@@ -1,0 +1,6 @@
+[submodule "src/textpreprocess"]
+	path = src/textpreprocess
+	url = https://github.com/fcoclavero/textpreprocess
+[submodule "src/wordvectors"]
+	path = src/wordvectors
+	url = https://github.com/fcoclavero/wordvectors

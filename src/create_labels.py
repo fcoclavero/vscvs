@@ -14,3 +14,4 @@ paths = image_paths.union(sketches_paths)
 print(image_paths == sketches_paths)
 print(paths == sketches_paths)
 print(paths == image_paths)
+

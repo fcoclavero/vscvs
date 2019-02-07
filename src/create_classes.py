@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 
-from plotly.offline import iplot
+from plotly.offline import plot
 from sklearn.manifold import TSNE
 
 from settings import DATA_SETS
@@ -29,7 +29,7 @@ def classes_set(directory):
     return set([path for path in os.listdir(directory) if os.path.isdir(os.path.join(directory, path))])
 
 
-def plot(classes):
+def plot_classes(classes):
     """
     Plot a classes data frame, showing all the different classes in a 2D projection of the semantic space.
     :param classes: a classes data frame, with "class", "vector" and "tsne" columns
@@ -49,7 +49,7 @@ def plot(classes):
         )
     )
     data = [trace]
-    iplot(data)
+    plot(data)
 
 
 def create_classes_data_frame(data_set, tsne_dimension = 2):
@@ -65,7 +65,7 @@ def create_classes_data_frame(data_set, tsne_dimension = 2):
     """
     paths = classes_set(DATA_SETS[data_set]['images']).union(classes_set(DATA_SETS[data_set]['sketches']))
     classes = pd.DataFrame(columns=['class', 'vector', 'tsne'])
-    classes['class'] = list(paths)
+    classes['class'] = sorted(list(paths))
     classes['class'] = classes['class'].apply(lambda cls: ' '.join(re.split(r'(?:_|-)', cls)))
     classes['class'] = classes['class'].apply(full_clean)
     classes['vector'] = classes['class'].apply(document_vector)

@@ -108,3 +108,6 @@ venv.bak/
 
 # Vector files
 *.vec*
+
+# Temporary plotly plots
+temp-plot.html

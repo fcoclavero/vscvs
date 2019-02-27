@@ -24,7 +24,7 @@ def train_sketchy_cnn(dataset_root, image_size, workers = 4, batch_size = 128, n
     :type: int
     :param epochs: the number of epochs used for training
     :type: int
-    :return:
+    :return: None
     """
     dataset = dset.ImageFolder(
         root=dataset_root,

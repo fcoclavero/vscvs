@@ -7,6 +7,7 @@ from src.trainers.sketchy_cnn import train_sketchy_cnn
 
 @click.group()
 def train():
+    """ Train a model. """
     pass
 
 

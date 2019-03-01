@@ -14,4 +14,4 @@ def train():
 @train.command()
 def sketchy_cnn():
     click.echo('sketchy cnn')
-    # train_sketchy_cnn(DATA_SETS['sketchy_test']['images'], DATA_SETS['sketchy_test']['dimensions'][0])
+    train_sketchy_cnn(DATA_SETS['sketchy_test']['images'], DATA_SETS['sketchy_test']['dimensions'][0])

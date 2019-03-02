@@ -1,17 +1,14 @@
 import torch
 
-import matplotlib.pyplot as plt
-import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
-import torchvision.utils as vutils
 
 from src.models.convolutional_network import ConvolutionalNetwork
 
 
-def train_sketchy_cnn(dataset_root, image_size, workers = 4, batch_size = 128, n_gpu = 1, epochs = 2):
+def train_sketchy_cnn(dataset_root, image_size, workers = 4, batch_size = 128, n_gpu = 0, epochs = 2):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param dataset_root:
@@ -42,13 +39,6 @@ def train_sketchy_cnn(dataset_root, image_size, workers = 4, batch_size = 128, n
 
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
-
-    # Plot some training images
-    real_batch = next(iter(data_loader))
-    plt.figure(figsize=(8,8))
-    plt.axis("off")
-    plt.title("Training Images")
-    plt.imshow(np.transpose(vutils.make_grid(real_batch[0].to(device)[:64], padding=2, normalize=True).cpu(),(1,2,0)))
 
     net = ConvolutionalNetwork()
     net.to(device)

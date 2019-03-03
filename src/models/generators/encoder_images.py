@@ -17,7 +17,7 @@ class ImageEncoder(nn.Module):
         :type: pytorch.nn.Module
         """
         super(ImageEncoder, self).__init__()
-        self.ngpu = n_gpu
+        self.n_gpu = n_gpu
         self.main = nn.Sequential(
             # input is (nc) x 256 x 256
             nn.Conv2d(n_channels, feature_depth, 4, 2, 1, bias=False),

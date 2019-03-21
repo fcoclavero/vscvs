@@ -1,3 +1,6 @@
+# In the DCGAN paper, the authors specify that all model weights are be randomly initialized from a Normal
+# distribution with mean=0, stdev=0.2.
+
 import torch
 
 import torch.nn as nn
@@ -8,7 +11,7 @@ import torchvision.transforms as transforms
 from src.models.convolutional_network import ConvolutionalNetwork
 
 
-def train_sketchy_cnn(dataset_root, image_size, workers = 4, batch_size = 128, n_gpu = 0, epochs = 2):
+def train_cvs_gan(dataset_root, image_size, workers = 4, batch_size = 128, n_gpu = 0, epochs = 2):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param dataset_root:
@@ -34,7 +37,8 @@ def train_sketchy_cnn(dataset_root, image_size, workers = 4, batch_size = 128, n
     )
 
     # Create the data_loader
-    data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers)
+    data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
+                                             shuffle=True, num_workers=workers)
 
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")

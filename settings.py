@@ -1,3 +1,7 @@
+import os
+
+ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
+
 DATA_SETS = {
     'sketchy': {
         'root': 'H:\\Data\\Sketchy\\',

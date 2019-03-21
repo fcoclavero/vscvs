@@ -14,7 +14,7 @@ DATA_SETS = {
     'sketchy_test': {
         'root': 'C:\\Users\\Chopan\\Documents\\Data\\sketchy_test\\',
         'images': 'C:\\Users\\Chopan\\Documents\\Data\\sketchy_test\\photo',
-        'sketches': 'C:\\Users\\Chopan\\Documents\\Data\\sketchy_test\\photo',
+        'sketches': 'C:\\Users\\Chopan\\Documents\\Data\\sketchy_test\\sketch',
         'classes': 'C:\\Users\\Chopan\\Documents\\Data\\sketchy_test\\classes.pickle',
         'dimensions': (256, 256),
         'language': 'en'

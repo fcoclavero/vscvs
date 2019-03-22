@@ -13,7 +13,7 @@ def train():
 def sketchy_cnn():
     from src.trainers.sketchy_cnn import train_sketchy_cnn
     click.echo('sketchy cnn')
-    train_sketchy_cnn(DATA_SETS['sketchy_test']['images'], DATA_SETS['sketchy_test']['dimensions'][0])
+    train_sketchy_cnn()
 
 
 @train.command()

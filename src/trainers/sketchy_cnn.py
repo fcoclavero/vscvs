@@ -7,7 +7,7 @@ from src.datasets.sketchy import SketchyImages
 from src.models.convolutional_network import ConvolutionalNetwork
 
 
-def train_sketchy_cnn(workers=4, batch_size=128, n_gpu=0, epochs=2):
+def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param workers: number of workers for data_loader
@@ -37,7 +37,6 @@ def train_sketchy_cnn(workers=4, batch_size=128, n_gpu=0, epochs=2):
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
     # Training
-
     for epoch in range(epochs):  # loop over the dataset multiple times
 
         running_loss = 0.0
@@ -60,7 +59,7 @@ def train_sketchy_cnn(workers=4, batch_size=128, n_gpu=0, epochs=2):
             running_loss += loss.item()
             if i % 5 == 4:  # print every 5 mini-batches
                 print('[%d, %5d] loss: %.3f' %
-                      (epoch + 1, i + 1, running_loss / 2000))
+                      (epoch + 1, i + 1, running_loss / 5))
                 running_loss = 0.0
 
     print('Finished Training')

@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from src.datasets.sketchy import SketchyImages
+from src.metrics import Accuracy
 from src.models.convolutional_network import ConvolutionalNetwork
 
 
@@ -36,6 +37,9 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
+    # Define metric
+    metric = Accuracy()
+
     # Training
     for epoch in range(epochs):  # loop over the dataset multiple times
 
@@ -43,7 +47,6 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
         for i, data in enumerate(data_loader, 0):
             # get the inputs
             inputs, labels = data
-
             inputs, labels = inputs.to(device), labels.to(device)
 
             # zero the parameter gradients
@@ -55,11 +58,14 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
             loss.backward()
             optimizer.step()
 
+            # Update metric object
+            metric(outputs, labels, loss)
+
             # print statistics
             running_loss += loss.item()
             if i % 5 == 4:  # print every 5 mini-batches
-                print('[%d, %5d] loss: %.3f' %
-                      (epoch + 1, i + 1, running_loss / 5))
+                print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 5))
+                print(metric)
                 running_loss = 0.0
 
     print('Finished Training')

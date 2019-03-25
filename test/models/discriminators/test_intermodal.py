@@ -46,7 +46,7 @@ def test_binary_classification(n_gpu = 1):
     print(net)
 
     # Define metrics
-    metrics = [AccuracyBinary()] #, PrecisionBinary(), RecallBinary(), F1Binary()]
+    metrics = [AccuracyBinary(), PrecisionBinary()] #, RecallBinary(), F1Binary()]
 
     epoch_size = 10
     epochs = 10

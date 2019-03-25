@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from src.datasets.sketchy import SketchyImages
-from src.metrics import Accuracy
+from src.metrics.multi_class import Accuracy
 from src.models.convolutional_network import ConvolutionalNetwork
 
 

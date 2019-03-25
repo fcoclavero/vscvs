@@ -5,7 +5,7 @@ import numpy as np
 
 from settings import DATA_SETS, ROOT_DIR
 
-from src.create_classes import classes_set, create_classes_data_frame
+from src.preprocessing.create_classes import classes_set, create_classes_data_frame
 
 
 def test_classes_set():

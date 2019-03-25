@@ -76,19 +76,19 @@ class AccuracyBinary(AbstractAccuracy):
         super(AccuracyBinary, self).__init__()
 
     def __call__(self, output, target, loss):
-        prediction = output > 0.5
+        prediction = (output > 0.5).float()
         self.correct += (prediction == target).sum().float()
         self.total += len(target)
         return self.value
 
 
-class Precision(AbstractMetric):
+class PrecisionBinary(AbstractMetric):
     """
     Simple precision metric: TP / (TP + FP).
     Measures the percentage of positives predictions that are correct.
     """
     def __init__(self):
-        super(Precision, self).__init__()
+        super(PrecisionBinary, self).__init__()
         self.true_positive = 0
         self.false_positive = 0
 
@@ -112,13 +112,13 @@ class Precision(AbstractMetric):
         self.false_positive = 0
 
 
-class Recall(AbstractMetric):
+class RecallBinary(AbstractMetric):
     """
     Simple precision metric: TP / (TP + FP).
     Measures the percentage of positives predictions that are correct.
     """
     def __init__(self):
-        super(Recall, self).__init__()
+        super(RecallBinary, self).__init__()
         self.true_positive = 0
         self.false_negative = 0
 
@@ -142,15 +142,15 @@ class Recall(AbstractMetric):
         self.false_negative = 0
 
 
-class F1(AbstractMetric):
+class F1Binary(AbstractMetric):
     """
     Simple precision metric: TP / (TP + FP).
     Measures the percentage of positives predictions that are correct.
     """
     def __init__(self):
-        super(F1, self).__init__()
-        self.precision = Precision()
-        self.recall = Recall()
+        super(F1Binary, self).__init__()
+        self.precision = PrecisionBinary()
+        self.recall = RecallBinary()
 
     def __call__(self, output, target, loss):
         self.precision(output, target, loss)

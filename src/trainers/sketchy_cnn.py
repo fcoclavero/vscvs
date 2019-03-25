@@ -37,7 +37,7 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-    # Define metric
+    # Define metrics
     metrics = [Accuracy()]
 
     # Training

@@ -18,5 +18,13 @@ DATA_SETS = {
         'classes': 'C:\\Users\\Chopan\\Documents\\Data\\sketchy_test\\classes.pickle',
         'dimensions': (256, 256),
         'language': 'en'
+    },
+    'sample_vectors': {
+        'pickle': os.path.join(ROOT_DIR, 'static', 'pickles', 'discriminators', 'intermodal-sample-data.pickle'),
+        'dimensions': (100000, 100)
+    },
+    'sample_vectors_onehot': {
+        'pickle': os.path.join(ROOT_DIR, 'static', 'pickles', 'discriminators', 'intermodal-sample-data-onehot.pickle'),
+        'dimensions': (100000, 100)
     }
 }

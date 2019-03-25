@@ -8,7 +8,7 @@ import torch
 import torch.nn.parallel
 
 from settings import DATA_SETS
-from src.metrics import AccuracyBinary, PrecisionBinary, F1Binary, RecallBinary
+from src.metrics import AccuracyBinary, PrecisionBinary, F1Binary, RecallBinary, Accuracy
 from src.models.discriminators.intermodal import InterModalDiscriminator, InterModalDiscriminatorOneHot
 from src.utils.data import split
 
@@ -100,15 +100,11 @@ def test_onehot_classification(n_gpu = 1):
 
     print(net)
 
-    def accuracy():
-        y_pred = net(x_test)
-        predicted_classes = y_pred.argmax(1)
-        return (predicted_classes == y_test.argmax(1)).sum().float() / float(len(predicted_classes))
+    # Define metrics
+    metrics = [Accuracy()]
 
     epoch_size = 10
     epochs = 10
-
-    max_accuracy = 0
 
     for epoch in range(epochs):
         for t in range(epoch_size):
@@ -116,12 +112,12 @@ def test_onehot_classification(n_gpu = 1):
             loss = loss_fn(y_pred, y_train.argmax(1))
             net.zero_grad()
             loss.backward()
+            for metric in metrics: metric(net(x_test), y_test.argmax(1), loss)
+            if t % 4 == 1:
+                print('epoch: %s t: %s loss: %s' % (epoch, epoch * epoch_size, loss.item()))
+                for metric in metrics:
+                    print(metric)
+                    metric.reset()
             with torch.no_grad():
                 for param in net.parameters():
                     param.data -= learning_rate * param.grad
-        current_accuracy = accuracy()
-        if current_accuracy < max_accuracy:
-            break
-        else:
-            print('epoch: %s t: %s loss: %s accuracy: %s' % (epoch, epoch * epoch_size, loss.item(), current_accuracy))
-            max_accuracy = current_accuracy

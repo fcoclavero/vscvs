@@ -114,8 +114,8 @@ class PrecisionBinary(AbstractMetric):
 
 class RecallBinary(AbstractMetric):
     """
-    Simple precision metric: TP / (TP + FP).
-    Measures the percentage of positives predictions that are correct.
+    Simple recall metric: TP / (TP + FN).
+    Measures how well we find all the positives.
     """
     def __init__(self):
         super(RecallBinary, self).__init__()
@@ -144,8 +144,7 @@ class RecallBinary(AbstractMetric):
 
 class F1Binary(AbstractMetric):
     """
-    Simple precision metric: TP / (TP + FP).
-    Measures the percentage of positives predictions that are correct.
+    F1 metric: 2 * (precision * recall) / (precision + recall).
     """
     def __init__(self):
         super(F1Binary, self).__init__()
@@ -168,8 +167,8 @@ class F1Binary(AbstractMetric):
         return 2 * precision * recall / (precision + recall)
 
     def reset(self):
-        self.precision = None
-        self.recall = None
+        self.precision = PrecisionBinary()
+        self.recall = RecallBinary()
 
 
 class MeanAveragePrecision(AbstractMetric):

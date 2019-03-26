@@ -47,7 +47,7 @@ class AveragePrecision(AbstractMetric):
 
 class MeanAveragePrecision(AveragePrecision):
     """
-    Mean, over all experiments, of the average precision of all classes: mean(TP_i / (TP_i + FP_i)) for i in classes.
+    Mean, over all experiments, of the average precision of all classes.
     """
     def __init__(self):
         super(MeanAveragePrecision, self).__init__()
@@ -93,7 +93,7 @@ class AverageRecall(AbstractMetric):
 
     @property
     def name(self):
-        return 'AvgRecall'
+        return 'AR'
 
     @property
     def value(self):
@@ -105,7 +105,7 @@ class AverageRecall(AbstractMetric):
 
 class MeanAverageRecall(AverageRecall):
     """
-    Mean, over all experiments, of the average recall of all classes: mean(TP_i / (TP_i + FN_i)) for i in classes.
+    Mean, over all experiments, of the average recall of all classes.
     """
     def __init__(self):
         super(MeanAverageRecall, self).__init__()
@@ -120,7 +120,7 @@ class MeanAverageRecall(AverageRecall):
 
     @property
     def name(self):
-        return 'mAvgRecall'
+        return 'mAR'
 
     @property
     def value(self):
@@ -130,3 +130,61 @@ class MeanAverageRecall(AverageRecall):
         super(MeanAverageRecall, self).reset()
         self.sum = 0
         self.total = 0
+
+
+class AverageF1(AbstractMetric):
+    """
+    Average F1 metric over all classes: mean(2 * (precision_i * recall_i) / (precision_i + recall_i)) for i in classes.
+    """
+    def __init__(self):
+        super(AverageF1, self).__init__()
+        self.precision = AveragePrecision()
+        self.recall = AverageRecall()
+
+    def __call__(self, output, target, loss):
+        self.precision(output, target, loss)
+        self.recall(output, target, loss)
+        return self.value
+
+    @property
+    def name(self):
+        return 'F1'
+
+    @property
+    def value(self):
+        precision = self.precision.value
+        recall = self.recall.value
+        return 2 * precision * recall / (precision + recall)
+
+    def reset(self):
+        self.precision = AveragePrecision()
+        self.recall = AverageRecall()
+
+
+class MeanAverageF1(AbstractMetric):
+    """
+    Mean, over all experiments, of the average F1 of all classes.
+    """
+    def __init__(self):
+        super(MeanAverageF1, self).__init__()
+        self.precision = MeanAveragePrecision()
+        self.recall = MeanAverageRecall()
+
+    def __call__(self, output, target, loss):
+        self.precision(output, target, loss)
+        self.recall(output, target, loss)
+        return self.value
+
+    @property
+    def name(self):
+        return 'aF1'
+
+    @property
+    def value(self):
+        precision = self.precision.value
+        recall = self.recall.value
+        return 2 * precision * recall / (precision + recall)
+
+    def reset(self):
+        self.precision = MeanAveragePrecision()
+        self.recall = MeanAverageRecall()

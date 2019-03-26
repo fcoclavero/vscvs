@@ -8,7 +8,7 @@ import torch
 import torch.nn.parallel
 
 from settings import DATA_SETS
-from src.metrics.multi_class import Accuracy
+from src.metrics.multi_class import Accuracy, MeanAveragePrecision, AveragePrecision
 from src.models.discriminators.intermodal import InterModalDiscriminatorOneHot
 from src.utils.data import split
 
@@ -45,7 +45,7 @@ def test_onehot_classification(n_gpu = 1):
     print(net)
 
     # Define metrics
-    metrics = [Accuracy()]
+    metrics = [Accuracy(), AveragePrecision(), MeanAveragePrecision()]
 
     epoch_size = 10
     epochs = 10

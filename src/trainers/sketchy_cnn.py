@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from src.datasets.sketchy import SketchyImages
-from src.metrics.multi_class import Accuracy
+from src.metrics.multi_class import Accuracy, MeanAverageF1, MeanAverageRecall, MeanAveragePrecision
 from src.models.convolutional_network import ConvolutionalNetwork
 
 
@@ -38,7 +38,7 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
     # Define metrics
-    metrics = [Accuracy()]
+    metrics = [Accuracy(), MeanAveragePrecision(), MeanAverageRecall(), MeanAverageF1()]
 
     # Training
     for epoch in range(epochs):  # loop over the dataset multiple times

@@ -99,7 +99,7 @@ class F1(AbstractMetric):
     def value(self):
         precision = self.precision.value
         recall = self.recall.value
-        return 2 * precision * recall / (precision + recall)
+        return 0.0 if (precision + recall) == 0 else 2 * precision * recall / (precision + recall)
 
     def reset(self):
         self.precision = Precision()

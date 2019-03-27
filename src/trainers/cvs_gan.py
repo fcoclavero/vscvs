@@ -1,21 +1,21 @@
-# In the DCGAN paper, the authors specify that all model weights are be randomly initialized from a Normal
-# distribution with mean=0, stdev=0.2.
-
 import torch
 
 import torch.nn as nn
 import torch.optim as optim
-import torchvision.datasets as dset
-import torchvision.transforms as transforms
 
+from tqdm import tqdm
+
+from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
+from ignite.metrics import Accuracy, Loss
+
+from src.datasets.sketchy import SketchyImages
 from src.models.convolutional_network import ConvolutionalNetwork
+from src.utils.data import dataset_split
 
 
-def train_cvs_gan(dataset_root, image_size, workers = 4, batch_size = 128, n_gpu = 0, epochs = 2):
+def train_cvs_gan(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1, train_validation_split=.8):
     """
     Train a classification Convolutional Neural Network for image classes.
-    :param dataset_root:
-    :param image_size:
     :param workers: number of workers for data_loader
     :type: int
     :param batch_size: batch size during training
@@ -24,21 +24,21 @@ def train_cvs_gan(dataset_root, image_size, workers = 4, batch_size = 128, n_gpu
     :type: int
     :param epochs: the number of epochs used for training
     :type: int
-    :return: None
+    :param train_test_split: proportion of the dataset that will be used for training. The remaining data will be used
+    as the test set.
+    :type: float
+    :param train_validation_split: proportion of the training set that will be used for actual training. The remaining
+    data will be used as the validation set.
+    :type: float
     """
-    dataset = dset.ImageFolder(
-        root=dataset_root,
-        transform=transforms.Compose([
-            transforms.Resize(image_size),
-            transforms.CenterCrop(image_size),
-            transforms.ToTensor(),
-            # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        ])
-    )
+    dataset = SketchyImages()
+
+    train_set, validation_set, test_set = dataset_split(dataset, train_test_split, train_validation_split)
 
     # Create the data_loader
-    data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
-                                             shuffle=True, num_workers=workers)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=workers)
+    validation_loader = torch.utils.data.DataLoader(validation_set, batch_size=batch_size, shuffle=True, num_workers=workers)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=True, num_workers=workers)
 
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
@@ -48,34 +48,46 @@ def train_cvs_gan(dataset_root, image_size, workers = 4, batch_size = 128, n_gpu
     print(net)
 
     # Define optimizer
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    criterion = nn.NLLLoss()
+    optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.8)
 
-    # Training
+    trainer = create_supervised_trainer(net, optimizer, criterion, device=device)
+    evaluator = create_supervised_evaluator(
+        net,
+        metrics={
+            'accuracy': Accuracy(),
+            'nll': Loss(criterion)
+        },
+        device=device
+    )
 
-    for epoch in range(epochs):  # loop over the dataset multiple times
+    desc = "ITERATION - loss: {:.2f}"
+    pbar = tqdm(
+        initial=0, leave=False, total=len(train_loader),
+        desc=desc.format(0)
+    )
 
-        running_loss = 0.0
-        for i, data in enumerate(data_loader, 0):
-            # get the inputs
-            inputs, labels = data
+    @trainer.on(Events.ITERATION_COMPLETED)
+    def log_training_loss(trainer):
+        pbar.desc = desc.format(trainer.state.output)
+        pbar.update(1)
 
-            inputs, labels = inputs.to(device), labels.to(device)
+    @trainer.on(Events.EPOCH_COMPLETED)
+    def log_training_results(trainer):
+        evaluator.run(train_loader)
+        metrics = evaluator.state.metrics
+        tqdm.write("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+              .format(trainer.state.epoch, metrics['accuracy'], metrics['nll']))
 
-            # zero the parameter gradients
-            optimizer.zero_grad()
+    @trainer.on(Events.EPOCH_COMPLETED)
+    def log_validation_results(trainer):
+        evaluator.run(validation_loader)
+        metrics = evaluator.state.metrics
+        tqdm.write("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+              .format(trainer.state.epoch, metrics['accuracy'], metrics['nll']))
+        pbar.n = pbar.last_print_n = 0
+        pbar.close()
 
-            # forward + backward + optimize
-            outputs = net(inputs)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-
-            # print statistics
-            running_loss += loss.item()
-            if i % 2000 == 1999:  # print every 2000 mini-batches
-                print('[%d, %5d] loss: %.3f' %
-                      (epoch + 1, i + 1, running_loss / 2000))
-                running_loss = 0.0
+    trainer.run(train_loader, max_epochs=epochs)
 
     print('Finished Training')

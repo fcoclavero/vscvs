@@ -15,7 +15,8 @@ def train():
 @click.option("--n_gpu", prompt="Number of gpus", help="The number of GPUs available. Use 0 for CPU mode.", default=0)
 @click.option("--epochs", prompt="Number of epochs", help="The number of training epochs.", type=int)
 def sketchy_cnn(workers, batch_size, n_gpu, epochs):
-    from src.trainers.sketchy_cnn import train_sketchy_cnn
+    # from src.trainers.sketchy_cnn import train_sketchy_cnn
+    from src.trainers.sketchy_cnn_ignite import train_sketchy_cnn
     click.echo('sketchy cnn')
     train_sketchy_cnn(workers, batch_size, n_gpu, epochs)
 

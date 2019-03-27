@@ -25,6 +25,7 @@ class ConvolutionalNetwork(nn.Module):
         x = F.relu(self.fully_connected_1(x))
         x = F.relu(self.fully_connected_2(x))
         x = self.fully_connected_3(x)
+        # x = F.softmax(x, dim=1)
         x = F.log_softmax(x, dim=-1)
         return x
 

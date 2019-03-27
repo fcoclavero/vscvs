@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from tqdm import tqdm
+
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 
@@ -49,32 +51,42 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_sp
     criterion = nn.NLLLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.8)
 
-    trainer = create_supervised_trainer(net, optimizer, criterion)
+    trainer = create_supervised_trainer(net, optimizer, criterion, device=device)
     evaluator = create_supervised_evaluator(
         net,
         metrics={
             'accuracy': Accuracy(),
             'nll': Loss(criterion)
-        }
+        },
+        device=device
+    )
+
+    desc = "ITERATION - loss: {:.2f}"
+    pbar = tqdm(
+        initial=0, leave=False, total=len(train_loader),
+        desc=desc.format(0)
     )
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(trainer):
-        print("Epoch[{}] Loss: {:.2f}".format(trainer.state.epoch, trainer.state.output))
+        pbar.desc = desc.format(trainer.state.output)
+        pbar.update(1)
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(trainer):
         evaluator.run(train_loader)
         metrics = evaluator.state.metrics
-        print("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+        tqdm.write("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
               .format(trainer.state.epoch, metrics['accuracy'], metrics['nll']))
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_validation_results(trainer):
         evaluator.run(validation_loader)
         metrics = evaluator.state.metrics
-        print("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+        tqdm.write("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
               .format(trainer.state.epoch, metrics['accuracy'], metrics['nll']))
+        pbar.n = pbar.last_print_n = 0
+        pbar.close()
 
     trainer.run(train_loader, max_epochs=epochs)
 

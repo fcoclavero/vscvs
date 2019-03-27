@@ -26,7 +26,7 @@ def sketchy_cnn(workers, batch_size, n_gpu, epochs):
 @click.option("--batch_size", prompt="Batch size", help="The batch size during training.", type=int)
 @click.option("--n_gpu", prompt="Number of gpus", help="The number of GPUs available. Use 0 for CPU mode.", default=0)
 @click.option("--epochs", prompt="Number of epochs", help="The number of training epochs.", type=int)
-def cvs_gan():
+def cvs_gan(workers, batch_size, n_gpu, epochs):
     from src.trainers.cvs_gan import train_cvs_gan
     click.echo('cvs gan')
-    train_cvs_gan(DATA_SETS['sketchy_test']['images'], DATA_SETS['sketchy_test']['dimensions'][0])
+    train_cvs_gan(workers, batch_size, n_gpu, epochs)

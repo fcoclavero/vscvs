@@ -7,7 +7,7 @@ from settings import DATA_SETS
 class SketchyImages(ImageFolder):
     def __init__(self):
         super(SketchyImages, self).__init__(
-            root=DATA_SETS['sketchy_test']['images'],
+            root=DATA_SETS['sketchy']['images'],
             transform=transforms.Compose([
                 transforms.Resize(DATA_SETS['sketchy_test']['dimensions'][0]),
                 transforms.CenterCrop(DATA_SETS['sketchy_test']['dimensions'][0]),

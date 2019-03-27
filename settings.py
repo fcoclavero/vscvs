@@ -4,18 +4,18 @@ ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 DATA_SETS = {
     'sketchy': {
-        'root': 'H:\\Data\\Sketchy\\',
-        'images': 'H:\\Data\\Sketchy\\rendered_256x256\\256x256\\photo\\tx_000000000000',
-        'sketches': 'H:\\Data\\Sketchy\\rendered_256x256\\256x256\\sketch\\tx_000000000000',
-        'classes': 'H:\\Data\\Sketchy\\classes.pickle',
+        'root': r'C:\Users\Chopan\Documents\Data\sketchy',
+        'images': r'C:\Users\Chopan\Documents\Data\sketchy\photo\tx_000000000000',
+        'sketches': r'C:\Users\Chopan\Documents\Data\sketchy\tx_000000000000',
+        'classes': r'C:\Users\Chopan\Documents\Data\sketchy\classes.pickle',
         'dimensions': (256, 256),
         'language': 'en'
     },
     'sketchy_test': {
-        'root': 'C:\\Users\\Chopan\\Documents\\Data\\sketchy_test\\',
-        'images': 'C:\\Users\\Chopan\\Documents\\Data\\sketchy_test\\photo',
-        'sketches': 'C:\\Users\\Chopan\\Documents\\Data\\sketchy_test\\sketch',
-        'classes': 'C:\\Users\\Chopan\\Documents\\Data\\sketchy_test\\classes.pickle',
+        'root': r'C:Users\Chopan\Documents\Data\sketchy_test',
+        'images': r'C:\Users\Chopan\Documents\Data\sketchy_test\photo',
+        'sketches': r'C:\Users\Chopan\Documents\Data\sketchy_test\sketch',
+        'classes': r'C:\Users\Chopan\Documents\Data\sketchy_test\classes.pickle',
         'dimensions': (256, 256),
         'language': 'en'
     },

@@ -1,7 +1,5 @@
 import click
 
-from settings import DATA_SETS
-
 
 @click.group()
 def train():
@@ -22,11 +20,12 @@ def sketchy_cnn(workers, batch_size, n_gpu, epochs):
 
 
 @train.command()
+@click.option("--vector_dimension", prompt="CVS dimensionality", help="The dimensionality of the common vector space.", default=4)
 @click.option("--workers", prompt="Data loader workers", help="The number of workers for the data loader.", default=4)
 @click.option("--batch_size", prompt="Batch size", help="The batch size during training.", type=int)
 @click.option("--n_gpu", prompt="Number of gpus", help="The number of GPUs available. Use 0 for CPU mode.", default=0)
 @click.option("--epochs", prompt="Number of epochs", help="The number of training epochs.", type=int)
-def cvs_gan(workers, batch_size, n_gpu, epochs):
+def cvs_gan(vector_dimension, workers, batch_size, n_gpu, epochs):
     from src.trainers.cvs_gan import train_cvs_gan
     click.echo('cvs gan')
-    train_cvs_gan(workers, batch_size, n_gpu, epochs)
+    train_cvs_gan(vector_dimension, workers, batch_size, n_gpu, epochs)

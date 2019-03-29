@@ -2,7 +2,7 @@ import torch.nn as nn
 
 
 class InterModalDiscriminator(nn.Module):
-    def __init__(self, input_dimension, n_gpu):
+    def __init__(self, input_dimension, n_gpu=0):
         """
         Fully connected network that classifies vectors in the common vector space as belonging any mode
         (image or sketch).

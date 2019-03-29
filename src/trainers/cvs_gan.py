@@ -9,13 +9,16 @@ from ignite.engine import Events, create_supervised_trainer, create_supervised_e
 from ignite.metrics import Accuracy, Loss
 
 from src.datasets.sketchy import SketchyImages
-from src.models.convolutional_network import ConvolutionalNetwork
+from src.models.discriminators.intermodal import InterModalDiscriminator
+from src.models.generators.images import ImageEncoder
 from src.utils.data import dataset_split
 
 
-def train_cvs_gan(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1, train_validation_split=.8):
+def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1, train_validation_split=.8):
     """
     Train a classification Convolutional Neural Network for image classes.
+    :param vector_dimension: the dimensionality of the common vector space.
+    :type: int
     :param workers: number of workers for data_loader
     :type: int
     :param batch_size: batch size during training
@@ -43,17 +46,21 @@ def train_cvs_gan(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
 
-    net = ConvolutionalNetwork()
-    net.to(device)
-    print(net)
+    encoder = ImageEncoder(feature_depth=64, output_dimension=vector_dimension)
+    decoder = InterModalDiscriminator(input_dimension=vector_dimension)
+    encoder.to(device)
+    print(encoder)
+    decoder.to(device)
+    print(decoder)
 
     # Define optimizer
     criterion = nn.NLLLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.8)
+    optimizer = optim.SGD(encoder.parameters(), lr=0.01, momentum=0.8)
 
-    trainer = create_supervised_trainer(net, optimizer, criterion, device=device)
+    # decoder(encoder(batch).view(batch_size,vector_dimension))
+    trainer = create_supervised_trainer(encoder, optimizer, criterion, device=device)
     evaluator = create_supervised_evaluator(
-        net,
+        encoder,
         metrics={
             'accuracy': Accuracy(),
             'nll': Loss(criterion)

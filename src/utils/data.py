@@ -41,8 +41,9 @@ def dataset_split(dataset, train_test_split, train_validation_split):
 
 def prepare_batch(batch, device=None, non_blocking=False):
     """
-    Prepare batch for training: pass to a device with options
+    Prepare batch for training: pass to a device with options. Assumes data and labels are the first
+    two parameters of each sample.
     """
-    x, y, *_ = batch
+    x, y, *_ = batch # unpack extra parameters into `_`
     return (convert_tensor(x, device=device, non_blocking=non_blocking),
             convert_tensor(y, device=device, non_blocking=non_blocking))

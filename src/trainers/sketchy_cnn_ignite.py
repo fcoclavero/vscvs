@@ -11,7 +11,7 @@ from ignite.metrics import Accuracy, Loss
 from settings import DATA_SETS
 from src.datasets.sketchy import Sketchy
 from src.models.convolutional_network import ConvolutionalNetwork
-from src.utils.data import dataset_split
+from src.utils.data import dataset_split, prepare_batch
 
 
 def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1, train_validation_split=.8):
@@ -52,7 +52,9 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_sp
     criterion = nn.NLLLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.8)
 
-    trainer = create_supervised_trainer(net, optimizer, criterion, device=device)
+    trainer = create_supervised_trainer(
+        net, optimizer, criterion, device=device, prepare_batch=prepare_batch
+    )
     evaluator = create_supervised_evaluator(
         net,
         metrics={

@@ -1,5 +1,7 @@
 import torch
 
+from ignite._utils import convert_tensor
+
 
 def split(data, split_proportion = 0.8):
     """
@@ -35,3 +37,12 @@ def dataset_split(dataset, train_test_split, train_validation_split):
     n_train = int(train_validation_split * (len(dataset) - n_test))
     n_validation = len(dataset) - n_train - n_test
     return torch.utils.data.random_split(dataset, (n_train, n_validation, n_test))
+
+
+def prepare_batch(batch, device=None, non_blocking=False):
+    """
+    Prepare batch for training: pass to a device with options
+    """
+    x, y, *_ = batch
+    return (convert_tensor(x, device=device, non_blocking=non_blocking),
+            convert_tensor(y, device=device, non_blocking=non_blocking))

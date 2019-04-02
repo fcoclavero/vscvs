@@ -52,21 +52,30 @@ class SketchyImageNames(ImageFolder):
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ])
         )
-        a=2
 
     def __get_image_name__(self, index):
         """
         Get name of the image indexed at `index`. This id can the be used to find the sketches
         associated with the image.
-        :param index:
-        :return:
+        :param index: the index of an image
+        :type: int
+        :return: the name of the image: it's id
+        :type: str
         """
         path = self.imgs[index][0]
         filename = os.path.split(path)[-1]
         return filename.split('.')[0] # remove file extension
 
     def __getitem__(self, index):
-        return super(Sketchy, self).__getitem__(index) + (self.__get_image_name__(index),)
+        """
+        Override of the Dataset method. Gets an image's pixel matrix, class, and name
+        :param index: the index of an image
+        :type: int
+        :return: a tuple with the image's pixel matrix, class and name
+        :type: tuple(torch.Tensor, int, str)
+        """
+        # tuple concatenation: https://stackoverflow.com/a/8538676
+        return super(SketchyImageNames, self).__getitem__(index) + (self.__get_image_name__(index),)
 
 
 class SketchyMixedBatches(Dataset):
@@ -86,11 +95,12 @@ class SketchyMixedBatches(Dataset):
         :param dataset_name: the version of the sketchy dataset, either 'sketchy' or 'sketchy_test'
         :type: str
         """
-        self.image_dataset = Sketchy(DATA_SETS[dataset_name]['photos'])
-        self.sketch_dataset = Sketchy(DATA_SETS[dataset_name]['sketches'])
+        self.image_dataset = SketchyImageNames(DATA_SETS[dataset_name]['photos'])
+        self.sketch_dataset = SketchyImageNames(DATA_SETS[dataset_name]['sketches'])
 
     def __len__(self):
         return len(self.image_dataset)
 
     def __getitem__(self, index):
-        pass
+        image, cls, name = self.image_dataset[index]
+        return image, cls

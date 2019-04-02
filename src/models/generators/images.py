@@ -16,7 +16,7 @@ class ImageEncoder(nn.Module):
         :return the image encoder pytorch model
         :type: pytorch.nn.Module
         """
-        super(ImageEncoder, self).__init__()
+        super().__init__()
         self.n_gpu = n_gpu
         self.main = nn.Sequential(
             # input is (n_channels) x 256 x 256

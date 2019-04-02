@@ -19,7 +19,7 @@ class Sketchy(ImageFolder):
         :param dataset: the root dir for photos or sketches.
         :type: str
         """
-        super(Sketchy, self).__init__(
+        super().__init__(
             root=dataset,
             transform=transforms.Compose([
                 transforms.Resize(DATA_SETS['sketchy']['dimensions'][0]),
@@ -43,7 +43,7 @@ class SketchyImageNames(ImageFolder):
         :param dataset: the root dir for photos or sketches.
         :type: str
         """
-        super(SketchyImageNames, self).__init__(
+        super().__init__(
             root=dataset,
             transform=transforms.Compose([
                 transforms.Resize(DATA_SETS['sketchy']['dimensions'][0]),
@@ -75,7 +75,7 @@ class SketchyImageNames(ImageFolder):
         :type: tuple(torch.Tensor, int, str)
         """
         # tuple concatenation: https://stackoverflow.com/a/8538676
-        return super(SketchyImageNames, self).__getitem__(index) + (self.__get_image_name__(index),)
+        return super().__getitem__(index) + (self.__get_image_name__(index),)
 
 
 class SketchyMixedBatches(Dataset):

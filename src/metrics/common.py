@@ -29,7 +29,7 @@ class AbstractAccuracy(AbstractMetric):
     Measures the percentage of correct predictions. Not reliable in case of unbalanced classes.
     """
     def __init__(self):
-        super(AbstractAccuracy, self).__init__()
+        super().__init__()
         self.correct = 0
         self.total = 0
 

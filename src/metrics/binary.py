@@ -8,7 +8,7 @@ class Accuracy(AbstractAccuracy):
     Accuracy for binary classification.
     """
     def __init__(self):
-        super(Accuracy, self).__init__()
+        super().__init__()
 
     def __call__(self, output, target, loss):
         prediction = (output > 0.5).float()
@@ -23,7 +23,7 @@ class Precision(AbstractMetric):
     Measures the percentage of positives predictions that are correct.
     """
     def __init__(self):
-        super(Precision, self).__init__()
+        super().__init__()
         self.true_positive = 0
         self.false_positive = 0
 
@@ -53,7 +53,7 @@ class Recall(AbstractMetric):
     Measures how well we find all the positives.
     """
     def __init__(self):
-        super(Recall, self).__init__()
+        super().__init__()
         self.true_positive = 0
         self.false_negative = 0
 
@@ -82,7 +82,7 @@ class F1(AbstractMetric):
     F1 metric: 2 * (precision * recall) / (precision + recall).
     """
     def __init__(self):
-        super(F1, self).__init__()
+        super().__init__()
         self.precision = Precision()
         self.recall = Recall()
 

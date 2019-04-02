@@ -13,7 +13,7 @@ class InterModalDiscriminator(nn.Module):
         :return the image encoder pytorch model
         :type: pytorch.nn.Module
         """
-        super(InterModalDiscriminator, self).__init__()
+        super().__init__()
         self.n_gpu = n_gpu
         self.main = nn.Sequential(
             # state size. input_dimension
@@ -43,7 +43,7 @@ class InterModalDiscriminatorOneHot(nn.Module):
         :return the image encoder pytorch model
         :type: pytorch.nn.Module
         """
-        super(InterModalDiscriminatorOneHot, self).__init__()
+        super().__init__()
         self.n_gpu = n_gpu
         self.main = nn.Sequential(
             # state size. input_dimension

@@ -12,7 +12,7 @@ def test_classes_set():
     """
     Check that the test data set class names are correctly identified.
     """
-    assert classes_set(DATA_SETS['sketchy_test']['images']) == pickle.load(
+    assert classes_set(DATA_SETS['sketchy_test']['photos']) == pickle.load(
         open(os.path.join(ROOT_DIR, 'static\\pickles\\classes_set.pickle'), 'rb')
     )
 

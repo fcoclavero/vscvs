@@ -8,7 +8,8 @@ from tqdm import tqdm
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 
-from src.datasets.sketchy import SketchyImages
+from settings import DATA_SETS
+from src.datasets.sketchy import Sketchy
 from src.models.convolutional_network import ConvolutionalNetwork
 from src.utils.data import dataset_split
 
@@ -31,7 +32,7 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_sp
     data will be used as the validation set.
     :type: float
     """
-    dataset = SketchyImages()
+    dataset = Sketchy(DATA_SETS['sketchy_test']['photos'])
 
     train_set, validation_set, test_set = dataset_split(dataset, train_test_split, train_validation_split)
 

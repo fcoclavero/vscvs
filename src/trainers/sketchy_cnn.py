@@ -3,7 +3,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from src.datasets.sketchy import SketchyImages
+from settings import DATA_SETS
+from src.datasets.sketchy import Sketchy
 from src.metrics.multi_class import Accuracy, MeanAverageF1, MeanAverageRecall, MeanAveragePrecision
 from src.models.convolutional_network import ConvolutionalNetwork
 
@@ -21,7 +22,7 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
     :type: int
     :return: None
     """
-    dataset = SketchyImages()
+    dataset = Sketchy(DATA_SETS['sketchy_test']['photos'])
 
     # Create the data_loader
     data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers)

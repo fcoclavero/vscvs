@@ -63,7 +63,7 @@ def create_classes_data_frame(data_set, tsne_dimension = 2):
     :return: a pandas DataFrame with "class", "vector" (document embeddings) and "tsne" columns
     :type: pd.DataFrame
     """
-    paths = classes_set(DATA_SETS[data_set]['images']).union(classes_set(DATA_SETS[data_set]['sketches']))
+    paths = classes_set(DATA_SETS[data_set]['photos']).union(classes_set(DATA_SETS[data_set]['sketches']))
     classes = pd.DataFrame(columns=['class', 'vector', 'tsne'])
     classes['class'] = sorted(list(paths))
     classes['class'] = classes['class'].apply(lambda cls: ' '.join(re.split(r'(?:_|-)', cls)))

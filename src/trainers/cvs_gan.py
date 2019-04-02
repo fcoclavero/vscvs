@@ -5,10 +5,11 @@ import torch.optim as optim
 
 from tqdm import tqdm
 
-from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
+from ignite.engine import Events, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 
-from src.datasets.sketchy import SketchyImages
+from src.datasets.sketchy import Sketchy
+from src.engines.cvs_gan import create_csv_gan_trainer
 from src.models.discriminators.intermodal import InterModalDiscriminator
 from src.models.generators.images import ImageEncoder
 from src.utils.data import dataset_split
@@ -34,7 +35,7 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     data will be used as the validation set.
     :type: float
     """
-    dataset = SketchyImages()
+    dataset = Sketchy()
 
     train_set, validation_set, test_set = dataset_split(dataset, train_test_split, train_validation_split)
 
@@ -46,27 +47,31 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
 
-    encoder = ImageEncoder(feature_depth=64, output_dimension=vector_dimension)
-    decoder = InterModalDiscriminator(input_dimension=vector_dimension)
-    encoder.to(device)
-    print(encoder)
-    decoder.to(device)
-    print(decoder)
+    generator = ImageEncoder(feature_depth=64, output_dimension=vector_dimension)
+    discriminator = InterModalDiscriminator(input_dimension=vector_dimension)
+    generator.to(device)
+    print(generator)
+    discriminator.to(device)
+    print(discriminator)
 
     # Define optimizer
     criterion = nn.NLLLoss()
-    optimizer = optim.SGD(encoder.parameters(), lr=0.01, momentum=0.8)
+    optimizer = optim.SGD(generator.parameters(), lr=0.01, momentum=0.8)
 
-    # decoder(encoder(batch).view(batch_size,vector_dimension))
-    trainer = create_supervised_trainer(encoder, optimizer, criterion, device=device)
+    # discriminator(generator(batch).view(batch_size,vector_dimension))
+
+    trainer = create_csv_gan_trainer(generator, optimizer, criterion, device=device)
     evaluator = create_supervised_evaluator(
-        encoder,
+        generator,
         metrics={
             'accuracy': Accuracy(),
             'nll': Loss(criterion)
         },
         device=device
     )
+
+    G_losses = []
+    D_losses = []
 
     desc = "ITERATION - loss: {:.2f}"
     pbar = tqdm(

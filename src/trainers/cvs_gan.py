@@ -8,11 +8,11 @@ from tqdm import tqdm
 from ignite.engine import Events, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 
-from src.datasets.sketchy import Sketchy
+from src.datasets.sketchy import SketchyMixedBatches
 from src.engines.cvs_gan import create_csv_gan_trainer
 from src.models.discriminators.intermodal import InterModalDiscriminator
 from src.models.generators.images import ImageEncoder
-from src.utils.data import dataset_split
+from src.utils.data import dataset_split, prepare_batch
 
 
 def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1, train_validation_split=.8):
@@ -35,7 +35,7 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     data will be used as the validation set.
     :type: float
     """
-    dataset = Sketchy()
+    dataset = SketchyMixedBatches('sketchy_test')
 
     train_set, validation_set, test_set = dataset_split(dataset, train_test_split, train_validation_split)
 
@@ -60,7 +60,9 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
 
     # discriminator(generator(batch).view(batch_size,vector_dimension))
 
-    trainer = create_csv_gan_trainer(generator, optimizer, criterion, device=device)
+    trainer = create_csv_gan_trainer(
+        generator, discriminator, optimizer, criterion, device=device, prepare_batch=prepare_batch
+    )
     evaluator = create_supervised_evaluator(
         generator,
         metrics={

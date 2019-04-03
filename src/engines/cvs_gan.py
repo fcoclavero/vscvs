@@ -1,8 +1,34 @@
 from ignite.engine import Engine
 
+from src.utils.data import prepare_batch
 
-def create_csv_gan_trainer(generator, discriminator, image_loader, sketch_loader, optimizer, loss_fn, device=None):
-    def update_model(trainer, batch):
+
+def create_csv_gan_trainer(generator, discriminator, optimizer, loss_fn,
+                           device=None, non_blocking=False, prepare_batch=prepare_batch):
+    """
+    Factory function for creating an ignite trainer Engine for the CSV GAN model.
+    :param generator: the generator model - generates vectors from images
+    :type: torch.nn.Module
+    :param discriminator: the discriminator model - classifies vectors as 'photo' or 'sketch'
+    :type: torch.nn.Module
+    :param optimizer: the optimizer to be used
+    :type: torch.optim.Optimizer
+    :param loss_fn: the loss function
+    :type: torch.nn loss function
+    :param device: device type specification
+    :type: str (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
+    :param prepare_batch: batch preparation logic
+    :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch.Tensor,torch.Tensor) (optional)
+    :return: a trainer engine with the update function
+    :type: ignite.engine.Engine
+    """
+    if device:
+        generator.to(device)
+        discriminator.to(device)
+
+    def _update(engine, batch):
         ############################
         # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
         ###########################
@@ -21,4 +47,5 @@ def create_csv_gan_trainer(generator, discriminator, image_loader, sketch_loader
         loss.backward()
         optimizer.step()
         return loss.item()
-    return Engine(update_model)
+
+    return Engine(_update)

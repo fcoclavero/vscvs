@@ -105,6 +105,20 @@ class SketchyImageNames(ImageFolder):
         )
         return super().__getitem__(index) + (name,) # tuple concatenation
 
+    def get_images(self, pattern):
+        """
+        Get a list of pixel matrices for all images matching the given pattern.
+        :param pattern: the pattern that returned images names must match
+        :type: str
+        :return: a list of images' pixel matrix
+        :type: list<torch.Tensor>
+        """
+        indices = [ # create a list of indices
+            i for i, path_class in enumerate(self.imgs) # return index
+            if re.match(pattern, os.path.split(path_class[0])[-1]) # if last part of path matches regex
+        ]
+        return [self.__getitem__(index)[0] for index in indices] # return only the pixel matrices
+
 
 class SketchyMixedBatches(Dataset):
     """
@@ -123,26 +137,25 @@ class SketchyMixedBatches(Dataset):
         :param dataset_name: the version of the sketchy dataset, either 'sketchy' or 'sketchy_test'
         :type: str
         """
-        self.image_dataset = SketchyImageNames(DATA_SETS[dataset_name]['photos'])
+        self.photos_dataset = SketchyImageNames(DATA_SETS[dataset_name]['photos'])
         self.sketch_dataset = SketchyImageNames(DATA_SETS[dataset_name]['sketches'])
-        self.__create_sketch_dict__()
 
     def __len__(self):
-        return len(self.image_dataset)
+        """
+        Get the length fo the Dataset, which in this case is defined as the amount of photos.
+        :return: the length of the Dataset
+        :type: int
+        """
+        return len(self.photos_dataset)
 
     def __getitem__(self, index):
-        image, cls, name = self.image_dataset[index]
-        return image, cls
-
-    def __create_sketch_dict__(self):
-        pass
-
-    def get_image_sketches(self, image_name):
         """
-        Retrieve the list of sketches based on the given image name.
-        :param image_name: the name of the image - it's id
-        :type: str
-        :return: a
+        Return a photo, all sketches based on it, and its class given the photo's index.
+        :param index: the photo's index
+        :type: int
+        :return: a tuple with the photos's pixel matrix, the associated sketches' pixel
+        matrices, and the images' class
+        :type: tuple(torch.Tensor, list<torch.Tensor>, int)
         """
-        # list(filter(lambda path_class: re.match('n02694662_17391', os.path.split(path_class[0])[-1]), self.sketch_dataset.imgs))
-        pass
+        photo, cls, name = self.photos_dataset[index]
+        return photo, self.sketch_dataset.get_images(name), cls

@@ -94,7 +94,7 @@ class SketchyImageNames(ImageFolder):
         transformed to a single dispatch generic function using the multiple-dispatch module.
         https://docs.python.org/3/library/functools.html#functools.singledispatch
         https://multiple-dispatch.readthedocs.io/en/latest/index.html
-        :param index: the image name
+        :param name: the image name
         :type: str
         :return: a tuple with the image's pixel matrix, class and name
         :type: tuple(torch.Tensor, int, str)

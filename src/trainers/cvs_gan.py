@@ -35,7 +35,7 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     data will be used as the validation set.
     :type: float
     """
-    dataset = SketchyMixedBatches('sketchy_test')
+    dataset = SketchyMixedBatches('sketchy')
 
     train_set, validation_set, test_set = dataset_split(dataset, train_test_split, train_validation_split)
 
@@ -63,17 +63,6 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     trainer = create_csv_gan_trainer(
         generator, discriminator, optimizer, criterion, device=device, prepare_batch=prepare_batch_gan
     )
-    evaluator = create_supervised_evaluator(
-        generator,
-        metrics={
-            'accuracy': Accuracy(),
-            'nll': Loss(criterion)
-        },
-        device=device
-    )
-
-    G_losses = []
-    D_losses = []
 
     desc = "ITERATION - loss: {:.2f}"
     pbar = tqdm(
@@ -85,22 +74,6 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     def log_training_loss(trainer):
         pbar.desc = desc.format(trainer.state.output)
         pbar.update(1)
-
-    @trainer.on(Events.EPOCH_COMPLETED)
-    def log_training_results(trainer):
-        evaluator.run(train_loader)
-        metrics = evaluator.state.metrics
-        tqdm.write("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-              .format(trainer.state.epoch, metrics['accuracy'], metrics['nll']))
-
-    @trainer.on(Events.EPOCH_COMPLETED)
-    def log_validation_results(trainer):
-        evaluator.run(validation_loader)
-        metrics = evaluator.state.metrics
-        tqdm.write("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-              .format(trainer.state.epoch, metrics['accuracy'], metrics['nll']))
-        pbar.n = pbar.last_print_n = 0
-        pbar.close()
 
     trainer.run(train_loader, max_epochs=epochs)
 

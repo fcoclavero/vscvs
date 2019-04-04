@@ -47,3 +47,13 @@ def prepare_batch(batch, device=None, non_blocking=False):
     x, y, *_ = batch # unpack extra parameters into `_`
     return (convert_tensor(x, device=device, non_blocking=non_blocking),
             convert_tensor(y, device=device, non_blocking=non_blocking))
+
+
+def prepare_batch_gan(batch, device=None, non_blocking=False):
+    """
+    Prepare batch for training: pass to a device with options. Assumes data and labels are the first
+    two parameters of each sample.
+    """
+    x, y, *_ = batch # unpack extra parameters into `_`
+    return (convert_tensor(x, device=device, non_blocking=non_blocking),
+            convert_tensor(y, device=device, non_blocking=non_blocking))

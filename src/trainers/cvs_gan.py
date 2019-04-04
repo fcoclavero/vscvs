@@ -12,7 +12,7 @@ from src.datasets.sketchy import SketchyMixedBatches
 from src.engines.cvs_gan import create_csv_gan_trainer
 from src.models.discriminators.intermodal import InterModalDiscriminator
 from src.models.generators.images import ImageEncoder
-from src.utils.data import dataset_split, prepare_batch
+from src.utils.data import dataset_split, prepare_batch_gan
 
 
 def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1, train_validation_split=.8):
@@ -61,7 +61,7 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     optimizer = optim.SGD(generator.parameters(), lr=0.01, momentum=0.8)
 
     trainer = create_csv_gan_trainer(
-        generator, discriminator, optimizer, criterion, device=device, prepare_batch=prepare_batch
+        generator, discriminator, optimizer, criterion, device=device, prepare_batch=prepare_batch_gan
     )
     evaluator = create_supervised_evaluator(
         generator,

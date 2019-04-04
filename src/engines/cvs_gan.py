@@ -1,5 +1,6 @@
 from ignite.engine import Engine
 
+from src.utils.initialize_weights import initialize_weights
 from src.utils.data import prepare_batch
 
 
@@ -24,11 +25,15 @@ def create_csv_gan_trainer(generator, discriminator, optimizer, loss_fn,
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """
+    print(generator)
+    print(discriminator)
+
     if device:
         generator.to(device)
         discriminator.to(device)
-        print(generator)
-        print(discriminator)
+
+    generator.apply(initialize_weights)
+    discriminator.apply(initialize_weights)
 
     def _update(engine, batch):
         ############################
@@ -44,7 +49,7 @@ def create_csv_gan_trainer(generator, discriminator, optimizer, loss_fn,
         discriminator.zero_grad()
         optimizer.zero_grad()
         x, y = prepare_batch(batch)
-        y_pred = model(x)
+        y_pred = discriminator(x)
         loss = loss_fn(y_pred, y)
         loss.backward()
         optimizer.step()

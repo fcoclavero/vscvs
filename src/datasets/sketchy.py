@@ -1,4 +1,5 @@
 import os
+import re
 import torch
 
 import torchvision.transforms as transforms
@@ -84,6 +85,25 @@ class SketchyImageNames(ImageFolder):
         """
         # tuple concatenation: https://stackoverflow.com/a/8538676
         return super().__getitem__(index) + (self.__get_image_name__(index),)
+
+    @dispatch(str)  # single argument, <str>
+    def __getitem__(self, name):
+        """
+        Get an image's pixel matrix, class, and name from its name.
+        To support indexing by position and name simultaneously, this function was
+        transformed to a single dispatch generic function using the multiple-dispatch module.
+        https://docs.python.org/3/library/functools.html#functools.singledispatch
+        https://multiple-dispatch.readthedocs.io/en/latest/index.html
+        :param index: the image name
+        :type: str
+        :return: a tuple with the image's pixel matrix, class and name
+        :type: tuple(torch.Tensor, int, str)
+        """
+        index = next( # stop iterator on first match and return index
+            i for i, path_class in enumerate(self.imgs) # return index
+            if re.match(name, os.path.split(path_class[0])[-1]) # if last part of path matches regex
+        )
+        return super().__getitem__(index) + (name,) # tuple concatenation
 
 
 class SketchyMixedBatches(Dataset):

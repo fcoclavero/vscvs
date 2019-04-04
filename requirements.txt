@@ -1,5 +1,6 @@
 click==6.7
 matplotlib==2.2.2
+multipledispatch==0.5.0
 numpy==1.14.3
 pandas==0.23.0
 plotly==3.3.0

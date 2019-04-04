@@ -1,8 +1,11 @@
 import os
+import torch
 
+import torchvision.transforms as transforms
+
+from multipledispatch import dispatch
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
-import torchvision.transforms as transforms
 
 from settings import DATA_SETS
 
@@ -66,9 +69,14 @@ class SketchyImageNames(ImageFolder):
         filename = os.path.split(path)[-1]
         return filename.split('.')[0] # remove file extension
 
+    @dispatch((int, torch.Tensor)) # single argument, either <int> or <Tensor>
     def __getitem__(self, index):
         """
-        Override of the Dataset method. Gets an image's pixel matrix, class, and name
+        Get an image's pixel matrix, class, and name from its positional index.
+        To support indexing by position and name simultaneously, this function was
+        transformed to a single dispatch generic function using the multiple-dispatch module.
+        https://docs.python.org/3/library/functools.html#functools.singledispatch
+        https://multiple-dispatch.readthedocs.io/en/latest/index.html
         :param index: the index of an image
         :type: int
         :return: a tuple with the image's pixel matrix, class and name
@@ -97,6 +105,7 @@ class SketchyMixedBatches(Dataset):
         """
         self.image_dataset = SketchyImageNames(DATA_SETS[dataset_name]['photos'])
         self.sketch_dataset = SketchyImageNames(DATA_SETS[dataset_name]['sketches'])
+        self.__create_sketch_dict__()
 
     def __len__(self):
         return len(self.image_dataset)
@@ -104,3 +113,16 @@ class SketchyMixedBatches(Dataset):
     def __getitem__(self, index):
         image, cls, name = self.image_dataset[index]
         return image, cls
+
+    def __create_sketch_dict__(self):
+        pass
+
+    def get_image_sketches(self, image_name):
+        """
+        Retrieve the list of sketches based on the given image name.
+        :param image_name: the name of the image - it's id
+        :type: str
+        :return: a
+        """
+        # list(filter(lambda path_class: re.match('n02694662_17391', os.path.split(path_class[0])[-1]), self.sketch_dataset.imgs))
+        pass

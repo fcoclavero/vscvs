@@ -1,7 +1,8 @@
 import torch.nn as nn
 
 
-def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2, batch_norm_std=1.0, batch_norm_bias=0.0):
+def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2,
+                       batch_norm_std=1.0, batch_norm_bias=0.0):
     """
     Custom weights initialization.
     The function takes an initialized model as input and re-initializes all convolutional, convolutional-transpose,

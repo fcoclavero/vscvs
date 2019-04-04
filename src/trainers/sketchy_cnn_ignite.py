@@ -37,9 +37,15 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_sp
     train_set, validation_set, test_set = dataset_split(dataset, train_test_split, train_validation_split)
 
     # Create the data_loader
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=workers)
-    validation_loader = torch.utils.data.DataLoader(validation_set, batch_size=batch_size, shuffle=True, num_workers=workers)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=True, num_workers=workers)
+    train_loader = torch.utils.data.DataLoader(
+        train_set, batch_size=batch_size, shuffle=True, num_workers=workers
+    )
+    validation_loader = torch.utils.data.DataLoader(
+        validation_set, batch_size=batch_size, shuffle=True, num_workers=workers
+    )
+    test_loader = torch.utils.data.DataLoader(
+        test_set, batch_size=batch_size, shuffle=True, num_workers=workers
+    )
 
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")

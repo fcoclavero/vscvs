@@ -40,25 +40,25 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     train_set, validation_set, test_set = dataset_split(dataset, train_test_split, train_validation_split)
 
     # Create the data_loader
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=workers)
-    validation_loader = torch.utils.data.DataLoader(validation_set, batch_size=batch_size, shuffle=True, num_workers=workers)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=True, num_workers=workers)
+    train_loader = torch.utils.data.DataLoader(
+        train_set, batch_size=batch_size, shuffle=True, num_workers=workers
+    )
+    validation_loader = torch.utils.data.DataLoader(
+        validation_set, batch_size=batch_size, shuffle=True, num_workers=workers
+    )
+    test_loader = torch.utils.data.DataLoader(
+        test_set, batch_size=batch_size, shuffle=True, num_workers=workers
+    )
 
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
 
     generator = ImageEncoder(feature_depth=64, output_dimension=vector_dimension)
     discriminator = InterModalDiscriminator(input_dimension=vector_dimension)
-    generator.to(device)
-    print(generator)
-    discriminator.to(device)
-    print(discriminator)
 
     # Define optimizer
     criterion = nn.NLLLoss()
     optimizer = optim.SGD(generator.parameters(), lr=0.01, momentum=0.8)
-
-    # discriminator(generator(batch).view(batch_size,vector_dimension))
 
     trainer = create_csv_gan_trainer(
         generator, discriminator, optimizer, criterion, device=device, prepare_batch=prepare_batch

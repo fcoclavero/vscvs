@@ -27,6 +27,8 @@ def create_csv_gan_trainer(generator, discriminator, optimizer, loss_fn,
     if device:
         generator.to(device)
         discriminator.to(device)
+        print(generator)
+        print(discriminator)
 
     def _update(engine, batch):
         ############################

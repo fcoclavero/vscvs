@@ -38,7 +38,9 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     """
     dataset = SketchyMixedBatches('sketchy')
 
-    train_set, validation_set, test_set = dataset_split(dataset, train_test_split, train_validation_split)
+    train_set, validation_set, test_set = dataset_split(
+        dataset, train_test_split, train_validation_split
+    )
 
     # Create the data_loader
     train_loader = torch.utils.data.DataLoader(

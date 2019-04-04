@@ -35,7 +35,9 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_sp
     """
     dataset = Sketchy(DATA_SETS['sketchy_test']['photos'])
 
-    train_set, validation_set, test_set = dataset_split(dataset, train_test_split, train_validation_split)
+    train_set, validation_set, test_set = dataset_split(
+        dataset, train_test_split, train_validation_split
+    )
 
     # Create the data_loader
     train_loader = torch.utils.data.DataLoader(

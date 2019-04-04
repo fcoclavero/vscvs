@@ -15,7 +15,8 @@ from src.models.generators.images import ImageEncoder
 from src.utils.data import dataset_split, prepare_batch_gan
 
 
-def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1, train_validation_split=.8):
+def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
+                  train_test_split=1, train_validation_split=.8):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param vector_dimension: the dimensionality of the common vector space.
@@ -28,11 +29,11 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     :type: int
     :param epochs: the number of epochs used for training
     :type: int
-    :param train_test_split: proportion of the dataset that will be used for training. The remaining data will be used
-    as the test set.
+    :param train_test_split: proportion of the dataset that will be used for training.
+    The remaining data will be used as the test set.
     :type: float
-    :param train_validation_split: proportion of the training set that will be used for actual training. The remaining
-    data will be used as the validation set.
+    :param train_validation_split: proportion of the training set that will be used for actual
+    training. The remaining data will be used as the validation set.
     :type: float
     """
     dataset = SketchyMixedBatches('sketchy')

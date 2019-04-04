@@ -43,6 +43,12 @@ def prepare_batch(batch, device=None, non_blocking=False):
     """
     Prepare batch for training: pass to a device with options. Assumes data and labels are the first
     two parameters of each sample.
+    :param batch: data to be sent to device.
+    :type: list
+    :param device: device type specification
+    :type: str (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
     """
     x, y, *_ = batch # unpack extra parameters into `_`
     return (convert_tensor(x, device=device, non_blocking=non_blocking),
@@ -51,8 +57,14 @@ def prepare_batch(batch, device=None, non_blocking=False):
 
 def prepare_batch_gan(batch, device=None, non_blocking=False):
     """
-    Prepare batch for training: pass to a device with options. Assumes data and labels are the first
-    two parameters of each sample.
+    Prepare batch for GAN training: pass to a device with options. Assumes the shape returned
+    by the SketchyMixedBatches Dataset.
+    :param batch: data to be sent to device.
+    :type: list
+    :param device: device type specification
+    :type: str (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
     """
     photos, sketches, classes = batch
     return (

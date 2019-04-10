@@ -1,5 +1,6 @@
 import os
 import re
+import pickle
 import torch
 
 import torchvision.transforms as transforms
@@ -129,6 +130,8 @@ class SketchyMixedBatches(Dataset):
     these photos, there are a variable number of sketches (anywhere from 5 to 10) which have the same
     filename as the photo they are based on, plus '-n' where 'n' indicates the sketch number for that
     particular photo.
+    We train with batches containing the sketches based on the batches' photos because this should be
+    the hardest case for the discriminator.
     """
     def __init__(self, dataset_name):
         """
@@ -139,6 +142,15 @@ class SketchyMixedBatches(Dataset):
         """
         self.photos_dataset = SketchyImageNames(DATA_SETS[dataset_name]['photos'])
         self.sketch_dataset = SketchyImageNames(DATA_SETS[dataset_name]['sketches'])
+        try:
+            # creating the reference list for the complete dataset is really expensive, so we
+            # try to load from pickle. If pickle not available, the list is created and then pickled
+            self.__sketches__ = pickle.load(open(r'static\image_sketch_dict.pickle', 'rb'))
+        except Exception as e:
+            self.__sketches__ = [  # list that contains a list of sketches for each photo in the dataset
+                self.sketch_dataset.get_images(photo[2]) for photo in self.photos_dataset
+            ]
+            pickle.dump(self.__sketches__, open(r'static\image_sketch_dict.pickle', 'wb'))
 
     def __len__(self):
         """
@@ -158,4 +170,4 @@ class SketchyMixedBatches(Dataset):
         :type: tuple(torch.Tensor, list<torch.Tensor>, int)
         """
         photo, cls, name = self.photos_dataset[index]
-        return photo, self.sketch_dataset.get_images(name), cls
+        return photo, self.__sketches__[index], cls

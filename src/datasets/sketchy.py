@@ -5,6 +5,7 @@ import torch
 
 import torchvision.transforms as transforms
 
+from tqdm import tqdm
 from multipledispatch import dispatch
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
@@ -106,6 +107,19 @@ class SketchyImageNames(ImageFolder):
         )
         return super().__getitem__(index) + (name,) # tuple concatenation
 
+    def get_image_indexes(self, pattern):
+        """
+        Get a list of dataset indexes for all images matching the given pattern.
+        :param pattern: the pattern that returned images names must match
+        :type: str
+        :return: a list of images' pixel matrix
+        :type: list<torch.Tensor>
+        """
+        return [ # create a list of indices
+            i for i, path_class in enumerate(self.imgs) # return index
+            if re.match(pattern, os.path.split(path_class[0])[-1]) # if last part of path matches regex
+        ]
+
     def get_images(self, pattern):
         """
         Get a list of pixel matrices for all images matching the given pattern.
@@ -114,11 +128,7 @@ class SketchyImageNames(ImageFolder):
         :return: a list of images' pixel matrix
         :type: list<torch.Tensor>
         """
-        indices = [ # create a list of indices
-            i for i, path_class in enumerate(self.imgs) # return index
-            if re.match(pattern, os.path.split(path_class[0])[-1]) # if last part of path matches regex
-        ]
-        return [self.__getitem__(index)[0] for index in indices] # return only the pixel matrices
+        return [self.__getitem__(index)[0] for index in self.get_image_indexes(pattern)]
 
 
 class SketchyMixedBatches(Dataset):
@@ -145,12 +155,12 @@ class SketchyMixedBatches(Dataset):
         try:
             # creating the reference list for the complete dataset is really expensive, so we
             # try to load from pickle. If pickle not available, the list is created and then pickled
-            self.__sketches__ = pickle.load(open(r'static\image_sketch_dict.pickle', 'rb'))
+            self.__sketches__ = pickle.load(open(r'static\image_sketch_indexes.pickle', 'rb'))
         except Exception as e:
             self.__sketches__ = [  # list that contains a list of sketches for each photo in the dataset
-                self.sketch_dataset.get_images(photo[2]) for photo in self.photos_dataset
+                self.sketch_dataset.get_image_indexes(photo[2]) for photo in tqdm(self.photos_dataset)
             ]
-            pickle.dump(self.__sketches__, open(r'static\image_sketch_dict.pickle', 'wb'))
+            pickle.dump(self.__sketches__, open(r'static\image_sketch_indexes.pickle', 'wb'))
 
     def __len__(self):
         """
@@ -170,4 +180,4 @@ class SketchyMixedBatches(Dataset):
         :type: tuple(torch.Tensor, list<torch.Tensor>, int)
         """
         photo, cls, name = self.photos_dataset[index]
-        return photo, self.__sketches__[index], cls
+        return photo, [self.sketch_dataset[i] for i in self.__sketches__[index]], cls

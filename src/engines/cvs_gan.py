@@ -7,7 +7,7 @@ from src.utils.data import prepare_batch
 
 
 def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discriminator_optimizer,
-                           gan_loss, photos_label=1, device=None,
+                           gan_loss, vector_dimension, photos_label=1, device=None,
                            non_blocking=False, prepare_batch=prepare_batch):
     """
     Factory function for creating an ignite trainer Engine for the CSV GAN model.
@@ -28,6 +28,8 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
     :type: torch.optim.Optimizer
     :param gan_loss: the loss function for the GAN model
     :type: torch.nn loss function
+    :param vector_dimension: the dimensionality of the common vector space.
+    :type: int
     :param photos_label: the binary label (1 or 0) to identify images as belonging to the photo
     modality. The label for sketches is deduced as the opposite of the given value.
     :param device: device type specification
@@ -56,7 +58,7 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
         generator.train()
         discriminator.train()
         # Forward pass image batch through the generator network
-        vectors = generator(images).view(-1)
+        vectors = generator(images).view(-1, vector_dimension)
         # Predict modality using the discriminator network
         prediction = discriminator(vectors).view(-1)
         # Calculate the generator loss: we use 1 - labels, as we want the generator to maximize
@@ -72,16 +74,18 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
 
     def _update(engine, batch):
         photos, sketches, classes = batch
+        # Create tensor of all sketches, no matter the class or associated photo, for CVS training
+        all_sketches = torch.cat(sketches, 0)
         # Generate mode label arrays
         photo_labels = torch.full((photos.size(0),), photos_label, device=device)
-        sketches_labels = torch.full((sketches.size(0),), sketches_label, device=device)
+        sketches_labels = torch.full((all_sketches.size(0),), sketches_label, device=device)
         # Reset gradients
         generator.zero_grad()
         discriminator.zero_grad()
         # Train with all-photo sub-batch
         photo_generator_loss, photo_discriminator_loss = gan_forward_pass(photos, photo_labels)
         # Train with all-sketch sub-batch
-        sketch_generator_loss, sketch_discriminator_loss = gan_forward_pass(sketches, sketches_labels)
+        sketch_generator_loss, sketch_discriminator_loss = gan_forward_pass(all_sketches, sketches_labels)
         # Add the losses from the all-photo and all-sketch sub-batches
         generator_loss = photo_generator_loss + sketch_generator_loss
         discriminator_loss = photo_discriminator_loss + sketch_discriminator_loss

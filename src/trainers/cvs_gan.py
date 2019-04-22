@@ -77,7 +77,7 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
 
     trainer = create_csv_gan_trainer(
         generator, discriminator, generator_optimizer, discriminator_optimizer, gan_loss,
-        device=device, prepare_batch=prepare_batch_gan
+        vector_dimension, device=device, prepare_batch=prepare_batch_gan
     )
 
     pbar_description = "ITERATION - loss: {:.2f}"

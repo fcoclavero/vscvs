@@ -180,7 +180,6 @@ class SketchyMixedBatches(Dataset):
         :type: tuple(torch.Tensor, list<torch.Tensor>, int)
         """
         photo, cls, name = self.photos_dataset[index]
-        # return photo, [self.sketch_dataset[i][0] for i in self.__sketches__[index]], cls
         return photo, torch.stack([self.sketch_dataset[i][0] for i in self.__sketches__[index]]), cls
 
 

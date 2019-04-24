@@ -80,7 +80,7 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
         vector_dimension, device=device, prepare_batch=prepare_batch_gan
     )
 
-    pbar_description = 'ITERATION - Generator loss: {:.2f} Discriminator loss: {:.2f}'
+    pbar_description = 'ITERATION - Generator loss: {:.4f} Discriminator loss: {:.4f}'
     pbar = tqdm(initial=0, leave=False, total=len(train_loader), desc=pbar_description.format(0, 0))
 
     @trainer.on(Events.ITERATION_COMPLETED)

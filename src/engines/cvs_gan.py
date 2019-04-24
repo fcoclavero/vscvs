@@ -53,25 +53,6 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
     generator.apply(initialize_weights)
     discriminator.apply(initialize_weights)
 
-    def gan_forward_pass(images, labels):
-        # Training mode
-        generator.train()
-        discriminator.train()
-        # Forward pass image batch through the generator network
-        vectors = generator(images).view(-1, vector_dimension)
-        # Predict modality using the discriminator network
-        prediction = discriminator(vectors).view(-1)
-        # Calculate the generator loss: we use 1 - labels, as we want the generator to maximize
-        generator_loss = gan_loss(prediction, 1 - labels) # discriminator mistakes
-        # loss.backward() computes dloss/dx for every parameter x which has requires_grad=True
-        generator_loss.backward() # grads are accumulated into x.grad for every param. x (by addition)
-        # Calculate the discriminator loss
-        discriminator_loss = gan_loss(prediction, labels)
-        # Accumulate gradients
-        discriminator_loss.backward()
-        # Return losses for logging
-        return generator_loss.item(), discriminator_loss.item()
-
     def _update(engine, batch):
         photos, sketches, classes = batch
         # Create tensor of all sketches, no matter the class or associated photo, for CVS training
@@ -82,17 +63,71 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
         # Reset gradients
         generator.zero_grad()
         discriminator.zero_grad()
+        # Training mode
+        generator.train()
+        discriminator.train()
+
+        ############################
+        # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
+        ###########################
         # Train with all-photo sub-batch
-        photo_generator_loss, photo_discriminator_loss = gan_forward_pass(photos, photo_labels)
+
+        # Forward pass photo batch through the generator network
+        photos_vectors = generator(photos).view(-1, vector_dimension)
+        # Predict modality using the discriminator network
+        photos_class_prediction = discriminator(photos_vectors).view(-1)
+        # Calculate the discriminator loss
+        photo_discriminator_loss = gan_loss(photos_class_prediction, photo_labels)
+        # Accumulate gradients
+        photo_discriminator_loss.backward()
+
         # Train with all-sketch sub-batch
-        sketch_generator_loss, sketch_discriminator_loss = gan_forward_pass(all_sketches, sketches_labels)
+
+        # Forward pass sketch batch through the generator network
+        sketch_vectors = generator(all_sketches).view(-1, vector_dimension)
+        # Predict modality using the discriminator network
+        sketches_class_prediction = discriminator(sketch_vectors).view(-1)
+        # Calculate the discriminator loss
+        sketch_discriminator_loss = gan_loss(sketches_class_prediction, sketches_labels)
+        # Accumulate gradients
+        sketch_discriminator_loss.backward()
+
         # Add the losses from the all-photo and all-sketch sub-batches
-        generator_loss = photo_generator_loss + sketch_generator_loss
         discriminator_loss = photo_discriminator_loss + sketch_discriminator_loss
         # Update model wights
+        discriminator_optimizer.step()
+
+        ############################
+        # (2) Update G network: maximize log(D(G(z)))
+        ###########################
+        # Train with all-photo sub-batch
+
+        # Forward pass photo batch through the generator network
+        photos_vectors = generator(photos).view(-1, vector_dimension)
+        # Predict modality using the discriminator network
+        photos_class_prediction_2 = discriminator(photos_vectors).view(-1)
+        # Calculate the discriminator loss
+        photo_generator_loss = gan_loss(photos_class_prediction_2, 1 - photo_labels)
+        # Accumulate gradients
+        photo_generator_loss.backward()
+
+        # Train with all-sketch sub-batch
+
+        # Forward pass sketch batch through the generator network
+        sketch_vectors = generator(all_sketches).view(-1, vector_dimension)
+        # Predict modality using the discriminator network
+        sketches_class_prediction = discriminator(sketch_vectors).view(-1)
+        # Calculate the discriminator loss
+        sketch_generator_loss = gan_loss(sketches_class_prediction, 1 - sketches_labels)
+        # Accumulate gradients
+        sketch_generator_loss.backward()
+
+        # Add the losses from the all-photo and all-sketch sub-batches
+        generator_loss = photo_generator_loss + sketch_generator_loss
+        # Update model wights
         generator_optimizer.step()
-        discriminator.step()
-        # Return losses, for reasons
+
+        # Return losses, for logging
         return generator_loss, discriminator_loss
 
     return Engine(_update)

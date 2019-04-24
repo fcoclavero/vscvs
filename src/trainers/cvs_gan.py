@@ -71,7 +71,7 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     discriminator.apply(initialize_weights)
 
     # Define loss and optimizers
-    gan_loss = nn.NLLLoss()
+    gan_loss = nn.BCELoss()
     generator_optimizer = optim.Adam(generator.parameters(), lr=lr, betas=(beta1, 0.999))
     discriminator_optimizer = optim.Adam(discriminator.parameters(), lr=lr, betas=(beta1, 0.999))
 
@@ -80,12 +80,12 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
         vector_dimension, device=device, prepare_batch=prepare_batch_gan
     )
 
-    pbar_description = "ITERATION - loss: {:.2f}"
-    pbar = tqdm(initial=0, leave=False, total=len(train_loader), desc=pbar_description.format(0))
+    pbar_description = 'ITERATION - Generator loss: {:.2f} Discriminator loss: {:.2f}'
+    pbar = tqdm(initial=0, leave=False, total=len(train_loader), desc=pbar_description.format(0, 0))
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(trainer):
-        pbar.desc = pbar_description.format(trainer.state.output)
+        pbar.desc = pbar_description.format(*trainer.state.output)
         pbar.update(1)
 
     trainer.run(train_loader, max_epochs=epochs)

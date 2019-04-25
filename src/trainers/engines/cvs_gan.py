@@ -54,6 +54,7 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
     discriminator.apply(initialize_weights)
 
     def _update(engine, batch):
+        # Unpack batch
         photos, sketches, classes = batch
         # Create tensor of all sketches, no matter the class or associated photo, for CVS training
         all_sketches = torch.cat(sketches, 0)

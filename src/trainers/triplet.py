@@ -7,16 +7,15 @@ from tqdm import tqdm
 
 from ignite.engine import Events
 
-from src.datasets.sketchy import SketchyMixedBatches
+from settings import DATA_SETS
+from src.datasets.sketchy import Sketchy
 from src.utils.collators import sketchy_collate
+from src.models.convolutional_network import ConvolutionalNetwork
 from src.trainers.engines.cvs_gan import create_csv_gan_trainer
-from src.models.discriminators.intermodal import InterModalDiscriminator
-from src.models.generators.images import ImageEncoder
 from src.utils.data import dataset_split, prepare_batch_gan
-from src.utils.initialize_weights import initialize_weights
 
 
-def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1,
+def train_triplet(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1,
                   train_validation_split=.8, lr=0.0002, beta1=.5):
     """
     Train a classification Convolutional Neural Network for image classes.
@@ -40,7 +39,7 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     :type: float
     :param beta1: Beta1 hyper-parameter for Adam optimizers
     """
-    dataset = SketchyMixedBatches('sketchy')
+    dataset = Sketchy(DATA_SETS['sketchy_test']['photos'])
 
     train_set, validation_set, test_set = dataset_split(
         dataset, train_test_split, train_validation_split
@@ -64,24 +63,17 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
 
     # Instance adversarial models
-    generator = ImageEncoder(feature_depth=64, output_dimension=vector_dimension)
-    discriminator = InterModalDiscriminator(input_dimension=vector_dimension)
-
-    # Initialize weights, as done in the DCGAN paper
-    generator.apply(initialize_weights)
-    discriminator.apply(initialize_weights)
+    net = ConvolutionalNetwork()
 
     # Define loss and optimizers
-    gan_loss = nn.BCELoss()
-    generator_optimizer = optim.Adam(generator.parameters(), lr=lr, betas=(beta1, 0.999))
-    discriminator_optimizer = optim.Adam(discriminator.parameters(), lr=lr, betas=(beta1, 0.999))
+    loss = nn.BCELoss() # TODO: change for triplet loss
+    optimizer = optim.Adam(net.parameters(), lr=lr, betas=(beta1, 0.999))
 
     trainer = create_csv_gan_trainer(
-        generator, discriminator, generator_optimizer, discriminator_optimizer, gan_loss,
-        vector_dimension, device=device, prepare_batch=prepare_batch_gan
+        net, optimizer, loss, vector_dimension, device=device, prepare_batch=prepare_batch_gan
     )
 
-    pbar_description = 'ITERATION - Generator loss: {:.4f} Discriminator loss: {:.4f}'
+    pbar_description = 'ITERATION - loss: {:.4f}'
     pbar = tqdm(initial=0, leave=False, total=len(train_loader), desc=pbar_description.format(0, 0))
 
     @trainer.on(Events.ITERATION_COMPLETED)

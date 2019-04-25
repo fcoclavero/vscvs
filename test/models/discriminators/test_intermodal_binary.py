@@ -3,14 +3,14 @@ import pickle
 import numpy as np
 import torch
 
-from settings import DATA_SETS
+from settings import DATA_SOURCES
 from src.models.discriminators.intermodal import InterModalDiscriminator
 from src.metrics.binary import Accuracy, Precision, Recall, F1
 from src.utils.data import split
 
 
 def test_binary_classification(n_gpu = 1):
-    data = pickle.load(open(DATA_SETS['sample_vectors']['pickle'], 'rb')) # Load sample data
+    data = pickle.load(open(DATA_SOURCES['sample_vectors']['pickle'], 'rb')) # Load sample data
     train, test = split(data)
 
     print('\n')

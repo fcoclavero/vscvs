@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from ignite.engine import Events
 
-from src.datasets.sketchy import SketchyMixedBatches
+from src.datasets import get_dataset
 from src.utils.collators import sketchy_collate
 from src.trainers.engines.cvs_gan import create_csv_gan_trainer
 from src.models.discriminators.intermodal import InterModalDiscriminator
@@ -40,7 +40,7 @@ def train_cvs_gan(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     :type: float
     :param beta1: Beta1 hyper-parameter for Adam optimizers
     """
-    dataset = SketchyMixedBatches('sketchy')
+    dataset = get_dataset('sketchy_mixed_batches')
 
     train_set, validation_set, test_set = dataset_split(
         dataset, train_test_split, train_validation_split

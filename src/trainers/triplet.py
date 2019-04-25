@@ -7,8 +7,7 @@ from tqdm import tqdm
 
 from ignite.engine import Events
 
-from settings import DATA_SETS
-from src.datasets.sketchy import Sketchy
+from src.datasets import get_dataset
 from src.utils.collators import sketchy_collate
 from src.models.convolutional_network import ConvolutionalNetwork
 from src.trainers.engines.cvs_gan import create_csv_gan_trainer
@@ -39,7 +38,7 @@ def train_triplet(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     :type: float
     :param beta1: Beta1 hyper-parameter for Adam optimizers
     """
-    dataset = Sketchy(DATA_SETS['sketchy_test']['photos'])
+    dataset = get_dataset('sketchy_test_photos')
 
     train_set, validation_set, test_set = dataset_split(
         dataset, train_test_split, train_validation_split

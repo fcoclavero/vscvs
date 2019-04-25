@@ -2,7 +2,7 @@ import os, pickle, random
 
 import pandas as pd
 
-from settings import ROOT_DIR, DATA_SETS
+from settings import ROOT_DIR, DATA_SOURCES
 
 
 def create_sample_vectors(n, dimension):
@@ -17,8 +17,8 @@ def create_sample_vectors(n, dimension):
     data = pd.DataFrame(columns=['class', 'vector'])
     data['class'] = [random.randint(0, 1) for i in range(n)]
     data['vector'] = data['class'].apply(lambda c: [c + random.uniform(0, 1) for i in range(dimension)])
-    pickle.dump(data, open(DATA_SETS['sample_vectors']['pickle']),'wb') # save binary labeled data to the static dir
+    pickle.dump(data, open(DATA_SOURCES['sample_vectors']['pickle']), 'wb') # save binary labeled data to the static dir
     data['class'] = data['class'].apply(lambda c: [1 - c, c]) # create one-hot encoded labels from the binary labels
-    pickle.dump(data, open(DATA_SETS['sample_vectors_onehot']['pickle'], 'wb')) # save to the static dir
-    DATA_SETS['sample_vectors']['dimensions'] = (n, dimension) # Update dimensions
-    DATA_SETS['sample_vectors_onehot']['dimensions'] = (n, dimension)
+    pickle.dump(data, open(DATA_SOURCES['sample_vectors_onehot']['pickle'], 'wb')) # save to the static dir
+    DATA_SOURCES['sample_vectors']['dimensions'] = (n, dimension) # Update dimensions
+    DATA_SOURCES['sample_vectors_onehot']['dimensions'] = (n, dimension)

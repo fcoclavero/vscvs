@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 from plotly.offline import plot
 from sklearn.manifold import TSNE
 
-from settings import DATA_SETS
+from settings import DATA_SOURCES
 
 from modules.textpreprocess.compound_cleaners.en import full_clean
 from modules.wordvectors.en import document_vector
@@ -63,12 +63,12 @@ def create_classes_data_frame(data_set, tsne_dimension = 2):
     :return: a pandas DataFrame with "class", "vector" (document embeddings) and "tsne" columns
     :type: pd.DataFrame
     """
-    paths = classes_set(DATA_SETS[data_set]['photos']).union(classes_set(DATA_SETS[data_set]['sketches']))
+    paths = classes_set(DATA_SOURCES[data_set]['photos']).union(classes_set(DATA_SOURCES[data_set]['sketches']))
     classes = pd.DataFrame(columns=['class', 'vector', 'tsne'])
     classes['class'] = sorted(list(paths))
     classes['class'] = classes['class'].apply(lambda cls: ' '.join(re.split(r'(?:_|-)', cls)))
     classes['class'] = classes['class'].apply(full_clean)
     classes['vector'] = classes['class'].apply(document_vector)
     classes['tsne'] = list(TSNE(n_components=tsne_dimension).fit_transform(np.vstack(classes['vector'].values)))
-    pickle.dump(classes, open(DATA_SETS[data_set]['classes'], 'wb'))
+    pickle.dump(classes, open(DATA_SOURCES[data_set]['classes'], 'wb'))
     return classes

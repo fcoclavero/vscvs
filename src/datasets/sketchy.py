@@ -10,7 +10,7 @@ from multipledispatch import dispatch
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
 
-from settings import DATA_SETS
+from settings import DATA_SOURCES
 
 
 class Sketchy(ImageFolder):
@@ -28,8 +28,8 @@ class Sketchy(ImageFolder):
         super().__init__(
             root=dataset,
             transform=transforms.Compose([
-                transforms.Resize(DATA_SETS['sketchy']['dimensions'][0]),
-                transforms.CenterCrop(DATA_SETS['sketchy']['dimensions'][0]),
+                transforms.Resize(DATA_SOURCES['sketchy']['dimensions'][0]),
+                transforms.CenterCrop(DATA_SOURCES['sketchy']['dimensions'][0]),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ])
@@ -52,8 +52,8 @@ class SketchyImageNames(ImageFolder):
         super().__init__(
             root=dataset,
             transform=transforms.Compose([
-                transforms.Resize(DATA_SETS['sketchy']['dimensions'][0]),
-                transforms.CenterCrop(DATA_SETS['sketchy']['dimensions'][0]),
+                transforms.Resize(DATA_SOURCES['sketchy']['dimensions'][0]),
+                transforms.CenterCrop(DATA_SOURCES['sketchy']['dimensions'][0]),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ])
@@ -150,8 +150,8 @@ class SketchyMixedBatches(Dataset):
         :param dataset_name: the version of the sketchy dataset, either 'sketchy' or 'sketchy_test'
         :type: str
         """
-        self.photos_dataset = SketchyImageNames(DATA_SETS[dataset_name]['photos'])
-        self.sketch_dataset = SketchyImageNames(DATA_SETS[dataset_name]['sketches'])
+        self.photos_dataset = SketchyImageNames(DATA_SOURCES[dataset_name]['photos'])
+        self.sketch_dataset = SketchyImageNames(DATA_SOURCES[dataset_name]['sketches'])
         try:
             # creating the reference list for the complete dataset is really expensive, so we
             # try to load from pickle. If pickle not available, the list is created and then pickled

@@ -2,7 +2,7 @@ import os
 
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-DATA_SETS = {
+DATA_SOURCES = {
     'sketchy': {
         'root': r'C:\Users\Chopan\Documents\Data\sketchy',
         'photos': r'C:\Users\Chopan\Documents\Data\sketchy\photo\tx_000000000000', # 12500

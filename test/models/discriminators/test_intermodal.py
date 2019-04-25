@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import torch.nn.parallel
 
-from settings import DATA_SETS
+from settings import DATA_SOURCES
 from src.metrics.multi_class import Accuracy, MeanAveragePrecision, AveragePrecision, MeanAverageRecall, AverageRecall, \
     MeanAverageF1, AverageF1
 from src.models.discriminators.intermodal import InterModalDiscriminatorOneHot
@@ -15,7 +15,7 @@ from src.utils.data import split
 
 
 def test_onehot_classification(n_gpu = 1):
-    data = pickle.load(open(DATA_SETS['sample_vectors_onehot']['pickle'], 'rb'))  # Load sample data
+    data = pickle.load(open(DATA_SOURCES['sample_vectors_onehot']['pickle'], 'rb'))  # Load sample data
     train, test = split(data)
 
     print('\n')

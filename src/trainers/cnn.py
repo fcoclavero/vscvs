@@ -13,10 +13,12 @@ from src.models.convolutional_network import ConvolutionalNetwork
 from src.utils.data import dataset_split, prepare_batch
 
 
-def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1,
-                      train_validation_split=.8):
+def train_cnn(dataset_name, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1,
+              train_validation_split=.8):
     """
     Train a classification Convolutional Neural Network for image classes.
+    :param dataset_name: the name of the Dataset to be used for training
+    :type: str
     :param workers: number of workers for data_loader
     :type: int
     :param batch_size: batch size during training
@@ -32,7 +34,7 @@ def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_sp
     training. The remaining data will be used as the validation set.
     :type: float
     """
-    dataset = get_dataset('sketchy_test_photos')
+    dataset = get_dataset(dataset_name)
 
     train_set, validation_set, test_set = dataset_split(
         dataset, train_test_split, train_validation_split

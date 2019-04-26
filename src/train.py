@@ -8,36 +8,51 @@ def train():
 
 
 @train.command()
-@click.option("--workers", prompt="Data loader workers", help="The number of workers for the data loader.", default=4)
-@click.option("--batch_size", prompt="Batch size", help="The batch size during training.", type=int)
-@click.option("--n_gpu", prompt="Number of gpus", help="The number of GPUs available. Use 0 for CPU mode.", default=0)
-@click.option("--epochs", prompt="Number of epochs", help="The number of training epochs.", type=int)
-def sketchy_cnn(workers, batch_size, n_gpu, epochs):
-    # from src.trainers.sketchy_cnn import train_sketchy_cnn
-    from src.trainers.sketchy_cnn_ignite import train_sketchy_cnn
-    click.echo('sketchy cnn')
-    train_sketchy_cnn(workers, batch_size, n_gpu, epochs)
+@click.option(
+    '--dataset_name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice(['sketchy_photos', 'sketchy_sketches', 'sketchy_test_photos', 'sketchy_test_sketches'])
+)
+@click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
+@click.option('--batch_size', prompt='Batch size', help='The batch size during training.', type=int)
+@click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
+@click.option('--epochs', prompt='Number of epochs', help='The number of training epochs.', type=int)
+def cnn(dataset_name, workers, batch_size, n_gpu, epochs):
+    from src.trainers.cnn import train_cnn
+    click.echo('cnn - %s dataset' % dataset_name)
+    train_cnn(dataset_name, workers, batch_size, n_gpu, epochs)
 
 
 @train.command()
-@click.option("--vector_dimension", prompt="CVS dimensionality", help="The dimensionality of the common vector space.", default=4)
-@click.option("--workers", prompt="Data loader workers", help="The number of workers for the data loader.", default=4)
-@click.option("--batch_size", prompt="Batch size", help="The batch size during training.", type=int)
-@click.option("--n_gpu", prompt="Number of gpus", help="The number of GPUs available. Use 0 for CPU mode.", default=0)
-@click.option("--epochs", prompt="Number of epochs", help="The number of training epochs.", type=int)
-def cvs_gan(vector_dimension, workers, batch_size, n_gpu, epochs):
+@click.option(
+    '--dataset_name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice(['sketchy_photos', 'sketchy_sketches', 'sketchy_test_photos', 'sketchy_test_sketches'])
+)
+@click.option(
+    '--vector_dimension', prompt='CVS dimensionality', help='Dimensionality of the vector space.', default=300
+)
+@click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
+@click.option('--batch_size', prompt='Batch size', help='The batch size during training.', type=int)
+@click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
+@click.option('--epochs', prompt='Number of epochs', help='The number of training epochs.', type=int)
+def triplet_cnn(dataset_name, vector_dimension, workers, batch_size, n_gpu, epochs):
+    from src.trainers.triplet_cnn import train_triplet_cnn
+    click.echo('triplet cnn - %s dataset' % dataset_name)
+    train_triplet_cnn(dataset_name, vector_dimension, workers, batch_size, n_gpu, epochs)
+
+
+@train.command()
+@click.option(
+    '--dataset_name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice(['sketchy_mixed_batches', 'sketchy_test_mixed_batches'])
+)
+@click.option(
+    '--vector_dimension', prompt='CVS dimensionality', help='Dimensionality of the common vector space.', default=300
+)
+@click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
+@click.option('--batch_size', prompt='Batch size', help='The batch size during training.', type=int)
+@click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
+@click.option('--epochs', prompt='Number of epochs', help='The number of training epochs.', type=int)
+def cvs_gan(dataset_name, vector_dimension, workers, batch_size, n_gpu, epochs):
     from src.trainers.cvs_gan import train_cvs_gan
-    click.echo('cvs gan')
-    train_cvs_gan(vector_dimension, workers, batch_size, n_gpu, epochs)
-
-
-@train.command()
-@click.option("--vector_dimension", prompt="CVS dimensionality", help="The dimensionality of the common vector space.", default=4)
-@click.option("--workers", prompt="Data loader workers", help="The number of workers for the data loader.", default=4)
-@click.option("--batch_size", prompt="Batch size", help="The batch size during training.", type=int)
-@click.option("--n_gpu", prompt="Number of gpus", help="The number of GPUs available. Use 0 for CPU mode.", default=0)
-@click.option("--epochs", prompt="Number of epochs", help="The number of training epochs.", type=int)
-def triplet(vector_dimension, workers, batch_size, n_gpu, epochs):
-    from src.trainers.triplet import train_triplet
-    click.echo('cvs gan')
-    train_triplet(vector_dimension, workers, batch_size, n_gpu, epochs)
+    click.echo('cvs gan - %s dataset' % dataset_name)
+    train_cvs_gan(dataset_name, vector_dimension, workers, batch_size, n_gpu, epochs)

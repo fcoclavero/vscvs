@@ -14,10 +14,13 @@ from src.trainers.engines.cvs_gan import create_csv_gan_trainer
 from src.utils.data import dataset_split, prepare_batch_gan
 
 
-def train_triplet(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1,
-                  train_validation_split=.8, lr=0.0002, beta1=.5):
+def train_triplet_cnn(dataset_name, vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1,
+                      train_validation_split=.8, lr=0.0002, beta1=.5):
     """
-    Train a classification Convolutional Neural Network for image classes.
+    Train a triplet CNN that generates a vector space where vectors generated from similar (same class) images are close
+    together and vectors from images of different classes are far apart.
+    :param dataset_name: the name of the Dataset to be used for training
+    :type: str
     :param vector_dimension: the dimensionality of the common vector space.
     :type: int
     :param workers: number of workers for data_loader
@@ -31,14 +34,14 @@ def train_triplet(vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
     :param train_test_split: proportion of the dataset that will be used for training.
     The remaining data will be used as the test set.
     :type: float
-    :param train_validation_split: proportion of the training set that will be used for actual
-    training. The remaining data will be used as the validation set.
+    :param train_validation_split: proportion of the training set that will be used for actual training.
+    The remaining data will be used as the validation set.
     :type: float
     :param lr: learning rate for optimizers
     :type: float
     :param beta1: Beta1 hyper-parameter for Adam optimizers
     """
-    dataset = get_dataset('sketchy_test_photos')
+    dataset = get_dataset(dataset_name)
 
     train_set, validation_set, test_set = dataset_split(
         dataset, train_test_split, train_validation_split

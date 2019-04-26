@@ -5,8 +5,8 @@ from ignite.engine import Engine
 from src.utils.data import prepare_batch
 
 
-def create_triplet_trainer(model, optimizer, loss, vector_dimension, device=None, non_blocking=False,
-                           prepare_batch=prepare_batch):
+def create_triplet_cnn_trainer(model, optimizer, loss, vector_dimension, device=None, non_blocking=False,
+                               prepare_batch=prepare_batch):
     """
     Factory function for creating an ignite trainer Engine for a triplet CNN.
     :param model: the generator model - generates vectors from images

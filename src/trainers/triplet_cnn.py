@@ -5,10 +5,11 @@ import torch.optim as optim
 
 from tqdm import tqdm
 
+from torch.utils.data.dataloader import default_collate
 from ignite.engine import Events
 
 from src.datasets import get_dataset
-from src.utils.collators import sketchy_collate
+from src.utils.collators import triplet_collate
 from src.models.convolutional_network import ConvolutionalNetwork
 from src.trainers.engines.triplet_cnn import create_triplet_cnn_trainer
 from src.utils.data import dataset_split, prepare_batch_gan
@@ -49,17 +50,18 @@ def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batc
     )
 
     # Create the data_loader
+    collate = triplet_collate(default_collate)
     train_loader = torch.utils.data.DataLoader(
         train_set, batch_size=batch_size, shuffle=True,
-        num_workers=workers, collate_fn=sketchy_collate
+        num_workers=workers, collate_fn=collate
     )
     validation_loader = torch.utils.data.DataLoader(
         validation_set, batch_size=batch_size, shuffle=True,
-        num_workers=workers, collate_fn=sketchy_collate
+        num_workers=workers, collate_fn=collate
     )
     test_loader = torch.utils.data.DataLoader(
         test_set, batch_size=batch_size, shuffle=True,
-        num_workers=workers, collate_fn=sketchy_collate
+        num_workers=workers, collate_fn=collate
     )
 
     # Decide which device we want to run on
@@ -69,7 +71,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batc
     net = ConvolutionalNetwork()
 
     # Define loss and optimizers
-    loss = nn.BCELoss() # TODO: change for triplet loss
+    loss = nn.MarginRankingLoss(margin=margin)
     optimizer = optim.Adam(net.parameters(), lr=learning_rate, betas=(beta1, 0.999))
 
     trainer = create_triplet_cnn_trainer(

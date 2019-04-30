@@ -26,7 +26,7 @@ class TripletMixin:
         :type: tuple
         """
         class_image_indexes = self.imgs_dict[cls]
-        return super().__getitem__(class_image_indexes[randint(0, len(class_image_indexes))])
+        return super().__getitem__(class_image_indexes[randint(0, len(class_image_indexes) - 1)])
 
     def __getitem__(self, index):
         """
@@ -37,9 +37,8 @@ class TripletMixin:
         :return: a tuple with the anchor
         :type: tuple(torch.Tensor, list<torch.Tensor>, int)
         """
-        classes = list(range(len(self.classes)))
         positive_class = self.imgs[index][1]
-        negative_classes = classes.remove(positive_class)
+        negative_classes = list(range(0, positive_class)) + list(range(positive_class + 1, len(self.classes)))
         anchor = super().__getitem__(index)
         positive = self.__get_random_item__(positive_class)
         negative = self.__get_random_item__(choice(negative_classes))

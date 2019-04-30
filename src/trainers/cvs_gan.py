@@ -8,7 +8,7 @@ from tqdm import tqdm
 from ignite.engine import Events
 
 from src.datasets import get_dataset
-from src.utils.collators import sketchy_collate
+from src.utils.collators import sketchy_mixed_collate
 from src.trainers.engines.cvs_gan import create_csv_gan_trainer
 from src.models.discriminators.intermodal import InterModalDiscriminator
 from src.models.generators.images import ImageEncoder
@@ -51,15 +51,15 @@ def train_cvs_gan(dataset_name, vector_dimension, workers=4, batch_size=16, n_gp
     # Create the data_loader
     train_loader = torch.utils.data.DataLoader(
         train_set, batch_size=batch_size, shuffle=True,
-        num_workers=workers, collate_fn=sketchy_collate
+        num_workers=workers, collate_fn=sketchy_mixed_collate
     )
     validation_loader = torch.utils.data.DataLoader(
         validation_set, batch_size=batch_size, shuffle=True,
-        num_workers=workers, collate_fn=sketchy_collate
+        num_workers=workers, collate_fn=sketchy_mixed_collate
     )
     test_loader = torch.utils.data.DataLoader(
         test_set, batch_size=batch_size, shuffle=True,
-        num_workers=workers, collate_fn=sketchy_collate
+        num_workers=workers, collate_fn=sketchy_mixed_collate
     )
 
     # Decide which device we want to run on

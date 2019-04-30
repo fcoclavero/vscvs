@@ -5,7 +5,7 @@ from ignite.engine import Engine
 from src.utils.data import prepare_batch
 
 
-def create_triplet_cnn_trainer(model, optimizer, loss, vector_dimension, device=None, non_blocking=False,
+def create_triplet_cnn_trainer(model, optimizer, loss_fn, vector_dimension, device=None, non_blocking=False,
                                prepare_batch=prepare_batch):
     """
     Factory function for creating an ignite trainer Engine for a triplet CNN.
@@ -13,7 +13,7 @@ def create_triplet_cnn_trainer(model, optimizer, loss, vector_dimension, device=
     :type: torch.nn.Module
     :param optimizer: the optimizer to be used for the generator model
     :type: torch.optim.Optimizer
-    :param loss: the loss function for the GAN model
+    :param loss_fn: the triplet loss
     :type: torch.nn loss function
     :param vector_dimension: the dimensionality of the common vector space.
     :type: int
@@ -56,7 +56,7 @@ def create_triplet_cnn_trainer(model, optimizer, loss, vector_dimension, device=
         # (4) Update network
         ###########################
         # Calculate the discriminator loss
-        photo_discriminator_loss = loss(photos_class_prediction, photo_labels)
+        photo_discriminator_loss = loss_fn(photos_class_prediction, photo_labels)
         # Accumulate gradients
         photo_discriminator_loss.backward()
         # Update model wights

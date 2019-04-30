@@ -7,7 +7,7 @@ from src.utils.data import prepare_batch
 
 
 def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discriminator_optimizer,
-                           gan_loss, vector_dimension, photos_label=1, device=None,
+                           loss_fn, vector_dimension, photos_label=1, device=None,
                            non_blocking=False, prepare_batch=prepare_batch):
     """
     Factory function for creating an ignite trainer Engine for the CSV GAN model.
@@ -26,7 +26,7 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
     :type: torch.optim.Optimizer
     :param discriminator_optimizer: the optimizer to be used for the discriminator model
     :type: torch.optim.Optimizer
-    :param gan_loss: the loss function for the GAN model
+    :param loss_fn: the loss function for the GAN model
     :type: torch.nn loss function
     :param vector_dimension: the dimensionality of the common vector space.
     :type: int
@@ -78,7 +78,7 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
         # Predict modality using the discriminator network
         photos_class_prediction = discriminator(photos_vectors).view(-1)
         # Calculate the discriminator loss
-        photo_discriminator_loss = gan_loss(photos_class_prediction, photo_labels)
+        photo_discriminator_loss = loss_fn(photos_class_prediction, photo_labels)
         # Accumulate gradients
         photo_discriminator_loss.backward()
 
@@ -89,7 +89,7 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
         # Predict modality using the discriminator network
         sketches_class_prediction = discriminator(sketch_vectors).view(-1)
         # Calculate the discriminator loss
-        sketch_discriminator_loss = gan_loss(sketches_class_prediction, sketches_labels)
+        sketch_discriminator_loss = loss_fn(sketches_class_prediction, sketches_labels)
         # Accumulate gradients
         sketch_discriminator_loss.backward()
 
@@ -108,7 +108,7 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
         # Predict modality using the discriminator network
         photos_class_prediction_2 = discriminator(photos_vectors).view(-1)
         # Calculate the discriminator loss
-        photo_generator_loss = gan_loss(photos_class_prediction_2, 1 - photo_labels)
+        photo_generator_loss = loss_fn(photos_class_prediction_2, 1 - photo_labels)
         # Accumulate gradients
         photo_generator_loss.backward()
 
@@ -119,7 +119,7 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
         # Predict modality using the discriminator network
         sketches_class_prediction = discriminator(sketch_vectors).view(-1)
         # Calculate the discriminator loss
-        sketch_generator_loss = gan_loss(sketches_class_prediction, 1 - sketches_labels)
+        sketch_generator_loss = loss_fn(sketches_class_prediction, 1 - sketches_labels)
         # Accumulate gradients
         sketch_generator_loss.backward()
 

@@ -17,7 +17,7 @@ from src.utils.initialize_weights import initialize_weights
 
 
 def train_cvs_gan(dataset_name, vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
-                  train_test_split=1, train_validation_split=.8, lr=0.0002, beta1=.5):
+                  train_test_split=1, train_validation_split=.8, learning_rate=0.0002, beta1=.5):
     """
     Train a GAN that generates a common vector space between photos and sketches.
     :param dataset_name: the name of the Dataset to be used for training
@@ -38,7 +38,7 @@ def train_cvs_gan(dataset_name, vector_dimension, workers=4, batch_size=16, n_gp
     :param train_validation_split: proportion of the training set that will be used for actual training.
     The remaining data will be used as the validation set.
     :type: float
-    :param lr: learning rate for optimizers
+    :param learning_rate: learning rate for optimizers
     :type: float
     :param beta1: Beta1 hyper-parameter for Adam optimizers
     """
@@ -75,8 +75,8 @@ def train_cvs_gan(dataset_name, vector_dimension, workers=4, batch_size=16, n_gp
 
     # Define loss and optimizers
     gan_loss = nn.BCELoss()
-    generator_optimizer = optim.Adam(generator.parameters(), lr=lr, betas=(beta1, 0.999))
-    discriminator_optimizer = optim.Adam(discriminator.parameters(), lr=lr, betas=(beta1, 0.999))
+    generator_optimizer = optim.Adam(generator.parameters(), lr=learning_rate, betas=(beta1, 0.999))
+    discriminator_optimizer = optim.Adam(discriminator.parameters(), lr=learning_rate, betas=(beta1, 0.999))
 
     trainer = create_csv_gan_trainer(
         generator, discriminator, generator_optimizer, discriminator_optimizer, gan_loss,

@@ -10,12 +10,12 @@ from ignite.engine import Events
 from src.datasets import get_dataset
 from src.utils.collators import sketchy_collate
 from src.models.convolutional_network import ConvolutionalNetwork
-from src.trainers.engines.cvs_gan import create_csv_gan_trainer
+from src.trainers.engines.triplet_cnn import create_triplet_cnn_trainer
 from src.utils.data import dataset_split, prepare_batch_gan
 
 
-def train_triplet_cnn(dataset_name, vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1,
-                      train_validation_split=.8, lr=0.0002, beta1=.5):
+def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batch_size=16, n_gpu=0, epochs=2,
+                      train_test_split=1, train_validation_split=.8, learning_rate=0.0002, beta1=.5):
     """
     Train a triplet CNN that generates a vector space where vectors generated from similar (same class) images are close
     together and vectors from images of different classes are far apart.
@@ -23,6 +23,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, workers=4, batch_size=16, 
     :type: str
     :param vector_dimension: the dimensionality of the common vector space.
     :type: int
+    :param margin: margin for the triplet loss
     :param workers: number of workers for data_loader
     :type: int
     :param batch_size: batch size during training
@@ -37,7 +38,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, workers=4, batch_size=16, 
     :param train_validation_split: proportion of the training set that will be used for actual training.
     The remaining data will be used as the validation set.
     :type: float
-    :param lr: learning rate for optimizers
+    :param learning_rate: learning rate for optimizers
     :type: float
     :param beta1: Beta1 hyper-parameter for Adam optimizers
     """
@@ -69,9 +70,9 @@ def train_triplet_cnn(dataset_name, vector_dimension, workers=4, batch_size=16, 
 
     # Define loss and optimizers
     loss = nn.BCELoss() # TODO: change for triplet loss
-    optimizer = optim.Adam(net.parameters(), lr=lr, betas=(beta1, 0.999))
+    optimizer = optim.Adam(net.parameters(), lr=learning_rate, betas=(beta1, 0.999))
 
-    trainer = create_csv_gan_trainer(
+    trainer = create_triplet_cnn_trainer(
         net, optimizer, loss, vector_dimension, device=device, prepare_batch=prepare_batch_gan
     )
 

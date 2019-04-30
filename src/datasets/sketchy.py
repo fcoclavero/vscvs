@@ -11,6 +11,7 @@ from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
 
 from settings import DATA_SOURCES
+from src.datasets.mixins import TripletMixin
 
 
 class Sketchy(ImageFolder):
@@ -36,21 +37,28 @@ class Sketchy(ImageFolder):
         )
 
 
+class SketchyTriplets(TripletMixin, Sketchy):
+    """
+    Sketchy Dataset with online triplet generation.
+    """
+    pass
+
+
 class SketchyImageNames(ImageFolder):
     """
     Same as the Sketchy Dataset above, but each item is a tuple containing the image, it's class, and
     also it's name. This is used by the SketchyMixedBatches Dataset to find the sketches associated
     with each photo.
     """
-    def __init__(self, dataset):
+    def __init__(self, root_directory):
         """
         Initialize the ImageFolder and perform transforms. Note that sketches and photos have the
         same exact dimension in both the sketchy and sketchy_test datasets.
-        :param dataset: the root dir for photos or sketches.
+        :param root_directory: the root directory for photos or sketches.
         :type: str
         """
         super().__init__(
-            root=dataset,
+            root=root_directory,
             transform=transforms.Compose([
                 transforms.Resize(DATA_SOURCES['sketchy']['dimensions'][0]),
                 transforms.CenterCrop(DATA_SOURCES['sketchy']['dimensions'][0]),

@@ -2,13 +2,17 @@
 
 from settings import DATA_SOURCES
 
-from src.datasets.sketchy import Sketchy, SketchyImageNames, SketchyMixedBatches
+from src.datasets.sketchy import Sketchy, SketchyImageNames, SketchyMixedBatches, SketchyTriplets
 
 DATASETS = {
     'sketchy_photos': lambda: Sketchy(DATA_SOURCES['sketchy']['photos']),
+    'sketchy_photos_triplets': lambda: SketchyTriplets(DATA_SOURCES['sketchy']['photos']),
     'sketchy_sketches': lambda: Sketchy(DATA_SOURCES['sketchy']['sketches']),
+    'sketchy_sketches_triplets': lambda: SketchyTriplets(DATA_SOURCES['sketchy']['sketches']),
     'sketchy_test_photos': lambda: Sketchy(DATA_SOURCES['sketchy_test']['photos']),
+    'sketchy_test_photos_triplets': lambda: SketchyTriplets(DATA_SOURCES['sketchy_test']['photos']),
     'sketchy_test_sketches': lambda: Sketchy(DATA_SOURCES['sketchy_test']['sketches']),
+    'sketchy_test_sketches_triplets': lambda: SketchyTriplets(DATA_SOURCES['sketchy_test']['sketches']),
     'sketchy_named_photos': lambda: SketchyImageNames(DATA_SOURCES['sketchy']['photos']),
     'sketchy_named_sketches': lambda: SketchyImageNames(DATA_SOURCES['sketchy']['photos']),
     'sketchy_test_named_photos': lambda: SketchyImageNames(DATA_SOURCES['sketchy_test']['photos']),

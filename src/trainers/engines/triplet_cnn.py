@@ -33,35 +33,28 @@ def create_triplet_cnn_trainer(model, optimizer, loss_fn, vector_dimension, devi
 
     def _update(engine, batch):
         # Unpack batch
-        photos, sketches, classes = batch # TODO: change to accomodate triplets
+        anchors, positives, negatives = batch
         # Reset gradients
-        model.zero_grad()
+        optimizer.zero_grad()
         # Training mode
         model.train()
-
-        ############################
-        # (1) Anchor
-        ###########################
-        photos_vectors = model(photos).view(-1, vector_dimension)
-
-        ############################
-        # (2) Positive
-        ###########################
-
-        ############################
-        # (3) Negative
-        ###########################
-
-        ############################
-        # (4) Update network
-        ###########################
-        # Calculate the discriminator loss
-        photo_discriminator_loss = loss_fn(photos_class_prediction, photo_labels)
+        # Train over batch triplets - we assume batch items have their data in the `0` position
+        anchor_embedding, positive_embedding, negative_embedding, \
+            distance_to_positive, distance_to_negative = model(anchors[0], positives[0], negatives[0])
+        # Create target tensor. A target of 1 denotes that the first input should be ranked higher (have a larger value)
+        # than the second input, fitting our case: first (second) input is distance to positive (negative). See (b)
+        target = torch.FloatTensor(anchors[1].size()[0]) # anchors[1] are the classes, Tensor of shape = `[batch_size]`
+        # Compute the triplet loss
+        triplet_loss = loss_fn(distance_to_positive, distance_to_negative, target) # (b)
+        # Embedding loss
+        # embedding_loss = anchor_embedding.norm(2) + positive_embedding.norm(2) + negative_embedding.norm(2)
+        # loss = triplet_loss + 0.001 * embedding_loss
         # Accumulate gradients
-        photo_discriminator_loss.backward()
+        triplet_loss.backward()
+        # loss.backward()
         # Update model wights
         optimizer.step()
-        # Return losses, for logging
-        return network_loss
+        # Return loss for logging
+        return triplet_loss
 
     return Engine(_update)

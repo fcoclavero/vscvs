@@ -9,6 +9,7 @@ from torch.utils.data.dataloader import default_collate
 from ignite.engine import Events
 
 from src.datasets import get_dataset
+from src.models.triplet_network import TripletNetwork
 from src.utils.collators import triplet_collate
 from src.models.convolutional_network import ConvolutionalNetwork
 from src.trainers.engines.triplet_cnn import create_triplet_cnn_trainer
@@ -68,7 +69,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batc
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
 
     # Instance adversarial models
-    net = ConvolutionalNetwork()
+    net = TripletNetwork(ConvolutionalNetwork())
 
     # Define loss and optimizers
     loss = nn.MarginRankingLoss(margin=margin)
@@ -83,7 +84,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batc
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(trainer):
-        pbar.desc = pbar_description.format(*trainer.state.output)
+        pbar.desc = pbar_description.format(trainer.state.output)
         pbar.update(1)
 
     trainer.run(train_loader, max_epochs=epochs)

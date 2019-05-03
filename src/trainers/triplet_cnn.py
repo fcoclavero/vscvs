@@ -17,7 +17,7 @@ from src.utils.data import dataset_split, prepare_batch_gan
 
 
 def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batch_size=16, n_gpu=0, epochs=2,
-                      train_test_split=1, train_validation_split=.8, learning_rate=0.0002, beta1=.5):
+                      train_test_split=.7, train_validation_split=.8, learning_rate=0.0002, beta1=.5):
     """
     Train a triplet CNN that generates a vector space where vectors generated from similar (same class) images are close
     together and vectors from images of different classes are far apart.

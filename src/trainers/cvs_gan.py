@@ -17,7 +17,7 @@ from src.utils.initialize_weights import initialize_weights
 
 
 def train_cvs_gan(dataset_name, vector_dimension, workers=4, batch_size=16, n_gpu=0, epochs=2,
-                  train_test_split=1, train_validation_split=.8, learning_rate=0.0002, beta1=.5):
+                  train_test_split=.7, train_validation_split=.8, learning_rate=0.0002, beta1=.5):
     """
     Train a GAN that generates a common vector space between photos and sketches.
     :param dataset_name: the name of the Dataset to be used for training

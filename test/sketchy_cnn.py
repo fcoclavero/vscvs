@@ -8,7 +8,7 @@ from src.metrics.multi_class import Accuracy, MeanAverageF1, MeanAverageRecall, 
 from src.models.convolutional_network import ConvolutionalNetwork
 
 
-def train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
+def test_train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param workers: number of workers for data_loader

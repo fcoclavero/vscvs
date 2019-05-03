@@ -13,7 +13,7 @@ from src.models.convolutional_network import ConvolutionalNetwork
 from src.utils.data import dataset_split, prepare_batch
 
 
-def train_cnn(dataset_name, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=1, train_validation_split=.8):
+def train_cnn(dataset_name, workers=4, batch_size=16, n_gpu=0, epochs=2, train_test_split=.7, train_validation_split=.8):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param dataset_name: the name of the Dataset to be used for training

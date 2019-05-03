@@ -111,6 +111,8 @@ venv.bak/
 
 # Big files
 static/pickles/discriminators/*.pickle
+mnist_train
+static/logs/*
 
 # Temporary plotly plots
 temp-plot.html

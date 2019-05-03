@@ -1,3 +1,4 @@
+import os
 import torch
 
 import torch.nn as nn
@@ -6,8 +7,10 @@ import torch.optim as optim
 from tqdm import tqdm
 
 from torch.utils.data.dataloader import default_collate
+from torch.utils.tensorboard import SummaryWriter
 from ignite.engine import Events
 
+from settings import ROOT_DIR
 from src.datasets import get_dataset
 from src.models.triplet_network import TripletNetwork
 from src.utils.collators import triplet_collate
@@ -79,11 +82,15 @@ def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batc
         net, optimizer, loss, vector_dimension, device=device, prepare_batch=prepare_batch_gan
     )
 
-    pbar_description = 'ITERATION - loss: {:.4f}'
+    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'triplet_cnn'))
+    # writer.add_graph(net, train_set)
+
+    pbar_description = 'ITERATION - loss: {:.6f}'
     pbar = tqdm(initial=0, leave=False, total=len(train_loader), desc=pbar_description.format(0, 0))
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(trainer):
+        writer.add_scalar('loss', trainer.state.output)
         pbar.desc = pbar_description.format(trainer.state.output)
         pbar.update(1)
 

@@ -113,6 +113,7 @@ venv.bak/
 static/pickles/discriminators/*.pickle
 mnist_train
 static/logs/*
+static/checkpoints/*
 
 # Temporary plotly plots
 temp-plot.html

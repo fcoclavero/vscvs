@@ -110,6 +110,7 @@ venv.bak/
 *.vec*
 
 # Big files
+static/pickles/triplet_cnn.pickle
 static/pickles/discriminators/*.pickle
 mnist_train
 static/logs/*

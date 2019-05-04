@@ -55,6 +55,6 @@ def create_triplet_cnn_trainer(model, optimizer, loss_fn, vector_dimension, devi
         # Update model wights
         optimizer.step()
         # Return loss for logging
-        return triplet_loss
+        return triplet_loss, torch.mean(distance_to_positive), torch.mean(distance_to_negative)
 
     return Engine(_update)

@@ -1,16 +1,14 @@
 import os
 import pickle
-
 import torch
 
 import torch.nn as nn
 import torch.optim as optim
-from ignite.handlers import ModelCheckpoint
 
 from tqdm import tqdm
-
-from torch.utils.data.dataloader import default_collate
+from torch.utils.data.dataloader import DataLoader, default_collate
 from torch.utils.tensorboard import SummaryWriter
+from ignite.handlers import ModelCheckpoint, TerminateOnNan
 from ignite.engine import Events
 
 from settings import ROOT_DIR
@@ -22,7 +20,7 @@ from src.trainers.engines.triplet_cnn import create_triplet_cnn_trainer
 from src.utils.data import dataset_split, prepare_batch_gan
 
 
-def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batch_size=16, n_gpu=0, epochs=2,
+def train_triplet_cnn(dataset_name, vector_dimension, resume=0, margin=.2, workers=4, batch_size=16, n_gpu=0, epochs=2,
                       train_test_split=.7, train_validation_split=.8, learning_rate=0.0002, beta1=.5):
     """
     Train a triplet CNN that generates a vector space where vectors generated from similar (same class) images are close
@@ -30,6 +28,8 @@ def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batc
     :param dataset_name: the name of the Dataset to be used for training
     :type: str
     :param vector_dimension: the dimensionality of the common vector space.
+    :type: int
+    :param resume: epoch number for resuming from a checkpoint. 0 indicates a fresh start.
     :type: int
     :param margin: margin for the triplet loss
     :param workers: number of workers for data_loader
@@ -50,60 +50,55 @@ def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batc
     :type: float
     :param beta1: Beta1 hyper-parameter for Adam optimizers
     """
-    dataset = get_dataset(dataset_name)
-
-    train_set, validation_set, test_set = dataset_split(
-        dataset, train_test_split, train_validation_split
-    )
-
-    # Create the data_loader
-    collate = triplet_collate(default_collate)
-    train_loader = torch.utils.data.DataLoader(
-        train_set, batch_size=batch_size, shuffle=True,
-        num_workers=workers, collate_fn=collate
-    )
-    validation_loader = torch.utils.data.DataLoader(
-        validation_set, batch_size=batch_size, shuffle=True,
-        num_workers=workers, collate_fn=collate
-    )
-    test_loader = torch.utils.data.DataLoader(
-        test_set, batch_size=batch_size, shuffle=True,
-        num_workers=workers, collate_fn=collate
-    )
-
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
 
     # Instance adversarial models
     net = TripletNetwork(ConvolutionalNetwork())
 
+    # Restore checkpoint
+    if resume:
+        try:
+            # checkpoint_path = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', '_model_%s.pth' % resume)
+            # net.load_state_dict(torch.load(checkpoint_path))
+            print('Loading checkpoint %s.' % resume)
+            print('Checkpoint loaded.')
+        except Exception as e:
+            print('No checkpoint file found for checkpoint number %s.' % resume)
+            print(e)
+
+    # Load data
+    dataset = get_dataset(dataset_name)
+
+    # Create the data_loaders
+    collate = triplet_collate(default_collate)
+
+    train_loader, validation_loader, test_loader = [
+        DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=workers, collate_fn=collate)
+        for subset in dataset_split(dataset, train_test_split, train_validation_split)
+    ]
+
     # Define loss and optimizers
     loss = nn.MarginRankingLoss(margin=margin)
     optimizer = optim.Adam(net.parameters(), lr=learning_rate, betas=(beta1, 0.999))
 
+    # Create the Ignite trainer
     trainer = create_triplet_cnn_trainer(
         net, optimizer, loss, vector_dimension, device=device, prepare_batch=prepare_batch_gan
     )
-
-    # Create a Checkpoint handler that can be used to periodically save objects to disc.
-    # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
-    handler = ModelCheckpoint(
-        os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn'), '', save_interval=2, n_saved=2, create_dir=True
-    )
-
-    # Summary writer for Tensorboard logging
-    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'triplet_cnn'))
-    # writer.add_graph(net, train_set)
 
     # tqdm progressbar definitions
     pbar_description = 'ITERATION - loss: {:.6f}'
     pbar = tqdm(initial=0, leave=False, total=len(train_loader), desc=pbar_description.format(0))
 
+    # Summary writer for Tensorboard logging
+    # Reference: https://pytorch.org/docs/stable/tensorboard.html
+    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'triplet_cnn'))
+
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(trainer):
-        writer.add_scalar('loss', trainer.state.output[0])
-        writer.add_scalar('avg_positive_dist', trainer.state.output[1])
-        writer.add_scalar('avg_negative_dist', trainer.state.output[2])
+        for i, scalar in enumerate(['loss', 'avg_positive_dist', 'avg_negative_dist']):
+            writer.add_scalar(scalar, trainer.state.output[i])
         pbar.desc = pbar_description.format(trainer.state.output[0])
         pbar.update(1)
 
@@ -124,7 +119,33 @@ def train_triplet_cnn(dataset_name, vector_dimension, margin=.2, workers=4, batc
         tqdm.write('Epoch complete')
         pbar.n = pbar.last_print_n = 0
 
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, handler, {'model': net})
+    # Create a Checkpoint handler that can be used to periodically save objects to disc.
+    # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
+    checkpoint_saver = ModelCheckpoint(
+        os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn'), filename_prefix='',
+        save_interval=1, n_saved=5, atomic=True, create_dir=True
+    )
+    trainer.add_event_handler(
+        Events.EPOCH_COMPLETED, checkpoint_saver,
+        {
+            'dataset_name': dataset_name,
+            'vector_dimension': vector_dimension,
+            'resume': resume,
+            'epochs': epochs,
+            'batch_size': batch_size,
+            'loss_margin': margin,
+            'learning_rate': learning_rate,
+            'beta1': beta1,
+            'model': TripletNetwork(ConvolutionalNetwork()),
+            'net': net,
+            'optimizer': optimizer,
+            'state_dict': net.state_dict()
+        }
+    )
+
+    # trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
+
+    # writer.add_graph(net, train_set)
 
     trainer.run(train_loader, max_epochs=epochs)
 

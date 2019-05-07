@@ -1,5 +1,13 @@
-# scvs
+# vscvs
 Common Visual Semantic Vector Space
+
+## Tensorboad
+
+Training routines generate Tensorboard compatible logs, which can be viewed in the Tensorboard console using the following command:
+
+```bash
+tensorboard --logdir=static/logs
+```
 
 ## Git submodules
 

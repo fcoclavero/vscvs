@@ -1,10 +1,10 @@
 import os
-import pickle
 import torch
 
 import torch.nn as nn
 import torch.optim as optim
 
+from datetime import datetime
 from tqdm import tqdm
 from torch.utils.data.dataloader import DataLoader, default_collate
 from torch.utils.tensorboard import SummaryWriter
@@ -50,6 +50,9 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=0, margin=.2, worke
     :type: float
     :param beta1: Beta1 hyper-parameter for Adam optimizers
     """
+    # Checkpoint directory path. One directory per run.
+    checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', '%s' % datetime.now())
+
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
 
@@ -119,15 +122,9 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=0, margin=.2, worke
         tqdm.write('Epoch complete')
         pbar.n = pbar.last_print_n = 0
 
-    # Create a Checkpoint handler that can be used to periodically save objects to disc.
-    # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
-    checkpoint_saver = ModelCheckpoint(
-        os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn'), filename_prefix='',
-        save_interval=1, n_saved=5, atomic=True, create_dir=True
-    )
-    trainer.add_event_handler(
-        Events.EPOCH_COMPLETED, checkpoint_saver,
-        {
+    @trainer.on(Events.COMPLETED)
+    def save_checkpoint(trainer):
+        checkpoint = {
             'dataset_name': dataset_name,
             'vector_dimension': vector_dimension,
             'resume': resume,
@@ -137,19 +134,23 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=0, margin=.2, worke
             'learning_rate': learning_rate,
             'beta1': beta1,
             'model': TripletNetwork(ConvolutionalNetwork()),
-            'net': net,
-            'optimizer': optimizer,
-            'state_dict': net.state_dict()
+            'optimizer': optimizer
         }
+        torch.save(checkpoint, os.path.join(checkpoint_directory, 'checkpoint.pth'))
+
+    # Create a Checkpoint handler that can be used to periodically save objects to disc.
+    # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
+    checkpoint_saver = ModelCheckpoint(
+        os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn'), filename_prefix='',
+        save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False
     )
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'net': net })
 
     # trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
     # writer.add_graph(net, train_set)
 
     trainer.run(train_loader, max_epochs=epochs)
-
-    pickle.dump(net, open('net.pickle', 'wb'))
 
     pbar.close()
 

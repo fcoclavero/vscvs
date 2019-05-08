@@ -20,8 +20,8 @@ from src.trainers.engines.triplet_cnn import create_triplet_cnn_trainer
 from src.utils.data import dataset_split, prepare_batch_gan
 
 
-def train_triplet_cnn(dataset_name, vector_dimension, resume=0, margin=.2, workers=4, batch_size=16, n_gpu=0, epochs=2,
-                      train_test_split=.7, train_validation_split=.8, learning_rate=0.0002, beta1=.5):
+def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, workers=4, batch_size=16, n_gpu=0,
+                      epochs=2, train_test_split=.7, train_validation_split=.8, learning_rate=0.0002, beta1=.5):
     """
     Train a triplet CNN that generates a vector space where vectors generated from similar (same class) images are close
     together and vectors from images of different classes are far apart.
@@ -29,8 +29,9 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=0, margin=.2, worke
     :type: str
     :param vector_dimension: the dimensionality of the common vector space.
     :type: int
-    :param resume: epoch number for resuming from a checkpoint. 0 indicates a fresh start.
-    :type: int
+    :param resume: checkpoint folder name containing model and checkpoint .pth files containing the information
+    needed for resuming training. Folder names correspond to dates with the following format: `%y-%m-%dT%H-%M`
+    :type: str
     :param margin: margin for the triplet loss
     :param workers: number of workers for data_loader
     :type: int
@@ -50,27 +51,29 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=0, margin=.2, worke
     :type: float
     :param beta1: Beta1 hyper-parameter for Adam optimizers
     """
-    # Checkpoint directory path. One directory per run.
-    checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', '%s' % datetime.now())
-
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
 
-    # Instance adversarial models
+    # Defaults
+    checkpoint_directory = os.path.join(
+        ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', datetime.now().strftime('%y-%m-%dT%H-%M')
+    )
     net = TripletNetwork(ConvolutionalNetwork())
+    start_epoch = 0
 
-    # Restore checkpoint
     if resume:
         try:
-            # checkpoint_path = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', '_model_%s.pth' % resume)
-            # net.load_state_dict(torch.load(checkpoint_path))
             print('Loading checkpoint %s.' % resume)
+            checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', resume)
+            checkpoint = torch.load(os.path.join(checkpoint_directory, 'checkpoint.pth'))
+            start_epoch = checkpoint['epochs']
+            net = torch.load(os.path.join(checkpoint_directory, '_net_%s.pth' % start_epoch))
             print('Checkpoint loaded.')
-        except Exception as e:
-            print('No checkpoint file found for checkpoint number %s.' % resume)
-            print(e)
+        except FileNotFoundError:
+            print('No checkpoint file found for checkpoint %s.' % resume)
+            raise
 
-    # Load data
+            # Load data
     dataset = get_dataset(dataset_name)
 
     # Create the data_loaders
@@ -124,25 +127,25 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=0, margin=.2, worke
 
     @trainer.on(Events.COMPLETED)
     def save_checkpoint(trainer):
-        checkpoint = {
+        new_checkpoint = {
             'dataset_name': dataset_name,
             'vector_dimension': vector_dimension,
-            'resume': resume,
-            'epochs': epochs,
+            'epochs': start_epoch + epochs,
             'batch_size': batch_size,
             'loss_margin': margin,
             'learning_rate': learning_rate,
             'beta1': beta1,
             'model': TripletNetwork(ConvolutionalNetwork()),
-            'optimizer': optimizer
+            'optimizer': optimizer,
+            'last_run': datetime.now()
         }
-        torch.save(checkpoint, os.path.join(checkpoint_directory, 'checkpoint.pth'))
+        torch.save(new_checkpoint, os.path.join(checkpoint_directory, 'checkpoint.pth'))
 
     # Create a Checkpoint handler that can be used to periodically save objects to disc.
     # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
     checkpoint_saver = ModelCheckpoint(
-        os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn'), filename_prefix='',
-        save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False
+        checkpoint_directory, filename_prefix='',
+        save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False, require_empty=False
     )
     trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'net': net })
 

@@ -32,7 +32,7 @@ def cnn(dataset_name, workers, batch_size, n_gpu, epochs):
 @click.option(
     '--vector_dimension', prompt='CVS dimensionality', help='Dimensionality of the vector space.', default=300
 )
-@click.option('--resume', prompt='Restore point', help='Epoch for checkpoint loading.', default=0)
+@click.option('--resume', help='Epoch for checkpoint loading.', default=None)
 @click.option('--margin', prompt='Margin', help='The margin for the Triplet Loss.', default=.2)
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
 @click.option('--batch_size', prompt='Batch size', help='The batch size during training.', default=16)

@@ -5,11 +5,13 @@ import torch.nn as nn
 import torch.optim as optim
 
 from datetime import datetime
+
+from ignite.metrics import Loss, TopKCategoricalAccuracy
 from tqdm import tqdm
 from torch.utils.data.dataloader import DataLoader, default_collate
 from torch.utils.tensorboard import SummaryWriter
 from ignite.handlers import ModelCheckpoint, TerminateOnNan, Timer
-from ignite.engine import Events
+from ignite.engine import Events, create_supervised_evaluator
 
 from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
 from src.datasets import get_dataset
@@ -93,6 +95,16 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
         net, optimizer, loss, vector_dimension, device=device, prepare_batch=prepare_batch_gan
     )
 
+    # Create a model evaluator
+    evaluator = create_supervised_evaluator(
+        net,
+        metrics={
+            'accuracy': TopKCategoricalAccuracy(),
+            'triplet_loss': Loss(loss)
+        },
+        device=device
+    )
+
     # Timer that measures the average time it takes to process a single batch of examples
     timer = Timer(average=True)
 
@@ -121,18 +133,17 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(trainer):
-        # evaluator.run(train_loader)
-        # metrics = evaluator.state.metrics
-        # tqdm.write("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-        #            .format(trainer.state.epoch, metrics['accuracy'], metrics['nll']))
-        pass
+        evaluator.run(train_loader)
+        metrics = evaluator.state.metrics
+        tqdm.write("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+                   .format(trainer.state.epoch, metrics['accuracy'], metrics['triplet_loss']))
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_validation_results(trainer):
-        # evaluator.run(validation_loader)
-        # metrics = evaluator.state.metrics
-        # tqdm.write("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
-        #            .format(trainer.state.epoch, metrics['accuracy'], metrics['nll']))
+        evaluator.run(validation_loader)
+        metrics = evaluator.state.metrics
+        tqdm.write("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+                   .format(trainer.state.epoch, metrics['accuracy'], metrics['triplet_loss']))
         tqdm.write('Epoch complete')
         pbar.n = pbar.last_print_n = 0
 

@@ -37,11 +37,14 @@ def cnn(dataset_name, workers, batch_size, n_gpu, epochs):
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
 @click.option('--batch_size', prompt='Batch size', help='The batch size during training.', default=16)
 @click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
+@click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
+@click.option('--beta1', prompt='Beta 1', help='Decay parameter for Adam optimizer.', default=.2)
 @click.option('--epochs', prompt='Number of epochs', help='The number of training epochs.', type=int)
-def triplet_cnn(dataset_name, vector_dimension, resume, margin, workers, batch_size, n_gpu, epochs):
+def triplet_cnn(dataset_name, vector_dimension, resume, margin, workers, batch_size, n_gpu, lr, beta1, epochs):
     from src.trainers.triplet_cnn import train_triplet_cnn
     click.echo('triplet cnn - %s dataset' % dataset_name)
-    train_triplet_cnn(dataset_name, vector_dimension, resume, margin, workers, batch_size, n_gpu, epochs)
+    train_triplet_cnn(dataset_name, vector_dimension, resume=resume, margin=margin, workers=workers,
+                      batch_size=batch_size, n_gpu=n_gpu, epochs=epochs, learning_rate=lr, beta1=beta1)
 
 
 @train.command()

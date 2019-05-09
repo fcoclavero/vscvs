@@ -2,6 +2,8 @@ import os
 
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
+CHECKPOINT_NAME_FORMAT = '%y-%m-%dT%H-%M'
+
 DATA_SOURCES = {
     'sketchy': {
         'root': r'C:\Users\Chopan\Documents\Data\sketchy',

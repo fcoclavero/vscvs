@@ -8,10 +8,10 @@ from datetime import datetime
 from tqdm import tqdm
 from torch.utils.data.dataloader import DataLoader, default_collate
 from torch.utils.tensorboard import SummaryWriter
-from ignite.handlers import ModelCheckpoint, TerminateOnNan
+from ignite.handlers import ModelCheckpoint, TerminateOnNan, Timer
 from ignite.engine import Events
 
-from settings import ROOT_DIR
+from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
 from src.datasets import get_dataset
 from src.models.triplet_network import TripletNetwork
 from src.utils.collators import triplet_collate
@@ -56,7 +56,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
 
     # Defaults
     checkpoint_directory = os.path.join(
-        ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', datetime.now().strftime('%y-%m-%dT%H-%M')
+        ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
     )
     net = TripletNetwork(ConvolutionalNetwork())
     start_epoch = 0
@@ -73,7 +73,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
             print('No checkpoint file found for checkpoint %s.' % resume)
             raise
 
-            # Load data
+    # Load data
     dataset = get_dataset(dataset_name)
 
     # Create the data_loaders
@@ -93,6 +93,14 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
         net, optimizer, loss, vector_dimension, device=device, prepare_batch=prepare_batch_gan
     )
 
+    # Timer that measures the average time it takes to process a single batch of examples
+    timer = Timer(average=True)
+
+    timer.attach(
+        trainer, start=Events.EPOCH_STARTED, resume=Events.ITERATION_STARTED,
+        pause=Events.ITERATION_COMPLETED, step=Events.ITERATION_COMPLETED
+    )
+
     # tqdm progressbar definitions
     pbar_description = 'ITERATION - loss: {:.6f}'
     pbar = tqdm(initial=0, leave=False, total=len(train_loader), desc=pbar_description.format(0))
@@ -100,6 +108,9 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
     # Summary writer for Tensorboard logging
     # Reference: https://pytorch.org/docs/stable/tensorboard.html
     writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'triplet_cnn'))
+
+    # Save network graph to Tensorboard
+    # writer.add_graph(net, train_set)
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(trainer):
@@ -137,7 +148,8 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
             'beta1': beta1,
             'model': TripletNetwork(ConvolutionalNetwork()),
             'optimizer': optimizer,
-            'last_run': datetime.now()
+            'last_run': datetime.now(),
+            'average_epoch_duration': timer.value()
         }
         torch.save(new_checkpoint, os.path.join(checkpoint_directory, 'checkpoint.pth'))
 
@@ -150,8 +162,6 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
     trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'net': net })
 
     # trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
-
-    # writer.add_graph(net, train_set)
 
     trainer.run(train_loader, max_epochs=epochs)
 

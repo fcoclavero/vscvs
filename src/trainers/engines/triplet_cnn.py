@@ -41,11 +41,11 @@ def create_triplet_cnn_trainer(model, optimizer, loss_fn, vector_dimension, devi
         # Train over batch triplets - we assume batch items have their data in the `0` position
         anchor_embedding, positive_embedding, negative_embedding, \
             distance_to_positive, distance_to_negative = model(anchors[0], positives[0], negatives[0])
-        # Create target tensor. A target of 1 denotes that the first input should be ranked higher (have a larger value)
+        # Create target tensor. A target of -1 denotes that the first input should be ranked lower (have lesser value)
         # than the second input, fitting our case: first (second) input is distance to positive (negative). See (b)
-        target = torch.FloatTensor(anchors[1].size()[0]) # anchors[1] are the classes, Tensor of shape = `[batch_size]`
-        # Compute the triplet loss
-        triplet_loss = loss_fn(distance_to_positive, distance_to_negative, target) # (b)
+        target = -torch.ones(anchors[1].size()[0], device=device) # anchors[1] are the classes, shape = `[batch_size]`
+        # Compute the triplet loss: https://pytorch.org/docs/stable/nn.html#torch.nn.MarginRankingLoss
+        triplet_loss = loss_fn(distance_to_positive, distance_to_negative, target) # (b). if target
         # Embedding loss
         # embedding_loss = anchor_embedding.norm(2) + positive_embedding.norm(2) + negative_embedding.norm(2)
         # loss = triplet_loss + 0.001 * embedding_loss

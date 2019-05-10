@@ -44,17 +44,13 @@ def create_triplet_cnn_trainer(model, optimizer, loss_fn, vector_dimension, devi
         # Create target tensor. A target of -1 denotes that the first input should be ranked lower (have lesser value)
         # than the second input, fitting our case: first (second) input is distance to positive (negative). See (b)
         target = -torch.ones(anchors[1].size()[0], device=device) # anchors[1] are the classes, shape = `[batch_size]`
-        # Compute the triplet loss: https://pytorch.org/docs/stable/nn.html#torch.nn.MarginRankingLoss
-        triplet_loss = loss_fn(distance_to_positive, distance_to_negative, target) # (b). if target
-        # Embedding loss
-        # embedding_loss = anchor_embedding.norm(2) + positive_embedding.norm(2) + negative_embedding.norm(2)
-        # loss = triplet_loss + 0.001 * embedding_loss
+        # (b) Compute the triplet loss: https://pytorch.org/docs/stable/nn.html#torch.nn.MarginRankingLoss
+        triplet_loss = loss_fn(distance_to_positive, distance_to_negative, target) # = d2positive - d2negative + margin
         # Accumulate gradients
         triplet_loss.backward()
-        # loss.backward()
         # Update model wights
         optimizer.step()
-        # Return loss for logging
+        # Return loss and average distances for logging
         return triplet_loss, torch.mean(distance_to_positive), torch.mean(distance_to_negative)
 
     return Engine(_update)

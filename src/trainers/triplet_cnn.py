@@ -87,7 +87,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
     ]
 
     # Define loss and optimizers
-    loss = nn.MarginRankingLoss(margin=margin)
+    loss = nn.MarginRankingLoss(margin=margin, reduction='mean')
     optimizer = optim.Adam(net.parameters(), lr=learning_rate, betas=(beta1, 0.999))
 
     # Create the Ignite trainer
@@ -97,10 +97,9 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
 
     # Create a model evaluator
     evaluator = create_supervised_evaluator(
-        net,
+        net.embedding_network,
         metrics={
-            'accuracy': TopKCategoricalAccuracy(),
-            'triplet_loss': Loss(loss)
+            'accuracy': TopKCategoricalAccuracy(k=50)
         },
         device=device
     )
@@ -114,7 +113,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
     )
 
     # tqdm progressbar definitions
-    pbar_description = 'ITERATION - loss: {:.6f}'
+    pbar_description = 'ITERATION => loss: {:.6f}'
     pbar = tqdm(initial=0, leave=False, total=len(train_loader), desc=pbar_description.format(0))
 
     # Summary writer for Tensorboard logging
@@ -172,7 +171,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
     )
     trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'net': net })
 
-    # trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
+    trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
     trainer.run(train_loader, max_epochs=epochs)
 

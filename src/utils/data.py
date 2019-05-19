@@ -72,3 +72,10 @@ def prepare_batch_gan(batch, device=None, non_blocking=False):
         [convert_tensor(sketch, device=device, non_blocking=non_blocking) for sketch in sketches],
         convert_tensor(classes, device=device, non_blocking=non_blocking)
     )
+
+
+def output_transform_gan(output):
+    # `output` variable is returned by above `process_function`
+    y_pred = output['y_pred']
+    y = output['y_true']
+    return y_pred, y  # output format is according to `Accuracy` docs

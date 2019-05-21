@@ -133,6 +133,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
 
     # @trainer.on(Events.EPOCH_COMPLETED)
     # def log_training_results(trainer):
+    #     pbar.n = pbar.last_print_n = 0
     #     evaluator.run(train_loader)
     #     metrics = evaluator.state.metrics
     #     tqdm.write("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
@@ -140,12 +141,12 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_validation_results(trainer):
+        pbar.n = pbar.last_print_n = 0
         # evaluator.run(validation_loader)
         # metrics = evaluator.state.metrics
         # tqdm.write("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
         #            .format(trainer.state.epoch, metrics['accuracy'], metrics['triplet_loss']))
         tqdm.write(' - Epoch complete')
-        pbar.n = pbar.last_print_n = 0
 
     @trainer.on(Events.COMPLETED)
     def save_checkpoint(trainer):
@@ -163,6 +164,8 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
             'average_epoch_duration': timer.value()
         }
         torch.save(new_checkpoint, os.path.join(checkpoint_directory, 'checkpoint.pth'))
+        pbar.close()
+        print('Finished Training')
 
     # Create a Checkpoint handler that can be used to periodically save objects to disc.
     # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
@@ -175,7 +178,3 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
     trainer.run(train_loader, max_epochs=epochs)
-
-    pbar.close()
-
-    print('Finished Training')

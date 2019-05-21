@@ -62,6 +62,9 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
     # Instance adversarial models
     generator = ImageEncoder(feature_depth=64, output_dimension=vector_dimension)
     discriminator = InterModalDiscriminator(input_dimension=vector_dimension)
+    # Initialize weights, as done in the DCGAN paper
+    generator.apply(initialize_weights)
+    discriminator.apply(initialize_weights)
     generator.to(device)
     discriminator.to(device)
     start_epoch = 0
@@ -77,9 +80,6 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
             print('Checkpoint loaded.')
         except FileNotFoundError:
             print('No checkpoint file found for checkpoint %s.' % resume)
-            # Initialize weights, as done in the DCGAN paper
-            generator.apply(initialize_weights)
-            discriminator.apply(initialize_weights)
             raise
 
     print(generator)
@@ -140,6 +140,7 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
 
     # @trainer.on(Events.EPOCH_COMPLETED)
     # def log_training_results(trainer):
+    #     pbar.n = pbar.last_print_n = 0
     #     evaluator.run(train_loader)
     #     metrics = evaluator.state.metrics
     #     tqdm.write("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
@@ -147,31 +148,32 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_validation_results(trainer):
+        pbar.n = pbar.last_print_n = 0
         # evaluator.run(validation_loader)
         # metrics = evaluator.state.metrics
         # tqdm.write("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
         #            .format(trainer.state.epoch, metrics['accuracy'], metrics['triplet_loss']))
         tqdm.write(' - Epoch complete')
-        pbar.n = pbar.last_print_n = 0
-
-    new_checkpoint = {
-        'dataset_name': dataset_name,
-        'vector_dimension': vector_dimension,
-        'epochs': start_epoch + epochs,
-        'batch_size': batch_size,
-        'learning_rate': learning_rate,
-        'beta1': beta1,
-        'generator': ImageEncoder(feature_depth=64, output_dimension=vector_dimension),
-        'discriminator': InterModalDiscriminator(input_dimension=vector_dimension),
-        'generator_optimizer': generator_optimizer,
-        'discriminator_optimizer': discriminator_optimizer,
-        'last_run': datetime.now(),
-        'average_epoch_duration': timer.value()
-    }
 
     @trainer.on(Events.COMPLETED)
     def save_checkpoint(trainer):
+        new_checkpoint = {
+            'dataset_name': dataset_name,
+            'vector_dimension': vector_dimension,
+            'epochs': start_epoch + epochs,
+            'batch_size': batch_size,
+            'learning_rate': learning_rate,
+            'beta1': beta1,
+            'generator': ImageEncoder(feature_depth=64, output_dimension=vector_dimension),
+            'discriminator': InterModalDiscriminator(input_dimension=vector_dimension),
+            'generator_optimizer': generator_optimizer,
+            'discriminator_optimizer': discriminator_optimizer,
+            'last_run': datetime.now(),
+            'average_epoch_duration': timer.value()
+        }
         torch.save(new_checkpoint, os.path.join(checkpoint_directory, 'checkpoint.pth'))
+        pbar.close()
+        print('Finished Training')
 
     # Create a Checkpoint handler that can be used to periodically save objects to disc.
     # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
@@ -186,7 +188,3 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
     trainer.run(train_loader, max_epochs=epochs)
-
-    pbar.close()
-
-    print('Finished Training')

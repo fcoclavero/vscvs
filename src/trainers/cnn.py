@@ -52,7 +52,7 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
 
     # Defaults
     checkpoint_directory = os.path.join(
-        ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
+        ROOT_DIR, 'static', 'checkpoints', 'cnn', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
     )
     net = ConvolutionalNetwork()
     net.to(device)
@@ -121,24 +121,29 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(trainer):
+        writer.add_scalar('loss', trainer.state.output)
         pbar.desc = pbar_description.format(trainer.state.output)
         pbar.update(1)
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(trainer):
+        pbar.n = pbar.last_print_n = 0
         evaluator.run(train_loader)
         metrics = evaluator.state.metrics
-        tqdm.write("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+        for key, value in metrics.items():
+            writer.add_scalar(key, value)
+        tqdm.write("\nTraining Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
               .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_validation_results(trainer):
+        pbar.n = pbar.last_print_n = 0
         evaluator.run(validation_loader)
         metrics = evaluator.state.metrics
+        for key, value in metrics.items():
+            writer.add_scalar(key, value)
         tqdm.write("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
               .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
-        pbar.n = pbar.last_print_n = 0
-        pbar.close()
 
     @trainer.on(Events.COMPLETED)
     def save_checkpoint(trainer):
@@ -154,6 +159,8 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
             'average_epoch_duration': timer.value()
         }
         torch.save(new_checkpoint, os.path.join(checkpoint_directory, 'checkpoint.pth'))
+        pbar.close()
+        print('Finished Training')
 
     # Create a Checkpoint handler that can be used to periodically save objects to disc.
     # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
@@ -166,5 +173,3 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
     trainer.run(train_loader, max_epochs=epochs)
-
-    print('Finished Training')

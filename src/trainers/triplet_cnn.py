@@ -6,7 +6,6 @@ import torch.optim as optim
 
 from datetime import datetime
 
-from ignite.metrics import Loss, TopKCategoricalAccuracy
 from tqdm import tqdm
 from torch.utils.data.dataloader import DataLoader, default_collate
 from torch.utils.tensorboard import SummaryWriter
@@ -22,8 +21,8 @@ from src.trainers.engines.triplet_cnn import create_triplet_cnn_trainer, create_
 from src.utils.data import dataset_split, output_transform_gan
 
 
-def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, workers=4, batch_size=16, n_gpu=0,
-                      epochs=2, train_test_split=.7, train_validation_split=.8, learning_rate=0.0002, beta1=.5):
+def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train_validation_split=.8, margin=.2,
+                      learning_rate=0.0002, beta1=.5, batch_size=16, workers=4, n_gpu=0, epochs=2, resume=None):
     """
     Train a triplet CNN that generates a vector space where vectors generated from similar (same class) images are close
     together and vectors from images of different classes are far apart.
@@ -31,27 +30,29 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
     :type: str
     :param vector_dimension: the dimensionality of the common vector space.
     :type: int
-    :param resume: checkpoint folder name containing model and checkpoint .pth files containing the information
-    needed for resuming training. Folder names correspond to dates with the following format: `%y-%m-%dT%H-%M`
-    :type: str
-    :param margin: margin for the triplet loss
-    :param workers: number of workers for data_loader
-    :type: int
-    :param batch_size: batch size during training
-    :type: int
-    :param n_gpu: number of GPUs available. Use 0 for CPU mode
-    :type: int
-    :param epochs: the number of epochs used for training
-    :type: int
     :param train_test_split: proportion of the dataset that will be used for training.
     The remaining data will be used as the test set.
     :type: float
     :param train_validation_split: proportion of the training set that will be used for actual training.
     The remaining data will be used as the validation set.
     :type: float
+    :param margin: margin for the triplet loss
+    :type: float
     :param learning_rate: learning rate for optimizers
     :type: float
     :param beta1: Beta1 hyper-parameter for Adam optimizers
+    :type: float
+    :param batch_size: batch size during training
+    :type: int
+    :param workers: number of workers for data_loader
+    :type: int
+    :param n_gpu: number of GPUs available. Use 0 for CPU mode
+    :type: int
+    :param epochs: the number of epochs used for training
+    :type: int
+    :param resume: checkpoint folder name containing model and checkpoint .pth files containing the information
+    needed for resuming training. Folder names correspond to dates with the following format: `%y-%m-%dT%H-%M`
+    :type: str
     """
     # Decide which device we want to run on
     device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
@@ -93,7 +94,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
     optimizer = optim.Adam(net.parameters(), lr=learning_rate, betas=(beta1, 0.999))
 
     # Create the Ignite trainer
-    trainer = create_triplet_cnn_trainer(net, optimizer, loss, vector_dimension, device=device)
+    trainer = create_triplet_cnn_trainer(vector_dimension, net, optimizer, loss, device=device)
 
     # Create a model evaluator
     # evaluator = create_triplet_cnn_evaluator(
@@ -130,7 +131,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, resume=None, margin=.2, wo
         pbar.desc = pbar_description.format(trainer.state.output[0], trainer.state.output[3])
         pbar.update(1)
 
-    # @trainer.on(Events.ITERATION_COMPLETED)
+    # @trainer.on(Events.EPOCH_COMPLETED)
     # def log_training_results(trainer):
     #     evaluator.run(train_loader)
     #     metrics = evaluator.state.metrics

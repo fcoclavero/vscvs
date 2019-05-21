@@ -5,7 +5,7 @@ from ignite.engine import Engine
 from src.utils.data import prepare_batch_gan, output_transform_gan
 
 
-def create_triplet_cnn_trainer(model, optimizer, loss_fn, vector_dimension, device=None, non_blocking=False,
+def create_triplet_cnn_trainer(vector_dimension, model, optimizer, loss_fn, device=None, non_blocking=False,
                                prepare_batch=prepare_batch_gan):
     """
     Factory function for creating an ignite trainer Engine for a triplet CNN.

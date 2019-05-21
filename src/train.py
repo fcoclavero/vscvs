@@ -12,14 +12,24 @@ def train():
     '--dataset_name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy_photos', 'sketchy_sketches', 'sketchy_test_photos', 'sketchy_test_sketches'])
 )
-@click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
+@click.option('--train_test_split', prompt='Train/test split',
+              help='proportion of the dataset that will be used for training.', default=.7)
+@click.option('--train_validation_split', prompt='Train/validation split',
+              help='proportion of the training set that will be used for training, not validating.', default=.8)
+@click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
+@click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
 @click.option('--batch_size', prompt='Batch size', help='The batch size during training.', default=16)
+@click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
 @click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @click.option('--epochs', prompt='Number of epochs', help='The number of training epochs.', type=int)
-def cnn(dataset_name, workers, batch_size, n_gpu, epochs):
+@click.option('--resume', help='Epoch for checkpoint loading.', default=None)
+def cnn(dataset_name, train_test_split, train_validation_split, lr, momentum, batch_size, workers,
+        n_gpu, epochs, resume):
     from src.trainers.cnn import train_cnn
     click.echo('cnn - %s dataset' % dataset_name)
-    train_cnn(dataset_name, workers, batch_size, n_gpu, epochs)
+    train_cnn(
+        dataset_name, train_test_split, train_validation_split, lr, momentum, batch_size, workers, n_gpu, epochs, resume
+    )
 
 
 @train.command()
@@ -36,11 +46,11 @@ def cnn(dataset_name, workers, batch_size, n_gpu, epochs):
 @click.option('--margin', prompt='Margin', help='The margin for the Triplet Loss.', default=.2)
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
 @click.option('--batch_size', prompt='Batch size', help='The batch size during training.', default=16)
-@click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
 @click.option('--beta1', prompt='Beta 1', help='Decay parameter for Adam optimizer.', default=.2)
+@click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @click.option('--epochs', prompt='Number of epochs', help='The number of training epochs.', type=int)
-def triplet_cnn(dataset_name, vector_dimension, resume, margin, workers, batch_size, n_gpu, lr, beta1, epochs):
+def triplet_cnn(dataset_name, vector_dimension, resume, margin, workers, batch_size, lr, beta1, n_gpu, epochs):
     from src.trainers.triplet_cnn import train_triplet_cnn
     click.echo('triplet cnn - %s dataset' % dataset_name)
     train_triplet_cnn(dataset_name, vector_dimension, resume=resume, margin=margin, workers=workers,

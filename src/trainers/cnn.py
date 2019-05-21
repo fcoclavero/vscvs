@@ -142,7 +142,7 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
         metrics = evaluator.state.metrics
         for key, value in metrics.items():
             writer.add_scalar(key, value)
-        tqdm.write("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+        tqdm.write("\nValidation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
               .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
 
     @trainer.on(Events.COMPLETED)

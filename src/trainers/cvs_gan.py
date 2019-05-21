@@ -143,7 +143,7 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
     #     pbar.n = pbar.last_print_n = 0
     #     evaluator.run(train_loader)
     #     metrics = evaluator.state.metrics
-    #     tqdm.write("Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+    #     tqdm.write("\nTraining Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
     #                .format(trainer.state.epoch, metrics['accuracy'], metrics['triplet_loss']))
 
     @trainer.on(Events.EPOCH_COMPLETED)
@@ -151,7 +151,7 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
         pbar.n = pbar.last_print_n = 0
         # evaluator.run(validation_loader)
         # metrics = evaluator.state.metrics
-        # tqdm.write("Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+        # tqdm.write("\nValidation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
         #            .format(trainer.state.epoch, metrics['accuracy'], metrics['triplet_loss']))
         tqdm.write(' - Epoch complete')
 

@@ -15,7 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
 from src.datasets import get_dataset
-from src.models.convolutional_network import ConvolutionalNetwork
+from src.models.convolutional.classification import ClassificationConvolutionalNetwork
 from src.utils.data import dataset_split, prepare_batch
 
 
@@ -52,16 +52,16 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
 
     # Defaults
     checkpoint_directory = os.path.join(
-        ROOT_DIR, 'static', 'checkpoints', 'cnn', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
+        ROOT_DIR, 'static', 'checkpoints', 'cnn_sk', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
     )
-    net = ConvolutionalNetwork()
+    net = ClassificationConvolutionalNetwork()
     net.to(device)
     start_epoch = 0
 
     if resume:
         try:
             print('Loading checkpoint %s.' % resume)
-            checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'cnn', resume)
+            checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'cnn_sk', resume)
             checkpoint = torch.load(os.path.join(checkpoint_directory, 'checkpoint.pth'))
             start_epoch = checkpoint['epochs']
             net = torch.load(os.path.join(checkpoint_directory, '_net_%s.pth' % start_epoch))
@@ -82,7 +82,7 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
     ]
 
     # Define loss and optimizers
-    loss = nn.NLLLoss()
+    loss = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=momentum)
 
     # Create the Ignite trainer
@@ -114,7 +114,7 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
 
     # Summary writer for Tensorboard logging
     # Reference: https://pytorch.org/docs/stable/tensorboard.html
-    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'cnn'))
+    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'cnn_sk'))
 
     # Save network graph to Tensorboard
     # writer.add_graph(net, train_set)
@@ -153,7 +153,7 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
             'batch_size': batch_size,
             'learning_rate': learning_rate,
             'momentum': momentum,
-            'model': ConvolutionalNetwork(),
+            'model': ClassificationConvolutionalNetwork(),
             'optimizer': optimizer,
             'last_run': datetime.now(),
             'average_epoch_duration': timer.value()

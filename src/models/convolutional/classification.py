@@ -3,7 +3,6 @@ import torch.nn.functional as F
 
 
 class ConvolutionalNetwork(nn.Module):
-
     def __init__(self):
         super().__init__()
         # 256x256x3
@@ -13,9 +12,9 @@ class ConvolutionalNetwork(nn.Module):
         # 61x61x16
         self.convolution_3 = nn.Conv2d(16, 20, 4) # 58x58x20
         # 29x29x20
-        self.fully_connected_1 = nn.Linear(20 * 29 * 29, 15000)
-        self.fully_connected_2 = nn.Linear(15000, 1200)
-        self.fully_connected_3 = nn.Linear(1200, 125)
+        self.fully_connected_1 = nn.Linear(20 * 29 * 29, 15000) # 15000
+        # 15000
+        self.fully_connected_2 = nn.Linear(15000, 1200) # 1200
 
     def forward(self, x):
         x = F.max_pool2d(F.relu(self.convolution_1(x)), (2, 2))
@@ -24,9 +23,6 @@ class ConvolutionalNetwork(nn.Module):
         x = x.view(-1, self.num_flat_features(x))
         x = F.relu(self.fully_connected_1(x))
         x = F.relu(self.fully_connected_2(x))
-        x = self.fully_connected_3(x)
-        # x = F.softmax(x, dim=1)
-        x = F.log_softmax(x, dim=-1)
         return x
 
     @staticmethod
@@ -36,3 +32,16 @@ class ConvolutionalNetwork(nn.Module):
         for s in size:
             num_features *= s
         return num_features
+
+
+class ClassificationConvolutionalNetwork(ConvolutionalNetwork):
+    def __init__(self):
+        super().__init__()
+        # 1200
+        self.fully_connected_3 = nn.Linear(1200, 125) # 125
+
+    def forward(self, x):
+        x = super().forward(x)
+        x = self.fully_connected_3(x)
+        x = F.log_softmax(x, dim=-1)
+        return x

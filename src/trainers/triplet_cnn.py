@@ -16,7 +16,7 @@ from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
 from src.datasets import get_dataset
 from src.models.triplet_network import TripletNetwork
 from src.utils.collators import triplet_collate
-from src.models.convolutional_network import ConvolutionalNetwork
+from src.models.convolutional.classification import ClassificationConvolutionalNetwork
 from src.trainers.engines.triplet_cnn import create_triplet_cnn_trainer, create_triplet_cnn_evaluator
 from src.utils.data import dataset_split, output_transform_gan
 
@@ -61,7 +61,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
     checkpoint_directory = os.path.join(
         ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
     )
-    net = TripletNetwork(ConvolutionalNetwork())
+    net = TripletNetwork(ClassificationConvolutionalNetwork())
     start_epoch = 0
 
     if resume:
@@ -158,7 +158,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
             'loss_margin': margin,
             'learning_rate': learning_rate,
             'beta1': beta1,
-            'model': TripletNetwork(ConvolutionalNetwork()),
+            'model': TripletNetwork(ClassificationConvolutionalNetwork()),
             'optimizer': optimizer,
             'last_run': datetime.now(),
             'average_epoch_duration': timer.value()

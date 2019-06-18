@@ -110,11 +110,15 @@ venv.bak/
 *.vec*
 
 # Big files
+experiments/sketchy_sketches_vectors.pickle
 static/pickles/triplet_cnn.pickle
 static/pickles/discriminators/*.pickle
 mnist_train
 static/logs/*
 static/checkpoints/*
+
+# Numerous files
+experiments/vectors/*
 
 # Temporary plotly plots
 temp-plot.html

@@ -8,18 +8,18 @@ DATA_DIR = r'C:\Users\Chopan\Dropbox\Data'
 
 DATA_SOURCES = {
     'sketchy': {
-        'root': os.path.join(DATA_DIR, r'sketchy'),
-        'photos': os.path.join(DATA_DIR, r'sketchy\photo\tx_000000000000'), # 12500
-        'sketches': os.path.join(DATA_DIR, r'sketchy\sketch\tx_000000000000'), # 75481
-        'classes': os.path.join(DATA_DIR, r'sketchy\classes.pickle'),
+        'root': os.path.join(DATA_DIR, 'sketchy'),
+        'photos': os.path.join(DATA_DIR, 'sketchy', 'photo', 'tx_000000000000'), # 12500
+        'sketches': os.path.join(DATA_DIR, 'sketchy', 'sketch', 'tx_000000000000'), # 75481
+        'classes': os.path.join(DATA_DIR, 'sketchy', 'classes.pickle'),
         'dimensions': (256, 256),
         'language': 'en'
     },
     'sketchy_test': {
-        'root': os.path.join(DATA_DIR, r'C:Users\Chopan\Documents\Data\sketchy_test'),
-        'photos': os.path.join(DATA_DIR, r'sketchy_test\photo'), # 1250
-        'sketches': os.path.join(DATA_DIR, r'sketchy_test\sketch'), # 1250
-        'classes': os.path.join(DATA_DIR, r'sketchy_test\classes.pickle'),
+        'root': os.path.join(DATA_DIR, 'sketchy_test'),
+        'photos': os.path.join(DATA_DIR, 'sketchy_test', 'photo'), # 1250
+        'sketches': os.path.join(DATA_DIR, 'sketchy_test', 'sketch'), # 1250
+        'classes': os.path.join(DATA_DIR, 'sketchy_test', 'classes.pickle'),
         'dimensions': (256, 256),
         'language': 'en'
     },

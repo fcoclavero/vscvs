@@ -19,15 +19,15 @@ class Sketchy(ImageFolder):
     Utility class for loading the sketchy dataset. It's original structure is compatible with
     the torch ImageFolder, so I will just subclass that and apply some transforms.
     """
-    def __init__(self, dataset):
+    def __init__(self, root_directory):
         """
         Initialize the ImageFolder and perform transforms. Note that sketches and photos have the
         same exact dimension in both the sketchy and sketchy_test datasets.
-        :param dataset: the root dir for photos or sketches.
+        :param root_directory: the root dir for photos or sketches.
         :type: str
         """
         super().__init__(
-            root=dataset,
+            root=root_directory,
             transform=transforms.Compose([
                 transforms.Resize(DATA_SOURCES['sketchy']['dimensions'][0]),
                 transforms.CenterCrop(DATA_SOURCES['sketchy']['dimensions'][0]),
@@ -44,29 +44,12 @@ class SketchyTriplets(TripletMixin, Sketchy):
     pass
 
 
-class SketchyImageNames(ImageFolder):
+class SketchyImageNames(Sketchy):
     """
     Same as the Sketchy Dataset above, but each item is a tuple containing the image, it's class, and
     also it's name. This is used by the SketchyMixedBatches Dataset to find the sketches associated
     with each photo.
     """
-    def __init__(self, root_directory):
-        """
-        Initialize the ImageFolder and perform transforms. Note that sketches and photos have the
-        same exact dimension in both the sketchy and sketchy_test datasets.
-        :param root_directory: the root directory for photos or sketches.
-        :type: str
-        """
-        super().__init__(
-            root=root_directory,
-            transform=transforms.Compose([
-                transforms.Resize(DATA_SOURCES['sketchy']['dimensions'][0]),
-                transforms.CenterCrop(DATA_SOURCES['sketchy']['dimensions'][0]),
-                transforms.ToTensor(),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-            ])
-        )
-
     def __get_image_name__(self, index):
         """
         Get name of the image indexed at `index`. This id can the be used to find the sketches

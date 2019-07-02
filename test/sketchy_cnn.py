@@ -5,7 +5,7 @@ import torch.optim as optim
 
 from src.datasets import get_dataset
 from src.metrics.multi_class import Accuracy, MeanAverageF1, MeanAverageRecall, MeanAveragePrecision
-from src.models.convolutional_network import ConvolutionalNetwork
+from src.models.convolutional.classification import ConvolutionalNetwork
 
 
 def test_train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):

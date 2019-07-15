@@ -1,12 +1,21 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Entry script for the whole project. """
+
+
+import click
 import warnings
+
+from src.embed import embed
+from src.retrieve import retrieve
+from src.train import train
+
 
 # Suppress gensim 'detected Windows; aliasing chunkize to chunkize_serial' warning
 warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
-
-import click
-
-from src.retrieve import retrieve
-from src.train import train
 
 
 # Create a nested command from command groups in the src package
@@ -35,9 +44,10 @@ def create_sample_vectors(n, dimension):
 
 # We must use add_command instead of CommandCollection to get a nested structure.
 # https://stackoverflow.com/a/39416589
-cli.add_command(train)
 cli.add_command(create_classes)
 cli.add_command(create_sample_vectors)
+cli.add_command(embed)
+cli.add_command(train)
 
 
 # Initialize the command line interface

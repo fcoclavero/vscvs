@@ -5,18 +5,17 @@ import torch.nn as nn
 import torch.optim as optim
 
 from datetime import datetime
-from tqdm import tqdm
-
 from ignite.handlers import Timer, ModelCheckpoint, TerminateOnNan
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
 
-from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
+from settings import ROOT_DIR
 from src.datasets import get_dataset
 from src.models.convolutional.classification import ClassificationConvolutionalNetwork
-from src.utils import get_device
+from src.utils import get_device, get_checkpoint_directory
 from src.utils.data import dataset_split, prepare_batch
 
 
@@ -52,9 +51,7 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
     device = get_device(n_gpu)
 
     # Defaults
-    checkpoint_directory = os.path.join(
-        ROOT_DIR, 'static', 'checkpoints', 'cnn_sk', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
-    )
+    checkpoint_directory = get_checkpoint_directory('cnn_sk')
     net = ClassificationConvolutionalNetwork()
     net.to(device)
     start_epoch = 0
@@ -62,7 +59,7 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
     if resume:
         try:
             print('Loading checkpoint %s.' % resume)
-            checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'cnn_sk', resume)
+            checkpoint_directory = get_checkpoint_directory('cnn_sk', resume)
             checkpoint = torch.load(os.path.join(checkpoint_directory, 'checkpoint.pth'))
             start_epoch = checkpoint['epochs']
             net = torch.load(os.path.join(checkpoint_directory, '_net_%s.pth' % start_epoch))
@@ -166,10 +163,11 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
     # Create a Checkpoint handler that can be used to periodically save objects to disc.
     # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
     checkpoint_saver = ModelCheckpoint(
-        checkpoint_directory, filename_prefix='',
+        checkpoint_directory, filename_prefix='net',
         save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False, require_empty=False
     )
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'net': net})
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'train': net})
+    trainer.add_event_handler(Events.COMPLETED, checkpoint_saver, {'complete': net})
 
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 

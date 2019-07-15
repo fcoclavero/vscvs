@@ -12,9 +12,9 @@ from torch.utils.tensorboard import SummaryWriter
 from ignite.handlers import Timer, ModelCheckpoint, TerminateOnNan
 from ignite.engine import Events
 
-from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
+from settings import ROOT_DIR
 from src.datasets import get_dataset
-from src.utils import get_device
+from src.utils import get_device, get_checkpoint_directory
 from src.utils.collators import sketchy_mixed_collate
 from src.trainers.engines.cvs_gan import create_csv_gan_trainer
 from src.models.discriminators.intermodal import InterModalDiscriminator
@@ -57,9 +57,7 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
     device = get_device(n_gpu)
 
     # Defaults
-    checkpoint_directory = os.path.join(
-        ROOT_DIR, 'static', 'checkpoints', 'csv_gan', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
-    )
+    checkpoint_directory = get_checkpoint_directory('csv_gan')
     # Instance adversarial models
     generator = ImageEncoder(feature_depth=64, output_dimension=vector_dimension)
     discriminator = InterModalDiscriminator(input_dimension=vector_dimension)
@@ -183,7 +181,10 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
         save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False, require_empty=False
     )
     trainer.add_event_handler(
-        Events.EPOCH_COMPLETED, checkpoint_saver, {'generator': generator, 'discriminator': discriminator}
+        Events.EPOCH_COMPLETED, checkpoint_saver, {'generator_train': generator, 'discriminator_train': discriminator}
+    )
+    trainer.add_event_handler(
+        Events.COMPLETED, checkpoint_saver, {'generator_complete': generator, 'discriminator_complete': discriminator}
     )
 
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())

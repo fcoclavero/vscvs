@@ -10,7 +10,7 @@ import click
 import warnings
 
 from src.embed import embed
-from src.retrieve import retrieve
+# from src.retrieve import retrieve
 from src.train import train
 
 

@@ -12,10 +12,10 @@ from torch.utils.tensorboard import SummaryWriter
 from ignite.handlers import ModelCheckpoint, TerminateOnNan, Timer
 from ignite.engine import Events
 
-from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
+from settings import ROOT_DIR
 from src.datasets import get_dataset
 from src.models.triplet_network import TripletNetwork
-from src.utils import get_device
+from src.utils import get_device, get_checkpoint_directory
 from src.utils.collators import triplet_collate
 from src.models.convolutional.classification import ClassificationConvolutionalNetwork
 from src.trainers.engines.triplet_cnn import create_triplet_cnn_trainer, create_triplet_cnn_evaluator
@@ -59,9 +59,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
     device = get_device(n_gpu)
 
     # Defaults
-    checkpoint_directory = os.path.join(
-        ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
-    )
+    checkpoint_directory = get_checkpoint_directory('triplet_cnn')
     net = TripletNetwork(ClassificationConvolutionalNetwork())
     start_epoch = 0
 
@@ -171,10 +169,11 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
     # Create a Checkpoint handler that can be used to periodically save objects to disc.
     # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
     checkpoint_saver = ModelCheckpoint(
-        checkpoint_directory, filename_prefix='',
+        checkpoint_directory, filename_prefix='net',
         save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False, require_empty=False
     )
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'net': net })
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'train': net })
+    trainer.add_event_handler(Events.COMPLETED, checkpoint_saver, {'complete': net})
 
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 

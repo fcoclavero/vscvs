@@ -1,6 +1,6 @@
 import torch
 
-from hog.histogram import gradient, magnitude_orientation, hog, visualise_histogram
+from hog.histogram import hog
 
 
 class HOG:
@@ -18,10 +18,10 @@ class HOG:
         :type: tuple<int, int>
         :param n_bins: number of bins for the histogram of each cell.
         :type: int
-        :param signed_orientation: gradients are represented using its angle and magnitude. Angles can be expressed using
-        values between 0 and 360 degrees or between 0 and 180 degrees. If the latter are used, we call the gradient
-        “unsigned” because a gradient and it’s negative are represented by the same numbers. Empirically it has been shown
-        that unsigned gradients work better than signed gradients for tasks such as pedestrian detection.
+        :param signed_orientation: gradients are represented using its angle and magnitude. Angles can be expressed
+        using values between 0 and 360 degrees or between 0 and 180 degrees. If the latter are used, we call the
+        gradient “unsigned” because a gradient and it’s negative are represented by the same numbers. Empirically it has
+        been shown that unsigned gradients work better than signed gradients for tasks such as pedestrian detection.
         :type: boolean
         :param normalize: weather block normalization should be used or not
         :type: boolean

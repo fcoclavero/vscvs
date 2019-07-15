@@ -5,6 +5,7 @@ warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 
 import click
 
+from src.retrieve import retrieve
 from src.train import train
 
 

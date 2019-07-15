@@ -16,6 +16,7 @@ from torch.utils.tensorboard import SummaryWriter
 from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
 from src.datasets import get_dataset
 from src.models.convolutional.classification import ClassificationConvolutionalNetwork
+from src.utils import get_device
 from src.utils.data import dataset_split, prepare_batch
 
 
@@ -48,7 +49,7 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
     :type: str
     """
     # Decide which device we want to run on
-    device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
+    device = get_device(n_gpu)
 
     # Defaults
     checkpoint_directory = os.path.join(

@@ -14,6 +14,7 @@ from ignite.engine import Events
 
 from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
 from src.datasets import get_dataset
+from src.utils import get_device
 from src.utils.collators import sketchy_mixed_collate
 from src.trainers.engines.cvs_gan import create_csv_gan_trainer
 from src.models.discriminators.intermodal import InterModalDiscriminator
@@ -53,7 +54,7 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
     :type: str
     """
     # Decide which device we want to run on
-    device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
+    device = get_device(n_gpu)
 
     # Defaults
     checkpoint_directory = os.path.join(

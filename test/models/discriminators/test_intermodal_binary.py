@@ -6,6 +6,7 @@ import torch
 from settings import DATA_SOURCES
 from src.models.discriminators.intermodal import InterModalDiscriminator
 from src.metrics.binary import Accuracy, Precision, Recall, F1
+from src.utils import get_device
 from src.utils.data import split
 
 
@@ -24,7 +25,7 @@ def test_binary_classification(n_gpu = 1):
     )
 
     # Decide which device we want to run on
-    device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
+    device = get_device(n_gpu)
 
     # Create data tensors
     x_train = torch.tensor(np.vstack(train['vector']), dtype=torch.float, device=device)

@@ -6,6 +6,7 @@ import torch.optim as optim
 from src.datasets import get_dataset
 from src.metrics.multi_class import Accuracy, MeanAverageF1, MeanAverageRecall, MeanAveragePrecision
 from src.models.convolutional.classification import ConvolutionalNetwork
+from src.utils import get_device
 
 
 def test_train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
@@ -27,7 +28,7 @@ def test_train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
     data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers)
 
     # Decide which device we want to run on
-    device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
+    device = get_device(n_gpu)
 
     net = ConvolutionalNetwork()
     net.to(device)

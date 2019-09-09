@@ -172,9 +172,10 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
         checkpoint_directory, filename_prefix='net',
         save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False, require_empty=False
     )
+
+    # Event handlers
     trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'train': net })
     trainer.add_event_handler(Events.COMPLETED, checkpoint_saver, {'complete': net})
-
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
     trainer.run(train_loader, max_epochs=epochs)

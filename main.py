@@ -3,7 +3,7 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" Entry script for the whole project. """
+""" Entry script for the entire project. """
 
 
 import click

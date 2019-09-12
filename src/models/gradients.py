@@ -6,6 +6,27 @@ import torch.nn.functional as F
 class AbstractKernelConvolution(torch.nn.Module):
     """ Abstract nn.Module for creating convolutions with user defined kernels. """
 
+    def __init__(self, in_channels=3, stride=1, padding=1, dilation=1):
+        """
+        Constructor. Saves convolution parameters.
+        :param in_channels: the number of channels for inputs.
+        :type: int
+        :param stride: controls the stride for the cross-correlation.
+        :type: int or tuple<int, int> with height and width dimensions, respectively
+        :param padding: controls the amount of implicit zero-paddings on both sides for `padding` number of points for
+        each dimension. Defaults to one to maintain input dimensions.
+        :type: int or tuple<int, int> with height and width dimensions, respectively
+        :param dilation: controls the spacing between the kernel points; also known as the à trous algorithm. It is
+        harder to describe, but this [link](https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md) has a
+        nice visualization of what dilation does.
+        :type: int or tuple<int, int> with height and width dimensions, respectively
+        """
+        super(AbstractKernelConvolution, self).__init__()
+        self.in_channels = in_channels
+        self.stride = stride
+        self.padding = padding
+        self.dilation = dilation
+
     @property
     def kernel(self):
         """ Get the custom kernel for the implementation of the kernel convolution. """
@@ -19,11 +40,8 @@ class AbstractKernelConvolution(torch.nn.Module):
         :return: the application of the Sobel filter over the input
         :type: torch.tensor
         """
-        return F.conv2d(x, self.kernel, padding=1) # zero-padding maintains image dimensions. 1 is enough given kernel
-
-    def __call__(self, *input, **kwargs):
-        """ Make the object callable by executing the `forward` function`. """
-        return self.forward(*input, **kwargs)
+        with torch.no_grad():  # we won't need the gradient, so we use this option for better performance
+            return F.conv2d(x, self.kernel, stride=self.stride, padding=self.padding, dilation=self.dilation)
 
 
 class SobelX(AbstractKernelConvolution):
@@ -35,9 +53,9 @@ class SobelX(AbstractKernelConvolution):
     """
     @property
     def kernel(self):
-        kernel_2d = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]]
-        kernel = torch.tensor([kernel_2d, kernel_2d, kernel_2d], dtype=torch.float)
-        return kernel.unsqueeze(0) # we must unsqueeze to handle multiple inputs
+        kernel_2d = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float)
+        kernel = torch.stack([kernel_2d for _ in range(self.in_channels)])  # repeat 2D kernel for each input channel
+        return kernel.unsqueeze(0)  # we must add and additional dimension to handle multiple inputs
 
 
 class SobelY(AbstractKernelConvolution):
@@ -49,9 +67,9 @@ class SobelY(AbstractKernelConvolution):
     """
     @property
     def kernel(self):
-        kernel_2d = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]]
-        kernel = torch.tensor([kernel_2d, kernel_2d, kernel_2d], dtype=torch.float)
-        return kernel.unsqueeze(0) # we must unsqueeze to handle multiple inputs
+        kernel_2d = torch.tensor([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=torch.float)
+        kernel = torch.stack([kernel_2d for _ in range(self.in_channels)])  # repeat 2D kernel for each input channel
+        return kernel.unsqueeze(0)  # we must add and additional dimension to handle multiple inputs
 
 
 class Laplacian(AbstractKernelConvolution):
@@ -63,42 +81,6 @@ class Laplacian(AbstractKernelConvolution):
     """
     @property
     def kernel(self):
-        kernel_2d = [[0, 1, 0], [1, 4, 1], [0, 1, 0]]
-        kernel = torch.tensor([kernel_2d, kernel_2d, kernel_2d], dtype=torch.float)
-        return kernel.unsqueeze(0) # we must unsqueeze to handle multiple inputs
-
-
-class SobelXGrayScale(AbstractKernelConvolution):
-    """
-    Torch nn Layer for the Sobel operator along the x axis. It approximates the gradient along the x axis by
-    filtering (convolution) the input with a specific kernel. It only works with grayscale images. Sobel kernel size 1.
-    Reference: https://en.wikipedia.org/wiki/Sobel_operator
-    """
-    @property
-    def kernel(self):
-        kernel = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float)
-        return kernel[None, None] # kernel was defined as 2D, so we must `unsqueeze(self.kernel, 0)` twice
-
-
-class SobelYGrayScale(AbstractKernelConvolution):
-    """
-    Torch nn Layer for the Sobel operator along the y axis. It approximates the gradient along the y axis by
-    filtering (convolution) the input with a specific kernel. It only works with grayscale images. Sobel kernel size 1.
-    Reference: https://en.wikipedia.org/wiki/Sobel_operator
-    """
-    @property
-    def kernel(self):
-        kernel = torch.tensor([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=torch.float)
-        return kernel[None, None] # kernel was defined as 2D, so we must `unsqueeze(self.kernel, 0)` twice
-
-
-class LaplacianGrayScale(AbstractKernelConvolution):
-    """
-    Torch nn Layer for the Laplacian derivative operator. It approximates the gradient magnitude along both axes by
-    filtering (convolution) the input with a specific kernel. It only works with grayscale images. Kernel size 1.
-    Reference: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_gradients/py_gradients.html
-    """
-    @property
-    def kernel(self):
-        kernel = torch.tensor([[0, 1, 0], [1, 4, 1], [0, 1, 0]], dtype=torch.float)
-        return kernel[None, None] # kernel was defined as 2D, so we must `unsqueeze(self.kernel, 0)` twice
+        kernel_2d = torch.tensor([[0, 1, 0], [1, 4, 1], [0, 1, 0]], dtype=torch.float)
+        kernel = torch.stack([kernel_2d for _ in range(self.in_channels)])  # repeat 2D kernel for each input channel
+        return kernel.unsqueeze(0)  # we must add and additional dimension to handle multiple inputs

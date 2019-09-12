@@ -26,6 +26,7 @@ class AbstractKernelConvolution(torch.nn.Module):
         self.stride = stride
         self.padding = padding
         self.dilation = dilation
+        self.register_buffer('weight', self.kernel) # register buffer that should not to be considered a model parameter
 
     @property
     def kernel(self):
@@ -41,7 +42,7 @@ class AbstractKernelConvolution(torch.nn.Module):
         :type: torch.tensor
         """
         with torch.no_grad():  # we won't need the gradient, so we use this option for better performance
-            return F.conv2d(x, self.kernel, stride=self.stride, padding=self.padding, dilation=self.dilation)
+            return F.conv2d(x, self.weight, stride=self.stride, padding=self.padding, dilation=self.dilation)
 
 
 class SobelX(AbstractKernelConvolution):

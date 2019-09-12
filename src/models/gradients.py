@@ -12,7 +12,6 @@ class AbstractKernelConvolution(torch.nn.Module):
         raise NotImplementedError
 
     def forward(self, x):
-
         """
         Perform the convolution of the input with the Sobel kernel.
         :param x: the image batch
@@ -30,6 +29,48 @@ class AbstractKernelConvolution(torch.nn.Module):
 class SobelX(AbstractKernelConvolution):
     """
     Torch nn Layer for the Sobel operator along the x axis. It approximates the gradient along the x axis by
+    filtering (convolution) the input with a specific kernel. The gradients are computed for all input channels using
+    the same 2D kernel over all of them. Sobel kernel size 1.
+    Reference: https://en.wikipedia.org/wiki/Sobel_operator
+    """
+    @property
+    def kernel(self):
+        kernel_2d = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]]
+        kernel = torch.tensor([kernel_2d, kernel_2d, kernel_2d], dtype=torch.float)
+        return kernel.unsqueeze(0) # we must unsqueeze to handle multiple inputs
+
+
+class SobelY(AbstractKernelConvolution):
+    """
+    Torch nn Layer for the Sobel operator along the y axis. It approximates the gradient along the y axis by
+    filtering (convolution) the input with a specific kernel. The gradients are computed for all input channels using
+    the same 2D kernel over all of them. Sobel kernel size 1.
+    Reference: https://en.wikipedia.org/wiki/Sobel_operator
+    """
+    @property
+    def kernel(self):
+        kernel_2d = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]]
+        kernel = torch.tensor([kernel_2d, kernel_2d, kernel_2d], dtype=torch.float)
+        return kernel.unsqueeze(0) # we must unsqueeze to handle multiple inputs
+
+
+class Laplacian(AbstractKernelConvolution):
+    """
+    Torch nn Layer for the Laplacian derivative operator. It approximates the gradient magnitude along both axes by
+    filtering (convolution) the input with a specific kernel. The gradients are computed for all input channels using
+    the same 2D kernel over all of them. Kernel size 1.
+    Reference: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_gradients/py_gradients.html
+    """
+    @property
+    def kernel(self):
+        kernel_2d = [[0, 1, 0], [1, 4, 1], [0, 1, 0]]
+        kernel = torch.tensor([kernel_2d, kernel_2d, kernel_2d], dtype=torch.float)
+        return kernel.unsqueeze(0) # we must unsqueeze to handle multiple inputs
+
+
+class SobelXGrayScale(AbstractKernelConvolution):
+    """
+    Torch nn Layer for the Sobel operator along the x axis. It approximates the gradient along the x axis by
     filtering (convolution) the input with a specific kernel. It only works with grayscale images. Sobel kernel size 1.
     Reference: https://en.wikipedia.org/wiki/Sobel_operator
     """
@@ -39,7 +80,7 @@ class SobelX(AbstractKernelConvolution):
         return kernel[None, None] # kernel was defined as 2D, so we must `unsqueeze(self.kernel, 0)` twice
 
 
-class SobelY(AbstractKernelConvolution):
+class SobelYGrayScale(AbstractKernelConvolution):
     """
     Torch nn Layer for the Sobel operator along the y axis. It approximates the gradient along the y axis by
     filtering (convolution) the input with a specific kernel. It only works with grayscale images. Sobel kernel size 1.
@@ -51,7 +92,7 @@ class SobelY(AbstractKernelConvolution):
         return kernel[None, None] # kernel was defined as 2D, so we must `unsqueeze(self.kernel, 0)` twice
 
 
-class Laplacian(AbstractKernelConvolution):
+class LaplacianGrayScale(AbstractKernelConvolution):
     """
     Torch nn Layer for the Laplacian derivative operator. It approximates the gradient magnitude along both axes by
     filtering (convolution) the input with a specific kernel. It only works with grayscale images. Kernel size 1.

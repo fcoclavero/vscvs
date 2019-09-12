@@ -3,11 +3,10 @@ import re
 import pickle
 import torch
 
-import torchvision.transforms as transforms
-
 from tqdm import tqdm
 from multipledispatch import dispatch
 from torch.utils.data import Dataset
+from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
 from settings import DATA_SOURCES
@@ -19,12 +18,14 @@ class Sketchy(ImageFolder):
     Utility class for loading the sketchy dataset. It's original structure is compatible with
     the torch ImageFolder, so I will just subclass that and apply some transforms.
     """
-    def __init__(self, root_directory):
+    def __init__(self, root_directory, *custom_transforms):
         """
         Initialize the ImageFolder and perform transforms. Note that sketches and photos have the
         same exact dimension in both the sketchy and sketchy_test datasets.
         :param root_directory: the root dir for photos or sketches.
         :type: str
+        :param custom_transforms: additional transforms for the Dataset
+        :type: torchvision.transforms
         """
         super().__init__(
             root=root_directory,
@@ -33,6 +34,7 @@ class Sketchy(ImageFolder):
                 transforms.CenterCrop(DATA_SOURCES['sketchy']['dimensions'][0]),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                *custom_transforms
             ])
         )
 

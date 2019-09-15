@@ -57,7 +57,7 @@ class HOG(torch.nn.Module):
             # Gradient angle linear interpolation. First we divide angles by the maximum angle. This gives us the angle
             grad_angle_interpolation = grad_angles / self.angle_range # as a fraction [0, 1] of the maximum.
             # We then multiply by 1 - n_bins and take the floor, giving us an int that corresponds to the angle
-            grad_bins = (grad_angle_interpolation * (self.n_bins-  1)).floor() # bin the pixel belongs to.
+            grad_bins = (grad_angle_interpolation * (self.n_bins-  1)).floor().long() # bin the pixel belongs to.
 
             # Now we need the histogram for every pixel block. First, we create tensor with a vector for each pixel,
             # containing its gradient magnitude in the index of the pixel's gradient orientation bin.

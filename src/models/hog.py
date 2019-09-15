@@ -5,11 +5,13 @@ from src.models.gradients import SobelX, SobelY
 
 
 class HOG(torch.nn.Module):
-    def __init__(self, cell_size=8, n_bins=9, signed_gradients=False):
+    def __init__(self, in_channels=3, cell_size=8, n_bins=9, signed_gradients=False):
         """
         Model for creating a histogram of oriented gradients feature vectors for the given images.
         Does not require training.
         Reference: https://www.learnopencv.com/histogram-of-oriented-gradients/
+        :param in_channels: the number of channels for inputs.
+        :type: int
         :param cell_size: the image will be divided into cells of the specified size, and the histogram of gradients is
         calculated in each one. Received as a tuple indicating the x and y dimensions of the cell, measured in pixels.
         :type: int
@@ -27,8 +29,8 @@ class HOG(torch.nn.Module):
         self.n_bins = n_bins
         self.signed_gradients = signed_gradients
         # Define constituent layers
-        self.sobel_x = SobelX()  # Sobel filtering layer
-        self.sobel_y = SobelY()  # Sobel filtering layer
+        self.sobel_x = SobelX(in_channels=in_channels)  # Sobel filtering layer
+        self.sobel_y = SobelY(in_channels=in_channels)  # Sobel filtering layer
         self.cell_pooling = torch.nn.AvgPool2d(cell_size, stride=cell_size, padding=0)
 
     @property
@@ -45,7 +47,7 @@ class HOG(torch.nn.Module):
         :type: torch.tensor
         """
         with torch.no_grad():  # we won't need gradients for operations, so we use this option for better performance
-            n_inputs, _, input_height, input_width = x.shape
+            n_inputs, n_channels, input_height, input_width = x.shape
 
             # First, we need to compute the gradients along both axes.
             gx, gy = self.sobel_x(x), self.sobel_y(x)

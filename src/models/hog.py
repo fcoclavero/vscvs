@@ -47,7 +47,7 @@ class HOG(torch.nn.Module):
         :type: torch.tensor
         """
         with torch.no_grad():  # we won't need gradients for operations, so we use this option for better performance
-            n_inputs, n_channels, input_height, input_width = x.shape
+            n_inputs, _, input_height, input_width = x.shape
 
             # First, we need to compute the gradients along both axes.
             gx, gy = self.sobel_x(x), self.sobel_y(x)
@@ -71,4 +71,9 @@ class HOG(torch.nn.Module):
             hog = self.cell_pooling(out) * self.cell_size**2
 
             # Now we flatten to return the actual feature vector
-            return hog.flatten()
+            return hog.flatten(start_dim=1) # start_dim=1 to return the hog vector of every image in a batch
+
+    def to(self, *args, **kwargs):
+        """ Override of `to` method to send buffers to the new device. """
+        self.sobel_x, self.sobel_y = self.sobel_x.to(*args, **kwargs), self.sobel_y.to(*args, **kwargs)
+        return super().to(*args, **kwargs)

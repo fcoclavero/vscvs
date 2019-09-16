@@ -44,6 +44,11 @@ class AbstractKernelConvolution(torch.nn.Module):
         with torch.no_grad():  # we won't need the gradient, so we use this option for better performance
             return F.conv2d(x, self.weight, stride=self.stride, padding=self.padding, dilation=self.dilation)
 
+    def to(self, *args, **kwargs):
+        """ Override of `to` method to send the weight buffer to the new device. """
+        self.register_buffer('weight', self.kernel.to(*args, **kwargs))
+        return super().to(*args, **kwargs)
+
 
 class SobelX(AbstractKernelConvolution):
     """

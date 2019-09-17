@@ -8,6 +8,7 @@ __status__ = 'Prototype'
 
 import os
 import pickle
+import torch
 
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -49,5 +50,16 @@ def create_embeddings(embedding_directory_name, dataset_name, model, batch_size,
         pickle.dump(outputs, open(os.path.join(embedding_directory, 'batch_{}.pickle'.format(i)), 'wb'))
 
 
-def load_embedding_pickles():
-    pass
+def load_embedding_pickles(embedding_directory_name):
+    """
+    Loads an embedding directory composed of pickled Tensors with image embeddings for a batch.
+    :param embedding_directory_name: the name of the subdirectory where the batch pickles will be saved
+    :type: str
+    :return: a single Pytorch tensor with all the embeddings found in the provided embedding directory. The later must
+    contain pickled tensor objects with image embeddings.
+    :type: torch.Tensor
+    """
+    embedding_directory = os.path.join('static', 'embeddings', embedding_directory_name)
+    return torch.cat([
+        pickle.load(open(os.path.join(embedding_directory, f), 'rb')) for f in tqdm(os.listdir(embedding_directory))
+    ])

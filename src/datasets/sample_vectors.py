@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" DataSet with randomly created vectors. """
+
+
 import pickle
 
 import numpy as np

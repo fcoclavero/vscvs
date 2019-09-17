@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" DataSets for loading the Sketchy dataset with different options. """
+
+
 import os
 import re
 import pickle

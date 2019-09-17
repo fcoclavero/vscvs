@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" GAN generator modules for the adversarial architecture for images. """
+
+
 import torch.nn as nn
 
 

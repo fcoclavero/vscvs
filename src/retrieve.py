@@ -1,36 +1,41 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Image retrieval given a query image. """
+
+
 import click
-import torch
+import os
+import pickle
 
 from datetime import datetime
 from sklearn.neighbors import NearestNeighbors
 
 
+def retrieve(n_gpu):
+    """
+
+    :param n_gpu: number of available GPUs. If zero, the CPU will be used
+    :type: int
+    :return:
+    """
+    pass
+
+
 @click.group()
 def retrieve():
-    """ Train a model. """
+    """ Image retrieval click group. """
     pass
 
 
 @retrieve.command()
 @click.option(
-    '--dataset_name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy_photos', 'sketchy_sketches', 'sketchy_test_photos', 'sketchy_test_sketches'])
+    '--embedding_directory_name', prompt='Embedding directory', help='Static directory where embeddings are saved.'
 )
-def hog(dataset_name):
-    from src.trainers.cnn import train_cnn
-    click.echo('cnn - %s dataset' % dataset_name)
-    train_cnn(
-        dataset_name, train_test_split, train_validation_split, lr, momentum, batch_size, workers, n_gpu, epochs, resume
-    )
-
-
-k = 16
-
-start = datetime.now()
-
-with torch.no_grad():
-    results  = NearestNeighbors(n_neighbors=k, algorithm='brute', metric='cosine').fit(torch.stack(vectors).squeeze())
-
-distances, indices = results.kneighbors(vectors[0].reshape(1,-1))
-
-print('KNN search duration: %s' % (datetime.now() - start))
+@click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
+def hog(embedding_directory_name, n_gpu):
+    click.echo('Querying {} embeddings'.format(embedding_directory_name))
+    from src.models.hog import HOG
+    model = HOG()

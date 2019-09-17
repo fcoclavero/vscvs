@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Modules with image processing convolutions with fixed kernels, such as the Sobel filter. """
+
+
 import torch
 
 import torch.nn.functional as F

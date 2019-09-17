@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Ignite trainer for the CSV GAN architecture. """
+
+
 import os
 import torch
 

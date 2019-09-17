@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Utility abstract classes for computing different metrics on the go. """
+
+
 class AbstractMetric:
     """
     Common interface for metric calculations.

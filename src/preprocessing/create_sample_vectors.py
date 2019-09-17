@@ -1,8 +1,16 @@
-import os, pickle, random
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Function for creating a dataset with random vectors, for testing purposes. """
+
+
+import pickle, random
 
 import pandas as pd
 
-from settings import ROOT_DIR, DATA_SOURCES
+from settings import DATA_SOURCES
 
 
 def create_sample_vectors(n, dimension):

@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Utility functions for handling data. """
+
+
 import torch
 
 from ignite._utils import convert_tensor

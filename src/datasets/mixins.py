@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Mixin for loading triplets of any DataSet object. """
+
+
 from random import choice, randint
 
 

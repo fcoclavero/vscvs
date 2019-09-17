@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" DEPRECATED. Canny threshold edge detector, using OpenCV. """
+
+
 import cv2
 
 

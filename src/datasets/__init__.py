@@ -1,3 +1,8 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
 """ Register datasets here to make them available in the CLI. """
 
 from settings import DATA_SOURCES

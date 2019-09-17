@@ -114,6 +114,7 @@ experiments/sketchy_sketches_vectors.pickle
 experiments/sketchy_sketches_hog_vectors.pickle
 static/pickles/triplet_cnn.pickle
 static/pickles/discriminators/*.pickle
+static/embeddings/*
 mnist_train
 static/logs/*
 static/checkpoints/*

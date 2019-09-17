@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Projecto settings and parameters. """
+
+
 import os
 
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))

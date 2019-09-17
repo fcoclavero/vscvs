@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Ignite trainer engine (training logic) for the CSV GAN architecture. """
+
+
 import torch
 
 from ignite.engine import Engine

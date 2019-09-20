@@ -22,17 +22,17 @@ def create_embeddings(model, dataset_name, embedding_directory_name, batch_size,
     """
     Creates embedding vectors for each element in the given DataSet by batches, and saves each batch as a pickle
     file in the given directory name (which will be a subdirectory of the static directory).
-    :param embedding_directory_name: the name of the subdirectory where the batch pickles will be saved
-    :type: str
+    :param model: name of the model to be used for embedding the DataSet.
+    :type: torch.nn.Module
     :param dataset_name: name of the registered dataset which will be embedded.
     :type: str
-    :param model: name of the model to be used for embedding the DataSet
-    :type: torch.nn.Module
-    :param batch_size: size of batches for the embedding process
+    :param embedding_directory_name: the name of the subdirectory where the batch pickles will be saved.
+    :type: str
+    :param batch_size: size of batches for the embedding process.
     :type: int
-    :param workers: number of data loader workers
+    :param workers: number of data loader workers.
     :type: int
-    :param n_gpu: number of available GPUs. If zero, the CPU will be used
+    :param n_gpu: number of available GPUs. If zero, the CPU will be used.
     :type: int
     """
     device = get_device(n_gpu)
@@ -52,6 +52,24 @@ def create_embeddings(model, dataset_name, embedding_directory_name, batch_size,
 
 
 def query_embeddings(model, query_image_filename, dataset_name, embedding_directory_name, k, n_gpu):
+    """
+    Query the embeddings for a dataset with the given image. The image is embedded with the given model. Pairwise
+    distances to the query image are computed for each embedding in the dataset, so the embeddings created by `model`
+    must have the same length as the ones in the embedding directory. The `k` most similar images are displayed.
+    :param model: name of the model to be used for embedding the DataSet.
+    :type: torch.nn.Module
+    :param query_image_filename: the complete file path and name to the image to be used as query. The images in the
+    dataset that are most similar to this image will be displayed.
+    :type: str
+    :param dataset_name: name of the registered dataset which will be embedded.
+    :type: str
+    :param embedding_directory_name: the name of the subdirectory where the batch pickles will be saved.
+    :type: str
+    :param k: the number of most similar images that wil be displayed.
+    :type: int
+    :param n_gpu: number of available GPUs. If zero, the CPU will be used.
+    :type: int
+    """
     device = get_device(n_gpu)
     # Load data
     dataset = get_dataset(dataset_name)

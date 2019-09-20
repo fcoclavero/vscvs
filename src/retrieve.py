@@ -30,7 +30,7 @@ def retrieve():
 @click.option(
     '--embedding_directory_name', prompt='Embedding directory', help='Static directory where embeddings will be saved.'
 )
-@click.option('--k', prompt='Top k', help='The amount of top results to be retrieved')
+@click.option('--k', prompt='Top k', help='The amount of top results to be retrieved', default=10)
 @click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 def hog(query_image_filename, dataset_name, embedding_directory_name, k, n_gpu):
     click.echo('Querying {} embeddings'.format(embedding_directory_name))

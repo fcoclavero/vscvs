@@ -10,6 +10,7 @@ import os
 import pickle
 import torch
 
+from torch.nn import PairwiseDistance
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -17,7 +18,7 @@ from src.datasets import get_dataset
 from src.utils import get_device
 
 
-def create_embeddings(embedding_directory_name, dataset_name, model, batch_size, workers, n_gpu):
+def create_embeddings(model, dataset_name, embedding_directory_name, batch_size, workers, n_gpu):
     """
     Creates embedding vectors for each element in the given DataSet by batches, and saves each batch as a pickle
     file in the given directory name (which will be a subdirectory of the static directory).
@@ -48,6 +49,23 @@ def create_embeddings(embedding_directory_name, dataset_name, model, batch_size,
         inputs, labels = inputs.to(device), labels.to(device)
         outputs = model(inputs)
         pickle.dump(outputs, open(os.path.join(embedding_directory, 'batch_{}.pickle'.format(i)), 'wb'))
+
+
+def query_embeddings(model, query_image_filename, dataset_name, embedding_directory_name, k, n_gpu):
+    device = get_device(n_gpu)
+    # Load data
+    dataset = get_dataset(dataset_name)
+    # Load embeddings from pickle directory
+    embeddings = load_embedding_pickles(embedding_directory_name)
+    # Get the query image and create the embedding for it
+    image, _ = dataset.getitem_by_filename(query_image_filename)
+    image = image.to(device)
+    query_embedding = model(image.unsqueeze(0)) # unsqueeze to add the missing dimension expected by the model
+    # Compute the distance to the query embedding for all images in the Dataset
+    p_dist = PairwiseDistance(p=2)
+    distances = p_dist(embeddings, query_embedding)
+    # Return the top k results
+    print(torch.topk(distances, k))
 
 
 def load_embedding_pickles(embedding_directory_name):

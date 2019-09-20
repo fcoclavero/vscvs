@@ -18,7 +18,7 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
 from settings import DATA_SOURCES
-from src.datasets.mixins import TripletMixin
+from src.datasets.mixins import TripletMixin, FilenameIndexedMixin
 
 
 class Sketchy(ImageFolder):
@@ -50,6 +50,13 @@ class Sketchy(ImageFolder):
 class SketchyTriplets(TripletMixin, Sketchy):
     """
     Sketchy Dataset with online triplet generation.
+    """
+    pass
+
+
+class SketchyFilenameIndexed(FilenameIndexedMixin, Sketchy):
+    """
+    Sketchy Dataset with additional filename indexation.
     """
     pass
 

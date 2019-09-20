@@ -42,10 +42,22 @@ def create_sample_vectors(n, dimension):
     create_sample_vectors(n, dimension)
 
 
+@click.command()
+@click.option(
+    '--path', prompt='Full path.', help='The full path to the image to be visualized.'
+)
+def show_image(path):
+    """ Display the image in the given path. """
+    from PIL import Image
+    image = Image.open(path)
+    image.show()
+
+
 # We must use add_command instead of CommandCollection to get a nested structure.
 # https://stackoverflow.com/a/39416589
 cli.add_command(create_classes)
 cli.add_command(create_sample_vectors)
+cli.add_command(show_image)
 cli.add_command(embed)
 cli.add_command(retrieve)
 cli.add_command(train)

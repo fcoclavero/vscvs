@@ -9,9 +9,9 @@ __status__ = 'Prototype'
 import click
 import warnings
 
-from src.embed import embed
-from src.retrieve import retrieve
-from src.train import train
+from src.cli.embed import embed
+from src.cli.retrieve import retrieve
+from src.cli.train import train
 
 
 # Suppress gensim 'detected Windows; aliasing chunkize to chunkize_serial' warning

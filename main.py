@@ -10,7 +10,7 @@ import click
 import warnings
 
 from src.embed import embed
-# from src.retrieve import retrieve
+from src.retrieve import retrieve
 from src.train import train
 
 
@@ -47,6 +47,7 @@ def create_sample_vectors(n, dimension):
 cli.add_command(create_classes)
 cli.add_command(create_sample_vectors)
 cli.add_command(embed)
+cli.add_command(retrieve)
 cli.add_command(train)
 
 

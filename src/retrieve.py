@@ -7,21 +7,8 @@ __status__ = 'Prototype'
 
 
 import click
-import os
-import pickle
 
-from datetime import datetime
-from sklearn.neighbors import NearestNeighbors
-
-
-def retrieve(n_gpu):
-    """
-
-    :param n_gpu: number of available GPUs. If zero, the CPU will be used
-    :type: int
-    :return:
-    """
-    pass
+from src.utils.embeddings import query_embeddings
 
 
 @click.group()
@@ -32,10 +19,20 @@ def retrieve():
 
 @retrieve.command()
 @click.option(
-    '--embedding_directory_name', prompt='Embedding directory', help='Static directory where embeddings are saved.'
+    '--query_image_filename', prompt='Query image full path.', help='The dataset will be queried for similar images.'
 )
+@click.option(
+    '--dataset_name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice([
+        d + '_filenames' for d in ['sketchy_photos', 'sketchy_sketches', 'sketchy_test_photos', 'sketchy_test_sketches']
+    ])
+)
+@click.option(
+    '--embedding_directory_name', prompt='Embedding directory', help='Static directory where embeddings will be saved.'
+)
+@click.option('--k', prompt='Top k', help='The amount of top results to be retrieved')
 @click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
-def hog(embedding_directory_name, n_gpu):
+def hog(query_image_filename, dataset_name, embedding_directory_name, k, n_gpu):
     click.echo('Querying {} embeddings'.format(embedding_directory_name))
     from src.models.hog import HOG
-    model = HOG()
+    query_embeddings(HOG(), query_image_filename, dataset_name, embedding_directory_name, k, n_gpu)

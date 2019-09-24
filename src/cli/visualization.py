@@ -24,3 +24,16 @@ def show_image(path):
     from PIL import Image
     image = Image.open(path)
     image.show()
+
+
+@visualization.command()
+@click.option(
+    '--dataset_name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice(['sketchy_photos', 'sketchy_sketches', 'sketchy_test_photos', 'sketchy_test_sketches'])
+)
+@click.option('--batch_size', prompt='Batch size', help='The batch size for the embedding routine.', default=16)
+@click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
+@click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
+def show_sample_batch(dataset_name, batch_size, workers, n_gpu):
+    from src.visualization import display_sample_batch
+    display_sample_batch(dataset_name, batch_size, workers, n_gpu)

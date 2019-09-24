@@ -16,6 +16,7 @@ from tqdm import tqdm
 
 from src.datasets import get_dataset
 from src.utils import get_device
+from src.visualization import plot_image_batch
 
 
 def create_embeddings(model, dataset_name, embedding_directory_name, batch_size, workers, n_gpu):
@@ -77,13 +78,19 @@ def query_embeddings(model, query_image_filename, dataset_name, embedding_direct
     embeddings = load_embedding_pickles(embedding_directory_name)
     # Get the query image and create the embedding for it
     image, _ = dataset.getitem_by_filename(query_image_filename)
-    image = image.to(device)
+    # Send elements to the specified device
+    embeddings, image, model = embeddings.to(device), image.to(device), model.to(device)
     query_embedding = model(image.unsqueeze(0)) # unsqueeze to add the missing dimension expected by the model
     # Compute the distance to the query embedding for all images in the Dataset
     p_dist = PairwiseDistance(p=2)
     distances = p_dist(embeddings, query_embedding)
     # Return the top k results
-    print(torch.topk(distances, k))
+    top_distances, top_indices = torch.topk(distances, k)
+    print(top_distances)
+    aux = [dataset[j] for j in top_indices]
+    image_tensors = torch.stack([tup[0] for tup in aux])
+    image_classes = [tup[1] for tup in aux]
+    plot_image_batch([image_tensors, image_classes], device)
 
 
 def load_embedding_pickles(embedding_directory_name):

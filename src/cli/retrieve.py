@@ -30,9 +30,15 @@ def retrieve():
 @click.option(
     '--embedding_directory_name', prompt='Embedding directory', help='Static directory where embeddings will be saved.'
 )
+@click.option('--in_channels', prompt='In channels', help='Number of image color channels.', default=3)
+@click.option('--cell_size', prompt='Cell size', help='Gradient pooling size.', default=8)
+@click.option('--n_bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
+@click.option('--signed_gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
 @click.option('--k', prompt='Top k', help='The amount of top results to be retrieved', default=10)
 @click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
-def hog(query_image_filename, dataset_name, embedding_directory_name, k, n_gpu):
+def hog(query_image_filename, dataset_name, embedding_directory_name, in_channels, cell_size, n_bins, signed_gradients,
+        k, n_gpu):
     click.echo('Querying {} embeddings'.format(embedding_directory_name))
     from src.models.hog import HOG
-    query_embeddings(HOG(), query_image_filename, dataset_name, embedding_directory_name, k, n_gpu)
+    model = HOG(in_channels, cell_size, n_bins, signed_gradients)
+    query_embeddings(model, query_image_filename, dataset_name, embedding_directory_name, k, n_gpu)

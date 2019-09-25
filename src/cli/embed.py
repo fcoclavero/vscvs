@@ -25,10 +25,16 @@ def embed():
 @click.option(
     '--embedding_directory_name', prompt='Embedding directory', help='Static directory where embeddings will be saved.'
 )
+@click.option('--in_channels', prompt='In channels', help='Number of image color channels.', default=3)
+@click.option('--cell_size', prompt='Cell size', help='Gradient pooling size.', default=8)
+@click.option('--n_bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
+@click.option('--signed_gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
 @click.option('--batch_size', prompt='Batch size', help='The batch size for the embedding routine.', default=16)
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
 @click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
-def hog(dataset_name, embedding_directory_name, batch_size, workers, n_gpu):
+def hog(dataset_name, embedding_directory_name, in_channels, cell_size, n_bins, signed_gradients,
+        batch_size, workers, n_gpu):
     click.echo('HOG embeddings for {} dataset'.format(dataset_name))
     from src.models.hog import HOG
-    create_embeddings(HOG(), dataset_name, embedding_directory_name, batch_size, workers, n_gpu)
+    model = HOG(in_channels, cell_size, n_bins, signed_gradients)
+    create_embeddings(model, dataset_name, embedding_directory_name, batch_size, workers, n_gpu)

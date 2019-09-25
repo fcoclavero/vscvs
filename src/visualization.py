@@ -13,10 +13,9 @@ import torchvision.utils as vutils
 from torch.utils.data import DataLoader
 
 from src.datasets import get_dataset
-from src.utils import get_device
 
 
-def display_sample_batch(dataset_name, batch_size, workers, n_gpu):
+def display_sample_batch(dataset_name, batch_size, workers):
     """
     Output a random batch form the specified dataset.
     :param dataset_name: name of the registered dataset which will be embedded.
@@ -25,25 +24,20 @@ def display_sample_batch(dataset_name, batch_size, workers, n_gpu):
     :type: int
     :param workers: number of data loader workers.
     :type: int
-    :param n_gpu: number of available GPUs. If zero, the CPU will be used.
-    :type: int
     """
-    device = get_device(n_gpu)
     # Load data
     dataset = get_dataset(dataset_name)
     # Create the data_loader
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers)
     # Plot the batch
-    plot_image_batch(next(iter(data_loader)), device)
+    plot_image_batch(next(iter(data_loader)))
 
 
-def plot_image_batch(batch, device, figsize=(8, 8), title=''):
+def plot_image(image, figsize=(8, 8), title=''):
     """
     Display a pyplot figure showing a random batch form the specified dataset.
-    :param batch: a PyTorch formatted image batch with image tensors in the first element.
+    :param image: a PyTorch formatted image with it's tensors in the first element.
     :type: list<torch.Tensor, ...>
-    :param device: device type specification
-    :type: str
     :param figsize: figure width and height (respectively), in inches.
     :type: tuple<float, float>
     :param title: title to be displayed over the batch image grid.
@@ -52,5 +46,22 @@ def plot_image_batch(batch, device, figsize=(8, 8), title=''):
     plt.figure(figsize=figsize)
     plt.axis('off')
     plt.title(title)
-    plt.imshow(np.transpose(vutils.make_grid(batch[0].to(device)[:64], padding=2, normalize=True).cpu(), (1, 2, 0)))
+    plt.imshow(image[0].cpu())
+    plt.show()
+
+
+def plot_image_batch(batch, figsize=(8, 8), title=''):
+    """
+    Display a pyplot figure showing a random batch form the specified dataset.
+    :param batch: a PyTorch formatted image batch with image tensors in the first element.
+    :type: list<torch.Tensor, ...>
+    :param figsize: figure width and height (respectively), in inches.
+    :type: tuple<float, float>
+    :param title: title to be displayed over the batch image grid.
+    :type: str
+    """
+    plt.figure(figsize=figsize)
+    plt.axis('off')
+    plt.title(title)
+    plt.imshow(np.transpose(vutils.make_grid(batch[0][:64], padding=2, normalize=True).cpu(), (1, 2, 0)))
     plt.show()

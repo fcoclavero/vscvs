@@ -33,7 +33,6 @@ def show_image(path):
 )
 @click.option('--batch_size', prompt='Batch size', help='The batch size for the embedding routine.', default=16)
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
-@click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
-def show_sample_batch(dataset_name, batch_size, workers, n_gpu):
+def show_sample_batch(dataset_name, batch_size, workers):
     from src.visualization import display_sample_batch
-    display_sample_batch(dataset_name, batch_size, workers, n_gpu)
+    display_sample_batch(dataset_name, batch_size, workers)

@@ -10,13 +10,13 @@ import os
 import pickle
 import torch
 
-from torch.nn import PairwiseDistance
+from torch.nn import PairwiseDistance, CosineSimilarity
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from src.datasets import get_dataset
+from src.datasets import get_dataset, get_dataset_class_names
 from src.utils import get_device
-from src.visualization import plot_image_batch
+from src.visualization import plot_image_batch, plot_image
 
 
 def create_embeddings(model, dataset_name, embedding_directory_name, batch_size, workers, n_gpu):
@@ -40,14 +40,14 @@ def create_embeddings(model, dataset_name, embedding_directory_name, batch_size,
     # Load data
     dataset = get_dataset(dataset_name)
     # Create the data_loader
-    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers)
+    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=workers)
     # Create and save embeddings
     embedding_directory = os.path.join('static', 'embeddings', embedding_directory_name)
     if not os.path.exists(embedding_directory):
         os.makedirs(embedding_directory)
     for i, data in tqdm(enumerate(data_loader, 0), total=int(len(dataset) / batch_size)):  # iterate batches
         inputs, labels = data
-        inputs, labels = inputs.to(device), labels.to(device)
+        inputs, labels, model = [var.to(device) for var in [inputs, labels, model]]
         outputs = model(inputs)
         pickle.dump(outputs, open(os.path.join(embedding_directory, 'batch_{}.pickle'.format(i)), 'wb'))
 
@@ -77,20 +77,25 @@ def query_embeddings(model, query_image_filename, dataset_name, embedding_direct
     # Load embeddings from pickle directory
     embeddings = load_embedding_pickles(embedding_directory_name)
     # Get the query image and create the embedding for it
-    image, _ = dataset.getitem_by_filename(query_image_filename)
+    image, image_class = dataset.getitem_by_filename(query_image_filename)
     # Send elements to the specified device
-    embeddings, image, model = embeddings.to(device), image.to(device), model.to(device)
+    embeddings, image, model = [var.to(device) for var in [embeddings, image, model]]
     query_embedding = model(image.unsqueeze(0)) # unsqueeze to add the missing dimension expected by the model
     # Compute the distance to the query embedding for all images in the Dataset
-    p_dist = PairwiseDistance(p=2)
+    # p_dist = PairwiseDistance(p=2)
+    p_dist = CosineSimilarity()
     distances = p_dist(embeddings, query_embedding)
     # Return the top k results
     top_distances, top_indices = torch.topk(distances, k)
-    print(top_distances)
     aux = [dataset[j] for j in top_indices]
     image_tensors = torch.stack([tup[0] for tup in aux])
     image_classes = [tup[1] for tup in aux]
-    plot_image_batch([image_tensors, image_classes], device)
+    image_class_names = get_dataset_class_names(dataset_name)
+    print('query image class = {}'.format(image_class_names[image_class]))
+    print('distances = {}'.format(top_distances))
+    print('classes = {}'.format([image_class_names[class_name] for class_name in image_classes]))
+    plot_image(image)
+    plot_image_batch([image_tensors, image_classes])
 
 
 def load_embedding_pickles(embedding_directory_name):

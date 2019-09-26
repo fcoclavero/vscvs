@@ -22,7 +22,7 @@ def get_device(n_gpu):
     :return: the name of the device to be used by PyTorch
     :type: str
     """
-    return torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
+    return torch.device('cuda:0' if (torch.cuda.is_available() and n_gpu > 0) else 'cpu')
 
 
 def get_checkpoint_directory(model_name, date=None):

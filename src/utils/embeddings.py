@@ -21,6 +21,7 @@ from src.visualization import plot_image_batch, plot_image
 
 def create_embeddings(model, dataset_name, embedding_directory_name, batch_size, workers, n_gpu):
     """
+    # TODO: parameter to choose between pairwise and cosine distances for the KNN
     Creates embedding vectors for each element in the given DataSet by batches, and saves each batch as a pickle
     file in the given directory name (which will be a subdirectory of the static directory).
     :param model: name of the model to be used for embedding the DataSet.
@@ -109,5 +110,7 @@ def load_embedding_pickles(embedding_directory_name):
     """
     embedding_directory = os.path.join('static', 'embeddings', embedding_directory_name)
     return torch.cat([
-        pickle.load(open(os.path.join(embedding_directory, f), 'rb')) for f in tqdm(os.listdir(embedding_directory))
+        pickle.load(open(os.path.join(embedding_directory, f), 'rb'))
+        for f in tqdm(os.listdir(embedding_directory), desc='Loading {} embeddings'.format(embedding_directory_name))
+        if 'tsne' not in f # skip possible projection pickle in the embedding directory
     ])

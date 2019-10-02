@@ -26,7 +26,7 @@ class Sketchy(ImageFolder):
     Utility class for loading the sketchy dataset. It's original structure is compatible with
     the torch ImageFolder, so I will just subclass that and apply some transforms.
     """
-    def __init__(self, root_directory, *custom_transforms):
+    def __init__(self, root_directory, *custom_transforms, n_channels=3, **kwargs):
         """
         Initialize the ImageFolder and perform transforms. Note that sketches and photos have the
         same exact dimension in both the sketchy and sketchy_test datasets.
@@ -34,15 +34,20 @@ class Sketchy(ImageFolder):
         :type: str
         :param custom_transforms: additional transforms for the Dataset
         :type: torchvision.transforms
+        :param n_channels: number of image color channels.
+        :type: int
         """
         super().__init__(
             root=root_directory,
             transform=transforms.Compose([
                 transforms.Resize(DATA_SOURCES['sketchy']['dimensions'][0]),
                 transforms.CenterCrop(DATA_SOURCES['sketchy']['dimensions'][0]),
+                *custom_transforms,
                 transforms.ToTensor(),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                *custom_transforms
+                transforms.Normalize(
+                    list((0.5 for _ in range(n_channels))), # mean sequence for each channel
+                    list((0.5 for _ in range(n_channels))) # std sequence for each channel
+                ),
             ])
         )
 
@@ -151,15 +156,17 @@ class SketchyMixedBatches(Dataset):
     We train with batches containing the sketches based on the batches' photos because this should be
     the hardest case for the discriminator.
     """
-    def __init__(self, dataset_name):
+    def __init__(self, dataset_name, *custom_transforms, **kwargs):
         """
         Initialize the ImageFolder and perform transforms. Note that sketches and photos have the
         same exact dimension in both the sketchy and sketchy_test datasets.
         :param dataset_name: the version of the sketchy dataset, either 'sketchy' or 'sketchy_test'
         :type: str
+        :param custom_transforms: additional transforms for the Dataset
+        :type: torchvision.transforms
         """
-        self.photos_dataset = SketchyImageNames(DATA_SOURCES[dataset_name]['photos'])
-        self.sketch_dataset = SketchyImageNames(DATA_SOURCES[dataset_name]['sketches'])
+        self.photos_dataset = SketchyImageNames(DATA_SOURCES[dataset_name]['photos'], *custom_transforms)
+        self.sketch_dataset = SketchyImageNames(DATA_SOURCES[dataset_name]['sketches'], *custom_transforms)
         try:
             # creating the reference list for the complete dataset is really expensive, so we
             # try to load from pickle. If pickle not available, the list is created and then pickled

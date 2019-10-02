@@ -29,33 +29,51 @@ DATASET_DATA_SOURCES = {
     'sketchy_test_named_photos': DATA_SOURCES['sketchy_test']['photos'],
     'sketchy_test_named_sketches': DATA_SOURCES['sketchy_test']['photos'],
     'sketchy_mixed_batches': 'sketchy',
-    'sketchy_test_mixed_batches': 'sketchy_test'
+    'sketchy_test_mixed_batches': 'sketchy_test',
 }
 
 
 DATASETS = {
-    'sketchy_photos': lambda data_source: Sketchy(data_source),
-    'sketchy_photos_triplets': lambda data_source: SketchyTriplets(data_source),
-    'sketchy_photos_filenames': lambda data_source: SketchyFilenameIndexed(data_source),
-    'sketchy_sketches': lambda data_source: Sketchy(data_source),
-    'sketchy_sketches_triplets': lambda data_source: SketchyTriplets(data_source),
-    'sketchy_sketches_filenames': lambda data_source: SketchyFilenameIndexed(data_source),
-    'sketchy_test_photos': lambda data_source: Sketchy(data_source),
-    'sketchy_test_photos_triplets': lambda data_source: SketchyTriplets(data_source),
-    'sketchy_test_photos_filenames': lambda data_source: SketchyFilenameIndexed(data_source),
-    'sketchy_test_sketches': lambda data_source: Sketchy(data_source),
-    'sketchy_test_sketches_triplets': lambda data_source: SketchyTriplets(data_source),
-    'sketchy_test_sketches_filenames': lambda data_source: SketchyFilenameIndexed(data_source),
-    'sketchy_named_photos': lambda data_source: SketchyImageNames(data_source),
-    'sketchy_named_sketches': lambda data_source: SketchyImageNames(data_source),
-    'sketchy_test_named_photos': lambda data_source: SketchyImageNames(data_source),
-    'sketchy_test_named_sketches': lambda data_source: SketchyImageNames(data_source),
-    'sketchy_mixed_batches': lambda data_source: SketchyMixedBatches(data_source),
-    'sketchy_test_mixed_batches': lambda data_source: SketchyMixedBatches(data_source)
+    'sketchy_photos':
+        lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
+    'sketchy_photos_triplets':
+        lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
+    'sketchy_photos_filenames':
+        lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy_sketches':
+        lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
+    'sketchy_sketches_triplets':
+        lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
+    'sketchy_sketches_filenames':
+        lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy_test_photos':
+        lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
+    'sketchy_test_photos_triplets':
+        lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
+    'sketchy_test_photos_filenames':
+        lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy_test_sketches':
+        lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
+    'sketchy_test_sketches_triplets':
+        lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
+    'sketchy_test_sketches_filenames':
+        lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy_named_photos':
+        lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
+    'sketchy_named_sketches':
+        lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
+    'sketchy_test_named_photos':
+        lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
+    'sketchy_test_named_sketches':
+        lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
+    'sketchy_mixed_batches':
+        lambda data_source, *args, **kwargs: SketchyMixedBatches(data_source, *args, **kwargs),
+    'sketchy_test_mixed_batches':
+        lambda data_source, *args, **kwargs: SketchyMixedBatches(data_source, *args, **kwargs),
 }
 
 
-def get_dataset(dataset_name):
+def get_dataset(dataset_name, *args, **kwargs):
     """
     Get the Dataset instancing lambda from the dictionary and return it's evaluation. This way, a Dataset object is
     only instanced when this function is evaluated.
@@ -63,10 +81,9 @@ def get_dataset(dataset_name):
     :type: str
     :return: the corresponding Dataset object.
     :type: torch.utils.data.Dataset
-
     """
     try:
-        return DATASETS[dataset_name](DATASET_DATA_SOURCES[dataset_name])
+        return DATASETS[dataset_name](DATASET_DATA_SOURCES[dataset_name], *args, **kwargs)
     except KeyError as e:
         raise type(e)('%s is not registered a Dataset.' % dataset_name)
 

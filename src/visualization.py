@@ -86,7 +86,7 @@ def plot_embedding_tsne(dataset_name, embedding_directory_name, load_projection=
     """
     from src.utils.embeddings import load_embedding_pickles # import here to avoid circular import
     dataset = get_dataset(dataset_name)
-    embeddings = load_embedding_pickles(embedding_directory_name).cpu()
+    embeddings = load_embedding_pickles(embedding_directory_name, 'cpu')
     image_class_names = get_dataset_class_names(dataset_name)
     projection_pickle_dir = os.path.join(ROOT_DIR, 'static', 'embeddings', embedding_directory_name)
     if load_projection:

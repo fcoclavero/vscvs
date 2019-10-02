@@ -46,7 +46,7 @@ def show_sample_batch(dataset_name, batch_size, workers):
 @click.option(
     '--embedding_directory_name', prompt='Embedding directory', help='Static directory where embeddings will be saved.'
 )
-@click.option('--load_projection', prompt='Load projection', help='Try to load pickled TSNE projections', default=False)
+@click.option('--load_projection', prompt='Load projection', help='Try to load pickled TSNE projections', is_flag=True)
 def embedding_tsne(dataset_name, embedding_directory_name, load_projection):
     click.echo('Display projection of the {} embeddings'.format(embedding_directory_name))
     from src.visualization import plot_embedding_tsne

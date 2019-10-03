@@ -13,7 +13,7 @@ def test_classes_set():
     Check that the test data set class names are correctly identified.
     """
     assert classes_set(DATA_SOURCES['sketchy_test']['photos']) == pickle.load(
-        open(os.path.join(ROOT_DIR, 'static\\pickles\\classes_set.pickle'), 'rb')
+        open(os.path.join(ROOT_DIR, 'data\\pickles\\classes_set.pickle'), 'rb')
     )
 
 
@@ -27,7 +27,7 @@ def test_create_classes_data_frame():
         os.remove(DATA_SOURCES['sketchy_test']['classes'])
     except OSError:
         pass
-    test_classes = pickle.load(open(os.path.join(ROOT_DIR,'static\\pickles\\classes.pickle'), 'rb'))
+    test_classes = pickle.load(open(os.path.join(ROOT_DIR,'data\\pickles\\classes.pickle'), 'rb'))
     new_classes = create_classes_data_frame('sketchy_test')
     assert test_classes['class'].equals(new_classes['class'])
     for i, vector in enumerate(test_classes['vector']):

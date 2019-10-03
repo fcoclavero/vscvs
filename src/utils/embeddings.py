@@ -22,7 +22,7 @@ from src.visualization import plot_image_batch
 def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu):
     """
     Creates embedding vectors for each element in the given DataSet by batches, and saves each batch as a pickle
-    file in the given directory name (which will be a subdirectory of the static directory).
+    file in the given directory name (which will be a subdirectory of the data directory).
     :param model: name of the model to be used for embedding the DataSet.
     :type: torch.nn.Module
     :param dataset_name: name of the registered dataset which will be embedded.
@@ -49,7 +49,7 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
         embedding_batches.append(model(inputs.to(device)))
     # The embeddings are sent to CPU before pickling, as a GPU might not be available when they are loaded
     embeddings = torch.cat(embedding_batches).to('cpu')
-    pickle.dump(embeddings, open(os.path.join('static', 'embeddings', '{}.pickle'.format(embeddings_name)), 'wb'))
+    pickle.dump(embeddings, open(os.path.join('data', 'embeddings', '{}.pickle'.format(embeddings_name)), 'wb'))
 
 
 def query_embeddings(model, query_image_filename, dataset_name, embeddings_name, k=16, distance='cosine', n_gpu=0):
@@ -110,4 +110,4 @@ def load_embedding_pickles(embeddings_name, device):
     contain pickled tensor objects with image embeddings.
     :type: torch.Tensor
     """
-    return pickle.load(open(os.path.join('static', 'embeddings', '{}.pickle'.format(embeddings_name)), 'rb')).to(device)
+    return pickle.load(open(os.path.join('data', 'embeddings', '{}.pickle'.format(embeddings_name)), 'rb')).to(device)

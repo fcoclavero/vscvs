@@ -120,7 +120,7 @@ def train_cnn(dataset_name, train_test_split=.7, train_validation_split=.8, lear
 
     # Summary writer for Tensorboard logging
     # Reference: https://pytorch.org/docs/stable/tensorboard.html
-    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'cnn_sk'))
+    writer = SummaryWriter(os.path.join(ROOT_DIR, 'data', 'logs', 'cnn_sk'))
 
     # Save network graph to Tensorboard
     # writer.add_graph(net, train_set)

@@ -36,5 +36,5 @@ def get_checkpoint_directory(model_name, date=None):
     :type: str
     """
     return os.path.join(
-        ROOT_DIR, 'static', 'checkpoints', model_name, datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
+        ROOT_DIR, 'data', 'checkpoints', model_name, datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
     )

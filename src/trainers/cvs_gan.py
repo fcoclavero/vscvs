@@ -79,7 +79,7 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
     if resume:
         try:
             print('Loading checkpoint %s.' % resume)
-            checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'csv_gan', resume)
+            checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'csv_gan', resume)
             checkpoint = torch.load(os.path.join(checkpoint_directory, 'checkpoint.pth'))
             start_epoch = checkpoint['epochs']
             generator = torch.load(os.path.join(checkpoint_directory, 'generator_net_%s.pth' % start_epoch))
@@ -134,7 +134,7 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
 
     # Summary writer for Tensorboard logging
     # Reference: https://pytorch.org/docs/stable/tensorboard.html
-    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'cvs_gan'))
+    writer = SummaryWriter(os.path.join(ROOT_DIR, 'data', 'logs', 'cvs_gan'))
 
     # Save network graph to Tensorboard
     # writer.add_graph(generator, train_set)

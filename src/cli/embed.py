@@ -55,7 +55,7 @@ def cnn(dataset_name, embeddings_name, checkpoint, epoch, batch_size, workers, n
     from src.models.convolutional.classification import ConvolutionalNetwork
     click.echo('CNN embeddings for {} dataset'.format(dataset_name))
     # Load the model checkpoint
-    checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'cnn', checkpoint)
+    checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'cnn', checkpoint)
     net = torch.load(os.path.join(checkpoint_directory, '_net_{}.pth'.format(epoch)))
     # This CNN is a classification model, so we will eliminate the last few layers to obtain embeddings with it
     state_dict = net.state_dict() # contains network layers

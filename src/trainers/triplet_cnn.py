@@ -74,7 +74,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
     if resume:
         try:
             print('Loading checkpoint %s.' % resume)
-            checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', resume)
+            checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'triplet_cnn', resume)
             checkpoint = torch.load(os.path.join(checkpoint_directory, 'checkpoint.pth'))
             start_epoch = checkpoint['epochs']
             net = torch.load(os.path.join(checkpoint_directory, '_net_%s.pth' % start_epoch))
@@ -126,7 +126,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
 
     # Summary writer for Tensorboard logging
     # Reference: https://pytorch.org/docs/stable/tensorboard.html
-    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'triplet_cnn'))
+    writer = SummaryWriter(os.path.join(ROOT_DIR, 'data', 'logs', 'triplet_cnn'))
 
     # Save network graph to Tensorboard
     # writer.add_graph(net, train_set)

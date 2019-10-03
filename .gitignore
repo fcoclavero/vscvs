@@ -112,12 +112,12 @@ venv.bak/
 # Big files
 experiments/sketchy_sketches_vectors.pickle
 experiments/sketchy_sketches_hog_vectors.pickle
-static/pickles/triplet_cnn.pickle
-static/pickles/discriminators/*.pickle
-static/embeddings/*
+data/pickles/triplet_cnn.pickle
+data/pickles/discriminators/*.pickle
+data/embeddings/*
 mnist_train
-static/logs/*
-static/checkpoints/*
+data/logs/*
+data/checkpoints/*
 
 # Numerous files
 experiments/vectors/*

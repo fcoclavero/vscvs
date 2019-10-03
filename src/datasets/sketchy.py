@@ -170,12 +170,12 @@ class SketchyMixedBatches(Dataset):
         try:
             # creating the reference list for the complete dataset is really expensive, so we
             # try to load from pickle. If pickle not available, the list is created and then pickled
-            self.__sketches__ = pickle.load(open(r'static\image_sketch_indexes.pickle', 'rb'))
+            self.__sketches__ = pickle.load(open(r'data\image_sketch_indexes.pickle', 'rb'))
         except Exception as e:
             self.__sketches__ = [  # list that contains a list of sketches for each photo in the dataset
                 self.sketch_dataset.get_image_indexes(photo[2]) for photo in tqdm(self.photos_dataset)
             ]
-            pickle.dump(self.__sketches__, open(r'static\image_sketch_indexes.pickle', 'wb'))
+            pickle.dump(self.__sketches__, open(r'data\image_sketch_indexes.pickle', 'wb'))
 
     def __len__(self):
         """

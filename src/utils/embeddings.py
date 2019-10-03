@@ -8,6 +8,7 @@ __status__ = 'Prototype'
 
 import os
 import pickle
+import shutil
 import torch
 
 from torch.nn import PairwiseDistance, CosineSimilarity
@@ -27,7 +28,7 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     :type: torch.nn.Module
     :param dataset_name: name of the registered dataset which will be embedded.
     :type: str
-    :param embeddings_name: the name of the pickle file where the embeddings will be saved.
+    :param embeddings_name: the name of the pickle directory where the embeddings will be saved.
     :type: str
     :param batch_size: size of batches for the embedding process.
     :type: int
@@ -42,14 +43,17 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     dataset = get_dataset(dataset_name)
     # Create the data_loader
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=workers)
-    # Accumulate processed batches in a list, which will be converted into a single Tensor before pickling.
-    embedding_batches = []
-    for i, data in tqdm(enumerate(data_loader, 0), total=len(data_loader)):  # iterate batches
+    # Delete and recreate the embedding directory to ensure we are working with an empty dir
+    embedding_directory = os.path.join('data', 'embeddings', embeddings_name)
+    shutil.rmtree(embedding_directory, ignore_errors=True)
+    os.makedirs(embedding_directory)
+    for i, data in tqdm(enumerate(data_loader, 0), total=len(data_loader), desc='Embedding data'):  # iterate batches
         inputs, _ = data
-        embedding_batches.append(model(inputs.to(device)))
-    # The embeddings are sent to CPU before pickling, as a GPU might not be available when they are loaded
-    embeddings = torch.cat(embedding_batches).to('cpu')
-    pickle.dump(embeddings, open(os.path.join('data', 'embeddings', '{}.pickle'.format(embeddings_name)), 'wb'))
+        inputs = inputs.to(device)
+        pickle.dump( # we pickle per file, as joining batches online results in massive RAM requirements
+            model(inputs).to('cpu'),  # embeddings are sent to CPU before pickling, as a GPU might not be available
+            open(os.path.join(embedding_directory, '{}.pickle'.format(i)), 'wb') # when they are loaded
+        )
 
 
 def query_embeddings(model, query_image_filename, dataset_name, embeddings_name, k=16, distance='cosine', n_gpu=0):
@@ -102,7 +106,7 @@ def query_embeddings(model, query_image_filename, dataset_name, embeddings_name,
 def load_embedding_pickles(embeddings_name, device):
     """
     Loads an embedding directory composed of pickled Tensors with image embeddings for a batch.
-    :param embeddings_name: the name of the pickle file where the embeddings are saved.
+    :param embeddings_name: the name of the pickle directory where the embeddings are saved.
     :type: str
     :param device: device type specification
     :type: str
@@ -110,4 +114,9 @@ def load_embedding_pickles(embeddings_name, device):
     contain pickled tensor objects with image embeddings.
     :type: torch.Tensor
     """
-    return pickle.load(open(os.path.join('data', 'embeddings', '{}.pickle'.format(embeddings_name)), 'rb')).to(device)
+    embedding_directory = os.path.join('data', 'embeddings', embeddings_name)
+    return torch.cat([
+        pickle.load(open(os.path.join(embedding_directory, f), 'rb')) for f in
+        tqdm(sorted(os.listdir(embedding_directory), key=len), desc='Loading {} embeddings'.format(embeddings_name))
+        if 'tsne' not in f  # skip possible projection pickle in the embedding directory
+    ])

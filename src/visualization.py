@@ -76,19 +76,19 @@ def plot_image_batch(batch, figsize=(8, 8), title=''):
     plt.show()
 
 
-def plot_embedding_tsne(dataset_name, embedding_directory_name, load_projection=False):
+def plot_embedding_tsne(dataset_name, embeddings_name, load_projection=False):
     """
     Plot a 2D projection of embeddings in the specified embedding directory using plotly.
     :param dataset_name: name of the registered dataset which will be embedded.
     :type: str
-    :param embedding_directory_name: the name of the subdirectory where the batch pickles will be saved.
+    :param embeddings_name: the name of the directory where the batch pickles will be saved.
     :type: str
     """
     from src.utils.embeddings import load_embedding_pickles # import here to avoid circular import
     dataset = get_dataset(dataset_name)
-    embeddings = load_embedding_pickles(embedding_directory_name, 'cpu')
+    embeddings = load_embedding_pickles(embeddings_name, 'cpu')
     image_class_names = get_dataset_class_names(dataset_name)
-    projection_pickle_dir = os.path.join(ROOT_DIR, 'data', 'embeddings', embedding_directory_name)
+    projection_pickle_dir = os.path.join(ROOT_DIR, 'data', 'embeddings', embeddings_name)
     if load_projection:
         click.echo('Loading existing 2D projection from pickle.')
         projection = pickle.load(open(os.path.join(projection_pickle_dir, 'tsne.pickle'), 'rb'))

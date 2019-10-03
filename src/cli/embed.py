@@ -62,5 +62,9 @@ def cnn(dataset_name, embeddings_name, checkpoint, epoch, batch_size, workers, n
     del state_dict['fully_connected_3.weight'] # delete last layer weights
     del state_dict['fully_connected_3.bias'] # and bias
     model = ConvolutionalNetwork() # new model object with same structure as checkpoint, but without last layer
-    model = model.load_state_dict(state_dict, strict=False) # load the trained model weights into it
-    create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
+    incorrect_keys = model.load_state_dict(state_dict, strict=False) # load the trained model weights into it
+    if not sum([len(keys) for keys in incorrect_keys]): # no incompatibility between checkpoint and selected model
+        create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
+    else: # log incompatibility
+        for i, field in enumerate(incorrect_keys._fields):
+            print('{}: {}'.format(field, incorrect_keys[i]))

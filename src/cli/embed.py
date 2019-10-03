@@ -52,19 +52,9 @@ def hog(dataset_name, embeddings_name, in_channels, cell_size, n_bins, signed_gr
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
 @click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 def cnn(dataset_name, embeddings_name, checkpoint, epoch, batch_size, workers, n_gpu):
-    from src.models.convolutional.classification import ConvolutionalNetwork
     click.echo('CNN embeddings for {} dataset'.format(dataset_name))
     # Load the model checkpoint
     checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'cnn', checkpoint)
     net = torch.load(os.path.join(checkpoint_directory, '_net_{}.pth'.format(epoch)))
     # This CNN is a classification model, so we will eliminate the last few layers to obtain embeddings with it
-    state_dict = net.state_dict() # contains network layers
-    del state_dict['fully_connected_3.weight'] # delete last layer weights
-    del state_dict['fully_connected_3.bias'] # and bias
-    model = ConvolutionalNetwork() # new model object with same structure as checkpoint, but without last layer
-    incorrect_keys = model.load_state_dict(state_dict, strict=False) # load the trained model weights into it
-    if not sum([len(keys) for keys in incorrect_keys]): # no incompatibility between checkpoint and selected model
-        create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
-    else: # log incompatibility
-        for i, field in enumerate(incorrect_keys._fields):
-            print('{}: {}'.format(field, incorrect_keys[i]))
+    create_embeddings(net.embedding_network, dataset_name, embeddings_name, batch_size, workers, n_gpu)

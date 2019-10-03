@@ -53,3 +53,24 @@ class ClassificationConvolutionalNetwork(ConvolutionalNetwork):
         x = self.fully_connected_3(x)
         x = F.log_softmax(x, dim=-1)
         return x
+
+    @property
+    def embedding_network(self):
+        """
+        Convert the classification CNN into an embedding network by eliminating the last layer.
+        The network weights are loaded from the Model's state_dict and copied to the returned model. If used with a
+        trained network, the returned embedding network should produce image descriptors.
+        :return: the derived embedding network
+        :type: ConvolutionalNetwork
+        """
+        state_dict = self.state_dict()  # contains network layers
+        del state_dict['fully_connected_3.weight']  # delete last layer weights
+        del state_dict['fully_connected_3.bias']  # and bias
+        model = ConvolutionalNetwork()  # new model object with same structure as checkpoint, but without last layer
+        incorrect_keys = model.load_state_dict(state_dict, strict=False)  # load the trained model weights into it
+        if not sum([len(keys) for keys in incorrect_keys]):  # no incompatibility between checkpoint and selected model
+            return model
+        else:  # log incompatibility
+            raise ValueError(
+                ''.join(['{}: {}\n'.format(field, incorrect_keys[i]) for i, field in enumerate(incorrect_keys._fields)])
+            )

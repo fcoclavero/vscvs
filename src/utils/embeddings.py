@@ -8,17 +8,15 @@ __status__ = 'Prototype'
 
 import os
 import pickle
-import shutil
 import torch
 
 from torch.nn import PairwiseDistance, CosineSimilarity
 from torch.utils.data import DataLoader
-from torchvision import transforms
 from tqdm import tqdm
 
 from src.datasets import get_dataset, get_dataset_class_names
 from src.utils import get_device
-from src.visualization import plot_image_batch, plot_image
+from src.visualization import plot_image_batch
 
 
 def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu):

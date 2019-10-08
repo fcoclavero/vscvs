@@ -35,7 +35,7 @@ def train(context, **kwargs):
 @click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
 @click.option('--resume', help='Epoch for checkpoint loading.', default=None)
-def cnn(batch_size, epochs, workers, n_gpu,
+def cnn(_, batch_size, epochs, workers, n_gpu,
         dataset_name, train_test_split, train_validation_split, lr, momentum, resume):
     from src.trainers.cnn import train_cnn
     click.echo('cnn - %s dataset' % dataset_name)
@@ -59,7 +59,7 @@ def cnn(batch_size, epochs, workers, n_gpu,
 @click.option('--margin', prompt='Margin', help='The margin for the Triplet Loss.', default=.2)
 @click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
 @click.option('--beta1', prompt='Beta 1', help='Decay parameter for Adam optimizer.', default=.2)
-def triplet_cnn(batch_size, epochs, workers, n_gpu, resume, dataset_name, lr, beta1, margin, vector_dimension):
+def triplet_cnn(_, batch_size, epochs, workers, n_gpu, resume, dataset_name, lr, beta1, margin, vector_dimension):
     from src.trainers.triplet_cnn import train_triplet_cnn
     click.echo('triplet cnn - %s dataset' % dataset_name)
     train_triplet_cnn(dataset_name, vector_dimension, resume=resume, margin=margin, workers=workers,
@@ -75,7 +75,7 @@ def triplet_cnn(batch_size, epochs, workers, n_gpu, resume, dataset_name, lr, be
 @click.option(
     '--vector_dimension', prompt='CVS dimensionality', help='Dimensionality of the common vector space.', default=300
 )
-def cvs_gan(batch_size, epochs, workers, n_gpu, dataset_name, vector_dimension):
+def cvs_gan(_, batch_size, epochs, workers, n_gpu, dataset_name, vector_dimension):
     from src.trainers.cvs_gan import train_cvs_gan
     click.echo('cvs gan - %s dataset' % dataset_name)
     train_cvs_gan(dataset_name, vector_dimension, workers, batch_size, n_gpu, epochs)

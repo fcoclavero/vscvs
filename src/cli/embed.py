@@ -25,7 +25,7 @@ from src.utils.embeddings import create_embeddings
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
 @click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context
-def embed(*args, **kwargs):
+def embed(context, **kwargs):
     """ Image embedding creation click group. """
     pass
 

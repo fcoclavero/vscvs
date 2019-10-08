@@ -21,17 +21,16 @@ from src.utils.embeddings import query_embeddings
 )
 @click.option(
     '--dataset_name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice([
-        d + '_filenames' for d in ['sketchy_photos', 'sketchy_sketches', 'sketchy_test_photos', 'sketchy_test_sketches']
-    ])
+    type=click.Choice(['sketchy_photos', 'sketchy_sketches', 'sketchy_test_photos', 'sketchy_test_sketches'])
 )
 @click.option('--embeddings_name', prompt='Embeddings name', help='Name of file where the embeddings will be saved.')
 @click.option('--k', prompt='Top k', help='The amount of top results to be retrieved', default=10)
 @click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context
-def retrieve(*args, **kwargs):
+def retrieve(context, **kwargs):
     """ Image retrieval click group. """
-    pass
+    # Use the `_filenames` variant of the selected dataset to allow retrieval by filename
+    context.obj['dataset_name'] = context.obj['dataset_name'] + '_filenames'
 
 
 @retrieve.command()

@@ -12,8 +12,8 @@ import warnings
 from src.cli.embed import embed
 from src.cli.measure import measure
 from src.cli.retrieve import retrieve
+from src.cli.show import show
 from src.cli.train import train
-from src.cli.visualization import visualization
 
 
 # Suppress gensim 'detected Windows; aliasing chunkize to chunkize_serial' warning
@@ -51,8 +51,8 @@ cli.add_command(create_sample_vectors)
 cli.add_command(embed)
 cli.add_command(measure)
 cli.add_command(retrieve)
+cli.add_command(show)
 cli.add_command(train)
-cli.add_command(visualization)
 
 
 # Initialize the command line interface

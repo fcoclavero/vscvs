@@ -10,7 +10,7 @@ import click
 import functools
 
 
-def pass_args_as_context(func):
+def pass_kwargs_in_context(func):
     """
     Decorator for `click` CLIs that puts all the kwargs of the decorated function to the click context and passes it
     on with `click.pass_context`. This is useful when multiple commands receive the same objects. In this case, a click
@@ -21,9 +21,9 @@ def pass_args_as_context(func):
     :return: the decorated function, which passes all kwargs to the click context and passes it on
     :type: function
     """
-    @click.pass_context # pass context decorator is needed for the variables to be accessible in the decorated function
-    def new_func(context, *args, **kwargs):
-        # Extend the context dict with the provided kwargs
+    @click.pass_context
+    def wrapper(context, *args, **kwargs):
+        """ Extend the context dict with the provided kwargs. """
         context.obj = {**context.obj, **kwargs} if context.obj else kwargs
         return context.invoke(func, context.obj, *args, **kwargs)
-    return functools.update_wrapper(new_func, func)
+    return functools.update_wrapper(wrapper, func)

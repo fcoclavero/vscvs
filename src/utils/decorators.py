@@ -21,14 +21,12 @@ def deprecated(func):
     :type: function
     """
     @functools.wraps(func)
-    def new_func(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-        warnings.warn("Call to deprecated function {}.".format(func.__name__),
-                      category=DeprecationWarning,
-                      stacklevel=2)
+        warnings.warn("Deprecated function {} invoked".format(func.__name__), category=DeprecationWarning, stacklevel=2)
         warnings.simplefilter('default', DeprecationWarning)  # reset filter
         return func(*args, **kwargs)
-    return new_func
+    return wrapper
 
 
 def threaded(func):
@@ -40,11 +38,11 @@ def threaded(func):
     :type: function
     """
     @functools.wraps(func)
-    def decorator(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         t = Thread(target=func, args=args, kwargs=kwargs)
         t.daemon = True
         t.start()
-    return decorator
+    return wrapper
 
 
 def parametrized(decorator):

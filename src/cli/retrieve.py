@@ -30,7 +30,7 @@ from src.utils.embeddings import query_embeddings
 def retrieve(context, **kwargs):
     """ Image retrieval click group. """
     # Use the `_filenames` variant of the selected dataset to allow retrieval by filename
-    context.obj['dataset_name'] = context.obj['dataset_name'] + '_filenames'
+    context.obj['dataset_name'] = context.obj['dataset_name'] + '-filenames'
 
 
 @retrieve.command()
@@ -40,10 +40,10 @@ def retrieve(context, **kwargs):
 @click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
 @click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
 def hog(_, query_image_filename, dataset_name, embeddings_name, k, n_gpu,
-        in_channels, cell_size, n_bins, signed_gradients):
+        in_channels, cell_size, bins, signed_gradients):
     click.echo('Querying {} embeddings'.format(embeddings_name))
     from src.models.hog import HOG
-    model = HOG(in_channels, cell_size, n_bins, signed_gradients)
+    model = HOG(in_channels, cell_size, bins, signed_gradients)
     query_embeddings(model, query_image_filename, dataset_name, embeddings_name, k, n_gpu)
 
 

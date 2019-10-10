@@ -35,10 +35,10 @@ def embed(context, **kwargs):
 @click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
 @click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
 def hog(_, dataset_name, embeddings_name, batch_size, workers, n_gpu,
-        in_channels, cell_size, n_bins, signed_gradients):
+        in_channels, cell_size, bins, signed_gradients):
     click.echo('HOG embeddings for {} dataset'.format(dataset_name))
     from src.models.hog import HOG
-    model = HOG(in_channels, cell_size, n_bins, signed_gradients)
+    model = HOG(in_channels, cell_size, bins, signed_gradients)
     create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
 

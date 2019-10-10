@@ -27,12 +27,14 @@ def cli():
 
 
 @click.command()
-@click.option('--data-set', prompt='Dataset name', help='The name of the dataset.')
+@click.option('--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+              type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--tsne-dimension', default=2, help='The target dimensionality for the lower dimension projection.')
-def create_classes(data_set, tsne_dimension):
+def create_classes(dataset_name, tsne_dimension):
     """" Create and pickle a new classes data frame. """
     from src.preprocessing import create_classes_data_frame # import here to avoid loading word vectors on every command
-    create_classes_data_frame(data_set, tsne_dimension)
+    from src.datasets import get_dataset
+    create_classes_data_frame(get_dataset(dataset_name), tsne_dimension)
 
 
 @click.command()

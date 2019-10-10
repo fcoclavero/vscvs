@@ -16,12 +16,12 @@ from src.utils.embeddings import create_embeddings
 
 
 @click.group()
-@click.option('--dataset_name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-              type=click.Choice(['sketchy_photos', 'sketchy_sketches', 'sketchy_test_photos', 'sketchy_test_sketches']))
-@click.option('--embeddings_name', prompt='Embeddings name', help='Name of file where the embeddings will be saved.')
-@click.option('--batch_size', prompt='Batch size', help='The batch size for the embedding routine.', default=16)
+@click.option('--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+              type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
+@click.option('--embeddings-name', prompt='Embeddings name', help='Name of file where the embeddings will be saved.')
+@click.option('--batch-size', prompt='Batch size', help='The batch size for the embedding routine.', default=16)
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
-@click.option('--n_gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
+@click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context
 def embed(context, **kwargs):
     """ Image embedding creation click group. """
@@ -30,10 +30,10 @@ def embed(context, **kwargs):
 
 @embed.command()
 @pass_context_to_kwargs
-@click.option('--in_channels', prompt='In channels', help='Number of image color channels.', default=3)
-@click.option('--cell_size', prompt='Cell size', help='Gradient pooling size.', default=8)
-@click.option('--n_bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
-@click.option('--signed_gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
+@click.option('--in-channels', prompt='In channels', help='Number of image color channels.', default=3)
+@click.option('--cell-size', prompt='Cell size', help='Gradient pooling size.', default=8)
+@click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
+@click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
 def hog(_, dataset_name, embeddings_name, batch_size, workers, n_gpu,
         in_channels, cell_size, n_bins, signed_gradients):
     click.echo('HOG embeddings for {} dataset'.format(dataset_name))

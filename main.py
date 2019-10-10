@@ -27,17 +27,17 @@ def cli():
 
 
 @click.command()
-@click.option("--data_set", prompt="Dataset name", help="The name of the dataset.")
-@click.option("--tsne_dimension", default=2, help="The target dimensionality for the lower dimension projection.")
+@click.option('--data-set', prompt='Dataset name', help='The name of the dataset.')
+@click.option('--tsne-dimension', default=2, help='The target dimensionality for the lower dimension projection.')
 def create_classes(data_set, tsne_dimension):
-    """ Create and pickle a new classes data frame. """
+    """" Create and pickle a new classes data frame. """
     from src.preprocessing import create_classes_data_frame # import here to avoid loading word vectors on every command
     create_classes_data_frame(data_set, tsne_dimension)
 
 
 @click.command()
-@click.option("--n", prompt="Number of samples", help="The number of sample vectors to be created.", type=int)
-@click.option("--dimension", prompt="Sample dimensionality", help="The dimension of sample vectors.", type=int)
+@click.option('--n', prompt='Number of samples', help='The number of sample vectors to be created.', type=int)
+@click.option('--dimension', prompt='Sample dimensionality', help='The dimension of sample vectors.', type=int)
 def create_sample_vectors(n, dimension):
     """ Create and pickle a new classes data frame. """
     from src.preprocessing import create_sample_vectors

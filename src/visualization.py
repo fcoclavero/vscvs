@@ -9,6 +9,7 @@ __status__ = 'Prototype'
 import click
 import pickle
 import os
+import torch
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,6 +41,17 @@ def display_sample_batch(dataset_name, batch_size, workers):
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers)
     # Plot the batch
     plot_image_batch(next(iter(data_loader)))
+
+
+def plot_image_retrieval(dataset, dataset_class_names, image, image_class, top_distances, top_indices):
+    aux = [dataset[j] for j in top_indices]
+    image_tensors = torch.stack([tup[0] for tup in aux])
+    image_classes = [tup[1] for tup in aux]
+    print('query image class = {}'.format(dataset_class_names[image_class]))
+    print('distances = {}'.format(top_distances))
+    print('classes = {}'.format([dataset_class_names[class_name] for class_name in image_classes]))
+    plot_image_batch([image, image_class])
+    plot_image_batch([image_tensors, image_classes])
 
 
 def plot_image(image, figsize=(8, 8), title=''):

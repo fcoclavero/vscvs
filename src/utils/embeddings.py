@@ -16,7 +16,8 @@ from tqdm import tqdm
 
 from src.datasets import get_dataset, get_dataset_class_names
 from src.utils import get_device, recreate_directory
-from src.visualization import plot_image_batch
+from src.utils.data import simple_split
+from src.visualization import plot_image_batch, plot_image_retrieval
 
 
 def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu):
@@ -54,6 +55,44 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
         )
 
 
+def load_embedding_pickles(embeddings_name, device):
+    """
+    Loads an embedding directory composed of pickled Tensors with image embeddings for a batch.
+    :param embeddings_name: the name of the pickle directory where the embeddings are saved.
+    :type: str
+    :param device: device type specification
+    :type: str
+    :return: a single Pytorch tensor with all the embeddings found in the provided embedding directory. The later must
+    contain pickled tensor objects with image embeddings.
+    :type: torch.Tensor
+    """
+    embedding_directory = os.path.join('data', 'embeddings', embeddings_name)
+    return torch.cat([
+        pickle.load(open(os.path.join(embedding_directory, f), 'rb')) for f in
+        tqdm(sorted(os.listdir(embedding_directory), key=len), desc='Loading {} embeddings'.format(embeddings_name))
+        if 'tsne' not in f  # skip possible projection pickle in the embedding directory
+    ])
+
+
+def get_top_k(query_embedding, embeddings, k, distance, device):
+    """
+
+    :param query_embedding:
+    :param embeddings:
+    :param k:
+    :param distance: which distance function to be used for nearest neighbor computation. Either 'cosine' or 'pairwise'
+    :type: str, either 'cosine' or 'pairwise'
+    :param device: device type specification
+    :type: str
+    :return: the closest k embeddings in the `embeddings` tensor to the `query_embedding`. A tuple with a list of their
+    distances and indices are returned (respectively).
+    """
+    embeddings, query_embedding = [var.to(device) for var in [embeddings, query_embedding]]
+    p_dist = PairwiseDistance(p=2) if distance == 'pairwise' else CosineSimilarity()
+    distances = p_dist(embeddings, query_embedding)
+    return torch.topk(distances, k) # return the top k results
+
+
 def query_embeddings(model, query_image_filename, dataset_name, embeddings_name, k=16, distance='cosine', n_gpu=0):
     """
     Query the embeddings for a dataset with the given image. The image is embedded with the given model. Pairwise
@@ -83,38 +122,38 @@ def query_embeddings(model, query_image_filename, dataset_name, embeddings_name,
     # Get the query image and create the embedding for it
     image, image_class = dataset.getitem_by_filename(query_image_filename)
     # Send elements to the specified device
-    embeddings, image, model = [var.to(device) for var in [embeddings, image, model]]
+    image, model = [var.to(device) for var in [image, model]]
     query_embedding = model(image.unsqueeze(0)) # unsqueeze to add the missing dimension expected by the model
     # Compute the distance to the query embedding for all images in the Dataset
-    p_dist = PairwiseDistance(p=2) if distance == 'pairwise' else CosineSimilarity()
-    distances = p_dist(embeddings, query_embedding)
-    # Return the top k results
-    top_distances, top_indices = torch.topk(distances, k)
-    aux = [dataset[j] for j in top_indices]
-    image_tensors = torch.stack([tup[0] for tup in aux])
-    image_classes = [tup[1] for tup in aux]
-    image_class_names = get_dataset_class_names(dataset_name)
-    print('query image class = {}'.format(image_class_names[image_class]))
-    print('distances = {}'.format(top_distances))
-    print('classes = {}'.format([image_class_names[class_name] for class_name in image_classes]))
-    plot_image_batch([image, image_class])
-    plot_image_batch([image_tensors, image_classes])
+    top_distances, top_indices = get_top_k(query_embedding, embeddings, k, distance, device)
+    plot_image_retrieval(dataset, get_dataset_class_names(dataset_name), image, image_class, top_distances, top_indices)
 
 
-def load_embedding_pickles(embeddings_name, device):
+def average_class_recall(dataset_name, embeddings_name, test_split, k, distance='cosine', n_gpu=0):
     """
-    Loads an embedding directory composed of pickled Tensors with image embeddings for a batch.
-    :param embeddings_name: the name of the pickle directory where the embeddings are saved.
+    Computes the average class recall for the given embeddings. Embeddings are split into "test" and "queried" subsets.
+    For each embedding in the "test" set, the nearest `k` embeddings in the "queried" set are retrieved using the given
+    distance metric, giving us a recall for each test embedding that corresponds to the percentage of the top `k`
+    retrieved embeddings that correspond to the same class as the test image. The average class recall is thus the
+    average recall over all test images.
+    :param dataset_name: name of the registered dataset which will be embedded.
     :type: str
-    :param device: device type specification
+    :param embeddings_name: the name of the pickle file where the embeddings will be saved.
     :type: str
-    :return: a single Pytorch tensor with all the embeddings found in the provided embedding directory. The later must
-    contain pickled tensor objects with image embeddings.
-    :type: torch.Tensor
+    :param test_split: the proportion of the embeddings that will be used for the queries needed to compute the average
+    class recall
+    :param k: the number of most similar images that wil be displayed.
+    :type: int
+    :param distance: which distance function to be used for nearest neighbor computation. Either 'cosine' or 'pairwise'
+    :type: str, either 'cosine' or 'pairwise'
+    :param n_gpu: number of available GPUs. If zero, the CPU will be used.
+    :type: int
     """
-    embedding_directory = os.path.join('data', 'embeddings', embeddings_name)
-    return torch.cat([
-        pickle.load(open(os.path.join(embedding_directory, f), 'rb')) for f in
-        tqdm(sorted(os.listdir(embedding_directory), key=len), desc='Loading {} embeddings'.format(embeddings_name))
-        if 'tsne' not in f  # skip possible projection pickle in the embedding directory
-    ])
+    device = get_device(n_gpu)
+    # Load data
+    dataset = get_dataset(dataset_name)
+    # Load embeddings from pickle directory
+    embeddings = load_embedding_pickles(embeddings_name, device)
+    # Split embeddings into "test" and "queried" subsets
+    queried_embeddings, test_embeddings = simple_split(embeddings, test_split)
+    a=1

@@ -12,63 +12,63 @@ from src.datasets.sketchy import Sketchy, SketchyImageNames, SketchyMixedBatches
 
 
 DATASET_DATA_SOURCES = {
-    'sketchy_photos': DATA_SOURCES['sketchy']['photos'],
-    'sketchy_photos_triplets': DATA_SOURCES['sketchy']['photos'],
-    'sketchy_photos_filenames': DATA_SOURCES['sketchy']['photos'],
-    'sketchy_sketches': DATA_SOURCES['sketchy']['sketches'],
-    'sketchy_sketches_triplets': DATA_SOURCES['sketchy']['sketches'],
-    'sketchy_sketches_filenames': DATA_SOURCES['sketchy']['sketches'],
-    'sketchy_test_photos': DATA_SOURCES['sketchy_test']['photos'],
-    'sketchy_test_photos_triplets': DATA_SOURCES['sketchy_test']['photos'],
-    'sketchy_test_photos_filenames': DATA_SOURCES['sketchy_test']['photos'],
-    'sketchy_test_sketches': DATA_SOURCES['sketchy_test']['sketches'],
-    'sketchy_test_sketches_triplets': DATA_SOURCES['sketchy_test']['sketches'],
-    'sketchy_test_sketches_filenames': DATA_SOURCES['sketchy_test']['sketches'],
-    'sketchy_named_photos': DATA_SOURCES['sketchy']['photos'],
-    'sketchy_named_sketches': DATA_SOURCES['sketchy']['photos'],
-    'sketchy_test_named_photos': DATA_SOURCES['sketchy_test']['photos'],
-    'sketchy_test_named_sketches': DATA_SOURCES['sketchy_test']['photos'],
-    'sketchy_mixed_batches': 'sketchy',
-    'sketchy_test_mixed_batches': 'sketchy_test',
+    'sketchy-photos': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-photos-triplets': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-photos-filenames': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-sketches': DATA_SOURCES['sketchy']['sketches'],
+    'sketchy-sketches-triplets': DATA_SOURCES['sketchy']['sketches'],
+    'sketchy-sketches-filenames': DATA_SOURCES['sketchy']['sketches'],
+    'sketchy-test-photos': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-test-photos-triplets': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-test-photos-filenames': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-test-sketches': DATA_SOURCES['sketchy_test']['sketches'],
+    'sketchy-test-sketches-triplets': DATA_SOURCES['sketchy_test']['sketches'],
+    'sketchy-test-sketches-filenames': DATA_SOURCES['sketchy_test']['sketches'],
+    'sketchy-named-photos': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-named-sketches': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-test-named-photos': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-test-named-sketches': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-mixed-batches': 'sketchy',
+    'sketchy-test-mixed-batches': 'sketchy_test',
 }
 
 
 DATASETS = {
-    'sketchy_photos':
+    'sketchy-photos':
         lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
-    'sketchy_photos_triplets':
+    'sketchy-photos-triplets':
         lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
-    'sketchy_photos_filenames':
+    'sketchy-photos-filenames':
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
-    'sketchy_sketches':
+    'sketchy-sketches':
         lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
-    'sketchy_sketches_triplets':
+    'sketchy-sketches-triplets':
         lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
-    'sketchy_sketches_filenames':
+    'sketchy-sketches-filenames':
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
-    'sketchy_test_photos':
+    'sketchy-test-photos':
         lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
-    'sketchy_test_photos_triplets':
+    'sketchy-test-photos-triplets':
         lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
-    'sketchy_test_photos_filenames':
+    'sketchy-test-photos-filenames':
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
-    'sketchy_test_sketches':
+    'sketchy-test-sketches':
         lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
-    'sketchy_test_sketches_triplets':
+    'sketchy-test-sketches-triplets':
         lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
-    'sketchy_test_sketches_filenames':
+    'sketchy-test-sketches-filenames':
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
-    'sketchy_named_photos':
+    'sketchy-named-photos':
         lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
-    'sketchy_named_sketches':
+    'sketchy-named-sketches':
         lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
-    'sketchy_test_named_photos':
+    'sketchy-test-named-photos':
         lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
-    'sketchy_test_named_sketches':
+    'sketchy-test-named-sketches':
         lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
-    'sketchy_mixed_batches':
+    'sketchy-mixed-batches':
         lambda data_source, *args, **kwargs: SketchyMixedBatches(data_source, *args, **kwargs),
-    'sketchy_test_mixed_batches':
+    'sketchy-test-mixed-batches':
         lambda data_source, *args, **kwargs: SketchyMixedBatches(data_source, *args, **kwargs),
 }
 

@@ -22,7 +22,7 @@ def test_train_sketchy_cnn(workers=4, batch_size=16, n_gpu=0, epochs=2):
     :type: int
     :return: None
     """
-    dataset = get_dataset('sketchy_test_photos')
+    dataset = get_dataset('sketchy-test-photos')
 
     # Create the data_loader
     data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers)

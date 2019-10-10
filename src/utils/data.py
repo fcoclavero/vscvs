@@ -9,21 +9,41 @@ __status__ = 'Prototype'
 import torch
 
 from ignite._utils import convert_tensor
+from torch.utils.data import Subset
 
 
-def split(data, split_proportion = 0.8):
+def simple_split(data, split_proportion = 0.8):
     """
     Splits incoming data into two sets, one for training and one for tests.
     Current implementation just slices on the index corresponding to the given proportion.
     This could be changed to a random, class balanced version.
     :param data: the dataset to be split
     :type: indexed object
-    :param split_proportion:
+    :param split_proportion: proportion of the data to be assigned to the fist split subset. As this function returns
+    two subsets, this parameter must be strictly between 0.0 and 1.0
+    :type: float
     :return: the two resulting datasets
     :type: indexed object
     """
+    assert 0. < split_proportion < 1.
     test_index = int(len(data) * split_proportion)
     return data[:test_index], data[test_index:]
+
+
+def split(data, split_proportion=0.8):
+    """
+    Splits incoming data into two sets, one for training and one for tests. Non-overlapping.
+    :param data: the dataset to be split
+    :type: indexed object
+    :param split_proportion: proportion of the data to be assigned to the fist split subset. As this function returns
+    two subsets, this parameter must be strictly between 0.0 and 1.0
+    :type: float
+    :return: the two resulting datasets
+    :type: indexed object
+    """
+    assert 0. < split_proportion < 1.
+    test_index = int(len(data) * split_proportion)
+    return Subset(data, range(test_index)), Subset(data, range(test_index, len(data)))
 
 
 def dataset_split(dataset, train_test_split, train_validation_split):

@@ -8,7 +8,6 @@ __status__ = 'Prototype'
 
 import os
 import pickle
-import shutil
 import torch
 
 from torch.nn import PairwiseDistance, CosineSimilarity
@@ -16,7 +15,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.datasets import get_dataset, get_dataset_class_names
-from src.utils import get_device
+from src.utils import get_device, recreate_directory
 from src.visualization import plot_image_batch
 
 
@@ -45,8 +44,7 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=workers)
     # Delete and recreate the embedding directory to ensure we are working with an empty dir
     embedding_directory = os.path.join('data', 'embeddings', embeddings_name)
-    shutil.rmtree(embedding_directory, ignore_errors=True)
-    os.makedirs(embedding_directory)
+    recreate_directory(embedding_directory)
     for i, data in tqdm(enumerate(data_loader, 0), total=len(data_loader), desc='Embedding data'):  # iterate batches
         inputs, _ = data
         inputs = inputs.to(device)

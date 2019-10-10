@@ -18,8 +18,6 @@ from src.utils.embeddings import create_embeddings
 @click.group()
 @click.option('--dataset_name', prompt='Dataset name', help='The name of the dataset to be used for training.',
               type=click.Choice(['sketchy_photos', 'sketchy_sketches', 'sketchy_test_photos', 'sketchy_test_sketches']))
-@click.option('--train_test_split', prompt='Train/test split', default=1.0,
-              help='Proportion of the dataset to be used for training.')
 @click.option('--embeddings_name', prompt='Embeddings name', help='Name of file where the embeddings will be saved.')
 @click.option('--batch_size', prompt='Batch size', help='The batch size for the embedding routine.', default=16)
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
@@ -36,7 +34,7 @@ def embed(context, **kwargs):
 @click.option('--cell_size', prompt='Cell size', help='Gradient pooling size.', default=8)
 @click.option('--n_bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
 @click.option('--signed_gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
-def hog(_, dataset_name, train_test_split, embeddings_name, batch_size, workers, n_gpu,
+def hog(_, dataset_name, embeddings_name, batch_size, workers, n_gpu,
         in_channels, cell_size, n_bins, signed_gradients):
     click.echo('HOG embeddings for {} dataset'.format(dataset_name))
     from src.models.hog import HOG
@@ -48,7 +46,7 @@ def hog(_, dataset_name, train_test_split, embeddings_name, batch_size, workers,
 @pass_context_to_kwargs
 @click.option('--checkpoint', prompt='Checkpoint date', help='Checkpoint date (corresponds to its directory name.')
 @click.option('--epoch', prompt='Checkpoint epoch', help='Epoch corresponding to the model state to be loaded.')
-def cnn(_, dataset_name, train_test_split, embeddings_name, batch_size, workers, n_gpu, checkpoint, epoch):
+def cnn(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint, epoch):
     click.echo('CNN embeddings for {} dataset'.format(dataset_name))
     # Load the model checkpoint
     checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'cnn', checkpoint)

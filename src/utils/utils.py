@@ -7,6 +7,7 @@ __status__ = 'Prototype'
 
 
 import os
+import shutil
 import torch
 
 from datetime import datetime
@@ -38,3 +39,24 @@ def get_checkpoint_directory(model_name, date=None):
     return os.path.join(
         ROOT_DIR, 'data', 'checkpoints', model_name, datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
     )
+
+
+def get_subdirectories(path):
+    """
+    Get a list of all the child directories of the given path.
+    :param path: the path who's child directories are to be returned
+    :type: str
+    :return: the paths of the child directories, relative to the given path
+    :type: list<str>
+    """
+    return next(os.walk(path))[1]
+
+
+def recreate_directory(directory_path):
+    """
+    Delete and recreate the directory at the given path to ensure an empty dir
+    :param directory_path: the path to the directory to be recreated
+    :type: str
+    """
+    shutil.rmtree(directory_path, ignore_errors=True)
+    os.makedirs(directory_path)

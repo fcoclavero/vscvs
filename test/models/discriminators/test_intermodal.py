@@ -12,12 +12,12 @@ from src.metrics.multi_class import Accuracy, MeanAveragePrecision, AveragePreci
     MeanAverageF1, AverageF1
 from src.models.discriminators.intermodal import InterModalDiscriminatorOneHot
 from src.utils import get_device
-from src.utils.data import split
+from src.utils.data import simple_split
 
 
 def test_onehot_classification(n_gpu = 1):
     data = pickle.load(open(DATA_SOURCES['sample_vectors_onehot']['pickle'], 'rb'))  # Load sample data
-    train, test = split(data)
+    train, test = simple_split(data)
 
     print('\n')
     print(

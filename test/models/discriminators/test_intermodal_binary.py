@@ -7,12 +7,12 @@ from settings import DATA_SOURCES
 from src.models.discriminators.intermodal import InterModalDiscriminator
 from src.metrics.binary import Accuracy, Precision, Recall, F1
 from src.utils import get_device
-from src.utils.data import split
+from src.utils.data import simple_split
 
 
 def test_binary_classification(n_gpu = 1):
     data = pickle.load(open(DATA_SOURCES['sample_vectors']['pickle'], 'rb')) # Load sample data
-    train, test = split(data)
+    train, test = simple_split(data)
 
     print('\n')
     print(

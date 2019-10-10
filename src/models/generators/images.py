@@ -10,12 +10,12 @@ import torch.nn as nn
 
 
 class ImageEncoder(nn.Module):
-    def __init__(self, output_dimension, feature_depth, n_channels=3, n_gpu=0):
+    def __init__(self, output_dimension, feature_depth, in_channels=3, n_gpu=0):
         """
         Convolutional network that creates feature vectors for images.
         :param output_dimension: the size of the output vector (common vector space dimensionality)
         :type: int
-        :param n_channels: number of channels of input images
+        :param in_channels: number of channels of input images
         :type: int
         :param feature_depth: regulates the size of channels in the convolutional layers
         :type: int
@@ -27,8 +27,8 @@ class ImageEncoder(nn.Module):
         super().__init__()
         self.n_gpu = n_gpu
         self.main = nn.Sequential(
-            # input is (n_channels) x 256 x 256
-            nn.Conv2d(n_channels, feature_depth, 4, 2, 1, bias=False),
+            # input is (in_channels) x 256 x 256
+            nn.Conv2d(in_channels, feature_depth, 4, 2, 1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
             # state size. (feature_depth) x 128 x 128
             nn.Conv2d(feature_depth, feature_depth * 2, 4, 2, 1, bias=False),

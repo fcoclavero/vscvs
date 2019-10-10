@@ -26,7 +26,7 @@ class Sketchy(ImageFolder):
     Utility class for loading the sketchy dataset. It's original structure is compatible with
     the torch ImageFolder, so I will just subclass that and apply some transforms.
     """
-    def __init__(self, root_directory, *custom_transforms, n_channels=3, **kwargs):
+    def __init__(self, root_directory, *custom_transforms, in_channels=3, **kwargs):
         """
         Initialize the ImageFolder and perform transforms. Note that sketches and photos have the
         same exact dimension in both the sketchy and sketchy_test datasets.
@@ -34,7 +34,7 @@ class Sketchy(ImageFolder):
         :type: str
         :param custom_transforms: additional transforms for the Dataset
         :type: torchvision.transforms
-        :param n_channels: number of image color channels.
+        :param in_channels: number of image color channels.
         :type: int
         """
         super().__init__(
@@ -45,8 +45,8 @@ class Sketchy(ImageFolder):
                 *custom_transforms,
                 transforms.ToTensor(),
                 transforms.Normalize(
-                    list((0.5 for _ in range(n_channels))), # mean sequence for each channel
-                    list((0.5 for _ in range(n_channels))) # std sequence for each channel
+                    list((0.5 for _ in range(in_channels))), # mean sequence for each channel
+                    list((0.5 for _ in range(in_channels))) # std sequence for each channel
                 ),
             ])
         )

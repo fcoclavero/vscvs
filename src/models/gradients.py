@@ -45,7 +45,7 @@ class AbstractKernelConvolution(torch.nn.Module):
         """
         Perform the convolution of the input with the Sobel kernel.
         :param x: the image batch
-        :type: torch.tensor[batch_size, n_channels, x_dimension, y_dimension]
+        :type: torch.tensor[batch_size, in_channels, x_dimension, y_dimension]
         :return: the application of the Sobel filter over the input
         :type: torch.tensor
         """

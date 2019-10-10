@@ -85,7 +85,7 @@ class HOG(torch.nn.Module):
         """
         Transform the incoming image batch into HOG feature vectors.
         :param x: the image batch
-        :type: torch.tensor[batch_size, n_channels, x_dimension, y_dimension]
+        :type: torch.tensor[batch_size, in_channels, x_dimension, y_dimension]
         :return: the HOG descriptor
         :type: torch.tensor
         """

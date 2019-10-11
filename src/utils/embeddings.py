@@ -126,7 +126,7 @@ def query_embeddings(model, query_image_filename, dataset_name, embeddings_name,
     query_embedding = model(image.unsqueeze(0)) # unsqueeze to add the missing dimension expected by the model
     # Compute the distance to the query embedding for all images in the Dataset
     top_distances, top_indices = get_top_k(query_embedding, embeddings, k, distance, device)
-    plot_image_retrieval(dataset, get_dataset_class_names(dataset_name), image, image_class, top_distances, top_indices)
+    plot_image_retrieval(dataset, dataset_name, image, image_class, top_distances, top_indices)
 
 
 def average_class_recall(dataset_name, embeddings_name, test_split, k, distance='cosine', n_gpu=0):

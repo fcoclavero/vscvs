@@ -86,15 +86,3 @@ def get_dataset(dataset_name, *args, **kwargs):
         return DATASETS[dataset_name](DATASET_DATA_SOURCES[dataset_name], *args, **kwargs)
     except KeyError as e:
         raise type(e)('%s is not registered a Dataset.' % dataset_name)
-
-
-def get_dataset_class_names(dataset_name):
-    """
-    Get a list of class names for the given dataset, indexed in alphabetical order.
-    :param dataset_name:  the name of the dataset
-    :type: str
-    :return: a list of class names in alphabetical order
-    :type: list<str>
-    """
-    import os
-    return os.listdir(DATASET_DATA_SOURCES[dataset_name])

@@ -43,14 +43,28 @@ def display_sample_batch(dataset_name, batch_size, workers):
     plot_image_batch(next(iter(data_loader)))
 
 
-def plot_image_retrieval(dataset, dataset_class_names, image, image_class, top_distances, top_indices):
+def plot_image_retrieval(dataset, query_image, query_image_class, top_distances, top_indices):
+    """
+    Prints and plots the results of a retrieval query, showing the query image and the top results and distances.
+    :param dataset: the Dataset that was queried
+    :type: torch.utils.data.Dataset
+    :param query_image: tensor with the original image pixels
+    :type: torch.Tensor
+    :param query_image_class: name of the image's class
+    :type: str
+    :param top_distances: one-dimensional tensor with the distances of the query image's embedding to the top k most
+    similar images' embeddings.
+    :type: torch.Tensor
+    :param top_indices: list of the indices of the top k most similar images in the dataset
+    :type: list<int>
+    """
     aux = [dataset[j] for j in top_indices]
     image_tensors = torch.stack([tup[0] for tup in aux])
     image_classes = [tup[1] for tup in aux]
-    print('query image class = {}'.format(dataset_class_names[image_class]))
+    print('query image class = {}'.format(dataset.classes[query_image_class]))
     print('distances = {}'.format(top_distances))
-    print('classes = {}'.format([dataset_class_names[class_name] for class_name in image_classes]))
-    plot_image_batch([image, image_class])
+    print('classes = {}'.format([dataset.classes[class_name] for class_name in image_classes]))
+    plot_image_batch([query_image, query_image_class])
     plot_image_batch([image_tensors, image_classes])
 
 
@@ -99,7 +113,6 @@ def plot_embedding_tsne(dataset_name, embeddings_name, load_projection=False):
     from src.utils.embeddings import load_embedding_pickles # import here to avoid circular import
     dataset = get_dataset(dataset_name)
     embeddings = load_embedding_pickles(embeddings_name, 'cpu')
-    image_class_names = get_dataset_class_names(dataset_name)
     projection_pickle_dir = os.path.join(ROOT_DIR, 'data', 'embeddings', embeddings_name)
     if load_projection:
         click.echo('Loading existing 2D projection from pickle.')
@@ -108,7 +121,7 @@ def plot_embedding_tsne(dataset_name, embeddings_name, load_projection=False):
     else:
         click.echo('Creating 2D projection of the embeddings using TSNE')
         projection = TSNE(n_components=2).fit_transform(embeddings)
-        dataset_class_names = [image_class_names[tup[1]] for tup in tqdm(dataset, desc='Retrieving image class names')]
+        dataset_class_names = [dataset.classes[tup[1]] for tup in tqdm(dataset, desc='Retrieving image class names')]
         pickle.dump(projection, open(os.path.join(projection_pickle_dir, 'tsne.pickle'), 'wb'))
         pickle.dump(dataset_class_names, open(os.path.join(projection_pickle_dir, 'tsne_class_names.pickle'), 'wb'))
     # Plot the resulting projection using plotly

@@ -22,7 +22,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from settings import ROOT_DIR
-from src.datasets import get_dataset, get_dataset_class_names
+from src.datasets import get_dataset
 
 
 def display_sample_batch(dataset_name, batch_size, workers):

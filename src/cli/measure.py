@@ -27,7 +27,7 @@ def recall():
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
 @click.option('--embeddings-name', prompt='Embeddings name', help='Name of file where the embeddings will be saved.')
-@click.option('--test-split', prompt='Test split', default=.8, help='Proportion of the dataset to be used for queries.')
+@click.option('--test-split', prompt='Test split', default=.2, help='Proportion of the dataset to be used for queries.')
 @click.option('--k', prompt='Top k', help='The amount of top results to be retrieved', default=10)
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 def same_class(dataset_name, embeddings_name, test_split, k, n_gpu):

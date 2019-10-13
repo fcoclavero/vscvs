@@ -12,7 +12,7 @@ import torch
 
 from settings import ROOT_DIR
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
-from src.utils.embeddings import query_embeddings
+from src.utils.embeddings import retrieve_top_k
 
 
 @click.group()
@@ -44,7 +44,7 @@ def hog(_, query_image_filename, dataset_name, embeddings_name, k, n_gpu,
     click.echo('Querying {} embeddings'.format(embeddings_name))
     from src.models.hog import HOG
     model = HOG(in_channels, cell_size, bins, signed_gradients)
-    query_embeddings(model, query_image_filename, dataset_name, embeddings_name, k, n_gpu)
+    retrieve_top_k(model, query_image_filename, dataset_name, embeddings_name, k, n_gpu)
 
 
 @retrieve.command()
@@ -57,4 +57,4 @@ def cnn(_, query_image_filename, dataset_name, embeddings_name, k, n_gpu, checkp
     checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'cnn', checkpoint)
     net = torch.load(os.path.join(checkpoint_directory, '_net_{}.pth'.format(epoch)))
     # This CNN is a classification model, so we will eliminate the last few layers to obtain embeddings with it
-    query_embeddings(net.embedding_network, query_image_filename, dataset_name, embeddings_name, k, n_gpu)
+    retrieve_top_k(net.embedding_network, query_image_filename, dataset_name, embeddings_name, k, n_gpu)

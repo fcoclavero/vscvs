@@ -6,6 +6,7 @@ __status__ = 'Prototype'
 """ Utility functions for handling data. """
 
 
+import random
 import torch
 
 from ignite._utils import convert_tensor
@@ -14,20 +15,37 @@ from torch.utils.data import Subset
 
 def simple_split(data, split_proportion = 0.8):
     """
-    Splits incoming data into two sets, one for training and one for tests.
-    Current implementation just slices on the index corresponding to the given proportion.
-    This could be changed to a random, class balanced version.
+    Splits incoming data into two sets, simply slicing on the index corresponding to the given proportion.
     :param data: the dataset to be split
     :type: indexed object
     :param split_proportion: proportion of the data to be assigned to the fist split subset. As this function returns
     two subsets, this parameter must be strictly between 0.0 and 1.0
     :type: float
     :return: the two resulting datasets
-    :type: indexed object
+    :type: tup<indexed obj, indexed obj>
     """
     assert 0. < split_proportion < 1.
-    test_index = int(len(data) * split_proportion)
-    return data[:test_index], data[test_index:]
+    split_index = int(len(data) * split_proportion)
+    return data[:split_index], data[split_index:]
+
+
+def random_simple_split(data, split_proportion = 0.8):
+    """
+    Splits incoming data into two sets, randomly and with no overlapping. Returns the two resulting data objects along
+    with two arrays containing the original indexes of each element.
+    :param data: the data to be split
+    :type: indexed obj
+    :param split_proportion: proportion of the data to be assigned to the fist split subset. As this function returns
+    two subsets, this parameter must be strictly between 0.0 and 1.0
+    :type: float
+    :return: the two resulting datasets and the original indexes lists
+    :type: indexed obj, indexed obj, list<int>, list<int>
+    """
+    assert 0. < split_proportion < 1.
+    indexes = list(range(len(data))) # all indexes in data
+    random.shuffle(indexes)
+    split_index = int(len(data) * split_proportion)
+    return data[indexes[:split_index]], data[indexes[split_index:]], indexes[:split_index], indexes[split_index:]
 
 
 def split(data, split_proportion=0.8):

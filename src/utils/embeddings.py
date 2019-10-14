@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 from src.datasets import get_dataset
 from src.utils import get_device, recreate_directory
-from src.utils.data import simple_split
+from src.utils.data import random_simple_split
 from src.visualization import plot_image_retrieval
 
 
@@ -157,10 +157,10 @@ def average_class_recall(dataset_name, embeddings_name, test_split, k, distance=
     # Load embeddings from pickle directory
     embeddings = load_embedding_pickles(embeddings_name, device).to(device)
     # Split embeddings into "test" and "queried" subsets
-    query_embeddings, queried_embeddings = simple_split(embeddings, test_split)
+    query_embeddings, queried_embeddings, query_indexes, queried_indexes = random_simple_split(embeddings, test_split)
     recalls = []
     for i, query_embedding in \
             tqdm(enumerate(query_embeddings), total=query_embeddings.shape[0], desc='Computing recall'):
         _, top_indices = get_top_k(query_embedding.unsqueeze(0), queried_embeddings, k, distance, device)
-        recalls.append(sum([dataset[j][1] == dataset[i][1] for j in top_indices]) / k)
-    print('Average recall: {}%'.format(mean(recalls)*100))
+        recalls.append(sum([dataset[queried_indexes[j]][1] == dataset[query_indexes[i]][1] for j in top_indices]) / k)
+    print('Average class recall: {0:.2f}%'.format(mean(recalls) * 100))

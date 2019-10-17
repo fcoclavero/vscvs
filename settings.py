@@ -3,16 +3,22 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" Projecto settings and parameters. """
+""" Project settings and parameters. """
 
 
 import os
+
+from dotenv import load_dotenv
+
+
+# Load env
+load_dotenv()
 
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 CHECKPOINT_NAME_FORMAT = '%y-%m-%dT%H-%M'
 
-DATA_DIR = '/home/paperspace/data'
+DATA_DIR = os.environ['DATA_DIR']
 
 DATA_SOURCES = {
     'sketchy': {

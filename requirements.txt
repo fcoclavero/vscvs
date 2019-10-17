@@ -2,17 +2,12 @@ click==7.0
 matplotlib==3.0.3
 multipledispatch==0.6.0
 numpy==1.16.3
-opencv==4.1.0
-p-tqdm==1.2
 pandas==0.24.2
-pathos==0.2.3
 Pillow==6.0.0
 plotly==3.8.0
 pytest==4.4.1
 pytest-arraydiff==0.3
 pytorch-ignite==0.2.0
-scikit-image==0.15.0
-scikit-learn==0.20.3
 tb-nightly
 torch==1.1.0
 torchvision==0.2.2

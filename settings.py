@@ -4,7 +4,7 @@ ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 CHECKPOINT_NAME_FORMAT = '%y-%m-%dT%H-%M'
 
-DATA_DIR = r'C:\Users\Chopan\Documents\Data'
+DATA_DIR = '/home/paperspace/data'
 
 DATA_SOURCES = {
     'sketchy': {

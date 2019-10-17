@@ -19,7 +19,7 @@ The project depends on several git submodules that provide NLP functions:
 Some submodules have their own submodules. To update all of them recursively, run the following:
 
 ```bash
- git submodule update --init --recursive
+git submodule update --init --recursive
 ```
 
 For individual updates, `cd` into the corresponding directory and run the following:

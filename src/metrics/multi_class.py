@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Utility classes for computing different metrics for multi-class classification on the go. """
+
+
 import numpy as np
 
 from sklearn.metrics import confusion_matrix

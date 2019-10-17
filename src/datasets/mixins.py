@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Mixins for adding additional features to DataSet objects. """
+
+
 from random import choice, randint
 
 
@@ -43,3 +51,30 @@ class TripletMixin:
         positive = self.__get_random_item__(positive_class)
         negative = self.__get_random_item__(choice(negative_classes))
         return anchor, positive, negative
+
+
+class FilenameIndexedMixin:
+    """
+    Mixin class for getting dataset items from a file name. It is intended to be used for retrieval tasks.
+    The mixin must be used with a torch.Dataset subclass, as it assumes the existence of the `imgs` field and a
+    `__getitem__` with the default Dataset indexation.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indexes
+        as values for efficient retrieval after initialization.
+        """
+        super().__init__(*args, **kwargs)
+        self.imgs_dict = {tup[0]: i for i, tup in enumerate(self.imgs)}
+
+    def getitem_by_filename(self, filename):
+        """
+        Get and item based on it's filename by getting the item's real index using the `imgs_dict` defined in the
+        FilenameIndexedMixin mixin and then using the index to retrieve the item using the default `__getitem__`.
+        :param filename: the filename of the item to be retrieved. Uses full paths.
+        :type: str
+        :return: the corresponding Dataset item.
+        :type: same as the mixed Dataset's `__getitem__`
+        """
+        return self[self.imgs_dict[filename]]

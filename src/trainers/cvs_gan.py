@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Ignite trainer for the CSV GAN architecture. """
+
+
 import os
 import torch
 
@@ -12,8 +20,9 @@ from torch.utils.tensorboard import SummaryWriter
 from ignite.handlers import Timer, ModelCheckpoint, TerminateOnNan
 from ignite.engine import Events
 
-from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
+from settings import ROOT_DIR
 from src.datasets import get_dataset
+from src.utils import get_device, get_checkpoint_directory
 from src.utils.collators import sketchy_mixed_collate
 from src.trainers.engines.cvs_gan import create_csv_gan_trainer
 from src.models.discriminators.intermodal import InterModalDiscriminator
@@ -53,12 +62,10 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
     :type: str
     """
     # Decide which device we want to run on
-    device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
+    device = get_device(n_gpu)
 
     # Defaults
-    checkpoint_directory = os.path.join(
-        ROOT_DIR, 'static', 'checkpoints', 'csv_gan', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
-    )
+    checkpoint_directory = get_checkpoint_directory('csv_gan')
     # Instance adversarial models
     generator = ImageEncoder(feature_depth=64, output_dimension=vector_dimension)
     discriminator = InterModalDiscriminator(input_dimension=vector_dimension)
@@ -72,7 +79,7 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
     if resume:
         try:
             print('Loading checkpoint %s.' % resume)
-            checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'csv_gan', resume)
+            checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'csv_gan', resume)
             checkpoint = torch.load(os.path.join(checkpoint_directory, 'checkpoint.pth'))
             start_epoch = checkpoint['epochs']
             generator = torch.load(os.path.join(checkpoint_directory, 'generator_net_%s.pth' % start_epoch))
@@ -127,7 +134,7 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
 
     # Summary writer for Tensorboard logging
     # Reference: https://pytorch.org/docs/stable/tensorboard.html
-    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'cvs_gan'))
+    writer = SummaryWriter(os.path.join(ROOT_DIR, 'data', 'logs', 'cvs_gan'))
 
     # Save network graph to Tensorboard
     # writer.add_graph(generator, train_set)
@@ -182,7 +189,10 @@ def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_val
         save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False, require_empty=False
     )
     trainer.add_event_handler(
-        Events.EPOCH_COMPLETED, checkpoint_saver, {'generator': generator, 'discriminator': discriminator}
+        Events.EPOCH_COMPLETED, checkpoint_saver, {'generator_train': generator, 'discriminator_train': discriminator}
+    )
+    trainer.add_event_handler(
+        Events.COMPLETED, checkpoint_saver, {'generator_complete': generator, 'discriminator_complete': discriminator}
     )
 
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())

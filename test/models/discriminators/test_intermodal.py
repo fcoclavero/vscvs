@@ -11,12 +11,13 @@ from settings import DATA_SOURCES
 from src.metrics.multi_class import Accuracy, MeanAveragePrecision, AveragePrecision, MeanAverageRecall, AverageRecall, \
     MeanAverageF1, AverageF1
 from src.models.discriminators.intermodal import InterModalDiscriminatorOneHot
-from src.utils.data import split
+from src.utils import get_device
+from src.utils.data import simple_split
 
 
 def test_onehot_classification(n_gpu = 1):
     data = pickle.load(open(DATA_SOURCES['sample_vectors_onehot']['pickle'], 'rb'))  # Load sample data
-    train, test = split(data)
+    train, test = simple_split(data)
 
     print('\n')
     print(
@@ -28,7 +29,7 @@ def test_onehot_classification(n_gpu = 1):
         (len(test), sum(test['class'].apply(lambda x: x[0])) / len(test) * 100, (len(test) - sum(test['class'].apply(lambda x: x[0]))) / len(test) * 100))
 
     # Decide which device we want to run on
-    device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
+    device = get_device(n_gpu)
 
     # Create data tensors
     x_train = torch.tensor(np.vstack(train['vector']), dtype=torch.float, device=device)

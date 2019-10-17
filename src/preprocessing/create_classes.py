@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Functions to generate a class dictionary for image labels. These are preprocessed and embedded (FastText). """
+
+
 import os
 import pickle
 import re

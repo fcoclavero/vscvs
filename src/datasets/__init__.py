@@ -1,35 +1,88 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
 """ Register datasets here to make them available in the CLI. """
 
 from settings import DATA_SOURCES
 
-from src.datasets.sketchy import Sketchy, SketchyImageNames, SketchyMixedBatches, SketchyTriplets
+from src.datasets.sketchy import Sketchy, SketchyImageNames, SketchyMixedBatches, SketchyTriplets, \
+                                 SketchyFilenameIndexed
 
-DATASETS = {
-    'sketchy_photos': lambda: Sketchy(DATA_SOURCES['sketchy']['photos']),
-    'sketchy_photos_triplets': lambda: SketchyTriplets(DATA_SOURCES['sketchy']['photos']),
-    'sketchy_sketches': lambda: Sketchy(DATA_SOURCES['sketchy']['sketches']),
-    'sketchy_sketches_triplets': lambda: SketchyTriplets(DATA_SOURCES['sketchy']['sketches']),
-    'sketchy_test_photos': lambda: Sketchy(DATA_SOURCES['sketchy_test']['photos']),
-    'sketchy_test_photos_triplets': lambda: SketchyTriplets(DATA_SOURCES['sketchy_test']['photos']),
-    'sketchy_test_sketches': lambda: Sketchy(DATA_SOURCES['sketchy_test']['sketches']),
-    'sketchy_test_sketches_triplets': lambda: SketchyTriplets(DATA_SOURCES['sketchy_test']['sketches']),
-    'sketchy_named_photos': lambda: SketchyImageNames(DATA_SOURCES['sketchy']['photos']),
-    'sketchy_named_sketches': lambda: SketchyImageNames(DATA_SOURCES['sketchy']['photos']),
-    'sketchy_test_named_photos': lambda: SketchyImageNames(DATA_SOURCES['sketchy_test']['photos']),
-    'sketchy_test_named_sketches': lambda: SketchyImageNames(DATA_SOURCES['sketchy_test']['photos']),
-    'sketchy_mixed_batches': lambda: SketchyMixedBatches('sketchy'),
-    'sketchy_test_mixed_batches': lambda: SketchyMixedBatches('sketchy_test')
+
+DATASET_DATA_SOURCES = {
+    'sketchy-photos': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-photos-triplets': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-photos-filenames': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-sketches': DATA_SOURCES['sketchy']['sketches'],
+    'sketchy-sketches-triplets': DATA_SOURCES['sketchy']['sketches'],
+    'sketchy-sketches-filenames': DATA_SOURCES['sketchy']['sketches'],
+    'sketchy-test-photos': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-test-photos-triplets': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-test-photos-filenames': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-test-sketches': DATA_SOURCES['sketchy_test']['sketches'],
+    'sketchy-test-sketches-triplets': DATA_SOURCES['sketchy_test']['sketches'],
+    'sketchy-test-sketches-filenames': DATA_SOURCES['sketchy_test']['sketches'],
+    'sketchy-named-photos': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-named-sketches': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-test-named-photos': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-test-named-sketches': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-mixed-batches': 'sketchy',
+    'sketchy-test-mixed-batches': 'sketchy_test',
 }
 
 
-def get_dataset(dataset_name):
+DATASETS = {
+    'sketchy-photos':
+        lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
+    'sketchy-photos-triplets':
+        lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
+    'sketchy-photos-filenames':
+        lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy-sketches':
+        lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
+    'sketchy-sketches-triplets':
+        lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
+    'sketchy-sketches-filenames':
+        lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy-test-photos':
+        lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
+    'sketchy-test-photos-triplets':
+        lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
+    'sketchy-test-photos-filenames':
+        lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy-test-sketches':
+        lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
+    'sketchy-test-sketches-triplets':
+        lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
+    'sketchy-test-sketches-filenames':
+        lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy-named-photos':
+        lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
+    'sketchy-named-sketches':
+        lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
+    'sketchy-test-named-photos':
+        lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
+    'sketchy-test-named-sketches':
+        lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
+    'sketchy-mixed-batches':
+        lambda data_source, *args, **kwargs: SketchyMixedBatches(data_source, *args, **kwargs),
+    'sketchy-test-mixed-batches':
+        lambda data_source, *args, **kwargs: SketchyMixedBatches(data_source, *args, **kwargs),
+}
+
+
+def get_dataset(dataset_name, *args, **kwargs):
     """
     Get the Dataset instancing lambda from the dictionary and return it's evaluation. This way, a Dataset object is
     only instanced when this function is evaluated.
     :param dataset_name: the name of the Dataset to be instanced. Must be a key in the DATASETS dictionary.
-    :return:
+    :type: str
+    :return: the corresponding Dataset object.
+    :type: torch.utils.data.Dataset
     """
     try:
-        return DATASETS[dataset_name]()
+        return DATASETS[dataset_name](DATASET_DATA_SOURCES[dataset_name], *args, **kwargs)
     except KeyError as e:
         raise type(e)('%s is not registered a Dataset.' % dataset_name)

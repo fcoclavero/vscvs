@@ -10,7 +10,7 @@ from settings import ROOT_DIR
 
 def test_tensorboard():
     # Writer will output to ./runs/ directory by default
-    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'example'))
+    writer = SummaryWriter(os.path.join(ROOT_DIR, 'data', 'logs', 'example'))
 
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
     trainset = datasets.MNIST('mnist_train', train=True, download=True, transform=transform)

@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Setuptools parameters for packaging the project. """
+
+
 import setuptools
 
 # tell setuptools about the package

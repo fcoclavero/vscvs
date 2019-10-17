@@ -1,3 +1,11 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Ignite trainer for a Triplet Network architecture. """
+
+
 import os
 import torch
 
@@ -12,9 +20,10 @@ from torch.utils.tensorboard import SummaryWriter
 from ignite.handlers import ModelCheckpoint, TerminateOnNan, Timer
 from ignite.engine import Events
 
-from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
+from settings import ROOT_DIR
 from src.datasets import get_dataset
 from src.models.triplet_network import TripletNetwork
+from src.utils import get_device, get_checkpoint_directory
 from src.utils.collators import triplet_collate
 from src.models.convolutional.classification import ClassificationConvolutionalNetwork
 from src.trainers.engines.triplet_cnn import create_triplet_cnn_trainer, create_triplet_cnn_evaluator
@@ -55,19 +64,17 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
     :type: str
     """
     # Decide which device we want to run on
-    device = torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
+    device = get_device(n_gpu)
 
     # Defaults
-    checkpoint_directory = os.path.join(
-        ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
-    )
+    checkpoint_directory = get_checkpoint_directory('triplet_cnn')
     net = TripletNetwork(ClassificationConvolutionalNetwork())
     start_epoch = 0
 
     if resume:
         try:
             print('Loading checkpoint %s.' % resume)
-            checkpoint_directory = os.path.join(ROOT_DIR, 'static', 'checkpoints', 'triplet_cnn', resume)
+            checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'triplet_cnn', resume)
             checkpoint = torch.load(os.path.join(checkpoint_directory, 'checkpoint.pth'))
             start_epoch = checkpoint['epochs']
             net = torch.load(os.path.join(checkpoint_directory, '_net_%s.pth' % start_epoch))
@@ -119,7 +126,7 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
 
     # Summary writer for Tensorboard logging
     # Reference: https://pytorch.org/docs/stable/tensorboard.html
-    writer = SummaryWriter(os.path.join(ROOT_DIR, 'static', 'logs', 'triplet_cnn'))
+    writer = SummaryWriter(os.path.join(ROOT_DIR, 'data', 'logs', 'triplet_cnn'))
 
     # Save network graph to Tensorboard
     # writer.add_graph(net, train_set)
@@ -170,11 +177,13 @@ def train_triplet_cnn(dataset_name, vector_dimension, train_test_split=.7, train
     # Create a Checkpoint handler that can be used to periodically save objects to disc.
     # Reference: https://pytorch.org/ignite/handlers.html?highlight=checkpoint#ignite.handlers.ModelCheckpoint
     checkpoint_saver = ModelCheckpoint(
-        checkpoint_directory, filename_prefix='',
+        checkpoint_directory, filename_prefix='net',
         save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False, require_empty=False
     )
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'net': net })
 
+    # Event handlers
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'train': net })
+    trainer.add_event_handler(Events.COMPLETED, checkpoint_saver, {'complete': net})
     trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
     trainer.run(train_loader, max_epochs=epochs)

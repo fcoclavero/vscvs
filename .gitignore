@@ -106,6 +106,9 @@ venv.bak/
 # PyCharm
 .idea
 
+# Visual Studio Code
+.vscode
+
 # Vector files
 *.vec*
 

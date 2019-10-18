@@ -13,19 +13,19 @@ python main.py embed --dataset-name sketchy-sketches --embeddings-name hog-sketc
 ### Retrieve an image given a set of embeddings
 
 ```bash
-python main.py retrieve --query-image-filename sketch.jpg --dataset-name sketchy-sketches --embeddings-name hog-sketches --k 16 --n-gpu 1 hog --in-channels 3 --cell-size 8 --bins 9 --signed-gradients False
+python main.py retrieve --query-image-filename sketchy/sketch/tx_000000000000/ape/n02470325_6919-1.png --dataset-name sketchy-sketches --embeddings-name hog-sketches --k 16 --n-gpu 1 hog --in-channels 3 --cell-size 8 --bins 9 --signed-gradients False
 ```
 
 ### Measure the class recall for a set of embeddings
 
 ```bash
-python main.py measure recall --k 16 --n-gpu 1 same-class --dataset-name sketchy-sketches --embeddings-name hog-sketches test-split 0.2
+python main.py measure recall --k 5 --n-gpu 1 same-class --dataset-name sketchy-sketches --embeddings-name hog-sketches --test-split 0.2
 ```
 
 ### Measure the cross modal retrieval class recall for a set of embeddings
 
 ```bash
-python main.py measure cross-modal recall --k 16 --n-gpu 1 same-class --sketch-dataset-name sketchy-sketches --photo-dataset-name sketchy-photos --sketch-embeddings-name hog-sketches --photo-embeddings-name hog-photos
+python main.py measure cross-modal recall --k 5 --n-gpu 1 same-class --sketch-dataset-name sketchy-sketches --photo-dataset-name sketchy-photos --sketch-embeddings-name hog-sketches --photo-embeddings-name hog-photos
 ```
 
 ## Tensorboad

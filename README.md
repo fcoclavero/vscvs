@@ -13,7 +13,7 @@ python main.py embed --dataset-name sketchy-sketches --embeddings-name hog-sketc
 ### Retrieve an image given a set of embeddings
 
 ```bash
-python main.py retrieve --query-image-filename sketchy/sketch/tx_000000000000/ape/n02470325_6919-1.png --dataset-name sketchy-sketches --embeddings-name hog-sketches --k 16 --n-gpu 1 hog --in-channels 3 --cell-size 8 --bins 9 --signed-gradients False
+python main.py retrieve --query-image-filename sketchy/sketch/tx_000000000000/ape/n02470325_6919-1.png --query-dataset-name sketchy-sketches --queried-dataset-name sketchy-photos --queried-embeddings-name hog-photos --k 16 --n-gpu 1 hog --in-channels 3 --cell-size 8 --bins 9 --signed-gradients False
 ```
 
 ### Measure the class recall for a set of embeddings

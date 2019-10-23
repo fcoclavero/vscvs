@@ -55,24 +55,24 @@ def recall(context, **kwargs):
     pass
  
  
-@cross_modal.command()
-@pass_context_to_kwargs
-@click.option(
-    '--sketch-dataset-name', type=click.Choice(['sketchy-sketches', 'sketchy-test-sketches']),
-    prompt='Sketch dataset name', help='The name of the dataset that corresponds to the sketch embeddings.',
-)
-@click.option(
-    '--photo-dataset-name', type=click.Choice(['sketchy-photos', 'sketchy-test-photos']),
-    prompt='Photos dataset name', help='The name of the dataset that corresponds to the photo embeddings.',
-)
-@click.option('--sketch-embeddings-name', prompt='Sketch embeddings name', help='Name of sketch embeddings directory.')
-@click.option('--photo-embeddings-name', prompt='Photo embeddings name', help='Name of photo embeddings directory.')
-def same_class(_, sketch_dataset_name, photo_dataset_name, sketch_embeddings_name, photo_embeddings_name,
-               test_split, k, n_gpu):
-    click.echo('Calculating cross modal class recall@{} for the {} and {} embeddings'.format(
-        k, sketch_embeddings_name,photo_embeddings_name
-    ))
-    from src.utils.embeddings import cross_modal_average_class_recall
-    cross_modal_average_class_recall(
-        sketch_dataset_name, photo_dataset_name, sketch_embeddings_name, photo_embeddings_name, test_split, k, n_gpu
-    )
+# @cross_modal.command()
+# @pass_context_to_kwargs
+# @click.option(
+#     '--sketch-dataset-name', type=click.Choice(['sketchy-sketches', 'sketchy-test-sketches']),
+#     prompt='Sketch dataset name', help='The name of the dataset that corresponds to the sketch embeddings.',
+# )
+# @click.option(
+#     '--photo-dataset-name', type=click.Choice(['sketchy-photos', 'sketchy-test-photos']),
+#     prompt='Photos dataset name', help='The name of the dataset that corresponds to the photo embeddings.',
+# )
+# @click.option('--sketch-embeddings-name', prompt='Sketch embeddings name', help='Name of sketch embeddings directory.')
+# @click.option('--photo-embeddings-name', prompt='Photo embeddings name', help='Name of photo embeddings directory.')
+# def same_class(_, sketch_dataset_name, photo_dataset_name, sketch_embeddings_name, photo_embeddings_name,
+#                test_split, k, n_gpu):
+#     click.echo('Calculating cross modal class recall@{} for the {} and {} embeddings'.format(
+#         k, sketch_embeddings_name,photo_embeddings_name
+#     ))
+#     from src.utils.embeddings import cross_modal_average_class_recall
+#     cross_modal_average_class_recall(
+#         sketch_dataset_name, photo_dataset_name, sketch_embeddings_name, photo_embeddings_name, test_split, k, n_gpu
+#     )

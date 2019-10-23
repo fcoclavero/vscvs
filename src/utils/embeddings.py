@@ -94,7 +94,8 @@ def get_top_k(query_embedding, embeddings, k, distance, device):
     return torch.topk(distances, k) # return the top k results
 
 
-def retrieve_top_k(model, query_image_filename, dataset_name, embeddings_name, k=16, distance='cosine', n_gpu=0):
+def retrieve_top_k(model, query_image_filename, query_dataset_name, queried_dataset_name, queried_embeddings_name,
+                   k=16, distance='cosine', n_gpu=0):
     """
     Query the embeddings for a dataset with the given image. The image is embedded with the given model. Pairwise
     distances to the query image are computed for each embedding in the dataset, so the embeddings created by `model`
@@ -104,9 +105,11 @@ def retrieve_top_k(model, query_image_filename, dataset_name, embeddings_name, k
     :param query_image_filename: the complete file path and name to the image to be used as query. The images in the
     dataset that are most similar to this image will be displayed.
     :type: str
-    :param dataset_name: name of the registered dataset which will be embedded.
+    :param query_dataset_name: name of the registered dataset to which the query image belongs.
     :type: str
-    :param embeddings_name: the name of the pickle file where the embeddings will be saved.
+    :param queried_dataset_name: name of the registered dataset to be queried.
+    :type: str
+    :param queried_embeddings_name: the name of the pickle file where the embeddings will be saved.
     :type: str
     :param k: the number of most similar images that wil be displayed.
     :type: int
@@ -117,9 +120,9 @@ def retrieve_top_k(model, query_image_filename, dataset_name, embeddings_name, k
     """
     device = get_device(n_gpu)
     # Load data
-    dataset = get_dataset(dataset_name)
+    dataset = get_dataset(query_dataset_name)
     # Load embeddings from pickle directory
-    embeddings = load_embedding_pickles(embeddings_name, device)
+    embeddings = load_embedding_pickles(queried_embeddings_name, device)
     # Get the query image and create the embedding for it
     image, image_class = dataset.getitem_by_filename(query_image_filename)
     # Send elements to the specified device

@@ -16,7 +16,7 @@ from src.utils.embeddings import create_embeddings
 
 
 @click.group()
-@click.option('--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+@click.option('--dataset-name', prompt='Dataset name', help='The name of the dataset to be embedded.',
               type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--embeddings-name', prompt='Embeddings name', help='Name of file where the embeddings will be saved.')
 @click.option('--batch-size', prompt='Batch size', help='The batch size for the embedding routine.', default=16)

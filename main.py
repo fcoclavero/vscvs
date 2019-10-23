@@ -27,7 +27,7 @@ def cli():
 
 
 @click.command()
-@click.option('--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+@click.option('--dataset-name', prompt='Dataset name', help='Name of the dataset for which classes must be created.',
               type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--tsne-dimension', default=2, help='The target dimensionality for the lower dimension projection.')
 def create_classes(dataset_name, tsne_dimension):

@@ -20,14 +20,14 @@ from src.utils.embeddings import retrieve_top_k
     '--query-image-filename', prompt='Query image full path.', help='The dataset will be queried for similar images.'
 )
 @click.option(
-    '--query-dataset-name', prompt='Dataset name', help='The name of the dataset that contains the query image.',
+    '--query-dataset-name', prompt='Query dataset name', help='The name of the dataset that contains the query image.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
 @click.option(
-    '--queried-dataset-name', prompt='Dataset name', help='The name of the dataset that will be queried.',
+    '--queried-dataset-name', prompt='Queried dataset name', help='The name of the dataset that will be queried.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--queried-embeddings-name', prompt='Embeddings name', help='Name of the queried embeddings directory.')
+@click.option('--queried-embeddings-name', prompt='Queried embeddings name', help='Queried embeddings directory name.')
 @click.option('--k', prompt='Top k', help='The amount of top results to be retrieved', default=10)
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context

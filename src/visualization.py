@@ -114,7 +114,7 @@ def plot_embedding_tsne(dataset_name, embeddings_name, load_projection=False):
     """
     from src.utils.embeddings import load_embedding_pickles # import here to avoid circular import
     dataset = get_dataset(dataset_name)
-    embeddings = load_embedding_pickles(embeddings_name, 'cpu')
+    embeddings = load_embedding_pickles(embeddings_name).to('cpu')
     projection_pickle_dir = os.path.join(ROOT_DIR, 'data', 'embeddings', embeddings_name)
     if load_projection:
         click.echo('Loading existing 2D projection from pickle.')

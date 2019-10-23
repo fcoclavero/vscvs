@@ -13,7 +13,7 @@ from ignite._utils import convert_tensor
 from torch.utils.data import Subset
 
 
-def simple_split(data, split_proportion = 0.8):
+def simple_split(data, split_proportion=.8):
     """
     Splits incoming data into two sets, simply slicing on the index corresponding to the given proportion.
     :param data: the dataset to be split
@@ -29,7 +29,7 @@ def simple_split(data, split_proportion = 0.8):
     return data[:split_index], data[split_index:]
 
 
-def random_simple_split(data, split_proportion = 0.8):
+def random_simple_split(data, split_proportion=.8):
     """
     Splits incoming data into two sets, randomly and with no overlapping. Returns the two resulting data objects along
     with two arrays containing the original indexes of each element.
@@ -48,7 +48,7 @@ def random_simple_split(data, split_proportion = 0.8):
     return data[indexes[:split_index]], data[indexes[split_index:]], indexes[:split_index], indexes[split_index:]
 
 
-def split(data, split_proportion=0.8):
+def split(data, split_proportion=.8):
     """
     Splits incoming data into two sets, one for training and one for tests. Non-overlapping.
     :param data: the dataset to be split

@@ -17,7 +17,6 @@ from tqdm import tqdm
 
 from src.datasets import get_dataset
 from src.utils import get_device, recreate_directory
-from src.utils.data import random_simple_split
 from src.visualization import plot_image_retrieval
 
 
@@ -56,12 +55,10 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
         )
 
 
-def load_embedding_pickles(embeddings_name, device):
+def load_embedding_pickles(embeddings_name):
     """
     Loads an embedding directory composed of pickled Tensors with image embeddings for a batch.
     :param embeddings_name: the name of the pickle directory where the embeddings are saved.
-    :type: str
-    :param device: device type specification
     :type: str
     :return: a single Pytorch tensor with all the embeddings found in the provided embedding directory. The later must
     contain pickled tensor objects with image embeddings.
@@ -75,22 +72,26 @@ def load_embedding_pickles(embeddings_name, device):
     ])
 
 
-def get_top_k(query_embedding, embeddings, k, distance, device):
+def get_top_k(query_embedding, queried_embeddings, k, distance, device):
     """
-    Returns the distances and indices of the k nearest embeddings in the `embeddings` tensor to the `query_embedding`
-    tensor.
-    :param query_embedding:
-    :param embeddings:
-    :param k:
+    Returns the distances and indices of the k nearest embeddings in the `queried_embeddings` tensor to the
+    `query_embedding` tensor.
+    :param query_embedding: tensor with the embedding of the query image.
+    :type: torch.Tensor with shape [1, embedding_length]
+    :param queried_embeddings: tensor with the stacked embeddings of the queried dataset.
+    :type: torch.Tensor with shape [queried_dataset_size, embedding_length]
+    :param k: the number of most similar images to be returned.
+    :type: int
     :param distance: which distance function to be used for nearest neighbor computation. Either 'cosine' or 'pairwise'
     :type: str, either 'cosine' or 'pairwise'
     :param device: device type specification
     :type: str
     :return: the closest k embeddings in the `embeddings` tensor to the `query_embedding`. A tuple with a list of their
     distances and indices are returned (respectively).
+    :type: tuple<torch.Tensor of shape [k], torch.Tensor of shape [k]>
     """
     p_dist = PairwiseDistance(p=2) if distance == 'pairwise' else CosineSimilarity()
-    distances = p_dist(embeddings, query_embedding)
+    distances = p_dist(queried_embeddings, query_embedding)
     return torch.topk(distances, k) # return the top k results
 
 
@@ -123,7 +124,7 @@ def retrieve_top_k(model, query_image_filename, query_dataset_name, queried_data
     query_dataset = get_dataset(query_dataset_name)
     queried_dataset = get_dataset(queried_dataset_name)
     # Load embeddings from pickle directory
-    queried_embeddings = load_embedding_pickles(queried_embeddings_name, device)
+    queried_embeddings = load_embedding_pickles(queried_embeddings_name).to(device)
     # Get the query image and create the embedding for it
     image, image_class = query_dataset.getitem_by_filename(query_image_filename)
     # Send elements to the specified device
@@ -135,20 +136,23 @@ def retrieve_top_k(model, query_image_filename, query_dataset_name, queried_data
     plot_image_retrieval(image, image_class, query_dataset, queried_dataset, top_distances, top_indices)
 
 
-def average_class_recall(dataset_name, embeddings_name, test_split, k, distance='cosine', n_gpu=0):
+def average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings,
+                         k, distance='cosine', n_gpu=0):
     """
     Computes the average class recall for the given embeddings. Embeddings are split into "test" and "queried" subsets.
     For each embedding in the "test" set, the nearest `k` embeddings in the "queried" set are retrieved using the given
     distance metric, giving us a recall for each test embedding that corresponds to the percentage of the top `k`
     retrieved embeddings that correspond to the same class as the test image. The average class recall is thus the
     average recall over all test images.
-    :param dataset_name: name of the registered dataset which will be embedded.
-    :type: str
-    :param embeddings_name: the name of the pickle file where the embeddings will be saved.
-    :type: str
-    :param test_split: the proportion of the embeddings that will be used for the queries needed to compute the average
-    class recall
-    :param k: the number of most similar images that wil be displayed.
+    :param query_dataset: the dataset to which the query image belongs.
+    :type: torch.utils.data.Dataset
+    :param queried_dataset: the dataset to be queried. It must have the exact same classes as the query dataset.
+    :type: torch.utils.data.Dataset
+    :param query_embeddings: the embedding tensors that will be used to retrieve images in the queried dataset.
+    :type: torch.Tensor of shape [query_dataset_length, embedding_length]
+    :param queried_embeddings: the embedding tensors that will be retrieved to compute the average class recall.
+    :type: torch.Tensor of shape [queried_dataset_length, embedding_length]
+    :param k: the number of most similar images to be retrieved in order to compute the recall.
     :type: int
     :param distance: which distance function to be used for nearest neighbor computation. Either 'cosine' or 'pairwise'
     :type: str, either 'cosine' or 'pairwise'
@@ -156,15 +160,10 @@ def average_class_recall(dataset_name, embeddings_name, test_split, k, distance=
     :type: int
     """
     device = get_device(n_gpu)
-    # Load data
-    dataset = get_dataset(dataset_name)
-    # Load embeddings from pickle directory
-    embeddings = load_embedding_pickles(embeddings_name, device).to(device)
-    # Split embeddings into "test" and "queried" subsets
-    query_embeddings, queried_embeddings, query_indexes, queried_indexes = random_simple_split(embeddings, test_split)
+    query_embeddings, queried_embeddings = query_embeddings.to(device), queried_embeddings.to(device)
     recalls = []
     for i, query_embedding in \
             tqdm(enumerate(query_embeddings), total=query_embeddings.shape[0], desc='Computing recall'):
         _, top_indices = get_top_k(query_embedding.unsqueeze(0), queried_embeddings, k, distance, device)
-        recalls.append(sum([dataset[queried_indexes[j]][1] == dataset[query_indexes[i]][1] for j in top_indices]) / k)
+        recalls.append(sum([queried_dataset[j][1] == query_dataset[i][1] for j in top_indices]) / k)
     print('Average class recall: {0:.2f}%'.format(mean(recalls) * 100))

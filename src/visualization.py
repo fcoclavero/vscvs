@@ -43,27 +43,29 @@ def display_sample_batch(dataset_name, batch_size, workers):
     plot_image_batch(next(iter(data_loader)))
 
 
-def plot_image_retrieval(dataset, query_image, query_image_class, top_distances, top_indices):
+def plot_image_retrieval(query_image, query_image_class, query_dataset, queried_dataset, top_distances, top_indices):
     """
     Prints and plots the results of a retrieval query, showing the query image and the top results and distances.
-    :param dataset: the Dataset that was queried
-    :type: torch.utils.data.Dataset
     :param query_image: tensor with the original image pixels
     :type: torch.Tensor
     :param query_image_class: name of the image's class
     :type: str
+    :param query_dataset: the Dataset that contains the query image
+    :type: torch.utils.data.Dataset
+    :param queried_dataset: the Dataset that was queried
+    :type: torch.utils.data.Dataset
     :param top_distances: one-dimensional tensor with the distances of the query image's embedding to the top k most
     similar images' embeddings.
     :type: torch.Tensor
     :param top_indices: list of the indices of the top k most similar images in the dataset
     :type: list<int>
     """
-    aux = [dataset[j] for j in top_indices]
+    aux = [queried_dataset[j] for j in top_indices]
     image_tensors = torch.stack([tup[0] for tup in aux])
     image_classes = [tup[1] for tup in aux]
-    print('query image class = {}'.format(dataset.classes[query_image_class]))
+    print('query image class = {}'.format(query_dataset.classes[query_image_class]))
     print('distances = {}'.format(top_distances))
-    print('classes = {}'.format([dataset.classes[class_name] for class_name in image_classes]))
+    print('classes = {}'.format([queried_dataset.classes[class_name] for class_name in image_classes]))
     plot_image_batch([query_image, query_image_class])
     plot_image_batch([image_tensors, image_classes])
 

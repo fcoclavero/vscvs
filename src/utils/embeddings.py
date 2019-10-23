@@ -120,18 +120,19 @@ def retrieve_top_k(model, query_image_filename, query_dataset_name, queried_data
     """
     device = get_device(n_gpu)
     # Load data
-    dataset = get_dataset(query_dataset_name)
+    query_dataset = get_dataset(query_dataset_name)
+    queried_dataset = get_dataset(queried_dataset_name)
     # Load embeddings from pickle directory
-    embeddings = load_embedding_pickles(queried_embeddings_name, device)
+    queried_embeddings = load_embedding_pickles(queried_embeddings_name, device)
     # Get the query image and create the embedding for it
-    image, image_class = dataset.getitem_by_filename(query_image_filename)
+    image, image_class = query_dataset.getitem_by_filename(query_image_filename)
     # Send elements to the specified device
     image, model = [var.to(device) for var in [image, model]]
     query_embedding = model(image.unsqueeze(0)) # unsqueeze to add the missing dimension expected by the model
     # Compute the distance to the query embedding for all images in the Dataset
-    embeddings, query_embedding = [var.to(device) for var in [embeddings, query_embedding]]
-    top_distances, top_indices = get_top_k(query_embedding, embeddings, k, distance, device)
-    plot_image_retrieval(dataset, image, image_class, top_distances, top_indices)
+    queried_embeddings, query_embedding = [var.to(device) for var in [queried_embeddings, query_embedding]]
+    top_distances, top_indices = get_top_k(query_embedding, queried_embeddings, k, distance, device)
+    plot_image_retrieval(image, image_class, query_dataset, queried_dataset, top_distances, top_indices)
 
 
 def average_class_recall(dataset_name, embeddings_name, test_split, k, distance='cosine', n_gpu=0):

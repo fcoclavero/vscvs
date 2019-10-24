@@ -7,7 +7,6 @@ __status__ = 'Prototype'
 
 
 import math
-
 import torch
 
 from torch.nn.parameter import Parameter

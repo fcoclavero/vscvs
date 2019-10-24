@@ -9,6 +9,7 @@ __status__ = 'Prototype'
 import functools
 import warnings
 
+from datetime import datetime
 from threading import Thread
 
 
@@ -42,6 +43,22 @@ def threaded(func):
         t = Thread(target=func, args=args, kwargs=kwargs)
         t.daemon = True
         t.start()
+    return wrapper
+
+
+def log_time(func):
+    """
+    Decorator for logging the execution time of a function.
+    :param func: the function to be decorated
+    :type: function
+    :return: the decorated function, which now prints its execution time.
+    :type: function
+    """
+    def wrapper(*args, **kwargs):
+        start = datetime.now()
+        ret = func(*args, **kwargs)
+        print('Executed {} in {} s.'.format(func.__name__, datetime.now() - start))
+        return ret
     return wrapper
 
 

@@ -177,10 +177,9 @@ def average_class_recall(query_dataset, queried_dataset, query_embeddings, queri
 
 @log_time
 def average_class_recall_parallel(query_dataset, queried_dataset, query_embeddings, queried_embeddings,
-                         k, distance='cosine', n_gpu=0):
+                                  k, distance='cosine', n_gpu=0):
     device = get_device(n_gpu)
     query_embeddings, queried_embeddings = query_embeddings.to(device), queried_embeddings.to(device)
-
     with Pool(processes=12) as pool:
         top_ks = pool.starmap(
             get_top_k,

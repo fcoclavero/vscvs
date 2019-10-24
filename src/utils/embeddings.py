@@ -10,16 +10,20 @@ import os
 import pickle
 import torch
 
+from itertools import repeat
 from statistics import mean
+from torch.multiprocessing import Pool
 from torch.nn import PairwiseDistance, CosineSimilarity
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.datasets import get_dataset
 from src.utils import get_device, recreate_directory
+from src.utils.decorators import log_time
 from src.visualization import plot_image_retrieval
 
 
+@log_time
 def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu):
     """
     Creates embedding vectors for each element in the given DataSet by batches, and saves each batch as a pickle
@@ -95,6 +99,7 @@ def get_top_k(query_embedding, queried_embeddings, k, distance, device):
     return torch.topk(distances, k) # return the top k results
 
 
+@log_time
 def retrieve_top_k(model, query_image_filename, query_dataset_name, queried_dataset_name, queried_embeddings_name,
                    k=16, distance='cosine', n_gpu=0):
     """
@@ -136,6 +141,7 @@ def retrieve_top_k(model, query_image_filename, query_dataset_name, queried_data
     plot_image_retrieval(image, image_class, query_dataset, queried_dataset, top_distances, top_indices)
 
 
+@log_time
 def average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings,
                          k, distance='cosine', n_gpu=0):
     """
@@ -167,3 +173,24 @@ def average_class_recall(query_dataset, queried_dataset, query_embeddings, queri
         _, top_indices = get_top_k(query_embedding.unsqueeze(0), queried_embeddings, k, distance, device)
         recalls.append(sum([queried_dataset[j][1] == query_dataset[i][1] for j in top_indices]) / k)
     print('Average class recall: {0:.2f}%'.format(mean(recalls) * 100))
+
+
+@log_time
+def average_class_recall_parallel(query_dataset, queried_dataset, query_embeddings, queried_embeddings,
+                         k, distance='cosine', n_gpu=0):
+    device = get_device(n_gpu)
+    query_embeddings, queried_embeddings = query_embeddings.to(device), queried_embeddings.to(device)
+
+    with Pool(processes=12) as pool:
+        top_ks = pool.starmap(
+            get_top_k,
+            tqdm(
+                zip(query_embeddings.unsqueeze(1),*[repeat(param) for param in [queried_embeddings,k,distance,device]]),
+                total=query_embeddings.shape[0], desc='Computing recall'
+            )
+        )
+        recalls = [
+            sum([queried_dataset[j][1] == query_dataset[i][1] for j in distances_indices[1]]) / k \
+            for i, distances_indices in enumerate(top_ks)
+        ]
+        print('Average class recall: {0:.2f}%'.format(mean(recalls) * 100))

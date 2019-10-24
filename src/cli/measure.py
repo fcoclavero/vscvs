@@ -13,7 +13,7 @@ from torch.utils.data import Subset
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from src.datasets import get_dataset
 from src.utils.data import random_simple_split
-from src.utils.embeddings import average_class_recall, load_embedding_pickles
+from src.utils.embeddings import average_class_recall, average_class_recall_parallel, load_embedding_pickles
 
 
 @click.group()
@@ -83,4 +83,5 @@ def same_class(_, query_dataset_name, queried_dataset_name, query_embeddings_nam
     query_dataset, queried_dataset = get_dataset(query_dataset_name), get_dataset(queried_dataset_name)
     query_embeddings = load_embedding_pickles(query_embeddings_name)
     queried_embeddings = load_embedding_pickles(queried_embeddings_name)
-    average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, n_gpu)
+    # average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, n_gpu)
+    average_class_recall_parallel(query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, n_gpu)

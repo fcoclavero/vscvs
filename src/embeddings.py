@@ -199,7 +199,7 @@ def match_class(queried_dataset, top_indices, query_image_class):
 
 @log_time
 def average_class_recall_parallel(query_dataset, queried_dataset, query_embeddings, queried_embeddings,
-                                  k, distance='cosine', n_gpu=0):
+                                  k, distance='cosine', n_gpu=0, processes=None):
     """
     Parallel
     :param query_dataset: the dataset to which the query image belongs.
@@ -216,10 +216,12 @@ def average_class_recall_parallel(query_dataset, queried_dataset, query_embeddin
     :type: str, either 'cosine' or 'pairwise'
     :param n_gpu: number of available GPUs. If zero, the CPU will be used.
     :type: int
+    :param processes: number of parallel workers to use. If `None`, then `os.cpu_count()` will be used.
+    :type: int or None
     """
     device = get_device(n_gpu)
     query_embeddings, queried_embeddings = query_embeddings.to(device), queried_embeddings.to(device)
-    with Pool(processes=12) as pool:
+    with Pool(processes=processes) as pool:
         top_indices_per_query = pool.starmap( # `multiprocessing` lib uses pickle as serializer backend, so the mapped
             get_top_k_indices, # func. must be declared in global scope. We use `starmap` to pass multiple parameters to
             tqdm( #  that func. `repeat` gives iterator that returns given param, so we can pass them without copying

@@ -13,7 +13,7 @@ from torch.utils.data import Subset
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from src.datasets import get_dataset
 from src.utils.data import random_simple_split
-from src.utils.embeddings import average_class_recall, average_class_recall_parallel, load_embedding_pickles
+from src.embeddings import average_class_recall, average_class_recall_parallel, load_embedding_pickles
 
 
 @click.group()

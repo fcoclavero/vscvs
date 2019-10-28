@@ -193,7 +193,21 @@ def average_class_recall(query_dataset, queried_dataset, query_embeddings, queri
     print('Average class recall: {0:.2f}%'.format(mean(recalls) * 100))
 
 
-def match_class(queried_dataset, top_indices, query_image_class):
+def class_recall(queried_dataset, top_indices, query_image_class):
+    """
+    Computes the recall for the results of the given top distances query.
+    :param queried_dataset: the dataset that was queried. It must have the exact same classes as the query dataset.
+    It is used to retrieve the classes for the given `top_indices`.
+    :type: torch.utils.data.Dataset
+    :param top_indices: a list with the indices, in the `queried_dataset`, of the most similar images to the
+    query image.
+    :type: list<int>
+    :param query_image_class: the class index (not name) of the query image.
+    :type: int
+    :return: the class recall, which corresponds to the percentage of the retrieved results (the given most similar
+    images to the query image) have the same class as the query image
+    :type: float
+    """
     return reduce(lambda part, i: part + queried_dataset[i][1] == query_image_class, top_indices, 0) / len(top_indices)
 
 
@@ -228,7 +242,7 @@ def average_class_recall_parallel(query_dataset, queried_dataset, query_embeddin
                 zip(query_embeddings.unsqueeze(1), *[repeat(param) for param in [queried_embeddings, k, distance]]),
                 total=query_embeddings.shape[0], desc='Computing distances')) # `total` required for `__len__` attribute
         recalls = pool.starmap(
-            match_class,
+            class_recall,
             tqdm(zip(repeat(queried_dataset), top_indices_per_query, query_dataset.targets),
                  total=query_embeddings.shape[0], desc='Computing recall'))
         print('Average class recall: {0:.2f}%'.format(mean(recalls) * 100))

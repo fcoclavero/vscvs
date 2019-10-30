@@ -26,19 +26,30 @@ def get_device(n_gpu):
     return torch.device('cuda:0' if (torch.cuda.is_available() and n_gpu > 0) else 'cpu')
 
 
-def get_checkpoint_directory(model_name, date=None):
+def get_checkpoint_directory(model_name, date=datetime.now()):
     """
     Get the path where model checkpoints should be stored.
     :param model_name: the name of the model
     :type: str
-    :param date: the date string of the model checkpoint. Defaults to the current date if `None` is passed.
-    :type: str or None
+    :param date: the date string of the model checkpoint. Defaults to the current date.
+    :type: str
     :return: the model checkpoint path
     :type: str
     """
-    return os.path.join(
-        ROOT_DIR, 'data', 'checkpoints', model_name, datetime.now().strftime(CHECKPOINT_NAME_FORMAT)
-    )
+    return os.path.join(ROOT_DIR, 'data', 'checkpoints', model_name, date.strftime(CHECKPOINT_NAME_FORMAT))
+
+
+def get_log_directory(model_name, date=datetime.now()):
+    """
+    Get the path where model checkpoints should be stored.
+    :param model_name: the name of the model
+    :type: str
+    :param date: the date string of the model checkpoint. Defaults to the current date.
+    :type: str
+    :return: the model checkpoint path
+    :type: str
+    """
+    return os.path.join(ROOT_DIR, 'data', 'logs', model_name, date.strftime(CHECKPOINT_NAME_FORMAT))
 
 
 def get_subdirectories(path):

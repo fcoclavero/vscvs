@@ -12,6 +12,8 @@ import torch
 from ignite._utils import convert_tensor
 from torch.utils.data import Subset
 
+from src.utils.decorators import deprecated
+
 
 def simple_split(data, split_proportion=.8):
     """
@@ -64,6 +66,7 @@ def split(data, split_proportion=.8):
     return Subset(data, range(test_index)), Subset(data, range(test_index, len(data)))
 
 
+@deprecated
 def dataset_split(dataset, train_test_split, train_validation_split):
     """
     Split a dataset into training. validation and test datasets, given the provided split proportions.
@@ -83,6 +86,26 @@ def dataset_split(dataset, train_test_split, train_validation_split):
     n_train = int(train_validation_split * (len(dataset) - n_test))
     n_validation = len(dataset) - n_train - n_test
     return torch.utils.data.random_split(dataset, (n_train, n_validation, n_test))
+
+
+def dataset_split_successive(dataset, *split_proportions):
+    """
+    Split a dataset successively into multiple subsets, given the provided split proportions. The first subset is
+    taken from the original dataset using the first proportion. The following subsets are taken using the same logic,
+    :param dataset: the dataset to be split.
+    :type: torch.utils.data.Dataset
+    :param split_proportions: any number of split proportions.
+    :type: float $\in [0, 1]$
+    :return: the the resulting Datasets
+    :type: list<torch.utils.data.Dataset> same length as `split_proportions`
+    """
+    subset_lengths = []
+    remaining_n = len(dataset)
+    for split_proportion in split_proportions:
+        subset_length = remaining_n * split_proportion
+        subset_lengths.append(subset_length)
+        remaining_n = max(0, remaining_n - subset_length)
+    return torch.utils.data.random_split(dataset, subset_lengths)
 
 
 def prepare_batch(batch, device=None, non_blocking=False):

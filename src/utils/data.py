@@ -105,7 +105,8 @@ def dataset_split_successive(dataset, *split_proportions):
         subset_length = remaining_n * split_proportion
         subset_lengths.append(subset_length)
         remaining_n = max(0, remaining_n - subset_length)
-    return torch.utils.data.random_split(dataset, subset_lengths)
+    subset_lengths.append(remaining_n)
+    return torch.utils.data.random_split(dataset, [int(subset_length) for subset_length in subset_lengths])
 
 
 def prepare_batch(batch, device=None, non_blocking=False):

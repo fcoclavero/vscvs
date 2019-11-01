@@ -28,20 +28,16 @@ def train(context, **kwargs):
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--train-test-split', prompt='Train/test split',
-              help='proportion of the dataset that will be used for training.', default=.7)
 @click.option('--train-validation-split', prompt='Train/validation split',
               help='proportion of the training set that will be used for training, not validating.', default=.8)
 @click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
 @click.option('--resume', help='Epoch for checkpoint loading.', default=None)
 def cnn(_, batch_size, epochs, workers, n_gpu,
-        dataset_name, train_test_split, train_validation_split, lr, momentum, resume):
+        dataset_name, train_validation_split, lr, momentum, resume):
     from src.trainers.cnn import train_cnn
     click.echo('cnn - %s dataset' % dataset_name)
-    train_cnn(
-        dataset_name, train_test_split, train_validation_split, lr, momentum, batch_size, workers, n_gpu, epochs, resume
-    )
+    train_cnn(dataset_name, train_validation_split, resume, batch_size, workers, n_gpu, epochs, lr, momentum)
 
 
 @train.command()

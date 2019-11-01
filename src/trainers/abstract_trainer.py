@@ -166,7 +166,7 @@ class AbstractTrainer:
             metrics = self.evaluator.state.metrics
             for key, value in metrics.items():
                 writer.add_scalar(key, value)
-            tqdm.write("\nTraining Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+            tqdm.write('\nTraining Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}\n'
                        .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
@@ -176,7 +176,7 @@ class AbstractTrainer:
             metrics = self.evaluator.state.metrics
             for key, value in metrics.items():
                 writer.add_scalar(key, value)
-            tqdm.write("\nValidation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}"
+            tqdm.write('\nValidation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}\n'
                        .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
 
         checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to periodically

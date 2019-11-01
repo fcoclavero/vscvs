@@ -18,6 +18,7 @@ from src.cli.train import train
 
 # Suppress gensim 'detected Windows; aliasing chunkize to chunkize_serial' warning
 warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
+warnings.filterwarnings(action='ignore', category=FutureWarning, module='tensorboard')
 
 
 # Create a nested command from command groups in the src package

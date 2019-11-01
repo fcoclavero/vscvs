@@ -51,8 +51,8 @@ class ClassOnlyGCNTrainer(AbstractTrainer):
         pass
 
 
-def train_class_only_gcn(dataset_name, train_validation_split=.8, resume_checkpoint=None, batch_size=16, workers=4,
-                         n_gpu=0, epochs=2, learning_rate=.01, weight_decay=5e-4):
+def train_class_only_gcn(dataset_name, train_validation_split=.8, resume_checkpoint=None, batch_size=16, epochs=2,
+                         workers=4, n_gpu=0, learning_rate=.01, weight_decay=5e-4):
     """
     Trains a GCN to predict image labels using a GCN over batch clique graphs where nodes correspond to batch images and
     vertex weights corresponds to image label word vector distances.

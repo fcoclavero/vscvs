@@ -55,8 +55,8 @@ class CNNTrainer(AbstractTrainer):
             self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
 
 
-def train_cnn(dataset_name, train_validation_split=.8, resume_checkpoint=None,
-              batch_size=16, workers=4, n_gpu=0, epochs=2, learning_rate=.01, momentum=.8):
+def train_cnn(dataset_name, train_validation_split=.8, resume_checkpoint=None, batch_size=16, epochs=2, workers=4,
+              n_gpu=0, learning_rate=.01, momentum=.8):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param dataset_name: the name of the Dataset to be used for training

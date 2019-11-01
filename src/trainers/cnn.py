@@ -8,8 +8,8 @@ __status__ = 'Prototype'
 
 from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
-from torch import optim
 from torch.nn import CrossEntropyLoss
+from torch.optim import SGD
 
 from src.models.convolutional.classification import ClassificationConvolutionalNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
@@ -18,7 +18,7 @@ from src.utils.data import prepare_batch
 
 class CNNTrainer(AbstractTrainer):
     """
-    Trainer for a simple classification CNN.
+    Trainer for a simple class classification CNN.
     """
     def __init__(self, dataset_name, train_validation_split=.8, resume_checkpoint=None, batch_size=16, workers=4,
                  n_gpu=0, epochs=2, learning_rate=.01, momentum=.8):
@@ -36,11 +36,11 @@ class CNNTrainer(AbstractTrainer):
 
     @property
     def optimizer(self):
-        return optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=self.momentum)
+        return SGD(self.model.parameters(), lr=self.learning_rate, momentum=self.momentum)
 
     @property
     def serialized_checkpoint(self):
-        return { **super().serialized_checkpoint, 'learning_rate': self.learning_rate, 'momentum': self.momentum }
+        return {**super().serialized_checkpoint, 'learning_rate': self.learning_rate, 'momentum': self.momentum}
 
     @property
     def trainer_id(self):

@@ -60,23 +60,23 @@ def plot_classes(classes):
     plot(data)
 
 
-def create_classes_data_frame(data_set, tsne_dimension = 2):
+def create_classes_data_frame(dataset, tsne_dimension=2):
     """
     Create a new classes data frame for the specified dataset. The dataset must be registered in the project settings.
     The data frame is pickled before function return, to prevent re-calculating things.
-    :param data_set: the name of the dataset
+    :param dataset: the name of the dataset
     :type: str
     :param tsne_dimension: the dimensions for the lower dimensional vector projections
     :type: int
     :return: a pandas DataFrame with "class", "vector" (document embeddings) and "tsne" columns
     :type: pd.DataFrame
     """
-    paths = classes_set(DATA_SOURCES[data_set]['photos']).union(classes_set(DATA_SOURCES[data_set]['sketches']))
+    paths = classes_set(DATA_SOURCES[dataset]['photos']).union(classes_set(DATA_SOURCES[dataset]['sketches']))
     classes = pd.DataFrame(columns=['class', 'vector', 'tsne'])
     classes['class'] = sorted(list(paths))
     classes['class'] = classes['class'].apply(lambda cls: ' '.join(re.split(r'(?:_|-)', cls)))
     classes['class'] = classes['class'].apply(full_clean)
     classes['vector'] = classes['class'].apply(document_vector)
     classes['tsne'] = list(TSNE(n_components=tsne_dimension).fit_transform(np.vstack(classes['vector'].values)))
-    pickle.dump(classes, open(DATA_SOURCES[data_set]['classes'], 'wb'))
+    pickle.dump(classes, open(DATA_SOURCES[dataset]['classes'], 'wb'))
     return classes

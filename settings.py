@@ -25,7 +25,6 @@ DATA_SOURCES = {
         'root': os.path.join(DATA_DIR, 'sketchy'),
         'photos': os.path.join(DATA_DIR, 'sketchy', 'photo', 'tx_000000000000'), # 12500
         'sketches': os.path.join(DATA_DIR, 'sketchy', 'sketch', 'tx_000000000000'), # 75481
-        'classes': os.path.join(DATA_DIR, 'sketchy', 'classes.pickle'),
         'dimensions': (256, 256),
         'language': 'en'
     },
@@ -33,7 +32,6 @@ DATA_SOURCES = {
         'root': os.path.join(DATA_DIR, 'sketchy_test'),
         'photos': os.path.join(DATA_DIR, 'sketchy_test', 'photo'), # 1250
         'sketches': os.path.join(DATA_DIR, 'sketchy_test', 'sketch'), # 1250
-        'classes': os.path.join(DATA_DIR, 'sketchy_test', 'classes.pickle'),
         'dimensions': (256, 256),
         'language': 'en'
     },

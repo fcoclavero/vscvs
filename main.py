@@ -24,6 +24,7 @@ warnings.filterwarnings(action='ignore', category=FutureWarning, module='tensorb
 # Create a nested command from command groups in the src package
 @click.group()
 def cli():
+    """ Click group for all of the project's scripts. """
     pass
 
 
@@ -32,17 +33,16 @@ def cli():
               type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--tsne-dimension', default=2, help='The target dimensionality for the lower dimension projection.')
 def create_classes(dataset_name, tsne_dimension):
-    """" Create and pickle a new classes data frame. """
+    click.echo('Creating a new classes dataframe for the {} dataset'.format(dataset_name))
     from src.preprocessing import create_classes_data_frame # import here to avoid loading word vectors on every command
-    from src.datasets import get_dataset
-    create_classes_data_frame(get_dataset(dataset_name), tsne_dimension)
+    create_classes_data_frame(dataset_name, tsne_dimension)
 
 
 @click.command()
 @click.option('--n', prompt='Number of samples', help='The number of sample vectors to be created.', type=int)
 @click.option('--dimension', prompt='Sample dimensionality', help='The dimension of sample vectors.', type=int)
 def create_sample_vectors(n, dimension):
-    """ Create and pickle a new classes data frame. """
+    click.echo('Creating sample vectors.')
     from src.preprocessing import create_sample_vectors
     create_sample_vectors(n, dimension)
 

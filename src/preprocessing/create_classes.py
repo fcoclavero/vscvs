@@ -3,7 +3,7 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" Functions to generate a class dictionary for image labels. These are preprocessed and embedded (FastText). """
+""" Functions to generate a class dataframe for image labels. These are preprocessed and embedded (FastText). """
 
 
 import os
@@ -16,11 +16,11 @@ import plotly.graph_objs as go
 
 from plotly.offline import plot
 from sklearn.manifold import TSNE
-
-from settings import DATA_SOURCES
+from tqdm import tqdm
 
 from modules.textpreprocess.compound_cleaners.en import full_clean
 from modules.wordvectors.en import document_vector
+from src.datasets import DATASET_DATA_SOURCES
 
 
 def classes_set(directory):
@@ -60,23 +60,27 @@ def plot_classes(classes):
     plot(data)
 
 
-def create_classes_data_frame(dataset, tsne_dimension=2):
+def create_classes_data_frame(dataset_name, tsne_dimension=2):
     """
-    Create a new classes data frame for the specified dataset. The dataset must be registered in the project settings.
+    Create a new classes dataframe for the specified dataset. The dataset must be registered in the project settings.
     The data frame is pickled before function return, to prevent re-calculating things.
-    :param dataset: the name of the dataset
+    :param dataset_name: the name of the dataset
     :type: str
     :param tsne_dimension: the dimensions for the lower dimensional vector projections
     :type: int
     :return: a pandas DataFrame with "class", "vector" (document embeddings) and "tsne" columns
     :type: pd.DataFrame
     """
-    paths = classes_set(DATA_SOURCES[dataset]['photos']).union(classes_set(DATA_SOURCES[dataset]['sketches']))
+    dataset_dir = DATASET_DATA_SOURCES[dataset_name]
+    paths = classes_set(dataset_dir)
     classes = pd.DataFrame(columns=['class', 'vector', 'tsne'])
     classes['class'] = sorted(list(paths))
-    classes['class'] = classes['class'].apply(lambda cls: ' '.join(re.split(r'(?:_|-)', cls)))
-    classes['class'] = classes['class'].apply(full_clean)
-    classes['vector'] = classes['class'].apply(document_vector)
+    tqdm.pandas(desc='Removing special characters.')
+    classes['class'] = classes['class'].progress_apply(lambda cls: ' '.join(re.split(r'(?:_|-)', cls)))
+    tqdm.pandas(desc='Applying full clean.')
+    classes['class'] = classes['class'].progress_apply(full_clean)
+    tqdm.pandas(desc='Creating document vectors.')
+    classes['vector'] = classes['class'].progress_apply(document_vector)
     classes['tsne'] = list(TSNE(n_components=tsne_dimension).fit_transform(np.vstack(classes['vector'].values)))
-    pickle.dump(classes, open(DATA_SOURCES[dataset]['classes'], 'wb'))
+    pickle.dump(classes, open(os.path.join(dataset_dir, 'classes.pickle'), 'wb'))
     return classes

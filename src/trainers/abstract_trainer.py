@@ -35,7 +35,7 @@ class AbstractTrainer:
         self.train_loader, self.val_loader = self._create_data_loaders(train_validation_split, batch_size, workers)
         self.log_directory = get_log_directory(self.trainer_id, date=date)
         self.checkpoint_directory = get_checkpoint_directory(self.trainer_id, date=date)
-        self.evaluator = self._create_evaluator()
+        self.evaluator = self._create_evaluator_engine()
         self.trainer_engine = self._create_trainer_engine()
         self.batch_size = batch_size
         self.start_epoch = 0
@@ -99,7 +99,7 @@ class AbstractTrainer:
         """
         raise NotImplementedError
 
-    def _create_evaluator(self):
+    def _create_evaluator_engine(self):
         """
         Creates an Ignite evaluator engine for the target model.
         :return: an evaluator engine for the target model

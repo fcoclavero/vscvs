@@ -46,7 +46,7 @@ class CNNTrainer(AbstractTrainer):
     def trainer_id(self):
         return 'cnn_sk'
 
-    def _create_evaluator(self):
+    def _create_evaluator_engine(self):
         return create_supervised_evaluator(
             self.model, metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss)}, device=self.device)
 

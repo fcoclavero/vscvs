@@ -10,7 +10,10 @@ import random
 import torch
 
 from ignite._utils import convert_tensor
+from itertools import repeat
+from torch.multiprocessing import Pool
 from torch.utils.data import Subset
+from torch_geometric.data import Data
 
 from src.utils.decorators import deprecated
 
@@ -142,6 +145,53 @@ def prepare_batch_gan(batch, device=None, non_blocking=False):
         [convert_tensor(sketch, device=device, non_blocking=non_blocking) for sketch in sketches],
         convert_tensor(classes, device=device, non_blocking=non_blocking)
     )
+
+
+def wordvector_distance(indices, class_wordvector_distances):
+    """
+    Get the distance of two class word vectors, given a pre-computed distance matrix. This can be used to determine
+    edge weights between two batch graph nodes.
+    :param indices: the indices of the two classes. In the graph structure, the first index corresponds to the origin
+    vertex and the second index corresponds to the destination vertex.
+    :type: torch.Tensor with shape [2]
+    :param class_wordvector_distances: pre-computed class word vector distances for all the classes in the dataset. The
+    matrix is symmetrical.
+    :type:
+    :return: the distances between the word vectors of the classes specified in `indices`.
+    :type: float
+    """
+    return class_wordvector_distances[indices[0]][indices[1]]
+
+
+def batch_clique_graph(batch, classes_dataframe, processes=None):
+    """
+    Creates a graph Data object from an image batch, to use with a semi-supervised graph learning model. The created
+    graph connects all batch elements with each other (clique graph) and graph vertex weights correspond to word
+    vector distances of class labels. Assumes data and labels are the first two parameters of each sample.
+    :param batch: data to be sent to device.
+    :type: list
+    :param classes_dataframe: dataframe containing class names and their word vectors
+    :type: pandas.Dataframe
+    :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
+    will be used.
+    :type: int or None
+    :return: the batch clique graph
+    :type: torch_geometric.data.Data
+    """
+    x, y, *_ = batch  # unpack extra parameters into `_`
+    # 1) Create node feature matrix. The features will be class indexes, which we will try to predict
+    nodes = y.unsqueeze(1) # TODO: change these to the image feature vectors in final implementation
+    # 2) Create the binary adjacency matrix for the clique graph
+    edge_index = torch.stack([
+        torch.arange(nodes.shape[0]).repeat_interleave(nodes.shape[0]), # each index repeated num_edges times
+        torch.arange(nodes.shape[0]).repeat(nodes.shape[0]) # the index range repeated num_edges times
+    ])
+    # 3) Create edge weights from the word vector distances
+    with Pool(processes=processes) as pool:
+        edge_classes = torch.stack([y.repeat_interleave(y.shape[0]), y.repeat(y.shape[0])]).t().contiguous()
+        edge_attr = torch.stack(pool.starmap(
+            wordvector_distance, zip(edge_classes, repeat(torch.tensor(classes_dataframe['distances'])))))
+    return Data(x=nodes, edge_index=edge_index, edge_attr=edge_attr, y=y)
 
 
 def output_transform_gan(output):

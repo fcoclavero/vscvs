@@ -18,11 +18,13 @@ def create():
 @create.command()
 @click.option('--dataset-name', prompt='Dataset name', help='Name of the dataset for which classes must be created.',
               type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
+@click.option('--distance', prompt='Distance', type=click.Choice(['cosine', 'pairwise']),
+              help='The distance measure to be used for pre-computing class document vector distances.')
 @click.option('--tsne-dimension', default=2, help='The target dimensionality for the lower dimension projection.')
-def classes(dataset_name, tsne_dimension):
+def classes(dataset_name, distance, tsne_dimension):
     click.echo('Creating a new classes dataframe for the {} dataset'.format(dataset_name))
     from src.preprocessing import create_classes_data_frame # import here to avoid loading word vectors on every command
-    create_classes_data_frame(dataset_name, tsne_dimension)
+    create_classes_data_frame(dataset_name, distance, tsne_dimension)
 
 
 @create.command()

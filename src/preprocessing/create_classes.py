@@ -9,6 +9,7 @@ __status__ = 'Prototype'
 import os
 import pickle
 import re
+import torch
 
 import numpy as np
 import pandas as pd
@@ -16,6 +17,7 @@ import plotly.graph_objs as go
 
 from plotly.offline import plot
 from sklearn.manifold import TSNE
+from torch.nn import PairwiseDistance, CosineSimilarity
 from tqdm import tqdm
 
 from modules.textpreprocess.compound_cleaners.en import full_clean
@@ -60,12 +62,14 @@ def plot_classes(classes):
     plot(data)
 
 
-def create_classes_data_frame(dataset_name, tsne_dimension=2):
+def create_classes_data_frame(dataset_name, distance='cosine', tsne_dimension=2):
     """
     Create a new classes dataframe for the specified dataset. The dataset must be registered in the project settings.
     The data frame is pickled before function return, to prevent re-calculating things.
     :param dataset_name: the name of the dataset
     :type: str
+    :param distance: which distance function to be used for nearest neighbor computation. Either 'cosine' or 'pairwise'
+    :type: str, either 'cosine' or 'pairwise'
     :param tsne_dimension: the dimensions for the lower dimensional vector projections
     :type: int
     :return: a pandas DataFrame with "class", "vector" (document embeddings) and "tsne" columns
@@ -74,13 +78,19 @@ def create_classes_data_frame(dataset_name, tsne_dimension=2):
     dataset_dir = DATASET_DATA_SOURCES[dataset_name]
     paths = classes_set(dataset_dir)
     classes = pd.DataFrame(columns=['class', 'vector', 'tsne'])
-    classes['class'] = sorted(list(paths))
+    classes['classes'] = sorted(list(paths))
     tqdm.pandas(desc='Removing special characters.')
-    classes['class'] = classes['class'].progress_apply(lambda cls: ' '.join(re.split(r'(?:_|-)', cls)))
+    classes['classes'] = classes['classes'].progress_apply(lambda cls: ' '.join(re.split(r'(?:_|-)', cls)))
     tqdm.pandas(desc='Applying full clean.')
-    classes['class'] = classes['class'].progress_apply(full_clean)
+    classes['classes'] = classes['classes'].progress_apply(full_clean)
     tqdm.pandas(desc='Creating document vectors.')
-    classes['vector'] = classes['class'].progress_apply(document_vector)
-    classes['tsne'] = list(TSNE(n_components=tsne_dimension).fit_transform(np.vstack(classes['vector'].values)))
+    vectors = torch.tensor(np.vstack(classes['classes'].progress_apply(document_vector)))
+    classes['vectors'] = vectors
+    p_dist = PairwiseDistance(p=2) if distance == 'pairwise' else CosineSimilarity()
+    classes['distances'] = p_dist( # distance from every node to every node
+        vectors.repeat_interleave(vectors.shape[0], 0),  # each index repeated num_edges times
+        vectors.repeat(vectors.shape[0], 1)  # the index range repeated num_edges times
+    ).reshape(vectors.shape[0], -1) # convert to 2D matrix with shape [vectors.shape[0], vectors.shape[0]]
+    classes['tsne'] = torch.tensor(TSNE(n_components=tsne_dimension).fit_transform(vectors))
     pickle.dump(classes, open(os.path.join(dataset_dir, 'classes.pickle'), 'wb'))
     return classes

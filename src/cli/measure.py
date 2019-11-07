@@ -13,7 +13,7 @@ from torch.utils.data import Subset
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from src.datasets import get_dataset
 from src.utils.data import random_simple_split
-from src.utils.embeddings import average_class_recall, load_embedding_pickles
+from src.embeddings import average_class_recall, average_class_recall_parallel, load_embedding_pickles
 
 
 @click.group()
@@ -24,6 +24,8 @@ def measure():
 
 @measure.group()
 @click.option('--k', prompt='Top k', help='The amount of top results to be retrieved', default=10)
+@click.option('--distance', prompt='Distance', help='The distance measure to be used.',
+              type=click.Choice(['cosine', 'pairwise']))
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context
 def recall(context, **kwargs):
@@ -39,14 +41,14 @@ def recall(context, **kwargs):
 )
 @click.option('--embeddings-name', prompt='Embeddings name', help='Name of the embeddings directory.')
 @click.option('--test-split', prompt='Test split', default=.2, help='Proportion of the dataset to be used for queries.')
-def same_class(_, dataset_name, embeddings_name, test_split, k, n_gpu):
+def same_class(_, dataset_name, embeddings_name, test_split, k, distance, n_gpu):
     click.echo('Calculating class recall@{} for {} embeddings'.format(k, embeddings_name))
     # Split dataset and embeddings into "query" and "queried" subsets
     dataset = get_dataset(dataset_name)
     embeddings = load_embedding_pickles(embeddings_name)
     query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(embeddings, test_split)
     query_dataset, queried_dataset = Subset(dataset, query_indices), Subset(dataset, queried_indices)
-    average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, n_gpu)
+    average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu)
 
  
 @measure.group()
@@ -67,7 +69,12 @@ def cross_modal():
 @click.option('--query-embeddings-name', prompt='Query embeddings name', help='Query embeddings directory name.')
 @click.option('--queried-embeddings-name', prompt='Queried embeddings name', help='Queried embeddings directory name.')
 @click.option('--k', prompt='Top k', help='The amount of top results to be retrieved', default=10)
-@click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
+@click.option('--distance', prompt='Distance', help='The distance measure to be used.',
+              type=click.Choice(['cosine', 'pairwise']))
+@click.option('--n-gpu', prompt='Number of gpus', default=0,
+              help='The number of GPUs available. Use 0 for CPU mode. Windows does not support CUDA multiprocessing.')
+@click.option('--processes', prompt='Number of parallel workers', default=1,
+              help='The number of parallel workers to be used.')
 @pass_kwargs_to_context
 def recall(context, **kwargs):
     """ Cross-modal image recall benchmarks click group. """
@@ -76,11 +83,13 @@ def recall(context, **kwargs):
 
 @recall.command()
 @pass_context_to_kwargs
-def same_class(_, query_dataset_name, queried_dataset_name, query_embeddings_name, queried_embeddings_name, k, n_gpu):
+def same_class(_, query_dataset_name, queried_dataset_name, query_embeddings_name, queried_embeddings_name,
+               k, distance, n_gpu, processes):
     click.echo('Calculating cross modal class recall@{} for the {} and {} embeddings'.format(
         k, query_embeddings_name, queried_embeddings_name
     ))
     query_dataset, queried_dataset = get_dataset(query_dataset_name), get_dataset(queried_dataset_name)
     query_embeddings = load_embedding_pickles(query_embeddings_name)
     queried_embeddings = load_embedding_pickles(queried_embeddings_name)
-    average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, n_gpu)
+    average_class_recall_parallel(
+        query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu, processes)

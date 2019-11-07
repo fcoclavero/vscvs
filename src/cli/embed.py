@@ -12,7 +12,7 @@ import torch
 
 from settings import ROOT_DIR
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
-from src.utils.embeddings import create_embeddings
+from src.embeddings import create_embeddings
 
 
 @click.group()

@@ -112,7 +112,7 @@ def plot_embedding_tsne(dataset_name, embeddings_name, load_projection=False):
     :param embeddings_name: the name of the directory where the batch pickles will be saved.
     :type: str
     """
-    from src.utils.embeddings import load_embedding_pickles # import here to avoid circular import
+    from src.embeddings import load_embedding_pickles # import here to avoid circular import
     dataset = get_dataset(dataset_name)
     embeddings = load_embedding_pickles(embeddings_name).to('cpu')
     projection_pickle_dir = os.path.join(ROOT_DIR, 'data', 'embeddings', embeddings_name)

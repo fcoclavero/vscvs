@@ -63,7 +63,8 @@ def create_triplet_cnn_trainer(vector_dimension, model, optimizer, loss_fn, devi
             return (pred > 0).sum() * 1.0 / dista.size()[0]
 
         # Return loss and average distances for logging
-        return triplet_loss, torch.mean(distance_to_positive), torch.mean(distance_to_negative), accuracy(distance_to_positive, distance_to_negative)
+        return triplet_loss, torch.mean(distance_to_positive), torch.mean(distance_to_negative), \
+               accuracy(distance_to_positive, distance_to_negative)
 
     return Engine(_update)
 

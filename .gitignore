@@ -121,6 +121,7 @@ data/embeddings/*
 mnist_train
 data/logs/*
 data/checkpoints/*
+data/Cora
 
 # Numerous files
 experiments/vectors/*

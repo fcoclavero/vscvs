@@ -5,8 +5,11 @@ __status__ = 'Prototype'
 
 """ Register datasets here to make them available in the CLI. """
 
-from settings import DATA_SOURCES
 
+import os
+import pickle
+
+from settings import DATA_SOURCES
 from src.datasets.sketchy import Sketchy, SketchyImageNames, SketchyMixedBatches, SketchyTriplets, \
                                  SketchyFilenameIndexed
 
@@ -85,4 +88,18 @@ def get_dataset(dataset_name, *args, **kwargs):
     try:
         return DATASETS[dataset_name](DATASET_DATA_SOURCES[dataset_name], *args, **kwargs)
     except KeyError as e:
-        raise type(e)('%s is not registered a Dataset.' % dataset_name)
+        raise type(e)('{} is not registered a Dataset.'.format(dataset_name))
+
+
+def get_dataset_classes_dataframe(dataset_name):
+    """
+    Return the dataset's classes dataframe, which includes class names and class word vectors.
+    :param dataset_name: the name of the Dataset. Must be a key in the DATASETS dictionary.
+    :type: str
+    :return: the corresponding classes dataframe
+    :type: pandas.Dataframes
+    """
+    try:
+        return pickle.load(open(os.path.join(DATASET_DATA_SOURCES[dataset_name], 'classes.pickle'), 'rb'))
+    except KeyError as e:
+        raise type(e)('{} doest not have a classes dataframe.'.format(dataset_name))

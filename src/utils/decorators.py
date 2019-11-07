@@ -54,6 +54,7 @@ def log_time(func):
     :return: the decorated function, which now prints its execution time.
     :type: function
     """
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
         start = datetime.now()
         ret = func(*args, **kwargs)

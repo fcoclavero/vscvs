@@ -180,7 +180,7 @@ def batch_clique_graph(batch, classes_dataframe, processes=None):
     """
     x, y, *_ = batch  # unpack extra parameters into `_`
     # 1) Create node feature matrix. The features will be class indexes, which we will try to predict
-    nodes = y.unsqueeze(1) # TODO: change these to the image feature vectors in final implementation
+    nodes = torch.eye(y.shape[0]) # TODO: change these to the image feature vectors in final implementation
     # 2) Create the binary adjacency matrix for the clique graph
     edge_index = torch.stack([
         torch.arange(nodes.shape[0]).repeat_interleave(nodes.shape[0]), # each index repeated num_edges times

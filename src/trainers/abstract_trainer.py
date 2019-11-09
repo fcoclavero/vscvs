@@ -26,22 +26,24 @@ class AbstractTrainer:
     Abstract class with the boilerplate code needed to define and run an Ignite trainer Engine.
     """
     def __init__(self, dataset_name, train_validation_split=.8, resume_date=None, batch_size=16, workers=4,
-                 n_gpu=0, epochs=2):
+                 drop_last=False, n_gpu=0, epochs=2):
         date = resume_date if resume_date else datetime.now()
-        self.device = get_device(n_gpu)
-        self.model = self.initial_model.to(self.device)
+        self.batch_size = batch_size
+        self.checkpoint_directory = get_checkpoint_directory(self.trainer_id, date=date)
         self.dataset = get_dataset(dataset_name)
         self.dataset_name = dataset_name
-        self.train_loader, self.val_loader = self._create_data_loaders(train_validation_split, batch_size, workers)
-        self.log_directory = get_log_directory(self.trainer_id, date=date)
-        self.checkpoint_directory = get_checkpoint_directory(self.trainer_id, date=date)
-        self.evaluator = self._create_evaluator_engine()
-        self.trainer_engine = self._create_trainer_engine()
-        self.batch_size = batch_size
-        self.start_epoch = 0
+        self.device = get_device(n_gpu)
         self.epochs = epochs
-        self.timer = self._create_timer()
         self.event_handlers = []
+        self.log_directory = get_log_directory(self.trainer_id, date=date)
+        self.model = self.initial_model.to(self.device)
+        self.start_epoch = 0
+        self.steps = 0
+        self.train_loader, self.val_loader = \
+            self._create_data_loaders(train_validation_split, batch_size, workers, drop_last)
+        self.trainer_engine = self._create_trainer_engine()
+        self.evaluator = self._create_evaluator_engine()
+        self.timer = self._create_timer()
         self._add_event_handlers()
 
     @property
@@ -155,9 +157,10 @@ class AbstractTrainer:
 
         @self.trainer_engine.on(Events.ITERATION_COMPLETED)
         def log_training_loss(trainer):
-            writer.add_scalar('loss', trainer.state.output)
+            writer.add_scalar('Training loss', trainer.state.output, self.steps)
             progressbar.desc = progressbar_description.format(trainer.state.output)
             progressbar.update(1)
+            self.steps += 1
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def log_training_results(trainer):
@@ -183,11 +186,12 @@ class AbstractTrainer:
             self.checkpoint_directory, filename_prefix='net', # save model objects to disc.
             save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False, require_empty=False
         )
+        self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'train': self.model})
         self.trainer_engine.add_event_handler(Events.COMPLETED, checkpoint_saver, {'complete': self.model})
-        self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
+        self.trainer_engine.add_event_handler(Events.COMPLETED, lambda _: writer.close())
 
-    def _create_data_loaders(self, train_validation_split, batch_size, workers):
+    def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last):
         """
         Create training and validation data loaders, placing a total of `len(self.dataset) * train_validation_split`
         elements in the training subset.
@@ -197,10 +201,14 @@ class AbstractTrainer:
         :type: int
         :param workers: number of workers for both data loaders.
         :type: int
+        :param drop_last: if `True`, the last batch will be dropped if incomplete (when the dataset size is not
+        divisible by the batch size). If `False` and the dataset size is not divisible by the batch size, the last
+        batch will have a smaller size than the rest.
+        :type: bool
         :return: two DataLoaders, the first for the training data and the second for the validation data.
         :type: torch.utils.data.DataLoader
         """
-        return [DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=workers)
+        return [DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=workers, drop_last=drop_last)
                 for subset in dataset_split_successive(self.dataset, train_validation_split)]
 
     def _create_timer(self):

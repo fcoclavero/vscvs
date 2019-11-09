@@ -88,9 +88,9 @@ def cvs_gan(_, resume, train_validation_split, batch_size, epochs, workers, n_gp
 @click.option('--weight-decay', prompt='Weight decay', help='Weight decay parameter for Adam optimizer.', default=5e-4)
 @click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
               help='The number of parallel workers to be used for creating batch graphs.')
-def class_only_gcn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, dataset_name,
+def classification_gcn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, dataset_name,
                    vector_dimension, lr, weight_decay, processes):
-    from src.trainers.class_only_gcn import train_class_only_gcn
+    from src.trainers.classification_gcn import train_classification_gcn
     click.echo('class only GCN - %s dataset' % dataset_name)
-    train_class_only_gcn(
+    train_classification_gcn(
         dataset_name, train_validation_split, resume, batch_size, epochs, workers, n_gpu, lr, weight_decay, processes)

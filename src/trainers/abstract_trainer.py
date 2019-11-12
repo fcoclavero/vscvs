@@ -157,7 +157,7 @@ class AbstractTrainer:
 
         @self.trainer_engine.on(Events.ITERATION_COMPLETED)
         def log_training_loss(trainer):
-            writer.add_scalar('Training loss', trainer.state.output, self.steps)
+            writer.add_scalar('training_loss', trainer.state.output, self.steps)
             progressbar.desc = progressbar_description.format(trainer.state.output)
             progressbar.update(1)
             self.steps += 1
@@ -168,7 +168,7 @@ class AbstractTrainer:
             self.evaluator.run(self.train_loader)
             metrics = self.evaluator.state.metrics
             for key, value in metrics.items():
-                writer.add_scalar(key, value)
+                writer.add_scalar('training_{}'.format(key), value, self.steps)
             tqdm.write('\nTraining Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}\n'
                        .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
 
@@ -178,7 +178,7 @@ class AbstractTrainer:
             self.evaluator.run(self.val_loader)
             metrics = self.evaluator.state.metrics
             for key, value in metrics.items():
-                writer.add_scalar(key, value)
+                writer.add_scalar('validation_{}'.format(key), value, self.steps)
             tqdm.write('\nValidation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}\n'
                        .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
 

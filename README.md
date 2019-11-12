@@ -33,7 +33,7 @@ python main.py measure cross-modal recall --k 5 --n-gpu 1 same-class --sketch-da
 Training routines generate Tensorboard compatible logs, which can be viewed in the Tensorboard console using the following command:
 
 ```bash
-tensorboard --logdir=static/logs
+tensorboard --logdir=data/logs
 ```
 
 ## Git submodules

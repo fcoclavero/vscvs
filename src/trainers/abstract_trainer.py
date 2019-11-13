@@ -25,17 +25,17 @@ class AbstractTrainer:
     """
     Abstract class with the boilerplate code needed to define and run an Ignite trainer Engine.
     """
-    def __init__(self, dataset_name, train_validation_split=.8, resume_date=None, batch_size=16, workers=4,
-                 drop_last=False, n_gpu=0, epochs=2):
-        date = resume_date if resume_date else datetime.now()
+    def __init__(self, dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2, workers=6,
+                 n_gpu=0, tag=None, drop_last=False):
+        date = resume_date or datetime.now()
         self.batch_size = batch_size
-        self.checkpoint_directory = get_checkpoint_directory(self.trainer_id, date=date)
+        self.checkpoint_directory = get_checkpoint_directory(self.trainer_id, tag=tag, date=date)
         self.dataset = get_dataset(dataset_name)
         self.dataset_name = dataset_name
         self.device = get_device(n_gpu)
         self.epochs = epochs
         self.event_handlers = []
-        self.log_directory = get_log_directory(self.trainer_id, date=date)
+        self.log_directory = get_log_directory(self.trainer_id, tag=tag, date=date)
         self.model = self.initial_model.to(self.device)
         self.start_epoch = 0
         self.steps = 0

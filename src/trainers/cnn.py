@@ -20,11 +20,11 @@ class CNNTrainer(AbstractTrainer):
     """
     Trainer for a simple class classification CNN.
     """
-    def __init__(self, dataset_name, train_validation_split=.8, resume_checkpoint=None, batch_size=16, workers=4,
-                 n_gpu=0, epochs=2, learning_rate=.01, momentum=.8):
+    def __init__(self, dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2, workers=6,
+                 n_gpu=0, tag=None, learning_rate=.01, momentum=.8, drop_last=False):
         self.learning_rate = learning_rate
         self.momentum = momentum
-        super().__init__(dataset_name, train_validation_split, resume_checkpoint, batch_size, workers, n_gpu, epochs)
+        super().__init__(dataset_name, resume_date, train_validation_split, batch_size, epochs, workers, n_gpu, tag)
 
     @property
     def initial_model(self):
@@ -55,31 +55,33 @@ class CNNTrainer(AbstractTrainer):
             self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
 
 
-def train_cnn(dataset_name, train_validation_split=.8, resume_checkpoint=None, batch_size=16, epochs=2, workers=4,
-              n_gpu=0, learning_rate=.01, momentum=.8):
+def train_cnn(dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2, workers=4, n_gpu=0,
+              tag=None, learning_rate=.01, momentum=.8):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param dataset_name: the name of the Dataset to be used for training
     :type: str
+    :param resume_date: date of the trainer state to be resumed. Dates must have the following
+    format: `%y-%m-%dT%H-%M`
+    :type: str
     :param train_validation_split: proportion of the training set that will be used for actual
     training. The remaining data will be used as the validation set.
     :type: float
-    :param resume_checkpoint: date of the trainer state to be resumed. Dates must have the following
-    format: `%y-%m-%dT%H-%M`
-    :type: str
     :param batch_size: batch size during training
+    :type: int
+    :param epochs: the number of epochs used for training
     :type: int
     :param workers: number of workers for data_loader
     :type: int
     :param n_gpu: number of GPUs available. Use 0 for CPU mode
     :type: int
-    :param epochs: the number of epochs used for training
-    :type: int
+    :param tag: optional tag for model checkpoint and tensorboard logs
+    :type: str
     :param learning_rate: learning rate for optimizers
     :type: float
     :param momentum: momentum parameter for SGD optimizer
     :type: float
     """
-    trainer = CNNTrainer(dataset_name, train_validation_split, resume_checkpoint, batch_size, workers, n_gpu, epochs,
+    trainer = CNNTrainer(dataset_name, resume_date, train_validation_split, batch_size, epochs, workers, n_gpu, tag,
                          learning_rate, momentum)
     trainer.run()

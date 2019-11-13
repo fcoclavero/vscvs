@@ -19,6 +19,7 @@ from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 @click.option('--epochs', prompt='Number of epochs', help='The number of training epochs.', type=int)
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
+@click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
 @pass_kwargs_to_context
 def train(context, **kwargs):
     """ Train a model. """
@@ -33,10 +34,10 @@ def train(context, **kwargs):
 )
 @click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
-def cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, dataset_name, lr, momentum):
+def cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name, lr, momentum):
     from src.trainers.cnn import train_cnn
     click.echo('cnn - %s dataset' % dataset_name)
-    train_cnn(dataset_name, train_validation_split, resume, batch_size, epochs, workers, n_gpu, lr, momentum)
+    train_cnn(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, lr, momentum)
 
 
 @train.command()
@@ -88,9 +89,9 @@ def cvs_gan(_, resume, train_validation_split, batch_size, epochs, workers, n_gp
 @click.option('--weight-decay', prompt='Weight decay', help='Weight decay parameter for Adam optimizer.', default=5e-4)
 @click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
               help='The number of parallel workers to be used for creating batch graphs.')
-def classification_gcn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, dataset_name,
-                   vector_dimension, lr, weight_decay, processes):
+def classification_gcn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name,
+                       vector_dimension, lr, weight_decay, processes):
     from src.trainers.classification_gcn import train_classification_gcn
     click.echo('class only GCN - %s dataset' % dataset_name)
-    train_classification_gcn(
-        dataset_name, train_validation_split, resume, batch_size, epochs, workers, n_gpu, lr, weight_decay, processes)
+    train_classification_gcn(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, lr,
+                             weight_decay, processes)

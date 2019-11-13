@@ -75,3 +75,19 @@ def recreate_directory(directory_path):
     """
     shutil.rmtree(directory_path, ignore_errors=True)
     os.makedirs(directory_path)
+
+
+def str_to_bin_array(number, array_length=None):
+    """
+    Creates a binary array for the given number. If a length is specified, then the returned array will have the same
+    add leading zeros to match `array_length`.
+    :param number: the number to be represented as a binary array
+    :type: int
+    :param array_length: (optional) the length of the binary array to be created.
+    :type: int
+    :return: the binary array representation of `number`
+    :type: list<int either 0 or 1>
+    """
+    bin_str = '{0:b}'.format(number)
+    bin_str = bin_str.zfill(array_length) if array_length else bin_str
+    return list(map(int, bin_str))

@@ -6,7 +6,11 @@ __status__ = 'Prototype'
 """ Mixins for adding additional features to DataSet objects. """
 
 
+import torch
+
 from random import choice, randint
+
+from src.utils import str_to_bin_array
 
 
 class TripletMixin:
@@ -59,7 +63,6 @@ class FilenameIndexedMixin:
     The mixin must be used with a torch.Dataset subclass, as it assumes the existence of the `imgs` field and a
     `__getitem__` with the default Dataset indexation.
     """
-
     def __init__(self, *args, **kwargs):
         """
         Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indexes
@@ -78,3 +81,19 @@ class FilenameIndexedMixin:
         :type: same as the mixed Dataset's `__getitem__`
         """
         return self[self.imgs_dict[filename]]
+
+
+class BinaryEncodingMixin:
+    """
+    Mixin class for adding unique binary encoding descriptors for each element in the dataset.
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize de base Dataset class and compute the length (in digits) of the binary form of the largest index in
+        the dataset. This is used to determine a standard binary encoding length for all indexes.
+        """
+        super().__init__(*args, **kwargs)
+        self.max_binary_digits = len(str_to_bin_array(len(self.classes)))
+
+    def __get_binary_encoding__(self, index):
+        return torch.tensor(str_to_bin_array(index, self.max_binary_digits))

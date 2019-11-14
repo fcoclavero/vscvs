@@ -18,7 +18,7 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
 from settings import DATA_SOURCES
-from src.datasets.mixins import TripletMixin, FilenameIndexedMixin, BinaryEncodingMixin
+from src.datasets.mixins import TripletMixin, FilenameIndexedMixin, BinaryEncodingMixin, OneHotEncodingMixin
 
 
 class Sketchy(ImageFolder):
@@ -68,7 +68,14 @@ class SketchyFilenameIndexed(FilenameIndexedMixin, Sketchy):
 
 class SketchyBinaryEncoded(BinaryEncodingMixin, Sketchy):
     """
-    Sketchy Dataset with additional filename indexation.
+    Sketchy Dataset with additional binary encodings for each item.
+    """
+    pass
+
+
+class SketchyOneHotEncoded(OneHotEncodingMixin, Sketchy):
+    """
+    Sketchy Dataset with additional one hot encodings for each item.
     """
     pass
 

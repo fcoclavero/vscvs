@@ -101,3 +101,21 @@ class BinaryEncodingMixin:
 
     def __getitem__(self, item):
         return self.__get_binary_encoding__(item), self.targets[item]
+
+
+class OneHotEncodingMixin:
+    """
+    Mixin class for adding unique one-hot encoding descriptors for each element in the dataset.
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize de base Dataset class and create a tensor with all one hot encodings.
+        """
+        super().__init__(*args, **kwargs)
+        self.encodings = torch.eye(len(self.targets))
+
+    def __get_one_hot_encoding__(self, index):
+        return self.encodings[index]
+
+    def __getitem__(self, item):
+        return self.__get_one_hot_encoding__(item), self.targets[item]

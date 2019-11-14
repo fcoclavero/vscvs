@@ -93,6 +93,6 @@ def classification_gcn(_, resume, train_validation_split, batch_size, epochs, wo
                        vector_dimension, lr, weight_decay, processes):
     from src.trainers.classification_gcn import train_classification_gcn
     click.echo('class only GCN - %s dataset' % dataset_name)
-    dataset_name = dataset_name + '-binary'
+    dataset_name = dataset_name + '-one-hot'
     train_classification_gcn(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, lr,
                              weight_decay, processes)

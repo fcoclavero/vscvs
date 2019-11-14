@@ -11,7 +11,7 @@ import pickle
 
 from settings import DATA_SOURCES
 from src.datasets.sketchy import Sketchy, SketchyImageNames, SketchyMixedBatches, SketchyTriplets, \
-                                 SketchyFilenameIndexed, SketchyBinaryEncoded
+                                 SketchyFilenameIndexed, SketchyBinaryEncoded, SketchyOneHotEncoded
 
 
 DATASET_DATA_SOURCES = {
@@ -49,6 +49,8 @@ DATASETS = {
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
     'sketchy-photos-binary':
         lambda data_source, *args, **kwargs: SketchyBinaryEncoded(data_source, *args, **kwargs),
+    'sketchy-photos-one-hot':
+        lambda data_source, *args, **kwargs: SketchyOneHotEncoded(data_source, *args, **kwargs),
     'sketchy-sketches':
         lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
     'sketchy-sketches-triplets':
@@ -57,6 +59,8 @@ DATASETS = {
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
     'sketchy-sketches-binary':
         lambda data_source, *args, **kwargs: SketchyBinaryEncoded(data_source, *args, **kwargs),
+    'sketchy-sketches-one-hot':
+        lambda data_source, *args, **kwargs: SketchyOneHotEncoded(data_source, *args, **kwargs),
     'sketchy-test-photos':
         lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
     'sketchy-test-photos-triplets':
@@ -65,6 +69,8 @@ DATASETS = {
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
     'sketchy-test-photos-binary':
         lambda data_source, *args, **kwargs: SketchyBinaryEncoded(data_source, *args, **kwargs),
+    'sketchy-test-photos-one-hot':
+        lambda data_source, *args, **kwargs: SketchyOneHotEncoded(data_source, *args, **kwargs),
     'sketchy-test-sketches':
         lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
     'sketchy-test-sketches-triplets':
@@ -73,6 +79,8 @@ DATASETS = {
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
     'sketchy-test-sketches-binary':
         lambda data_source, *args, **kwargs: SketchyBinaryEncoded(data_source, *args, **kwargs),
+    'sketchy-test-sketches-one-hot':
+        lambda data_source, *args, **kwargs: SketchyOneHotEncoded(data_source, *args, **kwargs),
     'sketchy-named-photos':
         lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
     'sketchy-named-sketches':

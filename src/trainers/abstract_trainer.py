@@ -85,7 +85,6 @@ class AbstractTrainer:
             'dataset_name': self.dataset_name,
             'total_epochs': self.start_epoch + self.epochs,
             'batch_size': self.batch_size,
-            'model': self.initial_model,
             'optimizer': self.optimizer,
             'last_run': datetime.now(),
             'average_epoch_duration': self.timer.value()
@@ -136,7 +135,7 @@ class AbstractTrainer:
         """
         try:
             self._deserialize_checkpoint(torch.load(os.path.join(self.checkpoint_directory, 'checkpoint.pth')))
-            print('Successfully loaded the {} checkpoint.'.format(resume_date))
+            tqdm.write('Successfully loaded the {} checkpoint.'.format(resume_date))
         except FileNotFoundError:
             raise FileNotFoundError('Checkpoint {} not found.'.format(resume_date))
 
@@ -164,23 +163,31 @@ class AbstractTrainer:
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def log_training_results(trainer):
-            progressbar.n = progressbar.last_print_n = 0
             self.evaluator.run(self.train_loader)
             metrics = self.evaluator.state.metrics
             for key, value in metrics.items():
                 writer.add_scalar('training_{}'.format(key), value, self.steps)
-            tqdm.write('\nTraining Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}\n'
+            tqdm.write('Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}'
                        .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def log_validation_results(trainer):
-            progressbar.n = progressbar.last_print_n = 0
             self.evaluator.run(self.val_loader)
             metrics = self.evaluator.state.metrics
             for key, value in metrics.items():
                 writer.add_scalar('validation_{}'.format(key), value, self.steps)
-            tqdm.write('\nValidation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}\n'
-                       .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
+            print('Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}\n'
+                  .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
+
+        @self.trainer_engine.on(Events.EPOCH_COMPLETED)
+        def reset_progressbar(trainer):
+            progressbar.n = progressbar.last_print_n = 0
+            progressbar.reset(total=len(self.train_loader))
+
+        @self.trainer_engine.on(Events.COMPLETED)
+        def cleanup(trainer):
+            writer.close()
+            progressbar.close()
 
         checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to periodically
             self.checkpoint_directory, filename_prefix='net', # save model objects to disc.
@@ -189,7 +196,6 @@ class AbstractTrainer:
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'train': self.model})
         self.trainer_engine.add_event_handler(Events.COMPLETED, checkpoint_saver, {'complete': self.model})
-        self.trainer_engine.add_event_handler(Events.COMPLETED, lambda _: writer.close())
 
     def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last):
         """

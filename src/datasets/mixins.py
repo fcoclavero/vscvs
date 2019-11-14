@@ -93,7 +93,11 @@ class BinaryEncodingMixin:
         the dataset. This is used to determine a standard binary encoding length for all indexes.
         """
         super().__init__(*args, **kwargs)
-        self.max_binary_digits = len(str_to_bin_array(len(self.classes)))
+        self.max_binary_digits = len(str_to_bin_array(len(self.targets)))
 
     def __get_binary_encoding__(self, index):
-        return torch.tensor(str_to_bin_array(index, self.max_binary_digits))
+        bin_arr = torch.tensor(str_to_bin_array(index, self.max_binary_digits))
+        return bin_arr
+
+    def __getitem__(self, item):
+        return self.__get_binary_encoding__(item), self.targets[item]

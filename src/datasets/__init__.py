@@ -11,22 +11,26 @@ import pickle
 
 from settings import DATA_SOURCES
 from src.datasets.sketchy import Sketchy, SketchyImageNames, SketchyMixedBatches, SketchyTriplets, \
-                                 SketchyFilenameIndexed
+                                 SketchyFilenameIndexed, SketchyBinaryEncoded
 
 
 DATASET_DATA_SOURCES = {
     'sketchy-photos': DATA_SOURCES['sketchy']['photos'],
     'sketchy-photos-triplets': DATA_SOURCES['sketchy']['photos'],
     'sketchy-photos-filenames': DATA_SOURCES['sketchy']['photos'],
+    'sketchy-photos-binary': DATA_SOURCES['sketchy']['photos'],
     'sketchy-sketches': DATA_SOURCES['sketchy']['sketches'],
     'sketchy-sketches-triplets': DATA_SOURCES['sketchy']['sketches'],
     'sketchy-sketches-filenames': DATA_SOURCES['sketchy']['sketches'],
+    'sketchy-sketches-binary': DATA_SOURCES['sketchy']['sketches'],
     'sketchy-test-photos': DATA_SOURCES['sketchy_test']['photos'],
     'sketchy-test-photos-triplets': DATA_SOURCES['sketchy_test']['photos'],
     'sketchy-test-photos-filenames': DATA_SOURCES['sketchy_test']['photos'],
+    'sketchy-test-photos-binary': DATA_SOURCES['sketchy_test']['photos'],
     'sketchy-test-sketches': DATA_SOURCES['sketchy_test']['sketches'],
     'sketchy-test-sketches-triplets': DATA_SOURCES['sketchy_test']['sketches'],
     'sketchy-test-sketches-filenames': DATA_SOURCES['sketchy_test']['sketches'],
+    'sketchy-test-sketches-binary': DATA_SOURCES['sketchy_test']['sketches'],
     'sketchy-named-photos': DATA_SOURCES['sketchy']['photos'],
     'sketchy-named-sketches': DATA_SOURCES['sketchy']['photos'],
     'sketchy-test-named-photos': DATA_SOURCES['sketchy_test']['photos'],
@@ -43,24 +47,32 @@ DATASETS = {
         lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
     'sketchy-photos-filenames':
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy-photos-binary':
+        lambda data_source, *args, **kwargs: SketchyBinaryEncoded(data_source, *args, **kwargs),
     'sketchy-sketches':
         lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
     'sketchy-sketches-triplets':
         lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
     'sketchy-sketches-filenames':
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy-sketches-binary':
+        lambda data_source, *args, **kwargs: SketchyBinaryEncoded(data_source, *args, **kwargs),
     'sketchy-test-photos':
         lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
     'sketchy-test-photos-triplets':
         lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
     'sketchy-test-photos-filenames':
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy-test-photos-binary':
+        lambda data_source, *args, **kwargs: SketchyBinaryEncoded(data_source, *args, **kwargs),
     'sketchy-test-sketches':
         lambda data_source, *args, **kwargs: Sketchy(data_source, *args, **kwargs),
     'sketchy-test-sketches-triplets':
         lambda data_source, *args, **kwargs: SketchyTriplets(data_source, *args, **kwargs),
     'sketchy-test-sketches-filenames':
         lambda data_source, *args, **kwargs: SketchyFilenameIndexed(data_source, *args, **kwargs),
+    'sketchy-test-sketches-binary':
+        lambda data_source, *args, **kwargs: SketchyBinaryEncoded(data_source, *args, **kwargs),
     'sketchy-named-photos':
         lambda data_source, *args, **kwargs: SketchyImageNames(data_source, *args, **kwargs),
     'sketchy-named-sketches':

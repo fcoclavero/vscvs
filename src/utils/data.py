@@ -179,19 +179,14 @@ def batch_clique_graph(batch, classes_dataframe, processes=None):
     :type: torch_geometric.data.Data
     """
     x, y, *_ = batch  # unpack extra parameters into `_`
-    # 1) Create node feature matrix. The features will be class indexes, which we will try to predict
-    nodes = torch.eye(y.shape[0]) # TODO: change these to the image feature vectors in final implementation
-    # 2) Create the binary adjacency matrix for the clique graph
-    edge_index = torch.stack([
-        torch.arange(nodes.shape[0]).repeat_interleave(nodes.shape[0]), # each index repeated num_edges times
-        torch.arange(nodes.shape[0]).repeat(nodes.shape[0]) # the index range repeated num_edges times
-    ])
-    # 3) Create edge weights from the word vector distances
-    with Pool(processes=processes) as pool:
+    edge_index = torch.stack([ # create the binary adjacency matrix for the clique graph
+        torch.arange(x.shape[0]).repeat_interleave(x.shape[0]), # each index repeated num_edges times
+        torch.arange(x.shape[0]).repeat(x.shape[0])]) # the index range repeated num_edges times
+    with Pool(processes=processes) as pool: # create edge weights from the word vector distances
         edge_classes = torch.stack([y.repeat_interleave(y.shape[0]), y.repeat(y.shape[0])]).t().contiguous()
         edge_attr = torch.stack(pool.starmap(
             wordvector_distance, zip(edge_classes, repeat(torch.tensor(classes_dataframe['distances'])))))
-    return Data(x=nodes, edge_index=edge_index, edge_attr=edge_attr, y=y)
+    return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y)
 
 
 def output_transform_gan(output):

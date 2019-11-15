@@ -80,7 +80,7 @@ def cvs_gan(_, resume, train_validation_split, batch_size, epochs, workers, n_gp
 @pass_context_to_kwargs
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-ketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
 @click.option(
     '--vector-dimension', prompt='CVS dimensionality', help='Dimensionality of the vector space.', default=300
@@ -93,6 +93,6 @@ def classification_gcn(_, resume, train_validation_split, batch_size, epochs, wo
                        vector_dimension, lr, weight_decay, processes):
     from src.trainers.classification_gcn import train_classification_gcn
     click.echo('class only GCN - %s dataset' % dataset_name)
-    dataset_name = dataset_name + '-one-hot'
+    dataset_name = dataset_name + '-binary'
     train_classification_gcn(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, lr,
                              weight_decay, processes)

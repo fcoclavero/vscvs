@@ -105,7 +105,7 @@ def dataset_split_successive(dataset, *split_proportions):
     subset_lengths = []
     remaining_n = len(dataset)
     for split_proportion in split_proportions:
-        subset_length = remaining_n * split_proportion
+        subset_length = int(remaining_n * split_proportion)
         subset_lengths.append(subset_length)
         remaining_n = max(0, remaining_n - subset_length)
     subset_lengths.append(remaining_n)

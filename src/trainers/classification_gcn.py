@@ -37,7 +37,7 @@ class ClassificationGCNTrainer(AbstractTrainer):
     @property
     def initial_model(self):
         dataset = get_dataset(self.dataset_name)
-        return ClassificationGCN(11, len(dataset.classes))
+        return ClassificationGCN(17, len(dataset.classes))
 
     @property
     def loss(self):

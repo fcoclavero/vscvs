@@ -165,19 +165,19 @@ class AbstractTrainer:
         def log_training_results(trainer):
             self.evaluator.run(self.train_loader)
             metrics = self.evaluator.state.metrics
+            print('\nTraining results - epoch: {}'.format(trainer.state.epoch))
             for key, value in metrics.items():
                 writer.add_scalar('training_{}'.format(key), value, self.steps)
-            tqdm.write('Training Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}'
-                       .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
+                print('{}: {:.4f}'.format(key, value))
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def log_validation_results(trainer):
             self.evaluator.run(self.val_loader)
             metrics = self.evaluator.state.metrics
+            print('\nValidation results - epoch: {}'.format(trainer.state.epoch))
             for key, value in metrics.items():
                 writer.add_scalar('validation_{}'.format(key), value, self.steps)
-            print('Validation Results - Epoch: {}  Avg accuracy: {:.2f} Avg loss: {:.2f}\n'
-                  .format(trainer.state.epoch, metrics['accuracy'], metrics['loss']))
+                print('{}: {:.4f}'.format(key, value))
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def reset_progressbar(trainer):

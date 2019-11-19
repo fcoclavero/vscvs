@@ -3,7 +3,7 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" Ignite trainer for a GCN image label classifier. """
+""" Ignite trainer for a GCN image label classifier, using binary or one-hot encodings as image feature vectors. """
 
 
 from ignite._utils import convert_tensor

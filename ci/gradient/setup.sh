@@ -1,4 +1,3 @@
-git submodule update --init --recursive
-pip install -r requirements.py
-pip install -r modules/textpreprocess/requirements.py
-pip install -r modules/wordvectors/requirements.py
+pip install -r requirements.txt
+pip install -r modules/textpreprocess/requirements.txt
+pip install -r modules/wordvectors/requirements.txt

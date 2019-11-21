@@ -6,10 +6,11 @@ container: pytorch/conda-cuda
 #container: paperspace/pytorch
 #experimentId: null
 #ignoreFiles: null
-isPreemptible: true
+#isPreemptible: true
 #isPublic: null
 #jobEnv: null
-machineType: K80
+#machineType: K80
+machineType: C3
 #module: false
 #name: null
 #nodeAttrs: null

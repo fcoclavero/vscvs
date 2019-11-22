@@ -74,7 +74,7 @@ class HOG(torch.nn.Module):
         # Define constituent layers
         self.sobel_x = SobelX(in_channels=in_channels)  # Sobel filtering layer
         self.sobel_y = SobelY(in_channels=in_channels)  # Sobel filtering layer
-        self.cell_pooling = torch.nn.AvgPool2d(cell_size, stride=cell_size, padding=0)
+        self.cell_pooling = torch.nn.AvgPool2d(cell_size)
 
     @property
     def angle_range(self):

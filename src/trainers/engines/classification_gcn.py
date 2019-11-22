@@ -3,7 +3,7 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" Ignite trainer engines (training logic) for a classification GCN. """
+""" Ignite trainer engine (training logic) for a classification GCN. """
 
 
 import torch
@@ -13,7 +13,7 @@ from ignite.engine import Engine
 
 def create_classification_gcn_trainer(prepare_batch, model, optimizer, loss_fn, device=None, non_blocking=False):
     """
-    Factory function for creating an ignite trainer Engine for a triplet CNN.
+    Factory function for creating an ignite trainer Engine for a classification GCN.
     :param prepare_batch: batch preparation logic
     :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch.Tensor,torch.Tensor)
     :param model: the generator model - generates vectors from images

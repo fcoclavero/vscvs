@@ -81,6 +81,14 @@ class HOG(torch.nn.Module):
         """ Range of possible gradient angles. Depends on whether signed gradients are used. """
         return 2 * math.pi if self.signed_gradients else math.pi
 
+    def descriptor_length(self, in_dimension):
+        """
+        Get the length of output descriptors, given the dimensions of the would be inputs.
+        :param in_dimension: input image dimensions (assuming square images).
+        :type: int
+        """
+        return int(self.bins * (in_dimension / self.cell_size) ** 2)
+
     def forward(self, x):
         """
         Transform the incoming image batch into HOG feature vectors.

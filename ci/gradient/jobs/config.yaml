@@ -2,7 +2,7 @@
 #cluster: null
 #clusterId: null
 #command: null
-container: pytorch/pytorch
+container: fcoclavero/vscvs
 #container: pytorch/conda-cuda
 #container: paperspace/pytorch
 #experimentId: null

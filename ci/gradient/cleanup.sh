@@ -1,3 +1,4 @@
+echo cleanup
 ls storage/vscvs/data/embeddings
 apt-get update && \
 apt-get install rsync && \

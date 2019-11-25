@@ -82,17 +82,36 @@ def cvs_gan(_, resume, train_validation_split, batch_size, epochs, workers, n_gp
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option(
-    '--vector-dimension', prompt='CVS dimensionality', help='Dimensionality of the vector space.', default=300
-)
 @click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
 @click.option('--weight-decay', prompt='Weight decay', help='Weight decay parameter for Adam optimizer.', default=5e-4)
 @click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
               help='The number of parallel workers to be used for creating batch graphs.')
 def classification_gcn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name,
-                       vector_dimension, lr, weight_decay, processes):
+                       lr, weight_decay, processes):
     from src.trainers.classification_gcn import train_classification_gcn
-    click.echo('class only GCN - %s dataset' % dataset_name)
+    click.echo('classification GCN - %s dataset' % dataset_name)
     dataset_name = dataset_name + '-binary'
     train_classification_gcn(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, lr,
                              weight_decay, processes)
+
+
+@train.command()
+@pass_context_to_kwargs
+@click.option(
+    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
+)
+@click.option('--in-channels', prompt='In channels', help='Number of image color channels.', default=3)
+@click.option('--cell-size', prompt='Cell size', help='Gradient pooling size.', default=8)
+@click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
+@click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
+@click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
+@click.option('--weight-decay', prompt='Weight decay', help='Weight decay parameter for Adam optimizer.', default=5e-4)
+@click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
+              help='The number of parallel workers to be used for creating batch graphs.')
+def hog_gcn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name, in_channels,
+            cell_size, bins, signed_gradients, lr, weight_decay, processes):
+    from src.trainers.hog_gcn import train_hog_gcn
+    click.echo('HOG GCN - %s dataset' % dataset_name)
+    train_hog_gcn(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, in_channels,
+                  cell_size, bins, signed_gradients, lr, weight_decay, processes)

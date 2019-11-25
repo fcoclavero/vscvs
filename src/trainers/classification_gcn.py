@@ -37,7 +37,7 @@ class ClassificationGCNTrainer(AbstractTrainer):
     @property
     def initial_model(self):
         dataset = get_dataset(self.dataset_name)
-        return ClassificationGCN(11, len(dataset.classes))
+        return ClassificationGCN(len(dataset.classes), 11)
 
     @property
     def loss(self):
@@ -74,8 +74,8 @@ class ClassificationGCNTrainer(AbstractTrainer):
     def _create_evaluator_engine(self):
         return create_classification_gcn_evaluator(
             self._prepare_batch, self.model, device=self.device,
-                metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss), 'recall': Recall(average=True),
-                         'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
+            metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss), 'recall': Recall(average=True),
+                     'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
 
     def _create_trainer_engine(self):
         return create_classification_gcn_trainer(

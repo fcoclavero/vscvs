@@ -7,4 +7,3 @@ COPY /requirements/wordvectors.txt /requirements/wordvectors.txt
 RUN pip install -r /requirements/vscvs.txt
 RUN pip install -r /requirements/textpreprocess.txt
 RUN pip install -r /requirements/wordvectors.txt
-CMD echo hello_docker

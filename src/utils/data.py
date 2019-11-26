@@ -189,6 +189,30 @@ def batch_clique_graph(batch, classes_dataframe, processes=None):
     return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y)
 
 
+def prepare_batch_graph(batch, classes_dataframe, device=None, non_blocking=False, processes=None):
+    """
+    Prepare batch for training: pass to a device with options. Assumes data and labels are the first
+    two parameters of each sample.
+    :param batch: data to be sent to device.
+    :type: list
+    :param classes_dataframe: dataframe containing class names and their word vectors
+    :type: pandas.Dataframe
+    :param device: device type specification
+    :type: str (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
+    :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
+    will be used.
+    :type: int or None
+    :return: the batch clique graph
+    :type: torch_geometric.data.Data
+    """
+    graph = batch_clique_graph(batch, classes_dataframe, processes)
+    graph.apply(
+        lambda attr: convert_tensor(attr.float(), device=device, non_blocking=non_blocking), 'x', 'edge_attr')
+    return graph
+
+
 def output_transform_gan(output):
     # `output` variable is returned by above `process_function`
     y_pred = output['y_pred']

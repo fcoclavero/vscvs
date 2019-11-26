@@ -39,10 +39,10 @@ class AbstractTrainer:
         self.model = self.initial_model.to(self.device)
         self.start_epoch = 0
         self.steps = 0
-        self.train_loader, self.val_loader = \
+        self.train_loader, self.validation_loader = \
             self._create_data_loaders(train_validation_split, batch_size, workers, drop_last)
         self.trainer_engine = self._create_trainer_engine()
-        self.evaluator = self._create_evaluator_engine()
+        self.evaluator_engine = self._create_evaluator_engine()
         self.timer = self._create_timer()
         self._add_event_handlers()
 
@@ -163,8 +163,8 @@ class AbstractTrainer:
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def log_training_results(trainer):
-            self.evaluator.run(self.train_loader)
-            metrics = self.evaluator.state.metrics
+            self.evaluator_engine.run(self.train_loader)
+            metrics = self.evaluator_engine.state.metrics
             print('\nTraining results - epoch: {}'.format(trainer.state.epoch))
             for key, value in metrics.items():
                 writer.add_scalar('training_{}'.format(key), value, self.steps)
@@ -172,8 +172,8 @@ class AbstractTrainer:
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def log_validation_results(trainer):
-            self.evaluator.run(self.val_loader)
-            metrics = self.evaluator.state.metrics
+            self.evaluator_engine.run(self.validation_loader)
+            metrics = self.evaluator_engine.state.metrics
             print('\nValidation results - epoch: {}'.format(trainer.state.epoch))
             for key, value in metrics.items():
                 writer.add_scalar('validation_{}'.format(key), value, self.steps)
@@ -214,8 +214,12 @@ class AbstractTrainer:
         :return: two DataLoaders, the first for the training data and the second for the validation data.
         :type: torch.utils.data.DataLoader
         """
-        return [DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=workers, drop_last=drop_last)
-                for subset in dataset_split_successive(self.dataset, train_validation_split)]
+        loaders = [DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=workers, drop_last=drop_last)
+                   for subset in dataset_split_successive(self.dataset, train_validation_split)]
+        if not len(loaders[-1]):
+            raise ValueError('Empty validation loader. This might be caused by having `drop_last=True` and \
+                             a resulting validation set smaller than `batch_size`.')
+        return loaders
 
     def _create_timer(self):
         """

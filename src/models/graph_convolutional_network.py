@@ -10,11 +10,10 @@ import torch
 
 import torch.nn.functional as F
 
-from ignite._utils import convert_tensor
 from torch_geometric.nn import GCNConv
 
 from src.models.hog import HOG
-from src.utils.data import batch_clique_graph
+from src.utils.data import prepare_batch_graph
 
 
 class ClassificationGCN(torch.nn.Module):
@@ -48,7 +47,7 @@ class ClassificationGCN(torch.nn.Module):
         x = F.relu(x)
         x = F.dropout(x, training=self.training)
         x = self.conv2(x, edge_index, edge_weight)
-        return F.log_softmax(x, dim=1)
+        return F.softmax(x, dim=1)
 
 
 class HOGGCN(torch.nn.Module):
@@ -97,10 +96,7 @@ class HOGGCN(torch.nn.Module):
         :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
         :type: bool (optional)
         """
-        graph = batch_clique_graph(batch, self.classes_dataframe, self.processes)
-        graph.apply(
-            lambda attr: convert_tensor(attr.float(), device=device, non_blocking=non_blocking), 'x', 'edge_attr')
-        return graph
+        return prepare_batch_graph(batch, self.classes_dataframe, device, non_blocking, self.processes)
 
     def forward(self, image_batch):
         """
@@ -110,5 +106,6 @@ class HOGGCN(torch.nn.Module):
         :return: tensor containing class probabilities for every node in the graph
         :type: torch.Tensor with shape <batch_size,
         """
-        embeddings = self.hog(image_batch)
-        return self.classification_gcn(self._batch_graph(embeddings))
+        x, y, *_ = image_batch  # unpack extra parameters into `_`
+        embeddings = self.hog(x)
+        return self.classification_gcn((self._batch_graph(embeddings), y))

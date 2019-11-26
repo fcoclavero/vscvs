@@ -6,16 +6,15 @@ __status__ = 'Prototype'
 """ Ignite trainer for a GCN image label classifier, using binary or one-hot encodings as image feature vectors. """
 
 
-from ignite._utils import convert_tensor
 from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy
-from torch.nn import NLLLoss
+from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 
 from src.datasets import get_dataset, get_dataset_classes_dataframe
 from src.models.graph_convolutional_network import ClassificationGCN
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.classification_gcn import *
-from src.utils.data import batch_clique_graph
+from src.utils.data import prepare_batch_graph
 
 
 class ClassificationGCNTrainer(AbstractTrainer):
@@ -41,7 +40,7 @@ class ClassificationGCNTrainer(AbstractTrainer):
 
     @property
     def loss(self):
-        return NLLLoss()
+        return CrossEntropyLoss()
 
     @property
     def optimizer(self):
@@ -55,31 +54,15 @@ class ClassificationGCNTrainer(AbstractTrainer):
     def trainer_id(self):
         return 'classification_gcn'
 
-    def _prepare_batch(self, batch, device=None, non_blocking=False):
-        """
-        Prepare batch for training: pass to a device with options. Assumes data and labels are the first
-        two parameters of each sample.
-        :param batch: data to be sent to device.
-        :type: list
-        :param device: device type specification
-        :type: str (optional) (default: None)
-        :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-        :type: bool (optional)
-        """
-        graph = batch_clique_graph(batch, self.classes_dataframe, self.processes)
-        graph.apply(
-            lambda attr: convert_tensor(attr.float(), device=device, non_blocking=non_blocking), 'x', 'edge_attr')
-        return graph
-
     def _create_evaluator_engine(self):
         return create_classification_gcn_evaluator(
-            self._prepare_batch, self.model, device=self.device,
+            prepare_batch_graph, self.model, self.classes_dataframe, device=self.device, processes=self.processes,
             metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss), 'recall': Recall(average=True),
                      'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
 
     def _create_trainer_engine(self):
-        return create_classification_gcn_trainer(
-            self._prepare_batch, self.model, self.optimizer, self.loss, device=self.device)
+        return create_classification_gcn_trainer(prepare_batch_graph, self.model, self.classes_dataframe,
+                                                self.optimizer, self.loss, device=self.device, processes=self.processes)
 
 
 def train_classification_gcn(dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2,

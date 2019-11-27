@@ -9,7 +9,9 @@ container: fcoclavero/vscvs
 #ignoreFiles: null
 #isPreemptible: true
 #isPublic: null
-#jobEnv: null
+#jobEnv:
+#  DATA_DIR: /storage/data
+#  EMBEDDINGS_DIR: /storage/data/embeddings
 #machineType: K80
 machineType: C3
 #module: false

@@ -1,4 +1,2 @@
 echo setup
-export LC_ALL=en_US.utf-8
-export LANG=en_US.utf-8
-cp /storage/.env .env
+cp /storage/vscvs.env .env

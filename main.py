@@ -6,6 +6,13 @@ __status__ = 'Prototype'
 """ Entry script for the entire project. """
 
 
+from dotenv import load_dotenv
+
+
+# Load env
+load_dotenv()
+
+
 import click
 import warnings
 

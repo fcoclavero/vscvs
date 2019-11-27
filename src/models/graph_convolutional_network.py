@@ -108,4 +108,4 @@ class HOGGCN(torch.nn.Module):
         """
         x, y, *_ = image_batch  # unpack extra parameters into `_`
         embeddings = self.hog(x)
-        return self.classification_gcn((self._batch_graph(embeddings), y))
+        return self.classification_gcn(self._batch_graph( (embeddings, y) ))

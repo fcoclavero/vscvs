@@ -168,7 +168,7 @@ class AbstractTrainer:
             print('\nTraining results - epoch: {}'.format(trainer.state.epoch))
             for key, value in metrics.items():
                 writer.add_scalar('training_{}'.format(key), value, self.steps)
-                print('{}: {:.4f}'.format(key, value))
+                print('{}: {:.6f}'.format(key, value))
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def log_validation_results(trainer):
@@ -177,7 +177,7 @@ class AbstractTrainer:
             print('\nValidation results - epoch: {}'.format(trainer.state.epoch))
             for key, value in metrics.items():
                 writer.add_scalar('validation_{}'.format(key), value, self.steps)
-                print('{}: {:.4f}'.format(key, value))
+                print('{}: {:.6f}'.format(key, value))
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def reset_progressbar(trainer):

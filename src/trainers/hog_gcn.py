@@ -9,12 +9,13 @@ __status__ = 'Prototype'
 
 
 from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy
-from torch.nn import NLLLoss
+from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 
 from src.datasets import get_dataset, get_dataset_classes_dataframe
 from src.models.graph_convolutional_network import HOGGCN
 from src.trainers.abstract_trainer import AbstractTrainer
+from src.trainers.engines.hog_gcn import create_hog_gcn_evaluator, create_hog_gcn_trainer
 from src.utils.data import prepare_batch
 
 
@@ -49,7 +50,7 @@ class HOGGCNTrainer(AbstractTrainer):
 
     @property
     def loss(self):
-        return NLLLoss()
+        return CrossEntropyLoss()
 
     @property
     def optimizer(self):
@@ -64,14 +65,14 @@ class HOGGCNTrainer(AbstractTrainer):
         return 'hog_gcn'
 
     def _create_evaluator_engine(self):
-        return create_supervised_evaluator(
-            prepare_batch=prepare_batch, model=self.model, device=self.device,
+        return create_hog_gcn_evaluator(
+            prepare_batch, self.model, self.classes_dataframe, device=self.device, processes=self.processes,
             metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss), 'recall': Recall(average=True),
                      'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
 
     def _create_trainer_engine(self):
-        return create_supervised_trainer(
-            model=self.model, optimizer=self.optimizer, loss_fn=self.loss, prepare_batch=prepare_batch)
+        return create_hog_gcn_trainer(prepare_batch, self.model, self.classes_dataframe, self.optimizer, self.loss,
+                                      device=self.device, processes=self.processes)
 
 
 def train_hog_gcn(dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2,

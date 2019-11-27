@@ -3,7 +3,7 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" Ignite trainer engine (training logic) for a classification GCN. """
+""" Ignite trainer engine (training logic) for a GCN image label classifier, using HOG feature vectors for images. """
 
 
 import torch
@@ -11,13 +11,14 @@ import torch
 from ignite.engine import Engine
 
 
-def create_classification_gcn_trainer(prepare_batch_graph, model, classes_dataframe, optimizer, loss_fn, device=None,
-                                      non_blocking=False, processes=None):
+def create_hog_gcn_trainer(prepare_batch, model, classes_dataframe, optimizer, loss_fn, device=None,
+                           non_blocking=False, processes=None):
     """
-    Factory function for creating an ignite trainer Engine for a classification GCN.
-    :param prepare_batch_graph: batch preparation logic that takes a simple `x` and `y` batch and returns the
-    corresponding batch graph
-    :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch_geometric.data.Data, torch.Tensor)
+    Factory function for creating an ignite trainer Engine for a class classification GCN that creates batch clique
+    graphs where node feature vectors correspond to batch image HOG feature vectors and vertex weights correspond to the
+    distance of class name strings' document vectors.
+    :param prepare_batch: image batch preparation logic
+    :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch.Tensor, torch.Tensor)
     :param model: the generator model - generates vectors from images
     :type: torch.nn.Module
     :param classes_dataframe: dataframe containing class names and their word vectors
@@ -42,10 +43,9 @@ def create_classification_gcn_trainer(prepare_batch_graph, model, classes_datafr
     def _update(engine, batch):
         model.train() # # set training mode
         optimizer.zero_grad() # reset gradients
-        batch_graph = prepare_batch_graph(
-            batch, classes_dataframe, device=device, non_blocking=non_blocking, processes=processes)
-        y_pred = model(batch_graph) # feed data to model
-        loss = loss_fn(y_pred, batch_graph.y) # compute loss
+        image_batch = prepare_batch(batch, device=device, non_blocking=non_blocking)
+        y_pred = model(image_batch) # feed data to model
+        loss = loss_fn(y_pred, image_batch[1]) # compute loss
         loss.backward() # back propagation
         optimizer.step() # update model wights
         return loss.item() # return loss for logging
@@ -53,14 +53,15 @@ def create_classification_gcn_trainer(prepare_batch_graph, model, classes_datafr
     return Engine(_update)
 
 
-def create_classification_gcn_evaluator(prepare_batch_graph, model, classes_dataframe, metrics=None, device=None,
-                                        non_blocking=False, processes=None):
+def create_hog_gcn_evaluator(prepare_batch, model, classes_dataframe, metrics=None, device=None,
+                             non_blocking=False, processes=None):
     """
-    Factory function for creating an evaluator for a classification GCN.
+    Factory function for creating an evaluator for a class classification GCN that creates batch clique graphs where
+    node feature vectors correspond to batch image HOG feature vectors and vertex weights correspond to the distance of
+    class name strings' document vectors.
     NOTE: `engine.state.output` for this engine is defined by `output_transform` parameter and is
     a tuple of `(batch_pred, batch_y)` by default.
-    :param prepare_batch_graph: batch preparation logic that takes a simple `x` and `y` batch and returns the
-    corresponding batch graph
+    :param prepare_batch: image batch preparation logic
     :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch_geometric.data.Data, torch.Tensor)
     :param model: the model to train.
     :type: torch.nn.Module
@@ -90,10 +91,9 @@ def create_classification_gcn_evaluator(prepare_batch_graph, model, classes_data
     def _inference(engine, batch):
         model.eval()
         with torch.no_grad():
-            batch_graph = prepare_batch_graph(
-                batch, classes_dataframe, device=device, non_blocking=non_blocking, processes=processes)
-            x, y = batch_graph.x, batch_graph.y
-            y_pred = model(batch_graph) # feed data to model
+            image_batch = prepare_batch(batch, device=device, non_blocking=non_blocking)
+            x, y, *_ = image_batch
+            y_pred = model(image_batch)  # feed data to model
             return _output_transform(x, y, y_pred)
 
     engine = Engine(_inference)

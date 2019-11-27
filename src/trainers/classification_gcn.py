@@ -13,7 +13,8 @@ from torch.optim import Adam
 from src.datasets import get_dataset, get_dataset_classes_dataframe
 from src.models.graph_convolutional_network import ClassificationGCN
 from src.trainers.abstract_trainer import AbstractTrainer
-from src.trainers.engines.classification_gcn import *
+from src.trainers.engines.classification_gcn import create_classification_gcn_evaluator, \
+                                                    create_classification_gcn_trainer
 from src.utils.data import prepare_batch_graph
 
 

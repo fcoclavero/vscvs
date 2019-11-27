@@ -1,4 +1,4 @@
-echo setup export lang
-export LC_ALL=C.UTF-8
-export LANG=C.UTF-8
+echo setup
+export LC_ALL=en_US.utf-8
+export LANG=en_US.utf-8
 cp /storage/.env .env

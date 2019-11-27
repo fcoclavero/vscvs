@@ -1,5 +1,6 @@
 echo setup
 ls -la
-ls /storage
+ls -la /storage
 cp /storage/vscvs.env .env
+ls -la
 echo setup complete

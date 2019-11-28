@@ -3,8 +3,6 @@
 #clusterId: null
 #command: null
 container: fcoclavero/vscvs
-#container: pytorch/conda-cuda
-#container: paperspace/pytorch
 #experimentId: null
 #ignoreFiles: null
 #isPreemptible: true
@@ -12,8 +10,7 @@ container: fcoclavero/vscvs
 #jobEnv:
 #  DATA_DIR: /storage/data
 #  EMBEDDINGS_DIR: /storage/data/embeddings
-#machineType: K80
-machineType: C3
+machineType: P4000 # K80 # C3
 #module: false
 #name: null
 #nodeAttrs: null

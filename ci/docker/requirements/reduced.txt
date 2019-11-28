@@ -1,0 +1,12 @@
+click==7.0
+matplotlib>=3.1
+multipledispatch==0.6.0
+nltk==3.4.5 # stopwords and wordnet corpus must be installed
+plotly>=4.2
+pyemd==0.5.1
+pyspellchecker==0.5.2
+pytest>=5.2
+pytest-arraydiff==0.3
+python-dotenv==0.10.3
+pytorch-ignite>=0.2
+tb-nightly

@@ -6,7 +6,7 @@ COPY /requirements/vscvs.txt /requirements/vscvs.txt
 COPY /requirements/textpreprocess.txt /requirements/textpreprocess.txt
 COPY /requirements/wordvectors.txt /requirements/wordvectors.txt
 RUN apt-get update && \
-    apt-get install rsync && \
+    apt-get install -y rsync && \
     mkdir requirements && \
     pip install -r /requirements/vscvs.txt && \
     pip install -r /requirements/textpreprocess.txt && \

@@ -1,3 +1,3 @@
 echo cleanup
-rsync --recursive --update data /storage/vscvs
+rsync --verbose --recursive --update data /storage/vscvs
 echo cleanup complete

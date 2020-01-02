@@ -1,3 +1,4 @@
-echo setup
+echo INFO: setup
 cp /storage/vscvs.env .env
-echo setup complete
+pip freeze
+echo INFO: setup complete

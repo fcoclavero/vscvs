@@ -13,7 +13,7 @@ from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 
 from src.datasets import get_dataset, get_dataset_classes_dataframe
-from src.models.graph_convolutional_network import HOGGCN
+from src.models import HOGGCN
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.hog_gcn import create_hog_gcn_evaluator, create_hog_gcn_trainer
 from src.utils.data import prepare_batch

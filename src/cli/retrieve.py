@@ -47,7 +47,7 @@ def retrieve(context, **kwargs):
 @click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
 def hog(_, query_image_filename, query_dataset_name, queried_dataset_name, queried_embeddings_name, k, n_gpu,
         in_channels, cell_size, bins, signed_gradients):
-    from src.models.hog import HOG
+    from src.models import HOG
     model = HOG(in_channels, cell_size, bins, signed_gradients)
     retrieve_top_k(
         model, query_image_filename, query_dataset_name, queried_dataset_name, queried_embeddings_name, k, n_gpu

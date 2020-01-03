@@ -22,10 +22,10 @@ from ignite.engine import Events
 
 from settings import ROOT_DIR
 from src.datasets import get_dataset
-from src.models.triplet_network import TripletNetwork
+from src.models import TripletNetwork
 from src.utils import get_device, get_checkpoint_directory
 from src.utils.collators import triplet_collate
-from src.models.convolutional.classification import ClassificationConvolutionalNetwork
+from src.models.convolutional import ClassificationConvolutionalNetwork
 from src.trainers.engines.triplet_cnn import create_triplet_cnn_trainer, create_triplet_cnn_evaluator
 from src.utils.data import dataset_split, output_transform_gan
 

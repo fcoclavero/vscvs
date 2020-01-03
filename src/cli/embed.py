@@ -37,7 +37,7 @@ def embed(context, **kwargs):
 def hog(_, dataset_name, embeddings_name, batch_size, workers, n_gpu,
         in_channels, cell_size, bins, signed_gradients):
     click.echo('HOG embeddings for {} dataset'.format(dataset_name))
-    from src.models.hog import HOG
+    from src.models import HOG
     model = HOG(in_channels, cell_size, bins, signed_gradients)
     create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 

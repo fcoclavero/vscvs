@@ -11,7 +11,7 @@ from ignite.metrics import Accuracy, Loss
 from torch.nn import CrossEntropyLoss
 from torch.optim import SGD
 
-from src.models.convolutional.classification import ClassificationConvolutionalNetwork
+from src.models.convolutional import ClassificationConvolutionalNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.utils.data import prepare_batch
 

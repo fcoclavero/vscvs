@@ -12,7 +12,7 @@ import torch.nn.functional as F
 
 from torch_geometric.nn import GCNConv
 
-from src.models.hog import HOG
+from src.models import HOG
 from src.utils.data import prepare_batch_graph
 
 

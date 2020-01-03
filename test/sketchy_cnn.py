@@ -5,7 +5,7 @@ import torch.optim as optim
 
 from src.datasets import get_dataset
 from src.metrics.multi_class import Accuracy, MeanAverageF1, MeanAverageRecall, MeanAveragePrecision
-from src.models.convolutional.classification import ConvolutionalNetwork
+from src.models.convolutional import ConvolutionalNetwork
 from src.utils import get_device
 
 

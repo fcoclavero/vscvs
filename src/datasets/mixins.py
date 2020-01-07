@@ -8,14 +8,40 @@ __status__ = 'Prototype'
 
 import torch
 
+from collections import defaultdict
 from random import choice, randint
 
 from src.utils import str_to_bin_array
 
 
+class SiameseMixin:
+    """
+    Mixin class for loading random pairs on `__get_item__` for any Dataset. Must be used with a torch.Dataset subclass,
+    as it assumes the existence of the `classes`, `class_to_idx` and `imgs` fields.
+    """
+    def __get_random_item__(self):
+        """
+        Get a random item from the Dataset.
+        :return: an item tuple
+        :type: tuple
+        """
+        return super().__getitem__(randint(0, len(self) - 1))
+
+    def __getitem__(self, index):
+        """
+        Modify the Dataset's `__getitem__` method, returning each requested item along with another random item from
+        the Dataset.
+        :param index: an item's index
+        :type: int
+        :return: a 2-tuple with the item corresponding to `index`, along with another random item.
+        :type: tuple
+        """
+        return super().__getitem__(index), self.__get_random_item__()
+
+
 class TripletMixin:
     """
-    Mixin class for loading triplets on __get_item__ for any Dataset. Must be used with a torch.Dataset subclass,
+    Mixin class for loading triplets on `__get_item__` for any Dataset. Must be used with a torch.Dataset subclass,
     as it assumes the existence of the `classes`, `class_to_idx` and `imgs` fields.
     """
     def __init__(self, *args, **kwargs):
@@ -24,10 +50,9 @@ class TripletMixin:
         triplet generation.
         """
         super().__init__(*args, **kwargs)
-        self.imgs_dict = {
-            idx: [index for index, img in enumerate(self.imgs) if img[1] == idx]
-            for cls, idx in self.class_to_idx.items()
-        }
+        self.class_images = defaultdict(list) # if new key is used, it will be initialized with an empty list by default
+        for image_index, image_class in enumerate(self.targets): # `self.target` contains the class of each image
+            self.class_images[image_class].append(image_index)
 
     def __get_random_item__(self, cls):
         """
@@ -37,8 +62,7 @@ class TripletMixin:
         :return: an item tuple
         :type: tuple
         """
-        class_image_indexes = self.imgs_dict[cls]
-        return super().__getitem__(class_image_indexes[randint(0, len(class_image_indexes) - 1)])
+        return super().__getitem__(choice(self.class_images[cls]))
 
     def __getitem__(self, index):
         """
@@ -46,12 +70,12 @@ class TripletMixin:
         and a negative (a random example of the same class).
         :param index: an item's index
         :type: int
-        :return: a tuple with the anchor
-        :type: tuple(torch.Tensor, list<torch.Tensor>, int)
+        :return: a 3-tuple with the anchor, positive and negative
+        :type: tuple
         """
-        positive_class = self.imgs[index][1]
-        negative_classes = list(range(0, positive_class)) + list(range(positive_class + 1, len(self.classes)))
         anchor = super().__getitem__(index)
+        positive_class = self.targets[index]
+        negative_classes = list(range(0, positive_class)) + list(range(positive_class + 1, len(self.classes)))
         positive = self.__get_random_item__(positive_class)
         negative = self.__get_random_item__(choice(negative_classes))
         return anchor, positive, negative

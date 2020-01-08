@@ -10,3 +10,4 @@ pytest-arraydiff==0.3
 python-dotenv==0.10.3
 pytorch-ignite>=0.2
 tb-nightly
+tqdm>=4.36

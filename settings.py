@@ -11,7 +11,6 @@ import os
 from dotenv import load_dotenv
 
 
-# Load env
 load_dotenv()
 
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))

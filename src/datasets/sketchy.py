@@ -51,6 +51,10 @@ class Sketchy(ImageFolder):
             ])
         )
 
+    @property
+    def classes_dataframe(self):
+        return pickle.load(open(os.path.join(self.root, 'classes.pickle'), 'rb'))
+
 
 class SketchyTriplets(TripletMixin, Sketchy):
     """

@@ -32,7 +32,7 @@ def train(context, **kwargs):
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
+@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
 def cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name, lr, momentum):
     from src.trainers.cnn import train_cnn
@@ -46,7 +46,7 @@ def cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, t
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
+@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
 def resnet(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name, lr, momentum):
     from src.trainers.resnet import train_resnet
@@ -60,7 +60,7 @@ def resnet(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
+@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
 def resnext(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name, lr, momentum):
     from src.trainers.resnext import train_resnext
@@ -72,14 +72,31 @@ def resnext(_, resume, train_validation_split, batch_size, epochs, workers, n_gp
 @pass_context_to_kwargs
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-ketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
+    type=click.Choice(['sketchy'])
+)
+@click.option('--margin', prompt='Margin', help='The margin for the Contrastive Loss.', default=.2)
+@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
+@click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
+def siamese_cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name,
+                margin, lr, momentum):
+    from src.trainers.siamese import train_siamese_cnn
+    click.echo('siamese cnn - %s dataset' % dataset_name)
+    dataset_name = dataset_name + '-siamese'
+    train_siamese_cnn(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag,
+                      margin, lr, momentum)
+
+
+@train.command()
+@pass_context_to_kwargs
+@click.option(
+    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
 @click.option(
     '--vector-dimension', prompt='CVS dimensionality', help='Dimensionality of the vector space.', default=300
 )
-@click.option('--resume', help='Epoch for checkpoint loading.', default=None)
 @click.option('--margin', prompt='Margin', help='The margin for the Triplet Loss.', default=.2)
-@click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
+@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--beta1', prompt='Beta 1', help='Decay parameter for Adam optimizer.', default=.2)
 def triplet_cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, dataset_name, vector_dimension,
                 margin, lr, beta1):
@@ -110,7 +127,7 @@ def cvs_gan(_, resume, train_validation_split, batch_size, epochs, workers, n_gp
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
+@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--weight-decay', prompt='Weight decay', help='Weight decay parameter for Adam optimizer.', default=5e-4)
 @click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
               help='The number of parallel workers to be used for creating batch graphs.')
@@ -133,7 +150,7 @@ def classification_gcn(_, resume, train_validation_split, batch_size, epochs, wo
 @click.option('--cell-size', prompt='Cell size', help='Gradient pooling size.', default=8)
 @click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
 @click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
-@click.option('--lr', prompt='Learning rate', help='Learning rate for Adam optimizer', default=2e-4)
+@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--weight-decay', prompt='Weight decay', help='Weight decay parameter for Adam optimizer.', default=5e-4)
 @click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
               help='The number of parallel workers to be used for creating batch graphs.')

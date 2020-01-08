@@ -1,0 +1,1 @@
+from src.loss_functions.contrastive import ContrastiveLoss

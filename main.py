@@ -14,7 +14,6 @@ load_dotenv()
 
 
 import click
-import torch
 import warnings
 
 from src.cli import create, embed, measure, retrieve, show, train

@@ -10,7 +10,7 @@ from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 
-from src.datasets import get_dataset, get_dataset_classes_dataframe
+from src.datasets import get_dataset
 from src.models import ClassificationGCN
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.classification_gcn import create_classification_gcn_evaluator, \
@@ -25,12 +25,10 @@ class ClassificationGCNTrainer(AbstractTrainer):
     """
     def __init__(self, dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2, workers=6,
                  n_gpu=0, tag=None, learning_rate=.01, weight_decay=5e-4, processes=None, drop_last=False):
-        self.dataset_name = dataset_name
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
         self.processes = processes
-        self.classes_dataframe = get_dataset_classes_dataframe(dataset_name)
         super().__init__(dataset_name, resume_date, train_validation_split, batch_size, epochs=epochs, workers=workers,
                          n_gpu=n_gpu, tag=tag, drop_last=drop_last)
 
@@ -57,12 +55,13 @@ class ClassificationGCNTrainer(AbstractTrainer):
 
     def _create_evaluator_engine(self):
         return create_classification_gcn_evaluator(
-            prepare_batch_graph, self.model, self.classes_dataframe, device=self.device, processes=self.processes,
-            metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss), 'recall': Recall(average=True),
-                     'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
+            prepare_batch_graph, self.model, self.dataset.classes_dataframe, device=self.device,
+            processes=self.processes, metrics={
+                'accuracy': Accuracy(), 'loss': Loss(self.loss),
+                'recall': Recall(average=True), 'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
 
     def _create_trainer_engine(self):
-        return create_classification_gcn_trainer(prepare_batch_graph, self.model, self.classes_dataframe,
+        return create_classification_gcn_trainer(prepare_batch_graph, self.model, self.dataset.classes_dataframe,
                                                 self.optimizer, self.loss, device=self.device, processes=self.processes)
 
 
@@ -71,7 +70,8 @@ def train_classification_gcn(dataset_name, resume_date=None, train_validation_sp
     """
     Trains a GCN to predict image labels using a GCN over batch clique graphs where nodes correspond to batch images and
     vertex weights corresponds to image label word vector distances.
-    :param dataset_name: the name of the Dataset to be used for training
+    :param dataset_name: the name of the Dataset to be used for training. Must have a classes dataframe containing all
+    possible class names and their word vectors.
     :type: str
     :param resume_date: date of the trainer state to be resumed. Dates must have the following
     format: `%y-%m-%dT%H-%M`

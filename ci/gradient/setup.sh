@@ -1,8 +1,6 @@
 echo INFO: setup
 cp /storage/vscvs.env .env
-sudo apt-get install wget
-conda install -c conda-forge cudatoolkit-dev
-pip install --upgrade torch
 nvcc --version
 nvidia-smi
+ls /storage/data/sketchy/sketch/tx_000000000000/apple/ | grep n07739125_1406-6.png
 echo INFO: setup complete

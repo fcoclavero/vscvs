@@ -1,5 +1,6 @@
 echo INFO: setup
 cp /storage/vscvs.env .env
+apt-get install wget
 conda install -c conda-forge cudatoolkit-dev
 pip install --upgrade torch
 nvcc --version

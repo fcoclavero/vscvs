@@ -6,14 +6,13 @@ __status__ = 'Prototype'
 """ Ignite trainer for a siamese network. """
 
 
-from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 from torch.optim import SGD
 
 from src.loss_functions import ContrastiveLoss
 from src.models import ClassificationConvolutionalNetwork, SiameseNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
-from src.utils.data import prepare_batch
+from src.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
 
 
 class SiameseTrainer(AbstractTrainer):
@@ -46,15 +45,13 @@ class SiameseTrainer(AbstractTrainer):
 
     @property
     def trainer_id(self):
-        return 'siamese {}'.format(self.architecture_model.__name__)
+        return 'siamese {}'.format(self.architecture_model.__class__.__name__)
 
     def _create_evaluator_engine(self):
-        return create_supervised_evaluator(
-            self.model, metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss)}, device=self.device)
+        return create_siamese_evaluator(self.model, metrics={'loss': Loss(self.loss)}, device=self.device)
 
     def _create_trainer_engine(self):
-        return create_supervised_trainer(
-            self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
+        return create_siamese_trainer(self.model, self.optimizer, self.loss, device=self.device)
 
 
 def train_siamese_cnn(dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2, workers=4,

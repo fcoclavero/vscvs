@@ -48,6 +48,6 @@ class ContrastiveLoss(torch.nn.Module):
         """
         euclidean_distance = torch.nn.functional.pairwise_distance(x_0, x_1) # cross-domain euclidian distance
         return torch.mean(
-            0.5 * (1 - y) * torch.pow(euclidean_distance^2, 2) +
+            0.5 * (1 - y) * torch.pow(euclidean_distance, 2) +
             0.5 * y * torch.clamp(self.margin -  torch.pow(euclidean_distance, 2), min=0.0)
         )

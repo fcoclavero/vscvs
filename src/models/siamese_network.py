@@ -35,10 +35,9 @@ class SiameseNetwork(nn.Module):
         :type: torch.Tensor with a size compatible with `embedding_network`
         :param input_2: the second network input
         :type: torch.Tensor with a size compatible with `embedding_network`
-        :return: the embeddings for both inputs and the distance between them
-        :type: torch.Tensor, torch.Tensor, torch.Float
+        :return: the embeddings for both inputs
+        :type: torch.Tensor, torch.Tensor
         """
         embedding_1 = self.embedding_network(input_1)
         embedding_2 = self.embedding_network(input_2)
-        distance = F.pairwise_distance(embedding_1, embedding_2, 2)
-        return embedding_1, embedding_2, distance
+        return embedding_1, embedding_2

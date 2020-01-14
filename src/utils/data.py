@@ -147,6 +147,21 @@ def prepare_batch_gan(batch, device=None, non_blocking=False):
     )
 
 
+def prepare_batch_siamese(batch, device=None, non_blocking=False):
+    """
+    Prepare batch for GAN training: pass to a device with options. Assumes the shape returned by a Dataset implementing
+    the `SiameseMixin`.
+    :param batch: data to be sent to device.
+    :type: list
+    :param device: device type specification
+    :type: str (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
+    """
+    images_1, images_2 = batch
+    return prepare_batch(images_1, device, non_blocking), prepare_batch(images_2, device, non_blocking)
+
+
 def wordvector_distance(indices, class_wordvector_distances):
     """
     Get the distance of two class word vectors, given a pre-computed distance matrix. This can be used to determine
@@ -214,7 +229,28 @@ def prepare_batch_graph(batch, classes_dataframe, device=None, non_blocking=Fals
 
 
 def output_transform_gan(output):
-    # `output` variable is returned by above `process_function`
+    """
+    Receives `x`, `y`, `y_pred` and the returns value to be assigned to engine's
+    state.output after each iteration. Default is returning `(y_pred, y,)`, which fits output expected by metrics.
+    :param output:
+    :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+    :return:
+    """
     y_pred = output['y_pred']
     y = output['y_true']
     return y_pred, y  # output format is according to `Accuracy` docs
+
+
+def output_transform_siamese(embeddings_1, embeddings_2):
+    """
+    Receives the output of a siamese network, the embeddings of each image, and the returns value to be assigned to
+    engine's state.output after each iteration, in this case the distances between each image pair.
+    :param embeddings_1: torch tensor containing the embeddings for the first image of each image pair.
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :param embeddings_2: torch tensor containing the embeddings for the second image of each image pair.
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :return: the distance between each image pair, which will be assigned to the Ignite engine's state.output after
+    each iteration.
+    :type: torch.Tensor with shape `batch_size`
+    """
+    return torch.nn.functional.pairwise_distance(embeddings_1, embeddings_2)

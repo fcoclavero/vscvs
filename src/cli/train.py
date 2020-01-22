@@ -12,7 +12,7 @@ from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 
 
 @click.group()
-@click.option('--resume', help='Epoch for checkpoint loading.', default=None)
+@click.option('--resume_date', help='Epoch for checkpoint loading.', default=None)
 @click.option('--train-validation-split', prompt='Train/validation split',
               help='proportion of the training set that will be used for training.', default=.8)
 @click.option('--batch-size', prompt='Batch size', help='The batch size during training.', default=16)
@@ -46,12 +46,12 @@ def cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, t
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
+@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
-def resnet(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name, lr, momentum):
+def resnet(_, *args, **kwargs):
     from src.trainers.resnet import train_resnet
-    click.echo('resnet - %s dataset' % dataset_name)
-    train_resnet(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, lr, momentum)
+    click.echo('resnet - {} dataset'.format(kwargs['dataset_name']))
+    train_resnet(*args, **kwargs)
 
 
 @train.command()
@@ -60,12 +60,12 @@ def resnet(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
+@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
-def resnext(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name, lr, momentum):
+def resnext(_, *args, **kwargs):
     from src.trainers.resnext import train_resnext
-    click.echo('resnext - %s dataset' % dataset_name)
-    train_resnext(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, lr, momentum)
+    click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))
+    train_resnext(*args, **kwargs)
 
 
 @train.command()

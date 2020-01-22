@@ -25,10 +25,12 @@ class AbstractTrainer:
     """
     Abstract class with the boilerplate code needed to define and run an Ignite trainer Engine.
     """
-    def __init__(self, dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2,
-                 workers=6, n_gpu=0, tag=None, drop_last=False):
+    def __init__(self, *args, dataset_name=None,  resume_date=None, train_validation_split=.8, batch_size=16, epochs=2,
+                 workers=6, n_gpu=0, tag=None, drop_last=False, **kwargs):
         """
         Base constructor which sets default trainer parameters.
+        :param args: mixin arguments
+        :type: tuple
         :param dataset_name: the name of the Dataset to be used for training
         :type: str
         :param resume_date: date of the trainer state to be resumed. Dates must have the following
@@ -49,6 +51,8 @@ class AbstractTrainer:
         :type: int
         :param drop_last: whether to drop the last batch if it is not the same size as `batch_size`.
         :type: boolean
+        :param kwargs: mixin keyword arguments
+        :type: dict
         """
         date = resume_date or datetime.now()
         self.batch_size = batch_size
@@ -68,6 +72,7 @@ class AbstractTrainer:
         self.evaluator_engine = self._create_evaluator_engine()
         self.timer = self._create_timer()
         self._add_event_handlers()
+        super().__init__(*args, **kwargs)
 
     @property
     def initial_model(self):
@@ -169,7 +174,7 @@ class AbstractTrainer:
 
         checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to periodically
             self.checkpoint_directory, filename_prefix='net', # save model objects to disc.
-            save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=False, require_empty=False
+            save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
         )
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver, {'train': self.model})
@@ -270,11 +275,16 @@ class EarlyStoppingMixin:
     def __init__(self, *args, early_stopping_patience=5, **kwargs):
         """
         Mixin constructor which creates and attaches an EarlyStopping handler to the Trainer.
+        :param args: additional mixin arguments
+        :type: tuple
         :param early_stopping_patience: number of epochs to wait if there are no improvements to stop the training.
         :type: int
+        :param kwargs: additional mixin keyword arguments
+        :type: dict
         """
         self.early_stopping_patience = early_stopping_patience
-        self.evaluator_engine.add_event_handler(Events.COMPLETED, self._early_stopping_handler, self.trainer_engine)
+        self.evaluator_engine.add_event_handler(Events.COMPLETED, self._early_stopping_handler)
+        super().__init__(*args, **kwargs)
 
     @property
     def _early_stopping_handler(self):

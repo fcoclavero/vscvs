@@ -24,12 +24,12 @@ class CNNTrainer(AbstractTrainer):
     def __init__(self, *args, learning_rate=.01, momentum=.8, **kwargs):
         """
         Trainer constructor.
+        :param args: AbstractTrainer arguments
+        :type: tuple
         :param learning_rate: learning rate for optimizers
         :type: float
         :param momentum: momentum parameter for SGD optimizer
         :type: float
-        :param args: AbstractTrainer arguments
-        :type: tuple
         :param kwargs: AbstractTrainer keyword arguments
         :type: dict
         """
@@ -70,9 +70,9 @@ class CNNTrainer(AbstractTrainer):
 def train_cnn(*args, **kwargs):
     """
     Train a classification Convolutional Neural Network for image classes.
-    :param args: ResNetTrainer arguments
+    :param args: CNNTrainer arguments
     :type: tuple
-    :param kwargs: ResNetTrainer keyword arguments
+    :param kwargs: CNNTrainer keyword arguments
     :type: dict
     """
     trainer = CNNTrainer(*args, **kwargs)

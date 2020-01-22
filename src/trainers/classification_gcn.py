@@ -14,7 +14,7 @@ from src.datasets import get_dataset
 from src.models import ClassificationGCN
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.classification_gcn import create_classification_gcn_evaluator, \
-                                                    create_classification_gcn_trainer
+    create_classification_gcn_trainer
 from src.utils.data import prepare_batch_graph
 
 
@@ -23,14 +23,28 @@ class ClassificationGCNTrainer(AbstractTrainer):
     Trainer for a class classification GCN that uses only image classes and batch clique graphs where vertex weights
     correspond to word vector distances between image class labels.
     """
-    def __init__(self, dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2, workers=6,
-                 n_gpu=0, tag=None, learning_rate=.01, weight_decay=5e-4, processes=None, drop_last=False):
-        self.batch_size = batch_size
+    def __init__(self, *args, dataset_name=None, learning_rate=.01, weight_decay=5e-4, processes=None, **kwargs):
+        """
+        Trainer constructor.
+        :param args: AbstractTrainer and EarlyStoppingMixin arguments
+        :type: tuple
+        :param dataset_name: the name of the Dataset to be used for training
+        :type: str
+        :param learning_rate: learning rate for Adam optimizer
+        :type: float
+        :param weight_decay: weight_decay parameter for Adam optimizer
+        :type: float
+        :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then
+        `os.cpu_count()` will be used.
+        :type: int or None
+        :param kwargs: AbstractTrainer and EarlyStoppingMixin keyword arguments
+        :type: dict
+        """
+        self.dataset_name = dataset_name
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
         self.processes = processes
-        super().__init__(dataset_name, resume_date, train_validation_split, batch_size, epochs=epochs, workers=workers,
-                         n_gpu=n_gpu, tag=tag, drop_last=drop_last)
+        super().__init__(*args, dataset_name = self.dataset_name, **kwargs)
 
     @property
     def initial_model(self):
@@ -61,42 +75,18 @@ class ClassificationGCNTrainer(AbstractTrainer):
                 'recall': Recall(average=True), 'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
 
     def _create_trainer_engine(self):
-        return create_classification_gcn_trainer(prepare_batch_graph, self.model, self.dataset.classes_dataframe,
-                                                self.optimizer, self.loss, device=self.device, processes=self.processes)
+        return create_classification_gcn_trainer(
+            prepare_batch_graph, self.model, self.dataset.classes_dataframe,
+            self.optimizer, self.loss, device=self.device, processes=self.processes)
 
 
-def train_classification_gcn(dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2,
-                             workers=4, n_gpu=0, tag=None, learning_rate=.01, weight_decay=5e-4, processes=None):
+def train_classification_gcn(*args, **kwargs):
     """
-    Trains a GCN to predict image labels using a GCN over batch clique graphs where nodes correspond to batch images and
-    vertex weights corresponds to image label word vector distances.
-    :param dataset_name: the name of the Dataset to be used for training. Must have a classes dataframe containing all
-    possible class names and their word vectors.
-    :type: str
-    :param resume_date: date of the trainer state to be resumed. Dates must have the following
-    format: `%y-%m-%dT%H-%M`
-    :type: str
-    :param train_validation_split: proportion of the training set that will be used for actual
-    training. The remaining data will be used as the validation set.
-    :type: float
-    :param batch_size: batch size during training
-    :type: int
-    :param epochs: the number of epochs used for training
-    :type: int
-    :param workers: number of workers for data_loader
-    :type: int
-    :param n_gpu: number of GPUs available. Use 0 for CPU mode
-    :type: int
-    :param tag: optional tag for model checkpoint and tensorboard logs
-    :type: str
-    :param learning_rate: learning rate for optimizers
-    :type: float
-    :param weight_decay: weight_decay parameter for Adam optimizer
-    :type: float
-    :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
-    will be used.
-    :type: int or None
+    Train a ClassificationGCN image classifier.
+    :param args: ClassificationGCNTrainer arguments
+    :type: tuple
+    :param kwargs: ClassificationGCNTrainer keyword arguments
+    :type: dict
     """
-    trainer = ClassificationGCNTrainer(dataset_name, resume_date, train_validation_split, batch_size, epochs,
-                                       workers, n_gpu, tag, learning_rate, weight_decay, processes, drop_last=True)
+    trainer = ClassificationGCNTrainer(*args, **kwargs)
     trainer.run()

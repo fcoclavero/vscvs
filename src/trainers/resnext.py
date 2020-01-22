@@ -24,12 +24,12 @@ class ResNextTrainer(AbstractTrainer, EarlyStoppingMixin):
     def __init__(self, *args, learning_rate=.01, momentum=.8, **kwargs):
         """
         Trainer constructor.
+        :param args: AbstractTrainer and EarlyStoppingMixin arguments
+        :type: tuple
         :param learning_rate: learning rate for optimizers
         :type: float
         :param momentum: momentum parameter for SGD optimizer
         :type: float
-        :param args: AbstractTrainer and EarlyStoppingMixin arguments
-        :type: tuple
         :param kwargs: AbstractTrainer and EarlyStoppingMixin keyword arguments
         :type: dict
         """
@@ -75,9 +75,9 @@ class ResNextTrainer(AbstractTrainer, EarlyStoppingMixin):
 def train_resnext(*args, **kwargs):
     """
     Train a ResNext image classifier.
-    :param args: ResNetTrainer arguments
+    :param args: ResNextTrainer arguments
     :type: tuple
-    :param kwargs: ResNetTrainer keyword arguments
+    :param kwargs: ResNextTrainer keyword arguments
     :type: dict
     """
     trainer = ResNextTrainer(*args, **kwargs)

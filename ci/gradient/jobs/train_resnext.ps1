@@ -3,7 +3,7 @@ gradient jobs create `
 --optionsFile config.yaml `
 --command ( `
     'sh ci/gradient/setup.sh && ' + `
-    'python main.py train --train-validation-split 0.9 --batch-size 64 --epochs 50 --workers 16 --n-gpu 1 ' + `
-                         'resnext --dataset-name sketchy-photos --learning_rate 0.00001 --momentum 0.9 && ' + `
+    'python main.py train --train-validation-split 0.85 --batch-size 50 --epochs 200 --workers 16 --n-gpu 1 ' + `
+                         'resnext --dataset-name sketchy-photos --learning_rate 0.05 --momentum 0.01 && ' + `
     'sh ci/gradient/cleanup.sh' `
 )

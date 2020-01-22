@@ -22,6 +22,7 @@ class ResNetTrainer(AbstractTrainer, EarlyStoppingMixin):
     """
     def __init__(self, *args, learning_rate=.01, momentum=.8, **kwargs):
         """
+        Trainer constructor.
         :param learning_rate: learning rate for optimizers
         :type: float
         :param momentum: momentum parameter for SGD optimizer

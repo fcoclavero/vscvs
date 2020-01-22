@@ -32,12 +32,12 @@ def train(context, **kwargs):
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
+@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
-def cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name, lr, momentum):
+def cnn(_,  *args, **kwargs):
     from src.trainers.cnn import train_cnn
-    click.echo('cnn - %s dataset' % dataset_name)
-    train_cnn(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, lr, momentum)
+    click.echo('cnn - {} dataset'.format(kwargs['dataset_name']))
+    train_cnn(*args, **kwargs)
 
 
 @train.command()

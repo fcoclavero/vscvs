@@ -14,6 +14,7 @@ from torch.optim import SGD
 from src.models import ClassificationConvolutionalNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.utils.data import prepare_batch
+from src.utils.decorators import kwargs_parameter_dict
 
 
 class CNNTrainer(AbstractTrainer):
@@ -65,6 +66,7 @@ class CNNTrainer(AbstractTrainer):
             self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
 
 
+@kwargs_parameter_dict
 def train_cnn(*args, **kwargs):
     """
     Train a classification Convolutional Neural Network for image classes.

@@ -30,19 +30,18 @@ def deprecated(func):
     return wrapper
 
 
-def threaded(func):
+def kwargs_parameter_dict(func):
     """
-    Decorator that runs the decorated function asynchronously by throwing a new Python thread upon function call.
+    Decorator that passes all received `kwargs` as a keyword dictionary parameter.
     :param func: the function to be decorated
     :type: function
-    :return: the decorated function, which evaluates in a new Python thread
+    :return: the decorated function, which now has a new dictionary parameter called `parameter_dict` with all the
+    original keyword arguments.
     :type: function
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        t = Thread(target=func, args=args, kwargs=kwargs)
-        t.daemon = True
-        t.start()
+        return func(*args, parameter_dict=kwargs, **kwargs)
     return wrapper
 
 
@@ -60,6 +59,22 @@ def log_time(func):
         ret = func(*args, **kwargs)
         print('Executed {} in {} s.'.format(func.__name__, datetime.now() - start))
         return ret
+    return wrapper
+
+
+def threaded(func):
+    """
+    Decorator that runs the decorated function asynchronously by throwing a new Python thread upon function call.
+    :param func: the function to be decorated
+    :type: function
+    :return: the decorated function, which evaluates in a new Python thread
+    :type: function
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        t = Thread(target=func, args=args, kwargs=kwargs)
+        t.daemon = True
+        t.start()
     return wrapper
 
 

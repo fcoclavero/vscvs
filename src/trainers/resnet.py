@@ -14,6 +14,7 @@ from torchvision.models import resnet50
 
 from src.trainers.abstract_trainer import AbstractTrainer, EarlyStoppingMixin
 from src.utils.data import prepare_batch
+from src.utils.decorators import kwargs_parameter_dict
 
 
 class ResNetTrainer(AbstractTrainer, EarlyStoppingMixin):
@@ -70,6 +71,7 @@ class ResNetTrainer(AbstractTrainer, EarlyStoppingMixin):
             self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
 
 
+@kwargs_parameter_dict
 def train_resnet(*args, **kwargs):
     """
     Train a ResNet image classifier.

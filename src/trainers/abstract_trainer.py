@@ -26,7 +26,7 @@ class AbstractTrainer:
     Abstract class with the boilerplate code needed to define and run an Ignite trainer Engine.
     """
     def __init__(self, *args, dataset_name=None,  resume_date=None, train_validation_split=.8, batch_size=16, epochs=2,
-                 workers=6, n_gpu=0, tag=None, drop_last=False, **kwargs):
+                 workers=6, n_gpu=0, tag=None, drop_last=False, parameter_dict=None, **kwargs):
         """
         Base constructor which sets default trainer parameters.
         :param args: mixin arguments
@@ -51,6 +51,8 @@ class AbstractTrainer:
         :type: int
         :param drop_last: whether to drop the last batch if it is not the same size as `batch_size`.
         :type: boolean
+        :param parameter_dict: dictionary with important training parameters for logging.
+        :type: dict
         :param kwargs: mixin keyword arguments
         :type: dict
         """
@@ -64,6 +66,7 @@ class AbstractTrainer:
         self.event_handlers = []
         self.log_directory = get_log_directory(self.trainer_id, tag=tag, date=date)
         self.model = self.initial_model.to(self.device)
+        self.parameter_dict = parameter_dict
         self.start_epoch = 0
         self.steps = 0
         self.train_loader, self.validation_loader = \
@@ -110,12 +113,12 @@ class AbstractTrainer:
         :type: dict
         """
         return {
+            'average_epoch_duration': self.timer.value(),
             'dataset_name': self.dataset_name,
-            'total_epochs': self.start_epoch + self.epochs,
-            'batch_size': self.batch_size,
-            'optimizer': self.optimizer,
             'last_run': datetime.now(),
-            'average_epoch_duration': self.timer.value()
+            'optimizer': self.optimizer,
+            'parameters': self.parameter_dict,
+            'total_epochs': self.start_epoch + self.epochs
         }
 
     @property

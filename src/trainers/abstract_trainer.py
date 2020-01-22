@@ -3,7 +3,7 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" Abstract class with the boilerplate code needed to define and run an Ignite engine. """
+""" Abstract class and mixins with the boilerplate code needed to define and run Ignite engines. """
 
 
 import os
@@ -11,7 +11,7 @@ import torch
 
 from datetime import datetime
 from ignite.engine import Events
-from ignite.handlers import Timer, ModelCheckpoint, TerminateOnNan
+from ignite.handlers import EarlyStopping, ModelCheckpoint, TerminateOnNan, Timer
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -25,8 +25,31 @@ class AbstractTrainer:
     """
     Abstract class with the boilerplate code needed to define and run an Ignite trainer Engine.
     """
-    def __init__(self, dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2, workers=6,
-                 n_gpu=0, tag=None, drop_last=False):
+    def __init__(self, dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2,
+                 workers=6, n_gpu=0, tag=None, drop_last=False):
+        """
+        Base constructor which sets default trainer parameters.
+        :param dataset_name: the name of the Dataset to be used for training
+        :type: str
+        :param resume_date: date of the trainer state to be resumed. Dates must have the following
+        format: `%y-%m-%dT%H-%M`
+        :type: str
+        :param train_validation_split: proportion of the training set that will be used for actual
+        training. The remaining data will be used as the validation set.
+        :type: float
+        :param batch_size: batch size during training
+        :type: int
+        :param epochs: the number of epochs used for training
+        :type: int
+        :param workers: number of workers for data_loader
+        :type: int
+        :param n_gpu: number of GPUs available. Use 0 for CPU mode
+        :type: int
+        :param tag: optional tag for model checkpoint and tensorboard logs
+        :type: int
+        :param drop_last: whether to drop the last batch if it is not the same size as `batch_size`.
+        :type: boolean
+        """
         date = resume_date or datetime.now()
         self.batch_size = batch_size
         self.checkpoint_directory = get_checkpoint_directory(self.trainer_id, tag=tag, date=date)
@@ -99,51 +122,6 @@ class AbstractTrainer:
         :type: str
         """
         raise NotImplementedError
-
-    def _create_evaluator_engine(self):
-        """
-        Creates an Ignite evaluator engine for the target model.
-        :return: an evaluator engine for the target model
-        :type: ignite.Engine
-        """
-        raise NotImplementedError
-
-    def _create_trainer_engine(self):
-        """
-        Creates an Ignite training engine for the target model.
-        :return: a trainer engine for the target model
-        :type: ignite.Engine
-        """
-        raise NotImplementedError
-
-    def _deserialize_checkpoint(self, checkpoint):
-        """
-        Load trainer fields from a serialized checkpoint dictionary.
-        :param checkpoint: the checkpoint being loaded
-        :type: dict
-        """
-        self.start_epoch = checkpoint['epochs']
-        self.model = torch.load(os.path.join(self.checkpoint_directory, '_model_{}.pth'.format(self.start_epoch)))
-
-    def _load_checkpoint(self, resume_date):
-        """
-        Load the trainer checkpoint dictionary for the given resume date and deserialize it (load the values in the
-        checkpoint dictionary into the trainer's fields).
-        :param resume_date: checkpoint folder name containing model and checkpoint .pth files containing the information
-        needed for resuming training. Folder names correspond to dates with the following format: `%y-%m-%dT%H-%M`
-        :type: str
-        """
-        try:
-            self._deserialize_checkpoint(torch.load(os.path.join(self.checkpoint_directory, 'checkpoint.pth')))
-            tqdm.write('Successfully loaded the {} checkpoint.'.format(resume_date))
-        except FileNotFoundError:
-            raise FileNotFoundError('Checkpoint {} not found.'.format(resume_date))
-
-    def _save_checkpoint(self):
-        """
-        Create the serialized checkpoint dictionary for the current trainer state, and save it.
-        """
-        torch.save(self.serialized_checkpoint, os.path.join(self.checkpoint_directory, 'checkpoint.pth'))
 
     def _add_event_handlers(self):
         """
@@ -221,6 +199,14 @@ class AbstractTrainer:
                              a resulting validation set smaller than `batch_size`.')
         return loaders
 
+    def _create_evaluator_engine(self):
+        """
+        Creates an Ignite evaluator engine for the target model.
+        :return: an evaluator engine for the target model
+        :type: ignite.Engine
+        """
+        raise NotImplementedError
+
     def _create_timer(self):
         """
         Create and attach a new timer to the trainer, registering callbacks.
@@ -232,8 +218,86 @@ class AbstractTrainer:
                      pause=Events.ITERATION_COMPLETED, step=Events.ITERATION_COMPLETED)
         return timer
 
+    def _create_trainer_engine(self):
+        """
+        Creates an Ignite training engine for the target model.
+        :return: a trainer engine for the target model
+        :type: ignite.Engine
+        """
+        raise NotImplementedError
+
+    def _deserialize_checkpoint(self, checkpoint):
+        """
+        Load trainer fields from a serialized checkpoint dictionary.
+        :param checkpoint: the checkpoint being loaded
+        :type: dict
+        """
+        self.start_epoch = checkpoint['epochs']
+        self.model = torch.load(os.path.join(self.checkpoint_directory, '_model_{}.pth'.format(self.start_epoch)))
+
+    def _load_checkpoint(self, resume_date):
+        """
+        Load the trainer checkpoint dictionary for the given resume date and deserialize it (load the values in the
+        checkpoint dictionary into the trainer's fields).
+        :param resume_date: checkpoint folder name containing model and checkpoint .pth files containing the information
+        needed for resuming training. Folder names correspond to dates with the following format: `%y-%m-%dT%H-%M`
+        :type: str
+        """
+        try:
+            self._deserialize_checkpoint(torch.load(os.path.join(self.checkpoint_directory, 'checkpoint.pth')))
+            tqdm.write('Successfully loaded the {} checkpoint.'.format(resume_date))
+        except FileNotFoundError:
+            raise FileNotFoundError('Checkpoint {} not found.'.format(resume_date))
+
+    def _save_checkpoint(self):
+        """
+        Create the serialized checkpoint dictionary for the current trainer state, and save it.
+        """
+        torch.save(self.serialized_checkpoint, os.path.join(self.checkpoint_directory, 'checkpoint.pth'))
+
     def run(self):
         """
         Run the trainer.
         """
         self.trainer_engine.run(self.train_loader, max_epochs=self.epochs)
+
+
+class EarlyStoppingMixin:
+    """
+    Mixin class for adding early stopping to a Trainer. The mixin must be inherited after the AbstractTrainer class in
+    order to have access to the Trainer's `evaluator_engine` and `trainer_engine`.
+    """
+    def __init__(self, *args, early_stopping_patience=5, **kwargs):
+        """
+        Mixin constructor which creates and attaches an EarlyStopping handler to the Trainer.
+        :param early_stopping_patience: number of epochs to wait if there are no improvements to stop the training.
+        :type: int
+        """
+        self.early_stopping_patience = early_stopping_patience
+        self.evaluator_engine.add_event_handler(Events.COMPLETED, self._early_stopping_handler, self.trainer_engine)
+
+    @property
+    def _early_stopping_handler(self):
+        """
+        Create the EarlyStopping handler that will evaluate the `score_function` class on each `evaluator_engine` run
+        and stop the `trainer_engine` if there has been no improvement in the `_score_function` for the number of
+        epochs specified in `early_stopping_patience`.
+        :return: the early stopping handler
+        :type: from ignite.handlers.EarlyStopping
+        """
+        return EarlyStopping(patience=self.early_stopping_patience, score_function=self._score_function,
+                             trainer=self.trainer_engine)
+
+    @staticmethod
+    def _score_function(engine):
+        """
+        Function needed by the early stopping event handler that will receive the engine and must return a single
+        score float. An improvement in the training is considered if the score returned by this function is higher
+        than in previous training steps. The trainer engine will stop if there is no improvement in
+        `self.early_stopping_patience` steps.
+        :param engine: engine provided by the event handler
+        :type: ignite.engine.Engine
+        :return: a single float that is bigger as the model improves
+        :type: float
+        """
+        raise NotImplementedError

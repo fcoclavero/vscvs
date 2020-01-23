@@ -72,18 +72,17 @@ def resnext(_, *args, **kwargs):
 @pass_context_to_kwargs
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy'])
+    type=click.Choice(['sketchy', 'sketchy-test'])
 )
 @click.option('--margin', prompt='Margin', help='The margin for the Contrastive Loss.', default=.2)
-@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
+@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
-def siamese_cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag, dataset_name,
-                margin, lr, momentum):
+def siamese_cnn(_, *args, **kwargs):
     from src.trainers.siamese import train_siamese_cnn
-    click.echo('siamese cnn - %s dataset' % dataset_name)
+    dataset_name = kwargs.pop('dataset_name')
+    click.echo('siamese cnn - {} dataset'.format(dataset_name))
     dataset_name = dataset_name + '-siamese'
-    train_siamese_cnn(dataset_name, resume, train_validation_split, batch_size, epochs, workers, n_gpu, tag,
-                      margin, lr, momentum)
+    train_siamese_cnn(*args, dataset_name = dataset_name, **kwargs)
 
 
 @train.command()

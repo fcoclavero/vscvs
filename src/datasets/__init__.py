@@ -66,6 +66,11 @@ DATASETS = {
             Sketchy(DATA_SOURCES['sketchy']['photos'], *args, **kwargs),
             Sketchy(DATA_SOURCES['sketchy']['sketches'], *args, **kwargs)
         ),
+    'sketchy-test-siamese':
+        lambda *args, **kwargs: SiameseDataset(
+            Sketchy(DATA_SOURCES['sketchy_test']['photos'], *args, **kwargs),
+            Sketchy(DATA_SOURCES['sketchy_test']['sketches'], *args, **kwargs)
+        ),
     'sketchy-mixed-batches':
         lambda *args, **kwargs: SketchyMixedBatches('sketchy', *args, **kwargs),
     'sketchy-test-mixed-batches':

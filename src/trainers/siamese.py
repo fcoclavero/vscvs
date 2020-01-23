@@ -8,24 +8,42 @@ __status__ = 'Prototype'
 
 from ignite.metrics import Accuracy, Loss
 from torch.optim import SGD
+from torchvision.models import resnet50, resnext50_32x4d
 
 from src.loss_functions import ContrastiveLoss
 from src.models import ClassificationConvolutionalNetwork, SiameseNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
+from src.utils.decorators import kwargs_parameter_dict
 
 
 class SiameseTrainer(AbstractTrainer):
     """
     Trainer for a siamese network.
     """
-    def __init__(self, architecture_model, dataset_name, resume_date=None, train_validation_split=.8, batch_size=16,
-                 epochs=2, workers=6, n_gpu=0, tag=None, margin=1.0, learning_rate=.01, momentum=.8, drop_last=False):
+    def __init__(self, *args, architecture_model=None, learning_rate=.01, margin=1.0, momentum=.8, **kwargs):
+        """
+        Trainer constructor.
+        :param args: AbstractTrainer arguments
+        :type: tuple
+        :param architecture_model: the model to be used for each branch of the siamese architecture. The same
+        architecture will be used for embedding each image pair, and weights will be shared.
+        :type: torch.nn.Module
+        :param learning_rate: learning rate for SGD optimizer
+        :type: float
+        :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the embeddings
+        of two examples as dissimilar.
+        :type: float
+        :param momentum: momentum parameter for SGD optimizer
+        :type: float
+        :param kwargs: AbstractTrainer keyword arguments
+        :type: dict
+        """
         self.architecture_model = architecture_model
         self.margin = margin
         self.learning_rate = learning_rate
         self.momentum = momentum
-        super().__init__(dataset_name, resume_date, train_validation_split, batch_size, epochs, workers, n_gpu, tag)
+        super().__init__(*args, **kwargs)
 
     @property
     def initial_model(self):
@@ -54,36 +72,40 @@ class SiameseTrainer(AbstractTrainer):
         return create_siamese_trainer(self.model, self.optimizer, self.loss, device=self.device)
 
 
-def train_siamese_cnn(dataset_name, resume_date=None, train_validation_split=.8, batch_size=16, epochs=2, workers=4,
-                      n_gpu=0, tag=None, margin=1.0, learning_rate=.01, momentum=.8):
+@kwargs_parameter_dict
+def train_siamese_cnn(*args, **kwargs):
     """
-    Train a ResNet image classifier.
-    :param dataset_name: the name of the Dataset to be used for training
-    :type: str
-    :param resume_date: date of the trainer state to be resumed. Dates must have the following
-    format: `%y-%m-%dT%H-%M`
-    :type: str
-    :param train_validation_split: proportion of the training set that will be used for actual
-    training. The remaining data will be used as the validation set.
-    :type: float
-    :param batch_size: batch size during training
-    :type: int
-    :param epochs: the number of epochs used for training
-    :type: int
-    :param workers: number of workers for data_loader
-    :type: int
-    :param n_gpu: number of GPUs available. Use 0 for CPU mode
-    :type: int
-    :param tag: optional tag for model checkpoint and tensorboard logs
-    :type: str
-    :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the embeddings
-    of two examples as dissimilar.
-    :type: float
-    :param learning_rate: learning rate for optimizers
-    :type: float
-    :param momentum: momentum parameter for SGD optimizer
-    :type: float
+    Train a Siamese CNN architecture.
+    :param args: SiameseTrainer arguments
+    :type: tuple
+    :param kwargs: SiameseTrainer keyword arguments
+    :type: dict
     """
-    trainer = SiameseTrainer(ClassificationConvolutionalNetwork(), dataset_name, resume_date, train_validation_split,
-                             batch_size, epochs, workers, n_gpu, tag, margin, learning_rate, momentum)
+    trainer = SiameseTrainer(*args, architecture_model = ClassificationConvolutionalNetwork(), **kwargs)
+    trainer.run()
+
+
+@kwargs_parameter_dict
+def train_siamese_resnet(*args, **kwargs):
+    """
+    Train a Siamese ResNet architecture.
+    :param args: SiameseTrainer arguments
+    :type: tuple
+    :param kwargs: SiameseTrainer keyword arguments
+    :type: dict
+    """
+    trainer = SiameseTrainer(*args, architecture_model = resnet50(), **kwargs)
+    trainer.run()
+
+
+@kwargs_parameter_dict
+def train_siamese_resnext(*args, **kwargs):
+    """
+    Train a Siamese ResNext architecture.
+    :param args: SiameseTrainer arguments
+    :type: tuple
+    :param kwargs: SiameseTrainer keyword arguments
+    :type: dict
+    """
+    trainer = SiameseTrainer(*args, architecture_model = resnext50_32x4d(), **kwargs)
     trainer.run()

@@ -1,5 +1,3 @@
-from ignite.engine import create_supervised_evaluator, create_supervised_trainer
-
 __author__ = ['Francisco Clavero']
 __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'

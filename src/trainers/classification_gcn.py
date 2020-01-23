@@ -16,6 +16,7 @@ from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.classification_gcn import create_classification_gcn_evaluator, \
     create_classification_gcn_trainer
 from src.utils.data import prepare_batch_graph
+from src.utils.decorators import kwargs_parameter_dict
 
 
 class ClassificationGCNTrainer(AbstractTrainer):
@@ -80,6 +81,7 @@ class ClassificationGCNTrainer(AbstractTrainer):
             self.optimizer, self.loss, device=self.device, processes=self.processes)
 
 
+@kwargs_parameter_dict
 def train_classification_gcn(*args, **kwargs):
     """
     Train a ClassificationGCN image classifier.

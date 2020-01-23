@@ -60,8 +60,8 @@ class ResNextTrainer(AbstractTrainer, EarlyStoppingMixin):
 
     @staticmethod
     def _score_function(engine):
-        validation_loss = engine.state.metrics['loss']
-        return -validation_loss
+        precision = engine.state.metrics['precision']
+        return precision
 
     def _create_evaluator_engine(self):
         return create_supervised_evaluator(

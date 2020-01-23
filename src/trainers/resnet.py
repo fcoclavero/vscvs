@@ -10,8 +10,8 @@ from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 from torch.nn import CrossEntropyLoss
 from torch.optim import SGD
-from torchvision.models import resnet50
 
+from src.models.convolutional.resnet import ResNet
 from src.trainers.abstract_trainer import AbstractTrainer, EarlyStoppingMixin
 from src.utils.data import prepare_batch
 from src.utils.decorators import kwargs_parameter_dict
@@ -39,7 +39,7 @@ class ResNetTrainer(AbstractTrainer, EarlyStoppingMixin):
 
     @property
     def initial_model(self):
-        return resnet50()
+        return ResNet(out_features=125)
 
     @property
     def loss(self):

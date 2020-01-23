@@ -3,7 +3,7 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" Image classification convolutional models. """
+""" Simple convolutional neural networks implemented from scratch. """
 
 
 import torch.nn as nn

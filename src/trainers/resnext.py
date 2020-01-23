@@ -7,11 +7,12 @@ __status__ = 'Prototype'
 
 
 from ignite.engine import create_supervised_trainer, create_supervised_evaluator
-from ignite.metrics import Accuracy, Loss
+from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy, Precision
+from torch import round
 from torch.nn import CrossEntropyLoss
 from torch.optim import SGD
-from torchvision.models import resnext50_32x4d
 
+from src.models.convolutional.resnext import ResNext
 from src.trainers.abstract_trainer import AbstractTrainer, EarlyStoppingMixin
 from src.utils.data import prepare_batch
 from src.utils.decorators import kwargs_parameter_dict
@@ -39,7 +40,7 @@ class ResNextTrainer(AbstractTrainer, EarlyStoppingMixin):
 
     @property
     def initial_model(self):
-        return resnext50_32x4d()
+        return ResNext(out_features=125)
 
     @property
     def loss(self):
@@ -64,11 +65,19 @@ class ResNextTrainer(AbstractTrainer, EarlyStoppingMixin):
 
     def _create_evaluator_engine(self):
         return create_supervised_evaluator(
-            self.model, metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss)}, device=self.device)
+            self.model, device=self.device,
+            metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss), 'recall': Recall(average=True),
+                     'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10), 'precision': Precision(average=True)})
 
     def _create_trainer_engine(self):
         return create_supervised_trainer(
             self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
+
+    @staticmethod
+    def _output_transform(output):
+        y_pred, y = output
+        y_pred = round(y_pred)
+        return y_pred, y
 
 
 @kwargs_parameter_dict

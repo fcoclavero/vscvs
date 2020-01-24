@@ -48,6 +48,7 @@ def cnn(_,  *args, **kwargs):
 )
 @click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
+@click.option('--patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
 def resnet(_, *args, **kwargs):
     from src.trainers.resnet import train_resnet
     click.echo('resnet - {} dataset'.format(kwargs['dataset_name']))
@@ -62,6 +63,7 @@ def resnet(_, *args, **kwargs):
 )
 @click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
+@click.option('--patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
 def resnext(_, *args, **kwargs):
     from src.trainers.resnext import train_resnext
     click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))

@@ -9,6 +9,7 @@ __status__ = 'Prototype'
 import click
 
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
+from src.cli.train.siamese import siamese
 
 
 @click.group()
@@ -24,6 +25,9 @@ from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 def train(context, **kwargs):
     """ Train a model. """
     pass
+
+
+train.add_command(siamese)
 
 
 @train.command()
@@ -68,23 +72,6 @@ def resnext(_, *args, **kwargs):
     from src.trainers.resnext import train_resnext
     click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))
     train_resnext(*args, **kwargs)
-
-
-@train.command()
-@pass_context_to_kwargs
-@click.option(
-    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy', 'sketchy-test'])
-)
-@click.option('--margin', prompt='Margin', help='The margin for the Contrastive Loss.', default=.2)
-@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
-@click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
-def siamese_cnn(_, *args, **kwargs):
-    from src.trainers.siamese import train_siamese_cnn
-    dataset_name = kwargs.pop('dataset_name')
-    click.echo('siamese cnn - {} dataset'.format(dataset_name))
-    dataset_name = dataset_name + '-siamese'
-    train_siamese_cnn(*args, dataset_name = dataset_name, **kwargs)
 
 
 @train.command()

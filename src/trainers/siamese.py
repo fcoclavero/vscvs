@@ -6,7 +6,7 @@ __status__ = 'Prototype'
 """ Ignite trainer for a siamese network. """
 
 
-from ignite.metrics import Accuracy, Loss
+from ignite.metrics import Loss
 from torch.optim import SGD
 from torchvision.models import resnet50, resnext50_32x4d
 
@@ -47,7 +47,7 @@ class SiameseTrainer(AbstractTrainer):
 
     @property
     def initial_model(self):
-        return SiameseNetwork(self.architecture_model)
+        return SiameseNetwork(self.architecture_model, self.architecture_model)
 
     @property
     def loss(self):

@@ -58,7 +58,7 @@ def create_siamese_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     return Engine(_update)
 
 
-def create_siamese_evaluator(model, metrics={}, device=None, non_blocking=False,
+def create_siamese_evaluator(model, metrics=None, device=None, non_blocking=False,
                              prepare_batch=prepare_batch_siamese, output_transform=output_transform_siamese):
     """
     Factory function for creating an evaluator for supervised models.
@@ -66,7 +66,7 @@ def create_siamese_evaluator(model, metrics={}, device=None, non_blocking=False,
     a tuple of `(batch_pred, batch_y)` by default.
     :param model: the model to train.
     :type: torch.nn.Module
-    :param: metrics: map of metric names to Metrics.
+    :param metrics: map of metric names to Metrics.
     :type: dict<str:<ignite.metrics.Metric>>
     :param device: device type specification. Applies to both model and batches.
     :type: str (optional) (default: None)

@@ -128,3 +128,6 @@ experiments/vectors/*
 
 # Temporary plotly plots
 temp-plot.html
+
+# dbxcli
+dbxcli

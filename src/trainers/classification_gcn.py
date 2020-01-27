@@ -12,7 +12,7 @@ from torch.optim import Adam
 
 from src.datasets import get_dataset
 from src.models import ClassificationGCN
-from src.trainers.abstract_trainer import AbstractTrainer
+from src.trainers.abstract_trainers import AbstractTrainer
 from src.trainers.engines.classification_gcn import create_classification_gcn_evaluator, \
     create_classification_gcn_trainer
 from src.utils.data import prepare_batch_graph

@@ -12,7 +12,7 @@ from torchvision.models import resnet50, resnext50_32x4d
 
 from src.loss_functions import ContrastiveLoss
 from src.models import ClassificationConvolutionalNetwork, SiameseNetwork
-from src.trainers.abstract_trainer import AbstractTrainer
+from src.trainers.abstract_trainers import AbstractTrainer
 from src.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
 from src.utils.decorators import kwargs_parameter_dict
 

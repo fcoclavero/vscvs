@@ -12,7 +12,7 @@ from torch.nn import CrossEntropyLoss
 from torch.optim import SGD
 
 from src.models import ClassificationConvolutionalNetwork
-from src.trainers.abstract_trainer import AbstractTrainer
+from src.trainers.abstract_trainers import AbstractTrainer
 from src.utils.data import prepare_batch
 from src.utils.decorators import kwargs_parameter_dict
 

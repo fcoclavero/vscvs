@@ -10,6 +10,7 @@ import click
 
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from src.cli.train.siamese import siamese
+from src.cli.train.triplet import triplet
 
 
 @click.group()
@@ -28,6 +29,7 @@ def train(context, **kwargs):
 
 
 train.add_command(siamese)
+train.add_command(triplet)
 
 
 @train.command()
@@ -66,32 +68,11 @@ def resnet(_, *args, **kwargs):
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
 @click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
-@click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
 @click.option('--early_stopping_patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
 def resnext(_, *args, **kwargs):
     from src.trainers.resnext import train_resnext
     click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))
     train_resnext(*args, **kwargs)
-
-
-@train.command()
-@pass_context_to_kwargs
-@click.option(
-    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
-@click.option(
-    '--vector-dimension', prompt='CVS dimensionality', help='Dimensionality of the vector space.', default=300
-)
-@click.option('--margin', prompt='Margin', help='The margin for the Triplet Loss.', default=.2)
-@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
-@click.option('--beta1', prompt='Beta 1', help='Decay parameter for Adam optimizer.', default=.2)
-def triplet_cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, dataset_name, vector_dimension,
-                margin, lr, beta1):
-    from src.trainers.triplet_cnn import train_triplet_cnn
-    click.echo('triplet cnn - %s dataset' % dataset_name)
-    dataset_name = dataset_name + '-triplets'
-    train_triplet_cnn(dataset_name, vector_dimension, resume, margin, workers, batch_size, n_gpu, epochs, lr, beta1)
 
 
 @train.command()

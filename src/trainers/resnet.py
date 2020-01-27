@@ -24,9 +24,9 @@ class ResNetTrainer(AbstractSGDOptimizerTrainer, EarlyStoppingMixin):
     def __init__(self, *args, **kwargs):
         """
         Trainer constructor.
-        :param args: AbstractTrainer and EarlyStoppingMixin arguments
+        :param args: AbstractSGDOptimizerTrainer and EarlyStoppingMixin arguments
         :type: tuple
-        :param kwargs: AbstractTrainer and EarlyStoppingMixin keyword arguments
+        :param kwargs: AbstractSGDOptimizerTrainer and EarlyStoppingMixin keyword arguments
         :type: dict
         """
         super().__init__(*args, **kwargs)

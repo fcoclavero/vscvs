@@ -10,32 +10,26 @@ from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy, Precision
 from torch import round
 from torch.nn import CrossEntropyLoss
-from torch.optim import SGD
 
 from src.models.convolutional.resnext import ResNext
-from src.trainers.abstract_trainer import AbstractTrainer, EarlyStoppingMixin
+from src.trainers.abstract_trainers import AbstractAdamOptimizerTrainer
+from src.trainers.mixins import EarlyStoppingMixin
 from src.utils.data import prepare_batch
 from src.utils.decorators import kwargs_parameter_dict
 
 
-class ResNextTrainer(AbstractTrainer, EarlyStoppingMixin):
+class ResNextTrainer(AbstractAdamOptimizerTrainer, EarlyStoppingMixin):
     """
     Trainer for a ResNext image classifier.
     """
-    def __init__(self, *args, learning_rate=.01, momentum=.8, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Trainer constructor.
-        :param args: AbstractTrainer and EarlyStoppingMixin arguments
+        :param args: AbstractAdamOptimizerTrainer and EarlyStoppingMixin arguments
         :type: tuple
-        :param learning_rate: learning rate for optimizers
-        :type: float
-        :param momentum: momentum parameter for SGD optimizer
-        :type: float
-        :param kwargs: AbstractTrainer and EarlyStoppingMixin keyword arguments
+        :param kwargs: AbstractAdamOptimizerTrainer and EarlyStoppingMixin keyword arguments
         :type: dict
         """
-        self.learning_rate = learning_rate
-        self.momentum = momentum
         super().__init__(*args, **kwargs)
 
     @property
@@ -45,10 +39,6 @@ class ResNextTrainer(AbstractTrainer, EarlyStoppingMixin):
     @property
     def loss(self):
         return CrossEntropyLoss()
-
-    @property
-    def optimizer(self):
-        return SGD(self.model.parameters(), lr=self.learning_rate, momentum=self.momentum)
 
     @property
     def serialized_checkpoint(self):

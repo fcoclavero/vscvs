@@ -283,6 +283,67 @@ class AbstractTrainer(ABC):
         self.trainer_engine.run(self.train_loader, max_epochs=self.epochs)
 
 
+class AbstractAdamOptimizerTrainer(AbstractTrainer):
+    """
+    Abstract trainer class that implements the `optimizer` property with an Adam optimizer. Adds the required parameters
+    to the class' constructor.
+    """
+    def __init__(self, *args, learning_rate=0.001, betas=(0.9, 0.999), epsilon=1e-08, weight_decay=0,
+                 amsgrad=False, **kwargs):
+        """
+        Mixin constructor.
+        :param args: arguments for additional mixin
+        :type: tuple
+        :param learning_rate: learning rate for optimizers
+        :type: float
+        :param betas: coefficients used for computing running averages of gradient and its square
+        :type: Tuple<float, float>
+        :param epsilon: term added to the denominator to improve numerical stability
+        :type: float
+        :param weight_decay: weight decay for L2 penalty
+        :type: float
+        :param amsgrad: whether to use the AMSGrad variant of this algorithm from the paper [On the Convergence of Adam
+        and Beyond](https://openreview.net/forum?id=ryQu7f-RZ)
+        :type: boolean
+        :param kwargs: keyword arguments for additional mixin
+        :type: dict
+        """
+        self.learning_rate = learning_rate
+        self.betas = betas
+        self.epsilon = epsilon
+        self.weight_decay = weight_decay
+        self.amsgrad = amsgrad
+        super().__init__(*args, **kwargs)
+
+    @property
+    @abstractmethod
+    def initial_model(self):
+        pass
+
+    @property
+    @abstractmethod
+    def loss(self):
+        pass
+
+    @property
+    def optimizer(self):
+        return Adam(self.model.parameters(), lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
+                    weight_decay=self.weight_decay, amsgrad=self.amsgrad)
+
+    @property
+    @abstractmethod
+    def trainer_id(self):
+        pass
+
+    @abstractmethod
+    def _create_evaluator_engine(self):
+        pass
+
+    @abstractmethod
+    def _create_trainer_engine(self):
+        pass
+
+
 class AbstractSGDOptimizerTrainer(AbstractTrainer):
     """
     Abstract trainer class that implements the `optimizer` property with an SGD optimizer. Adds the required parameters
@@ -291,13 +352,13 @@ class AbstractSGDOptimizerTrainer(AbstractTrainer):
     def __init__(self, *args, learning_rate=.01, momentum=.8, **kwargs):
         """
         Mixin constructor.
-        :param args: additional mixin arguments
+        :param args: arguments for additional mixin
         :type: tuple
         :param learning_rate: learning rate for optimizers
         :type: float
         :param momentum: momentum parameter for SGD optimizer
         :type: float
-        :param kwargs: additional mixin keyword arguments
+        :param kwargs: keyword arguments for additional mixin
         :type: dict
         """
         self.learning_rate = learning_rate

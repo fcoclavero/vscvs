@@ -20,7 +20,7 @@ from src.trainers.decorators import adam_optimizer, sgd_optimizer
               help='Second coefficient used for computing running averages of gradient and its square.')
 @click.option('--epsilon', prompt='Epsilon', default=1e-8,
               help='Term added to the denominator to improve numerical stability .')
-@click.option('--weight-decay', prompt='Weight decay', default=0, help='Weight decay (L2 penalty).')
+@click.option('--weight-decay', prompt='Weight decay', default=0.0, help='Weight decay (L2 penalty).')
 @click.option('--amsgrad', prompt='Amsgrad', default=False, help='Whether to use the AMSGrad variant.')
 @pass_kwargs_to_context
 def adam(context, **kwargs):

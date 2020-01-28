@@ -23,6 +23,14 @@ def deprecated(func):
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        """
+        Wrapped function to be returned by the decorator.
+        :param args: original function arguments
+        :type: tuple
+        :param kwargs: original function keyword arguments
+        :type: dict
+        :return: original function evaluation
+        """
         warnings.simplefilter('always', DeprecationWarning)  # turn off filter
         warnings.warn("Deprecated function {} invoked".format(func.__name__), category=DeprecationWarning, stacklevel=2)
         warnings.simplefilter('default', DeprecationWarning)  # reset filter
@@ -41,6 +49,14 @@ def kwargs_parameter_dict(func):
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        """
+        Wrapped function to be returned by the decorator.
+        :param args: original function arguments
+        :type: tuple
+        :param kwargs: original function keyword arguments
+        :type: dict
+        :return: original function evaluation
+        """
         return func(*args, parameter_dict=kwargs, **kwargs)
     return wrapper
 
@@ -55,6 +71,14 @@ def log_time(func):
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        """
+        Wrapped function to be returned by the decorator.
+        :param args: original function arguments
+        :type: tuple
+        :param kwargs: original function keyword arguments
+        :type: dict
+        :return: original function evaluation
+        """
         start = datetime.now()
         ret = func(*args, **kwargs)
         print('Executed {} in {} s.'.format(func.__name__, datetime.now() - start))
@@ -72,6 +96,14 @@ def threaded(func):
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        """
+        Wrapped function to be returned by the decorator.
+        :param args: original function arguments
+        :type: tuple
+        :param kwargs: original function keyword arguments
+        :type: dict
+        :return: original function evaluation
+        """
         t = Thread(target=func, args=args, kwargs=kwargs)
         t.daemon = True
         t.start()
@@ -83,12 +115,27 @@ def parametrized(decorator):
     Meta-decorator that adds parametrization support to other decorators.
     :param decorator: the decorator to be modified with parameter support
     :type: function
-    :return: a trainer engine with the update function
+    :return: a decorator which can receive arguments and keyword arguments
     :type: function
     """
     @functools.wraps(decorator)
     def wrapper(*args, **kwargs):
+        """
+        Define and return the decorated decorator, which can receive arguments and keyword arguments.
+        :param args: arguments to be received by the decorator
+        :type: tuple
+        :param kwargs: keyword arguments to be received by the decorator
+        :type: dict
+        :return: decorated function evaluation
+        """
         def decorator_wrapper(func):
+            """
+            Evaluate the original decorator, which receives the function to be decorated along with the specified
+            arguments and keyword arguments.
+            :param func: the function to be decorated by the original decorator
+            :type: function
+            :return: the evaluation of the parametrized decorator
+            """
             return decorator(func, *args, **kwargs)
         return decorator_wrapper
     return wrapper

@@ -9,8 +9,54 @@ __status__ = 'Prototype'
 import click
 
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
+from src.cli.train.optimizers import sgd
 from src.cli.train.siamese import siamese
 from src.cli.train.triplet import triplet
+
+
+""" Simple trainer commands. """
+
+
+@click.command()
+@pass_context_to_kwargs
+@click.option(
+    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
+)
+@click.option('--early_stopping_patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+def cnn(_,  *args, **kwargs):
+    from src.trainers.cnn import train_cnn
+    click.echo('cnn - {} dataset'.format(kwargs['dataset_name']))
+    train_cnn(*args, **kwargs)
+
+
+@click.command()
+@pass_context_to_kwargs
+@click.option(
+    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
+)
+@click.option('--early_stopping_patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+def resnet(_, *args, **kwargs):
+    from src.trainers.resnet import train_resnet
+    click.echo('resnet - {} dataset'.format(kwargs['dataset_name']))
+    train_resnet(*args, **kwargs)
+
+
+@click.command()
+@pass_context_to_kwargs
+@click.option(
+    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
+)
+@click.option('--early_stopping_patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+def resnext(_, *args, **kwargs):
+    from src.trainers.resnext import train_resnext
+    click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))
+    train_resnext(*args, **kwargs)
+
+
+""" Global trainer group. """
 
 
 @click.group()
@@ -28,51 +74,26 @@ def train(context, **kwargs):
     pass
 
 
-train.add_command(siamese)
-train.add_command(triplet)
+""" Add every simple and compound trainer command to each optimizer trainer group """
 
 
-@train.command()
-@pass_context_to_kwargs
-@click.option(
-    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
-@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
-@click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
-def cnn(_,  *args, **kwargs):
-    from src.trainers.cnn import train_cnn
-    click.echo('cnn - {} dataset'.format(kwargs['dataset_name']))
-    train_cnn(*args, **kwargs)
+for optimizer_group in [sgd]:
+    # Compound trainer commands
+    optimizer_group.add_command(siamese)
+    optimizer_group.add_command(triplet)
+    # Simple trainer commands
+    optimizer_group.add_command(cnn)
+    optimizer_group.add_command(resnet)
+    optimizer_group.add_command(resnext)
+    # optimizer_group.add_command(cvs_gan)
+    # optimizer_group.add_command(classification_gcn)
+    # optimizer_group.add_command(hog_gcn)
 
 
-@train.command()
-@pass_context_to_kwargs
-@click.option(
-    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
-@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
-@click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
-@click.option('--early_stopping_patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
-def resnet(_, *args, **kwargs):
-    from src.trainers.resnet import train_resnet
-    click.echo('resnet - {} dataset'.format(kwargs['dataset_name']))
-    train_resnet(*args, **kwargs)
+""" Add optimizer trainer groups to the global trainer group. """
 
 
-@train.command()
-@pass_context_to_kwargs
-@click.option(
-    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
-@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
-@click.option('--early_stopping_patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
-def resnext(_, *args, **kwargs):
-    from src.trainers.resnext import train_resnext
-    click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))
-    train_resnext(*args, **kwargs)
+train.add_command(sgd)
 
 
 @train.command()

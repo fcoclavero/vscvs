@@ -13,7 +13,6 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from ignite.engine import Events
 from ignite.handlers import ModelCheckpoint, TerminateOnNan, Timer
-from torch.optim import Adam, SGD
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -27,34 +26,34 @@ class AbstractTrainer(ABC):
     """
     Abstract class with the boilerplate code needed to define and run an Ignite trainer Engine.
     """
-    def __init__(self, *args, dataset_name=None,  resume_date=None, train_validation_split=.8, batch_size=16, epochs=2,
-                 workers=6, n_gpu=0, tag=None, drop_last=False, parameter_dict=None, **kwargs):
+    def __init__(self, *args, batch_size=16, dataset_name=None, drop_last=False, epochs=2, n_gpu=0, parameter_dict=None,
+                 resume_date=None, tag=None, train_validation_split=.8, workers=6, **kwargs):
         """
         Base constructor which sets default trainer parameters.
         :param args: mixin arguments
         :type: tuple
-        :param dataset_name: the name of the Dataset to be used for training
-        :type: str
-        :param resume_date: date of the trainer state to be resumed. Dates must have the following
-        format: `%y-%m-%dT%H-%M`
-        :type: str
-        :param train_validation_split: proportion of the training set that will be used for actual
-        training. The remaining data will be used as the validation set.
-        :type: float
         :param batch_size: batch size during training
         :type: int
+        :param dataset_name: the name of the Dataset to be used for training
+        :type: str
+        :param drop_last: whether to drop the last batch if it is not the same size as `batch_size`.
+        :type: boolean
         :param epochs: the number of epochs used for training
-        :type: int
-        :param workers: number of workers for data_loader
         :type: int
         :param n_gpu: number of GPUs available. Use 0 for CPU mode
         :type: int
-        :param tag: optional tag for model checkpoint and tensorboard logs
-        :type: int
-        :param drop_last: whether to drop the last batch if it is not the same size as `batch_size`.
-        :type: boolean
         :param parameter_dict: dictionary with important training parameters for logging.
         :type: dict
+        :param resume_date: date of the trainer state to be resumed. Dates must have the following
+        format: `%y-%m-%dT%H-%M`
+        :type: str
+        :param tag: optional tag for model checkpoint and tensorboard logs
+        :type: int
+        :param train_validation_split: proportion of the training set that will be used for actual
+        training. The remaining data will be used as the validation set.
+        :type: float
+        :param workers: number of workers for data_loader
+        :type: int
         :param kwargs: mixin keyword arguments
         :type: dict
         """
@@ -65,7 +64,6 @@ class AbstractTrainer(ABC):
         self.dataset_name = dataset_name
         self.device = get_device(n_gpu)
         self.epochs = epochs
-        self.event_handlers = []
         self.log_directory = get_log_directory(self.trainer_id, tag=tag, date=date)
         self.model = self.initial_model.to(self.device)
         self.parameter_dict = parameter_dict
@@ -119,6 +117,7 @@ class AbstractTrainer(ABC):
         """
         return {
             'average_epoch_duration': self.timer.value(),
+            'batch_size': self.batch_size,
             'dataset_name': self.dataset_name,
             'last_run': datetime.now(),
             'optimizer': self.optimizer,
@@ -281,113 +280,3 @@ class AbstractTrainer(ABC):
         Run the trainer.
         """
         self.trainer_engine.run(self.train_loader, max_epochs=self.epochs)
-
-
-class AbstractAdamOptimizerTrainer(AbstractTrainer):
-    """
-    Abstract trainer class that implements the `optimizer` property with an Adam optimizer. Adds the required parameters
-    to the class' constructor.
-    """
-    def __init__(self, *args, learning_rate=0.001, betas=(0.9, 0.999), epsilon=1e-08, weight_decay=0,
-                 amsgrad=False, **kwargs):
-        """
-        Mixin constructor.
-        :param args: arguments for additional mixin
-        :type: tuple
-        :param learning_rate: learning rate for optimizers
-        :type: float
-        :param betas: coefficients used for computing running averages of gradient and its square
-        :type: Tuple<float, float>
-        :param epsilon: term added to the denominator to improve numerical stability
-        :type: float
-        :param weight_decay: weight decay for L2 penalty
-        :type: float
-        :param amsgrad: whether to use the AMSGrad variant of this algorithm from the paper [On the Convergence of Adam
-        and Beyond](https://openreview.net/forum?id=ryQu7f-RZ)
-        :type: boolean
-        :param kwargs: keyword arguments for additional mixin
-        :type: dict
-        """
-        self.learning_rate = learning_rate
-        self.betas = betas
-        self.epsilon = epsilon
-        self.weight_decay = weight_decay
-        self.amsgrad = amsgrad
-        super().__init__(*args, **kwargs)
-
-    @property
-    @abstractmethod
-    def initial_model(self):
-        pass
-
-    @property
-    @abstractmethod
-    def loss(self):
-        pass
-
-    @property
-    def optimizer(self):
-        return Adam(self.model.parameters(), lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
-                    weight_decay=self.weight_decay, amsgrad=self.amsgrad)
-
-    @property
-    @abstractmethod
-    def trainer_id(self):
-        pass
-
-    @abstractmethod
-    def _create_evaluator_engine(self):
-        pass
-
-    @abstractmethod
-    def _create_trainer_engine(self):
-        pass
-
-
-class AbstractSGDOptimizerTrainer(AbstractTrainer):
-    """
-    Abstract trainer class that implements the `optimizer` property with an SGD optimizer. Adds the required parameters
-    to the class' constructor.
-    """
-    def __init__(self, *args, learning_rate=.01, momentum=.8, **kwargs):
-        """
-        Mixin constructor.
-        :param args: arguments for additional mixin
-        :type: tuple
-        :param learning_rate: learning rate for optimizers
-        :type: float
-        :param momentum: momentum parameter for SGD optimizer
-        :type: float
-        :param kwargs: keyword arguments for additional mixin
-        :type: dict
-        """
-        self.learning_rate = learning_rate
-        self.momentum = momentum
-        super().__init__(*args, **kwargs)
-
-    @property
-    @abstractmethod
-    def initial_model(self):
-        pass
-
-    @property
-    @abstractmethod
-    def loss(self):
-        pass
-
-    @property
-    def optimizer(self):
-        return SGD(self.model.parameters(), lr=self.learning_rate, momentum=self.momentum)
-
-    @property
-    @abstractmethod
-    def trainer_id(self):
-        pass
-
-    @abstractmethod
-    def _create_evaluator_engine(self):
-        pass
-
-    @abstractmethod
-    def _create_trainer_engine(self):
-        pass

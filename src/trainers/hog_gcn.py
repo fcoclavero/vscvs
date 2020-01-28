@@ -12,7 +12,7 @@ from torch.optim import Adam
 
 from src.datasets import get_dataset
 from src.models import HOGGCN
-from src.trainers.abstract_trainers import AbstractTrainer
+from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.hog_gcn import create_hog_gcn_evaluator, create_hog_gcn_trainer
 from src.utils.data import prepare_batch
 from src.utils.decorators import kwargs_parameter_dict

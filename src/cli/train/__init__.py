@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 import click
 
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
-from src.cli.train.optimizers import sgd
+from src.cli.train.optimizers import adam, sgd
 from src.cli.train.siamese import siamese
 from src.cli.train.triplet import triplet
 
@@ -23,7 +23,7 @@ from src.cli.train.triplet import triplet
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--early_stopping_patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+@click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
 def cnn(_,  *args, **kwargs):
     from src.trainers.cnn import train_cnn
     click.echo('cnn - {} dataset'.format(kwargs['dataset_name']))
@@ -36,7 +36,7 @@ def cnn(_,  *args, **kwargs):
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--early_stopping_patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+@click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
 def resnet(_, *args, **kwargs):
     from src.trainers.resnet import train_resnet
     click.echo('resnet - {} dataset'.format(kwargs['dataset_name']))
@@ -49,7 +49,7 @@ def resnet(_, *args, **kwargs):
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--early_stopping_patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+@click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
 def resnext(_, *args, **kwargs):
     from src.trainers.resnext import train_resnext
     click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))
@@ -60,7 +60,7 @@ def resnext(_, *args, **kwargs):
 
 
 @click.group()
-@click.option('--resume_date', help='Epoch for checkpoint loading.', default=None)
+@click.option('--resume-date', help='Epoch for checkpoint loading.', default=None)
 @click.option('--train-validation-split', prompt='Train/validation split',
               help='proportion of the training set that will be used for training.', default=.8)
 @click.option('--batch-size', prompt='Batch size', help='The batch size during training.', default=16)
@@ -77,7 +77,7 @@ def train(context, **kwargs):
 """ Add every simple and compound trainer command to each optimizer trainer group """
 
 
-for optimizer_group in [sgd]:
+for optimizer_group in [adam, sgd]:
     # Compound trainer commands
     optimizer_group.add_command(siamese)
     optimizer_group.add_command(triplet)
@@ -93,6 +93,7 @@ for optimizer_group in [sgd]:
 """ Add optimizer trainer groups to the global trainer group. """
 
 
+train.add_command(adam)
 train.add_command(sgd)
 
 
@@ -117,7 +118,7 @@ def cvs_gan(_, resume, train_validation_split, batch_size, epochs, workers, n_gp
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
+@click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--weight-decay', prompt='Weight decay', help='Weight decay parameter for Adam optimizer.', default=5e-4)
 @click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
               help='The number of parallel workers to be used for creating batch graphs.')
@@ -139,7 +140,7 @@ def classification_gcn(_, *args, **kwargs):
 @click.option('--cell-size', prompt='Cell size', help='Gradient pooling size.', default=8)
 @click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
 @click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
-@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
+@click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--weight-decay', prompt='Weight decay', help='Weight decay parameter for Adam optimizer.', default=5e-4)
 @click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
               help='The number of parallel workers to be used for creating batch graphs.')

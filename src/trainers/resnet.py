@@ -12,7 +12,6 @@ from torch.nn import CrossEntropyLoss
 
 from src.models.convolutional.resnet import ResNet
 from src.trainers.abstract_trainer import AbstractTrainer
-from src.trainers.decorators import adam_optimizer, sgd_optimizer
 from src.trainers.mixins import EarlyStoppingMixin
 from src.utils.data import prepare_batch
 from src.utils.decorators import kwargs_parameter_dict
@@ -72,26 +71,21 @@ def resnet(cls):
     return ResNetTrainer
 
 
-@resnet
-@adam_optimizer
-class AdamResNetTrainer(AbstractTrainer, EarlyStoppingMixin):
-    pass
-
-
-@resnet
-@sgd_optimizer
-class SGDResNetTrainer(AbstractTrainer, EarlyStoppingMixin):
-    pass
-
-
 @kwargs_parameter_dict
-def train_resnet(*args, **kwargs):
+def train_resnet(*args, optimizer_decorator=None, **kwargs):
     """
     Train a ResNet image classifier.
     :param args: ResNetTrainer arguments
     :type: tuple
+    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    `optimizer` property with a specific optimizer.
+    :type: function
     :param kwargs: ResNetTrainer keyword arguments
     :type: dict
     """
+    @resnet
+    @optimizer_decorator
+    class SGDResNetTrainer(AbstractTrainer, EarlyStoppingMixin):
+        pass
     trainer = SGDResNetTrainer(*args, **kwargs)
     trainer.run()

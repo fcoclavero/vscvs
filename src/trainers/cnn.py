@@ -12,7 +12,6 @@ from torch.nn import CrossEntropyLoss
 
 from src.models import ClassificationConvolutionalNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
-from src.trainers.decorators import adam_optimizer, sgd_optimizer
 from src.trainers.mixins import EarlyStoppingMixin
 from src.utils.data import prepare_batch
 from src.utils.decorators import kwargs_parameter_dict
@@ -54,7 +53,7 @@ def cnn(cls):
 
         @property
         def trainer_id(self):
-            return 'cnn_sk'
+            return 'cnn'
 
         def _create_evaluator_engine(self):
             return create_supervised_evaluator(
@@ -67,26 +66,21 @@ def cnn(cls):
     return CNNTrainer
 
 
-@cnn
-@adam_optimizer
-class AdamCNNTrainer(AbstractTrainer, EarlyStoppingMixin):
-    pass
-
-
-@cnn
-@sgd_optimizer
-class SGDCNNTrainer(AbstractTrainer, EarlyStoppingMixin):
-    pass
-
-
 @kwargs_parameter_dict
-def train_cnn(*args, **kwargs):
+def train_cnn(*args, optimizer_decorator=None, **kwargs):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param args: CNNTrainer arguments
     :type: tuple
+    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    `optimizer` property with a specific optimizer.
+    :type: function
     :param kwargs: CNNTrainer keyword arguments
     :type: dict
     """
-    trainer = SGDCNNTrainer(*args, **kwargs)
+    @cnn
+    @optimizer_decorator
+    class CNNTrainer(AbstractTrainer, EarlyStoppingMixin):
+        pass
+    trainer = CNNTrainer(*args, **kwargs)
     trainer.run()

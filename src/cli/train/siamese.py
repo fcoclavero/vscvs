@@ -17,7 +17,7 @@ from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
     type=click.Choice(['sketchy', 'sketchy-test'])
 )
 @click.option('--margin', prompt='Margin', help='The margin for the Contrastive Loss.', default=.2)
-@click.option('--learning_rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
+@click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
 @pass_kwargs_to_context
 def siamese(context, **kwargs):

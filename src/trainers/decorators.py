@@ -13,6 +13,8 @@ def adam_optimizer(cls):
     """
     Class decorator for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with an
     [Adam](https://pytorch.org/docs/stable/optim.html#torch.optim.Adam) optimizer.
+    The optimizer must be defined here, in the trainer class, because we need to pass the model parameters to the
+    optimizer constructor.
     :param cls: a Trainer class
     :type: AbstractTrainer subclass
     :return: `cls`, but with an `optimizer` property that returns an SGD Optimizer
@@ -36,8 +38,8 @@ def adam_optimizer(cls):
             :type: float
             :param weight_decay: weight decay for L2 penalty
             :type: float
-            :param amsgrad: whether to use the AMSGrad variant of this algorithm from the paper [On the Convergence of Adam
-            and Beyond](https://openreview.net/forum?id=ryQu7f-RZ)
+            :param amsgrad: whether to use the AMSGrad variant of this algorithm from the paper [On the Convergence of
+            Adam and Beyond](https://openreview.net/forum?id=ryQu7f-RZ)
             :type: boolean
             :param kwargs: keyword arguments for additional mixins
             :type: dict
@@ -54,6 +56,12 @@ def adam_optimizer(cls):
             return Adam(self.model.parameters(), lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
                         weight_decay=self.weight_decay, amsgrad=self.amsgrad)
 
+        @property
+        def serialized_checkpoint(self):
+            return {**super().serialized_checkpoint, 'optimizer': 'Adam',
+                    'learning_rate': self.learning_rate, 'betas': self.betas, 'epsilon': self.epsilon,
+                    'weight_decay': self.weight_decay, 'amsgrad': self.amsgrad}
+
     return AdamOptimizerTrainer
 
 
@@ -61,6 +69,8 @@ def sgd_optimizer(cls):
     """
     Class decorator for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with a
     [Stochastic Gradient Descent (SGD)](https://pytorch.org/docs/stable/optim.html#torch.optim.SGD) optimizer.
+    The optimizer must be defined here, in the trainer class, because we need to pass the model parameters to the
+    optimizer constructor.
     :param cls: a Trainer class
     :type: AbstractTrainer subclass
     :return: `cls`, but with an `optimizer` property that returns an SGD Optimizer
@@ -89,5 +99,10 @@ def sgd_optimizer(cls):
         @property
         def optimizer(self):
             return SGD(self.model.parameters(), lr=self.learning_rate, momentum=self.momentum)
+
+        @property
+        def serialized_checkpoint(self):
+            return {**super().serialized_checkpoint, 'optimizer': 'SGD',
+                    'learning_rate': self.learning_rate, 'momentum': self.momentum}
 
     return SGDOptimizerTrainer

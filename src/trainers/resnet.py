@@ -29,27 +29,29 @@ def resnet(cls):
         """
         Trainer for a ResNext image classifier.
         """
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, out_features=125, pretrained=False, **kwargs):
             """
             Trainer constructor.
             :param args: AbstractSGDOptimizerTrainer and EarlyStoppingMixin arguments
             :type: tuple
+            :param out_features: number of output features. If `None`, defaults to 1000.
+            :type: int or None
+            :param pretrained: if True, uses a model pre-trained on ImageNet.
+            :type: boolean
             :param kwargs: AbstractSGDOptimizerTrainer and EarlyStoppingMixin keyword arguments
             :type: dict
             """
+            self.out_features = out_features
+            self.pretrained = pretrained
             super().__init__(*args, **kwargs)
 
         @property
         def initial_model(self):
-            return ResNet(out_features=125)
+            return ResNet(out_features=self.out_features, pretrained=self.pretrained)
 
         @property
         def loss(self):
             return CrossEntropyLoss()
-
-        @property
-        def serialized_checkpoint(self):
-            return {**super().serialized_checkpoint, 'learning_rate': self.learning_rate, 'momentum': self.momentum}
 
         @property
         def trainer_id(self):

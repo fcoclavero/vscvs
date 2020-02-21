@@ -120,7 +120,6 @@ class AbstractTrainer(ABC):
             'batch_size': self.batch_size,
             'dataset_name': self.dataset_name,
             'last_run': datetime.now(),
-            'optimizer': self.optimizer,
             'parameters': self.parameter_dict,
             'total_epochs': self.start_epoch + self.epochs
         }

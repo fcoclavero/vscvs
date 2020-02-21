@@ -48,10 +48,6 @@ def cnn(cls):
             return CrossEntropyLoss()
 
         @property
-        def serialized_checkpoint(self):
-            return {**super().serialized_checkpoint, 'learning_rate': self.learning_rate, 'momentum': self.momentum}
-
-        @property
         def trainer_id(self):
             return 'cnn'
 

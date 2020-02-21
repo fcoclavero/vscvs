@@ -36,6 +36,7 @@ def cnn(_,  *args, **kwargs):
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
+@click.option('--pretrained', prompt='Pretrained', help='Whether to use pretrained model weights.', default=False)
 @click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
 def resnet(_, *args, **kwargs):
     from src.trainers.resnet import train_resnet
@@ -49,6 +50,7 @@ def resnet(_, *args, **kwargs):
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
+@click.option('--pretrained', prompt='Pretrained', help='Whether to use pretrained model weights.', default=False)
 @click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
 def resnext(_, *args, **kwargs):
     from src.trainers.resnext import train_resnext

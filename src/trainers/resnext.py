@@ -30,27 +30,29 @@ def resnext(cls):
         """
         Trainer for a ResNext image classifier.
         """
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, out_features=125, pretrained=False, **kwargs):
             """
             Trainer constructor.
             :param args: AbstractAdamOptimizerTrainer and EarlyStoppingMixin arguments
             :type: tuple
+            :param out_features: number of output features. If `None`, defaults to 1000.
+            :type: int or None
+            :param pretrained: if True, uses a model pre-trained on ImageNet.
+            :type: boolean
             :param kwargs: AbstractAdamOptimizerTrainer and EarlyStoppingMixin keyword arguments
             :type: dict
             """
+            self.out_features = out_features
+            self.pretrained = pretrained
             super().__init__(*args, **kwargs)
 
         @property
         def initial_model(self):
-            return ResNext(out_features=125)
+            return ResNext(out_features=self.out_features, pretrained=self.pretrained)
 
         @property
         def loss(self):
             return CrossEntropyLoss()
-
-        @property
-        def serialized_checkpoint(self):
-            return {**super().serialized_checkpoint, 'learning_rate': self.learning_rate, 'momentum': self.momentum}
 
         @property
         def trainer_id(self):
@@ -65,7 +67,8 @@ def resnext(cls):
             return create_supervised_evaluator(
                 self.model, device=self.device,
                 metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss), 'recall': Recall(average=True),
-                         'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10), 'precision': Precision(average=True)})
+                         'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10),
+                         'precision': Precision(average=True)})
 
         def _create_trainer_engine(self):
             return create_supervised_trainer(

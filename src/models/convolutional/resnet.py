@@ -24,7 +24,7 @@ class ResNet(nn.Module):
         :type: int or None
         :param pretrained: if True, uses a model pre-trained on ImageNet.
         :type: boolean
-        :param progress: if True, displays a progress bar of the download to stderr"
+        :param progress: if True, displays a progress bar of the download to stderr
         :type: boolean
         :param kwargs: additional keyword arguments
         :type: dict

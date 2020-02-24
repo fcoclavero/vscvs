@@ -25,7 +25,7 @@ def resnet(cls):
     :return: `cls`, but implementing the common options for training a ResNet model
     :type: `cls.__class__`
     """
-    class ResNetTrainer(cls):
+    class Trainer(cls):
         """
         Trainer for a ResNext image classifier.
         """
@@ -70,7 +70,7 @@ def resnet(cls):
             return create_supervised_trainer(
                 self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
 
-    return ResNetTrainer
+    return Trainer
 
 
 @kwargs_parameter_dict
@@ -87,7 +87,7 @@ def train_resnet(*args, optimizer_decorator=None, **kwargs):
     """
     @resnet
     @optimizer_decorator
-    class SGDResNetTrainer(AbstractTrainer, EarlyStoppingMixin):
+    class ResNetTrainer(AbstractTrainer, EarlyStoppingMixin):
         pass
-    trainer = SGDResNetTrainer(*args, **kwargs)
+    trainer = ResNetTrainer(*args, **kwargs)
     trainer.run()

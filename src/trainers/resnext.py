@@ -26,7 +26,7 @@ def resnext(cls):
     :return: `cls`, but implementing the common options for training a ResNext model
     :type: `cls.__class__`
     """
-    class ResNextTrainer(cls):
+    class Trainer(cls):
         """
         Trainer for a ResNext image classifier.
         """
@@ -80,7 +80,7 @@ def resnext(cls):
             y_pred = round(y_pred)
             return y_pred, y
 
-    return ResNextTrainer
+    return Trainer
 
 
 @kwargs_parameter_dict
@@ -97,7 +97,7 @@ def train_resnext(*args, optimizer_decorator=None, **kwargs):
     """
     @resnext
     @optimizer_decorator
-    class SGDResNextTrainer(AbstractTrainer, EarlyStoppingMixin):
+    class ResNextTrainer(AbstractTrainer, EarlyStoppingMixin):
         pass
-    trainer = SGDResNextTrainer(*args, **kwargs)
+    trainer = ResNextTrainer(*args, **kwargs)
     trainer.run()

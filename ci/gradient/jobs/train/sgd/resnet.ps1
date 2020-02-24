@@ -1,5 +1,5 @@
 gradient jobs create `
---name train_resnet `
+--name train_resnet_sgd `
 --optionsFile config.yaml `
 --command ( `
     'sh ci/gradient/setup.sh && ' + `

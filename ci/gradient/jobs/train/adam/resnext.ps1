@@ -1,5 +1,5 @@
 gradient jobs create `
---name train_resnext `
+--name train_resnext_adam `
 --optionsFile config.yaml `
 --command ( `
     'sh ci/gradient/setup.sh && ' + `

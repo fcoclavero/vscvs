@@ -36,12 +36,8 @@ def siamese(cls):
             :param architecture_model: the model to be used for each branch of the siamese architecture. The same
             architecture will be used for embedding each image pair, and weights will be shared.
             :type: torch.nn.Module
-            :param learning_rate: learning rate for SGD optimizer
-            :type: float
             :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the embeddings
             of two examples as dissimilar.
-            :type: float
-            :param momentum: momentum parameter for SGD optimizer
             :type: float
             :param kwargs: AbstractTrainer keyword arguments
             :type: dict
@@ -57,6 +53,11 @@ def siamese(cls):
         @property
         def loss(self):
             return ContrastiveLoss(margin=self.margin)
+
+        @property
+        def serialized_checkpoint(self):
+            return {**super().serialized_checkpoint,
+                    'architecture_model': self.architecture_model, 'margin': self.margin}
 
         @property
         def trainer_id(self):

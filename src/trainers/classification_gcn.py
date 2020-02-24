@@ -8,7 +8,6 @@ __status__ = 'Prototype'
 
 from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy
 from torch.nn import CrossEntropyLoss
-from torch.optim import Adam
 
 from src.datasets import get_dataset
 from src.models import ClassificationGCN
@@ -32,17 +31,13 @@ def classification_gcn(cls):
         Trainer for a class classification GCN that uses only image classes and batch clique graphs where vertex weights
         correspond to word vector distances between image class labels.
         """
-        def __init__(self, *args, dataset_name=None, learning_rate=.01, weight_decay=5e-4, processes=None, **kwargs):
+        def __init__(self, *args, dataset_name=None, processes=None, **kwargs):
             """
             Trainer constructor.
             :param args: AbstractTrainer and EarlyStoppingMixin arguments
             :type: tuple
             :param dataset_name: the name of the Dataset to be used for training
             :type: str
-            :param learning_rate: learning rate for Adam optimizer
-            :type: float
-            :param weight_decay: weight_decay parameter for Adam optimizer
-            :type: float
             :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then
             `os.cpu_count()` will be used.
             :type: int or None
@@ -50,8 +45,6 @@ def classification_gcn(cls):
             :type: dict
             """
             self.dataset_name = dataset_name
-            self.learning_rate = learning_rate
-            self.weight_decay = weight_decay
             self.processes = processes
             super().__init__(*args, dataset_name = self.dataset_name, **kwargs)
 
@@ -65,12 +58,8 @@ def classification_gcn(cls):
             return CrossEntropyLoss()
 
         @property
-        def optimizer(self):
-            return Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
-
-        @property
         def serialized_checkpoint(self):
-            return {**super().serialized_checkpoint, 'learning_rate': self.learning_rate, 'weight_decay': self.weight_decay}
+            return {**super().serialized_checkpoint, 'processes': self.processes}
 
         @property
         def trainer_id(self):

@@ -89,24 +89,22 @@ def classification_gcn(_, *args, **kwargs):
     train_classification_gcn(*args, dataset_name=dataset_name, **kwargs)
 
 
-# @click.command()
-# @pass_context_to_kwargs
-# @click.option(
-#     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-#     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-# )
-# @click.option('--in-channels', prompt='In channels', help='Number of image color channels.', default=3)
-# @click.option('--cell-size', prompt='Cell size', help='Gradient pooling size.', default=8)
-# @click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
-# @click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
-# @click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
-# @click.option('--weight-decay', prompt='Weight decay', help='Weight decay parameter for Adam optimizer.', default=5e-4)
-# @click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
-#               help='The number of parallel workers to be used for creating batch graphs.')
-# def hog_gcn(_, *args, **kwargs):
-#     from src.trainers.hog_gcn import train_hog_gcn
-#     click.echo('HOG GCN - {} dataset'.format(kwargs['dataset_name']))
-#     train_hog_gcn(*args, **kwargs)
+@click.command()
+@pass_context_to_kwargs
+@click.option(
+    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
+)
+@click.option('--in-channels', prompt='In channels', help='Number of image color channels.', default=3)
+@click.option('--cell-size', prompt='Cell size', help='Gradient pooling size.', default=8)
+@click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
+@click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
+@click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
+              help='The number of parallel workers to be used for creating batch graphs.')
+def hog_gcn(_, *args, **kwargs):
+    from src.trainers.hog_gcn import train_hog_gcn
+    click.echo('HOG GCN - {} dataset'.format(kwargs['dataset_name']))
+    train_hog_gcn(*args, **kwargs)
 
 
 """ Global trainer group. """
@@ -140,7 +138,7 @@ for optimizer_group in [adam, sgd]:
     optimizer_group.add_command(resnext)
     # optimizer_group.add_command(cvs_gan)
     optimizer_group.add_command(classification_gcn)
-    # optimizer_group.add_command(hog_gcn)
+    optimizer_group.add_command(hog_gcn)
 
 
 """ Add optimizer trainer groups to the global trainer group. """

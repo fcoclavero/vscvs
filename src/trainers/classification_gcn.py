@@ -19,76 +19,93 @@ from src.utils.data import prepare_batch_graph
 from src.utils.decorators import kwargs_parameter_dict
 
 
-class ClassificationGCNTrainer(AbstractTrainer):
+def classification_gcn(cls):
     """
-    Trainer for a class classification GCN that uses only image classes and batch clique graphs where vertex weights
-    correspond to word vector distances between image class labels.
+    Class decorator for creating Trainer classes with the common options needed for a classification GCN.
+    :param cls: a Trainer class
+    :type: AbstractTrainer subclass
+    :return: `cls`, but implementing the common options for training a classification GCN
+    :type: `cls.__class__`
     """
-    def __init__(self, *args, dataset_name=None, learning_rate=.01, weight_decay=5e-4, processes=None, **kwargs):
+    class Trainer(cls):
         """
-        Trainer constructor.
-        :param args: AbstractTrainer and EarlyStoppingMixin arguments
-        :type: tuple
-        :param dataset_name: the name of the Dataset to be used for training
-        :type: str
-        :param learning_rate: learning rate for Adam optimizer
-        :type: float
-        :param weight_decay: weight_decay parameter for Adam optimizer
-        :type: float
-        :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then
-        `os.cpu_count()` will be used.
-        :type: int or None
-        :param kwargs: AbstractTrainer and EarlyStoppingMixin keyword arguments
-        :type: dict
+        Trainer for a class classification GCN that uses only image classes and batch clique graphs where vertex weights
+        correspond to word vector distances between image class labels.
         """
-        self.dataset_name = dataset_name
-        self.learning_rate = learning_rate
-        self.weight_decay = weight_decay
-        self.processes = processes
-        super().__init__(*args, dataset_name = self.dataset_name, **kwargs)
+        def __init__(self, *args, dataset_name=None, learning_rate=.01, weight_decay=5e-4, processes=None, **kwargs):
+            """
+            Trainer constructor.
+            :param args: AbstractTrainer and EarlyStoppingMixin arguments
+            :type: tuple
+            :param dataset_name: the name of the Dataset to be used for training
+            :type: str
+            :param learning_rate: learning rate for Adam optimizer
+            :type: float
+            :param weight_decay: weight_decay parameter for Adam optimizer
+            :type: float
+            :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then
+            `os.cpu_count()` will be used.
+            :type: int or None
+            :param kwargs: AbstractTrainer and EarlyStoppingMixin keyword arguments
+            :type: dict
+            """
+            self.dataset_name = dataset_name
+            self.learning_rate = learning_rate
+            self.weight_decay = weight_decay
+            self.processes = processes
+            super().__init__(*args, dataset_name = self.dataset_name, **kwargs)
 
-    @property
-    def initial_model(self):
-        dataset = get_dataset(self.dataset_name)
-        return ClassificationGCN(len(dataset.classes), 11)
+        @property
+        def initial_model(self):
+            dataset = get_dataset(self.dataset_name)
+            return ClassificationGCN(len(dataset.classes), 11)
 
-    @property
-    def loss(self):
-        return CrossEntropyLoss()
+        @property
+        def loss(self):
+            return CrossEntropyLoss()
 
-    @property
-    def optimizer(self):
-        return Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+        @property
+        def optimizer(self):
+            return Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
 
-    @property
-    def serialized_checkpoint(self):
-        return {**super().serialized_checkpoint, 'learning_rate': self.learning_rate, 'weight_decay': self.weight_decay}
+        @property
+        def serialized_checkpoint(self):
+            return {**super().serialized_checkpoint, 'learning_rate': self.learning_rate, 'weight_decay': self.weight_decay}
 
-    @property
-    def trainer_id(self):
-        return 'classification_gcn'
+        @property
+        def trainer_id(self):
+            return 'classification_gcn'
 
-    def _create_evaluator_engine(self):
-        return create_classification_gcn_evaluator(
-            prepare_batch_graph, self.model, self.dataset.classes_dataframe, device=self.device,
-            processes=self.processes, metrics={
-                'accuracy': Accuracy(), 'loss': Loss(self.loss),
-                'recall': Recall(average=True), 'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
+        def _create_evaluator_engine(self):
+            return create_classification_gcn_evaluator(
+                prepare_batch_graph, self.model, self.dataset.classes_dataframe, device=self.device,
+                processes=self.processes, metrics={
+                    'accuracy': Accuracy(), 'loss': Loss(self.loss),
+                    'recall': Recall(average=True), 'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
 
-    def _create_trainer_engine(self):
-        return create_classification_gcn_trainer(
-            prepare_batch_graph, self.model, self.dataset.classes_dataframe,
-            self.optimizer, self.loss, device=self.device, processes=self.processes)
+        def _create_trainer_engine(self):
+            return create_classification_gcn_trainer(
+                prepare_batch_graph, self.model, self.dataset.classes_dataframe,
+                self.optimizer, self.loss, device=self.device, processes=self.processes)
+
+    return Trainer
 
 
 @kwargs_parameter_dict
-def train_classification_gcn(*args, **kwargs):
+def train_classification_gcn(*args, optimizer_decorator=None, **kwargs):
     """
     Train a ClassificationGCN image classifier.
     :param args: ClassificationGCNTrainer arguments
     :type: tuple
+    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    `optimizer` property with a specific optimizer.
+    :type: function
     :param kwargs: ClassificationGCNTrainer keyword arguments
     :type: dict
     """
+    @classification_gcn
+    @optimizer_decorator
+    class ClassificationGCNTrainer(AbstractTrainer):
+        pass
     trainer = ClassificationGCNTrainer(*args, **kwargs)
     trainer.run()

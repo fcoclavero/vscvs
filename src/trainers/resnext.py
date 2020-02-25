@@ -56,7 +56,7 @@ def resnext(cls):
 
         @property
         def trainer_id(self):
-            return 'resnext'
+            return 'ResNext'
 
         @staticmethod
         def _score_function(engine):

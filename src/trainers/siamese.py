@@ -61,7 +61,7 @@ def siamese(cls):
 
         @property
         def trainer_id(self):
-            return 'siamese {}'.format(self.architecture_model.__class__.__name__)
+            return 'Siamese{}'.format(self.architecture_model.__class__.__name__)
 
         def _create_evaluator_engine(self):
             return create_siamese_evaluator(self.model, metrics={'loss': Loss(self.loss)}, device=self.device)

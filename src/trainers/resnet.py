@@ -55,7 +55,7 @@ def resnet(cls):
 
         @property
         def trainer_id(self):
-            return 'resnet'
+            return 'ResNet'
 
         @staticmethod
         def _score_function(engine):

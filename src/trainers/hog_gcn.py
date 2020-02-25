@@ -83,7 +83,7 @@ def hog_gcn(cls):
 
         @property
         def trainer_id(self):
-            return 'hog_gcn'
+            return 'HOGGCN'
 
         def _create_evaluator_engine(self):
             return create_hog_gcn_evaluator(

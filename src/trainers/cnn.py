@@ -49,7 +49,7 @@ def cnn(cls):
 
         @property
         def trainer_id(self):
-            return 'cnn'
+            return 'CNN'
 
         def _create_evaluator_engine(self):
             return create_supervised_evaluator(

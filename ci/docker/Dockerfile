@@ -42,5 +42,15 @@ RUN conda install -y pytorch torchvision ignite cudatoolkit=10.1 -c pytorch
 # }
 # See [this link](https://github.com/NVIDIA/nvidia-docker/issues/595#issuecomment-519714769) for further reference.
 
+# Module requirements
+
+COPY /requirements/textpreprocess.txt /textpreprocess.txt
+COPY /requirements/wordvectors.txt /wordvectors.txt
+RUN pip install -r /textpreprocess.txt && \
+    pip install -r /wordvectors.txt
+RUN python -c "import nltk; nltk.download('wordnet'); nltk.download('stopwords')"
+
+# Project requirements
+
 COPY /requirements/vscvs.txt /requirements.txt
 RUN pip install -r /requirements.txt

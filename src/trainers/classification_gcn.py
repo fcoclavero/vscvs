@@ -63,7 +63,7 @@ def classification_gcn(cls):
 
         @property
         def trainer_id(self):
-            return 'classification_gcn'
+            return 'ClassificationGCN'
 
         def _create_evaluator_engine(self):
             return create_classification_gcn_evaluator(

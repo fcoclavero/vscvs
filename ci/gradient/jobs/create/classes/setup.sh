@@ -1,1 +1,1 @@
-python -c "import nltk; nltk.download('wordnet'); nltk.download('stopwords')"
+python -c "import nltk; nltk.download('wordnet'); nltk.download('punkt'); nltk.download('stopwords')"

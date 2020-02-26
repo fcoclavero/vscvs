@@ -1,5 +1,5 @@
 gradient jobs create `
---name train_resnext_sgd `
+--name train_resnext_sgd_photos `
 --optionsFile config.yaml `
 --command ( `
     'sh ci/gradient/setup.sh && ' + `

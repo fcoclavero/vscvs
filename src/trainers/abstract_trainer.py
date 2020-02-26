@@ -17,6 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from settings import CHECKPOINT_NAME_FORMAT
 from src.datasets import get_dataset
 from src.utils import get_device, get_checkpoint_directory, get_log_directory
 from src.utils.data import dataset_split_successive
@@ -26,8 +27,8 @@ class AbstractTrainer(ABC):
     """
     Abstract class with the boilerplate code needed to define and run an Ignite trainer Engine.
     """
-    def __init__(self, *args, batch_size=16, dataset_name=None, drop_last=False, epochs=2, n_gpu=0, parameter_dict=None,
-                 resume_date=None, tag=None, train_validation_split=.8, workers=6, **kwargs):
+    def __init__(self, *args, batch_size=0, dataset_name=None, drop_last=False, epochs=1, n_gpu=0, parameter_dict=None,
+                 resume_date=None, resume_checkpoint=None, tag=None, train_validation_split=.8, workers=6, **kwargs):
         """
         Base constructor which sets default trainer parameters.
         :param args: mixin arguments
@@ -44,8 +45,9 @@ class AbstractTrainer(ABC):
         :type: int
         :param parameter_dict: dictionary with important training parameters for logging.
         :type: dict
-        :param resume_date: date of the trainer state to be resumed. Dates must have the following
-        format: `%y-%m-%dT%H-%M`
+        :param resume_date: date of the trainer state to be resumed. Dates must have this format: `%y-%m-%dT%H-%M`
+        :type: str
+        :param resume_checkpoint: name of the model checkpoint to be loaded.
         :type: str
         :param tag: optional tag for model checkpoint and tensorboard logs
         :type: int
@@ -57,7 +59,7 @@ class AbstractTrainer(ABC):
         :param kwargs: mixin keyword arguments
         :type: dict
         """
-        date = resume_date or datetime.now()
+        date = datetime.now()
         self.batch_size = batch_size
         self.checkpoint_directory = get_checkpoint_directory(self.trainer_id, tag=tag, date=date)
         self.dataset = get_dataset(dataset_name)
@@ -67,8 +69,12 @@ class AbstractTrainer(ABC):
         self.log_directory = get_log_directory(self.trainer_id, tag=tag, date=date)
         self.model = self.initial_model.to(self.device)
         self.parameter_dict = parameter_dict
-        self.start_epoch = 0
-        self.steps = 0
+        self.resume_date = datetime.strptime(resume_date, CHECKPOINT_NAME_FORMAT)
+        self.resume_checkpoint = resume_checkpoint
+        self.start_epoch = 1
+        self.tag = tag
+        self._load_checkpoint()
+        self.epoch = self.start_epoch
         self.train_loader, self.validation_loader = \
             self._create_data_loaders(train_validation_split, batch_size, workers, drop_last)
         self.trainer_engine = self._create_trainer_engine()
@@ -108,7 +114,7 @@ class AbstractTrainer(ABC):
         pass
 
     @property
-    def serialized_checkpoint(self):
+    def trainer_checkpoint(self):
         """
         Getter for the serialized checkpoint dictionary, which contains the values of the trainer's fields that should
         be saved in a trainer checkpoint.
@@ -119,9 +125,12 @@ class AbstractTrainer(ABC):
             'average_epoch_duration': self.timer.value(),
             'batch_size': self.batch_size,
             'dataset_name': self.dataset_name,
-            'last_run': datetime.now(),
             'parameters': self.parameter_dict,
-            'total_epochs': self.start_epoch + self.epochs
+            'resume_date': self.resume_date,
+            'resume_checkpoint': self.resume_checkpoint,
+            'start_epoch': self.start_epoch,
+            'epochs': self.epochs,
+            'tag': self.tag
         }
 
     @property
@@ -146,28 +155,32 @@ class AbstractTrainer(ABC):
 
         @self.trainer_engine.on(Events.ITERATION_COMPLETED)
         def log_training_loss(trainer):
-            writer.add_scalar('training_loss', trainer.state.output, self.steps)
+            writer.add_scalar('training_loss', trainer.state.output, self.epoch)
             progressbar.desc = progressbar_description.format(trainer.state.output)
             progressbar.update(1)
-            self.steps += 1
+            self.epoch += 1
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def log_training_results(trainer):
             self.evaluator_engine.run(self.train_loader)
             metrics = self.evaluator_engine.state.metrics
-            print('\nTraining results - epoch: {}'.format(trainer.state.epoch))
+            print('\nTraining results - epoch: {}'.format(self.epoch))
             for key, value in metrics.items():
-                writer.add_scalar('training_{}'.format(key), value, self.steps)
+                writer.add_scalar('training_{}'.format(key), value, self.epoch)
                 print('{}: {:.6f}'.format(key, value))
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def log_validation_results(trainer):
             self.evaluator_engine.run(self.validation_loader)
             metrics = self.evaluator_engine.state.metrics
-            print('\nValidation results - epoch: {}'.format(trainer.state.epoch))
+            print('\nValidation results - epoch: {}'.format(self.epoch))
             for key, value in metrics.items():
-                writer.add_scalar('validation_{}'.format(key), value, self.steps)
+                writer.add_scalar('validation_{}'.format(key), value, self.epoch)
                 print('{}: {:.6f}'.format(key, value))
+
+        @self.trainer_engine.on(Events.EPOCH_COMPLETED)
+        def update_trainer_checkpoint(trainer):
+            self._save_trainer_checkpoint()
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
         def reset_progressbar(trainer):
@@ -245,34 +258,43 @@ class AbstractTrainer(ABC):
         """
         pass
 
-    def _deserialize_checkpoint(self, checkpoint):
+    def _load_checkpoint(self):
         """
-        Load trainer fields from a serialized checkpoint dictionary.
-        :param checkpoint: the checkpoint being loaded
-        :type: dict
+        Load the state and model checkpoints and update the trainer to continue training.
         """
-        self.start_epoch = checkpoint['epochs']
-        self.model = torch.load(os.path.join(self.checkpoint_directory, '_model_{}.pth'.format(self.start_epoch)))
+        if self.resume_date:
+            try:
+                previous_checkpoint_directory = \
+                    get_checkpoint_directory(self.trainer_id, tag=self.tag, date=self.resume_date)
+            except FileNotFoundError:
+                raise FileNotFoundError('Checkpoint {} not found.'.format(self.resume_date))
+            self._load_model_checkpoint(previous_checkpoint_directory)
+            self._load_trainer_checkpoint(previous_checkpoint_directory)
+            tqdm.write('Successfully loaded the {} checkpoint.'.format(self.resume_date))
 
-    def _load_checkpoint(self, resume_date):
+    def _load_model_checkpoint(self, previous_checkpoint_directory):
         """
-        Load the trainer checkpoint dictionary for the given resume date and deserialize it (load the values in the
-        checkpoint dictionary into the trainer's fields).
-        :param resume_date: checkpoint folder name containing model and checkpoint .pth files containing the information
-        needed for resuming training. Folder names correspond to dates with the following format: `%y-%m-%dT%H-%M`
+        Load the model state_dict saved in the model checkpoint file into the already initialized model field.
+        :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        try:
-            self._deserialize_checkpoint(torch.load(os.path.join(self.checkpoint_directory, 'checkpoint.pth')))
-            tqdm.write('Successfully loaded the {} checkpoint.'.format(resume_date))
-        except FileNotFoundError:
-            raise FileNotFoundError('Checkpoint {} not found.'.format(resume_date))
+        state_dict = torch.load(os.path.join(previous_checkpoint_directory, '{}.pth'.format(self.resume_checkpoint)))
+        self.model.load_state_dict(state_dict)
 
-    def _save_checkpoint(self):
+    def _load_trainer_checkpoint(self, previous_checkpoint_directory):
+        """
+        Load trainer fields from the specified saved trainer checkpoint file.
+        :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
+        :type: str
+        """
+        previous_state = torch.load(os.path.join(previous_checkpoint_directory, 'trainer.pth'))
+        self.start_epoch = previous_state['start_epoch'] + previous_state['epochs']
+
+    def _save_trainer_checkpoint(self):
         """
         Create the serialized checkpoint dictionary for the current trainer state, and save it.
         """
-        torch.save(self.serialized_checkpoint, os.path.join(self.checkpoint_directory, 'checkpoint.pth'))
+        torch.save(self.trainer_checkpoint, os.path.join(self.checkpoint_directory, 'trainer.pth'))
 
     def run(self):
         """

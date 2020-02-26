@@ -77,11 +77,6 @@ def hog_gcn(cls):
             return CrossEntropyLoss()
 
         @property
-        def serialized_checkpoint(self):
-            return {**super().serialized_checkpoint, 'in_channels': self.in_channels, 'cell_size': self.cell_size,
-                    'bins': self.bins, 'signed_gradients': self.signed_gradients, 'processes': self.processes}
-
-        @property
         def trainer_id(self):
             return 'HOGGCN'
 

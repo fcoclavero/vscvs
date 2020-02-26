@@ -56,12 +56,6 @@ def adam_optimizer(cls):
             return Adam(self.model.parameters(), lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
                         weight_decay=self.weight_decay, amsgrad=self.amsgrad)
 
-        @property
-        def serialized_checkpoint(self):
-            return {**super().serialized_checkpoint, 'optimizer': 'Adam',
-                    'learning_rate': self.learning_rate, 'betas': self.betas, 'epsilon': self.epsilon,
-                    'weight_decay': self.weight_decay, 'amsgrad': self.amsgrad}
-
     return AdamOptimizerTrainer
 
 
@@ -99,10 +93,5 @@ def sgd_optimizer(cls):
         @property
         def optimizer(self):
             return SGD(self.model.parameters(), lr=self.learning_rate, momentum=self.momentum)
-
-        @property
-        def serialized_checkpoint(self):
-            return {**super().serialized_checkpoint, 'optimizer': 'SGD',
-                    'learning_rate': self.learning_rate, 'momentum': self.momentum}
 
     return SGDOptimizerTrainer

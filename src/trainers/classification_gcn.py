@@ -58,10 +58,6 @@ def classification_gcn(cls):
             return CrossEntropyLoss()
 
         @property
-        def serialized_checkpoint(self):
-            return {**super().serialized_checkpoint, 'processes': self.processes}
-
-        @property
         def trainer_id(self):
             return 'ClassificationGCN'
 

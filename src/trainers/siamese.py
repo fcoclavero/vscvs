@@ -55,11 +55,6 @@ def siamese(cls):
             return ContrastiveLoss(margin=self.margin)
 
         @property
-        def serialized_checkpoint(self):
-            return {**super().serialized_checkpoint,
-                    'architecture_model': self.architecture_model, 'margin': self.margin}
-
-        @property
         def trainer_id(self):
             return 'Siamese{}'.format(self.architecture_model.__class__.__name__)
 

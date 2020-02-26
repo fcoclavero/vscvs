@@ -111,7 +111,8 @@ def hog_gcn(_, *args, **kwargs):
 
 
 @click.group()
-@click.option('--resume-date', help='Epoch for checkpoint loading.', default=None)
+@click.option('--resume-date', help='Date of the training checkpoint to be resumed.', default=None)
+@click.option('--resume-checkpoint', help='Model checkpoint to be resumed.', default=None)
 @click.option('--train-validation-split', prompt='Train/validation split',
               help='proportion of the training set that will be used for training.', default=.8)
 @click.option('--batch-size', prompt='Batch size', help='The batch size during training.', default=16)

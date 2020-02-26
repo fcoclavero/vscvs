@@ -20,17 +20,27 @@ CHECKPOINT_NAME_FORMAT = '%y-%m-%dT%H-%M'
 DATA_DIR = os.environ['DATA_DIR']
 
 DATA_SOURCES = {
-    'sketchy': {
+    'sketchy-photos': {
         'root': os.path.join(DATA_DIR, 'sketchy'),
-        'photos': os.path.join(DATA_DIR, 'sketchy', 'photo', 'tx_000000000000'), # 12500
-        'sketches': os.path.join(DATA_DIR, 'sketchy', 'sketch', 'tx_000000000000'), # 75481
+        'images': os.path.join(DATA_DIR, 'sketchy', 'photo', 'tx_000000000000'), # 12500
         'dimensions': (256, 256),
         'language': 'en'
     },
-    'sketchy_test': {
+    'sketchy-sketches': {
+        'root': os.path.join(DATA_DIR, 'sketchy'),
+        'images': os.path.join(DATA_DIR, 'sketchy', 'sketch', 'tx_000000000000'), # 75481
+        'dimensions': (256, 256),
+        'language': 'en'
+    },
+    'sketchy-test-photos': {
         'root': os.path.join(DATA_DIR, 'sketchy_test'),
-        'photos': os.path.join(DATA_DIR, 'sketchy_test', 'photo'), # 1250
-        'sketches': os.path.join(DATA_DIR, 'sketchy_test', 'sketch'), # 1250
+        'images': os.path.join(DATA_DIR, 'sketchy_test', 'photo'), # 1250
+        'dimensions': (256, 256),
+        'language': 'en'
+    },
+    'sketchy-test-sketches': {
+        'root': os.path.join(DATA_DIR, 'sketchy_test'),
+        'images': os.path.join(DATA_DIR, 'sketchy_test', 'sketch'), # 1250
         'dimensions': (256, 256),
         'language': 'en'
     },

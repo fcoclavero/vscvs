@@ -22,7 +22,7 @@ from tqdm import tqdm
 
 from modules.textpreprocess.compound_cleaners.en import full_clean
 from modules.wordvectors.en import document_vector
-from src.datasets import DATASET_DATA_SOURCES
+from settings import DATA_SOURCES
 
 
 def classes_set(directory):
@@ -75,7 +75,7 @@ def create_classes_data_frame(dataset_name, distance='cosine', tsne_dimension=2)
     :return: a pandas DataFrame with "class", "vector" (document embeddings) and "tsne" columns
     :type: pd.DataFrame
     """
-    dataset_dir = DATASET_DATA_SOURCES[dataset_name]
+    dataset_dir = DATA_SOURCES[dataset_name]['images']
     paths = classes_set(dataset_dir)
     classes = pd.DataFrame(columns=['class', 'vector', 'tsne'])
     classes['classes'] = sorted(list(paths))

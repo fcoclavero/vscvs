@@ -69,7 +69,7 @@ class AbstractTrainer(ABC):
         self.log_directory = get_log_directory(self.trainer_id, tag=tag, date=date)
         self.model = self.initial_model.to(self.device)
         self.parameter_dict = parameter_dict
-        self.resume_date = datetime.strptime(resume_date, CHECKPOINT_NAME_FORMAT)
+        self.resume_date = datetime.strptime(resume_date, CHECKPOINT_NAME_FORMAT) if resume_date else resume_date
         self.resume_checkpoint = resume_checkpoint
         self.start_epoch = 1
         self.tag = tag

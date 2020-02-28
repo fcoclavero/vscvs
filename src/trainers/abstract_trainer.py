@@ -75,6 +75,7 @@ class AbstractTrainer(ABC):
         self.tag = tag
         self._load_checkpoint()
         self.epoch = self.start_epoch
+        self.step = 0
         self.train_loader, self.validation_loader = \
             self._create_data_loaders(train_validation_split, batch_size, workers, drop_last)
         self.trainer_engine = self._create_trainer_engine()
@@ -154,10 +155,17 @@ class AbstractTrainer(ABC):
         writer = SummaryWriter(self.log_directory)
 
         @self.trainer_engine.on(Events.ITERATION_COMPLETED)
+        def update_step_counter(trainer):
+            self.step += 1
+
+        @self.trainer_engine.on(Events.ITERATION_COMPLETED)
         def log_training_loss(trainer):
-            writer.add_scalar('training_loss', trainer.state.output, self.epoch)
+            writer.add_scalar('training_loss', trainer.state.output, self.step)
             progressbar.desc = progressbar_description.format(trainer.state.output)
             progressbar.update(1)
+
+        @self.trainer_engine.on(Events.EPOCH_COMPLETED)
+        def update_epoch_counter(trainer):
             self.epoch += 1
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
@@ -166,7 +174,7 @@ class AbstractTrainer(ABC):
             metrics = self.evaluator_engine.state.metrics
             print('\nTraining results - epoch: {}'.format(self.epoch))
             for key, value in metrics.items():
-                writer.add_scalar('training_{}'.format(key), value, self.epoch)
+                writer.add_scalar('training_{}'.format(key), value, self.step)
                 print('{}: {:.6f}'.format(key, value))
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
@@ -175,7 +183,7 @@ class AbstractTrainer(ABC):
             metrics = self.evaluator_engine.state.metrics
             print('\nValidation results - epoch: {}'.format(self.epoch))
             for key, value in metrics.items():
-                writer.add_scalar('validation_{}'.format(key), value, self.epoch)
+                writer.add_scalar('validation_{}'.format(key), value, self.step)
                 print('{}: {:.6f}'.format(key, value))
 
         @self.trainer_engine.on(Events.EPOCH_COMPLETED)
@@ -194,11 +202,11 @@ class AbstractTrainer(ABC):
 
         periodic_checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to periodically
             self.checkpoint_directory, filename_prefix='net_latest', # save model objects to disc.
-            save_interval=1, n_saved=3, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
+            n_saved=3, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
         )
         best_checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to save the best
             self.checkpoint_directory, filename_prefix='net_best', # performing models
-            save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
+            n_saved=5, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
         )
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, best_checkpoint_saver, {'train': self.model})

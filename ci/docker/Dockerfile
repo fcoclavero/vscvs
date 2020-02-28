@@ -48,7 +48,8 @@ COPY /requirements/textpreprocess.txt /textpreprocess.txt
 COPY /requirements/wordvectors.txt /wordvectors.txt
 RUN pip install -r /textpreprocess.txt && \
     pip install -r /wordvectors.txt
-RUN python -c "import nltk; nltk.download('wordnet'); nltk.download('punkt'); nltk.download('stopwords')"
+RUN python -c "import nltk; nltk.download('averaged_perceptron_tagger'); nltk.download('punkt')" && \
+    python -c "import nltk; nltk.download('wordnet'); nltk.download('stopwords')"
 
 # Project requirements
 

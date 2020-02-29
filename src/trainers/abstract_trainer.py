@@ -77,7 +77,7 @@ class AbstractTrainer(ABC):
         self.epoch = self.start_epoch
         self.step = 0
         self.train_loader, self.validation_loader = \
-            self._create_data_loaders(train_validation_split, batch_size, workers, drop_last)
+            self.create_data_loaders(train_validation_split, batch_size, workers, drop_last)
         self.trainer_engine = self._create_trainer_engine()
         self.evaluator_engine = self._create_evaluator_engine()
         self.timer = self._create_timer()
@@ -213,7 +213,7 @@ class AbstractTrainer(ABC):
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, periodic_checkpoint_saver, {'train': self.model})
         self.trainer_engine.add_event_handler(Events.COMPLETED, periodic_checkpoint_saver, {'complete': self.model})
 
-    def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last):
+    def create_data_loaders(self, train_validation_split, batch_size, workers, drop_last, collate_fn=None):
         """
         Create training and validation data loaders, placing a total of `len(self.dataset) * train_validation_split`
         elements in the training subset.
@@ -227,6 +227,9 @@ class AbstractTrainer(ABC):
         divisible by the batch size). If `False` and the dataset size is not divisible by the batch size, the last
         batch will have a smaller size than the rest.
         :type: bool
+        :param collate_fn :merges a list of samples to form a mini-batch of Tensor(s). Used when using batched loading
+        from a map-style dataset.
+        :type: callable
         :return: two DataLoaders, the first for the training data and the second for the validation data.
         :type: torch.utils.data.DataLoader
         """

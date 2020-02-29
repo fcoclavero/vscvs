@@ -30,8 +30,7 @@ class SiameseNetwork(nn.Module):
 
     def forward(self, input_1, input_2):
         """
-        Perform a forward pass on the network, computing the embeddings for both inputs and the distance between them,
-        as it will be needed for computing the loss.
+        Perform a forward pass on the network, computing the embeddings for both inputs.
         :param input_1: the first network input
         :type: torch.Tensor with a size compatible with `embedding_network_1`
         :param input_2: the second network input
@@ -63,8 +62,7 @@ class SiameseNetworkShared(nn.Module):
 
     def forward(self, input_1, input_2):
         """
-        Perform a forward pass on the network, computing the embeddings for both inputs and the distance between them,
-        as it will be needed for computing the loss.
+        Perform a forward pass on the network, computing the embeddings for both inputs.
         :param input_1: the first network input
         :type: torch.Tensor with a size compatible with `embedding_network`
         :param input_2: the second network input

@@ -32,6 +32,6 @@ def triplet(context, **kwargs):
 @click.option('--beta1', prompt='Beta 1', help='Decay parameter for Adam optimizer.', default=.2)
 def cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, dataset_name, vector_dimension,
         margin, lr, beta1):
-    from src.trainers.triplet_cnn import train_triplet_cnn
+    from src.trainers.triplet import train_triplet_cnn
     click.echo('triplet cnn - %s dataset' % dataset_name)
     train_triplet_cnn(dataset_name, vector_dimension, resume, margin, workers, batch_size, n_gpu, epochs, lr, beta1)

@@ -8,13 +8,15 @@ __status__ = 'Prototype'
 
 import torch
 
+import torch.nn.functional as F
+
 from ignite.engine import Engine
 
 from src.utils.data import prepare_batch_gan, output_transform_gan
 
 
-def create_triplet_cnn_trainer(vector_dimension, model, optimizer, loss_fn, device=None, non_blocking=False,
-                               prepare_batch=prepare_batch_gan):
+def create_triplet_trainer(model, optimizer, loss_fn, device=None, non_blocking=False,
+                           prepare_batch=prepare_batch_gan):
     """
     Factory function for creating an ignite trainer Engine for a triplet CNN.
     :param model: the generator model - generates vectors from images
@@ -45,8 +47,9 @@ def create_triplet_cnn_trainer(vector_dimension, model, optimizer, loss_fn, devi
         # Training mode
         model.train()
         # Train over batch triplets - we assume batch items have their data in the `0` position
-        anchor_embedding, positive_embedding, negative_embedding, \
-            distance_to_positive, distance_to_negative = model(anchors[0], positives[0], negatives[0])
+        anchor_embedding, positive_embedding, negative_embedding = model(anchors[0], positives[0], negatives[0])
+        distance_to_positive = F.pairwise_distance(anchor_embedding, positive_embedding, 2)
+        distance_to_negative = F.pairwise_distance(anchor_embedding, negative_embedding, 2)
         # Create target tensor. A target of -1 denotes that the first input should be ranked lower (have lesser value)
         # than the second input, fitting our case: first (second) input is distance to positive (negative). See (b)
         target = -torch.ones(anchors[1].size()[0], device=device) # anchors[1] are the classes, shape = `[batch_size]`
@@ -69,8 +72,8 @@ def create_triplet_cnn_trainer(vector_dimension, model, optimizer, loss_fn, devi
     return Engine(_update)
 
 
-def create_triplet_cnn_evaluator(model, metrics={}, device=None, non_blocking=False, prepare_batch=prepare_batch_gan,
-                                 output_transform=output_transform_gan):
+def create_triplet_evaluator(model, metrics={}, device=None, non_blocking=False, prepare_batch=prepare_batch_gan,
+                             output_transform=output_transform_gan):
     """
     Factory function for creating an evaluator for supervised models.
     NOTE: `engine.state.output` for this engine is defined by `output_transform` parameter and is

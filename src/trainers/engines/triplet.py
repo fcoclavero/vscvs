@@ -12,11 +12,11 @@ import torch.nn.functional as F
 
 from ignite.engine import Engine
 
-from src.utils.data import prepare_batch_gan, output_transform_gan
+from src.utils.data import output_transform_triplet, prepare_batch_triplet
 
 
 def create_triplet_trainer(model, optimizer, loss_fn, device=None, non_blocking=False,
-                           prepare_batch=prepare_batch_gan):
+                           prepare_batch=prepare_batch_triplet):
     """
     Factory function for creating an ignite trainer Engine for a triplet CNN.
     :param model: the generator model - generates vectors from images
@@ -72,8 +72,8 @@ def create_triplet_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     return Engine(_update)
 
 
-def create_triplet_evaluator(model, metrics={}, device=None, non_blocking=False, prepare_batch=prepare_batch_gan,
-                             output_transform=output_transform_gan):
+def create_triplet_evaluator(model, metrics={}, device=None, non_blocking=False, prepare_batch=prepare_batch_triplet,
+                             output_transform=output_transform_triplet):
     """
     Factory function for creating an evaluator for supervised models.
     NOTE: `engine.state.output` for this engine is defined by `output_transform` parameter and is

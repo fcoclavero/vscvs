@@ -93,7 +93,8 @@ def train_triplet_cnn(*args, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, architecture_model=ConvolutionalNetwork(), **kwargs)
+    trainer = TripletTrainer(
+        *args, anchor_network=ConvolutionalNetwork(), positive_negative_network=ConvolutionalNetwork(), **kwargs)
     trainer.run()
 
 
@@ -113,7 +114,7 @@ def train_triplet_resnet(*args, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, architecture_model=resnet50(), **kwargs)
+    trainer = TripletTrainer(*args, anchor_network=resnet50(), positive_negative_network=resnet50(), **kwargs)
     trainer.run()
 
 
@@ -133,5 +134,6 @@ def train_triplet_resnext(*args, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, architecture_model=resnext50_32x4d(), **kwargs)
+    trainer = TripletTrainer(
+        *args, anchor_network=resnext50_32x4d(), positive_negative_network=resnext50_32x4d(), **kwargs)
     trainer.run()

@@ -13,7 +13,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
+try:
+    ROOT_DIR = os.environ['ROOT_DIR']
+except KeyError:
+    ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 CHECKPOINT_NAME_FORMAT = '%y-%m-%dT%H-%M'
 

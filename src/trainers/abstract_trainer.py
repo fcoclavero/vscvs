@@ -299,8 +299,8 @@ class AbstractTrainer(ABC):
         :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        previous_state = torch.load(os.path.join(previous_checkpoint_directory, 'trainer.pth'))
-        self.start_epoch = previous_state['start_epoch'] + previous_state['epochs']
+        previous_trainer_checkpoint = torch.load(os.path.join(previous_checkpoint_directory, 'trainer.pth'))
+        self.start_epoch = previous_trainer_checkpoint['start_epoch'] + previous_trainer_checkpoint['epochs']
 
     def _save_trainer_checkpoint(self):
         """

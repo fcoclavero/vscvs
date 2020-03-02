@@ -16,6 +16,7 @@ from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy', 'sketchy-test'])
 )
+@click.option('--margin', prompt='Margin', help='The margin for the triplet loss.', default=.2)
 @pass_kwargs_to_context
 def triplet(context, **kwargs):
     """ Train a triplet model. """

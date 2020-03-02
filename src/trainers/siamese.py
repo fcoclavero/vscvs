@@ -28,7 +28,7 @@ def siamese(cls):
         """
         Trainer for a siamese network.
         """
-        def __init__(self, *args, embedding_network=None, margin=1.0, **kwargs):
+        def __init__(self, *args, embedding_network=None, margin=.2, **kwargs):
             """
             Trainer constructor.
             :param args: AbstractTrainer arguments
@@ -37,7 +37,8 @@ def siamese(cls):
             architecture will be used for embedding each image pair, and weights will be shared.
             :type: torch.nn.Module
             :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the
-            embeddings of two examples as dissimilar.
+            embeddings of two examples as dissimilar. Dissimilar image pairs will be pushed apart unless their distance
+            is already greater than the margin. Similar sketch–image pairs will be pulled together in the feature space.
             :type: float
             :param kwargs: AbstractTrainer keyword arguments
             :type: dict
@@ -68,11 +69,14 @@ def siamese(cls):
 
 
 @kwargs_parameter_dict
-def train_siamese_cnn(*args, optimizer_decorator=None, **kwargs):
+def train_siamese_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     """
     Train a Siamese CNN architecture.
     :param args: SiameseTrainer arguments
     :type: tuple
+    :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the embeddings
+    of two examples as dissimilar.
+    :type: float
     :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: function
@@ -83,16 +87,19 @@ def train_siamese_cnn(*args, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network=ConvolutionalNetwork(), **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network=ConvolutionalNetwork(), margin=margin, **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_siamese_resnet(*args, optimizer_decorator=None, **kwargs):
+def train_siamese_resnet(*args, margin=.2, optimizer_decorator=None, **kwargs):
     """
     Train a Siamese ResNet architecture.
     :param args: SiameseTrainer arguments
     :type: tuple
+    :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the embeddings
+    of two examples as dissimilar.
+    :type: float
     :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: function
@@ -103,16 +110,19 @@ def train_siamese_resnet(*args, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network=resnet50(), **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network=resnet50(), margin=margin, **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_siamese_resnext(*args, optimizer_decorator=None, **kwargs):
+def train_siamese_resnext(*args, margin=.2, optimizer_decorator=None, **kwargs):
     """
     Train a Siamese ResNext architecture.
     :param args: SiameseTrainer arguments
     :type: tuple
+    :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the embeddings
+    of two examples as dissimilar.
+    :type: float
     :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: function
@@ -123,5 +133,5 @@ def train_siamese_resnext(*args, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network=resnext50_32x4d(), **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network=resnext50_32x4d(), margin=margin, **kwargs)
     trainer.run()

@@ -30,19 +30,25 @@ def triplet(cls):
         """
         Trainer for a triplet network.
         """
-        def __init__(self, *args, anchor_network=None, positive_negative_network=None, margin=1.0, **kwargs):
+        def __init__(self, *args, anchor_network=None, positive_negative_network=None, margin=.2, **kwargs):
             """
             Trainer constructor.
             :param args: AbstractTrainer arguments
             :type: tuple
             :param anchor_network: the model to be used for computing anchor image embeddings.
             :type: torch.nn.Module
-            :param positive_negative_network: the model to be used for computing the embeddings for the positive (same
-            class) and negative (different class) elements of each triplet. The positive and negative elements are
-            assumed to be of the same mode, and their embedding network will share weights.
+            :param positive_negative_network: the model to be used for computing image embeddings for the positive
+            and negative elements in each triplet.
             :type: torch.nn.Module
-            :param margin: parameter for the triplet loss, defining the acceptable threshold for considering the
-            embeddings of two examples as dissimilar.
+            :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
+            distance from the anchor element to the negative, and the distance from the anchor to the negative. The
+            objective of the loss function is that the distance between the representations of the anchor and the
+            negative is greater (and bigger than the margin) than the distance between the anchor and the positive.
+            There are three kinds of triplets: easy triplets ( |(a,n)| > |(a,p)| + m ), hard triplets
+            ( |(a,n)| < |(a,p)| ) and semi-hard triplets ( |(a,p)| < |(a,n)| < |(a,p)| + m ).
+            Good triplet selection (sufficient hard triplets, and few easy triplets) is essential for better training
+            and model performance.
+            See: https://gombru.github.io/assets/ranking_loss/triplets_negatives.png
             :type: float
             :param kwargs: AbstractTrainer keyword arguments
             :type: dict
@@ -78,11 +84,14 @@ def triplet(cls):
 
 
 @kwargs_parameter_dict
-def train_triplet_cnn(*args, optimizer_decorator=None, **kwargs):
+def train_triplet_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     """
     Train a Triplet CNN architecture.
     :param args: TripletTrainer arguments
     :type: tuple
+    :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
+    distance from the anchor element to the negative, and the distance from the anchor to the negative.
+    :type: float
     :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: function
@@ -93,37 +102,20 @@ def train_triplet_cnn(*args, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(
-        *args, anchor_network=ConvolutionalNetwork(), positive_negative_network=ConvolutionalNetwork(), **kwargs)
+    trainer = TripletTrainer(*args, anchor_network=ConvolutionalNetwork(),
+                             positive_negative_network=ConvolutionalNetwork(), margin=margin, **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_triplet_resnet(*args, optimizer_decorator=None, **kwargs):
+def train_triplet_resnet(*args, margin=.2, optimizer_decorator=None, **kwargs):
     """
     Train a Triplet ResNet architecture.
     :param args: TripletTrainer arguments
     :type: tuple
-    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
-    `optimizer` property with a specific optimizer.
-    :type: function
-    :param kwargs: TripletTrainer keyword arguments
-    :type: dict
-    """
-    @triplet
-    @optimizer_decorator
-    class TripletTrainer(AbstractTrainer):
-        pass
-    trainer = TripletTrainer(*args, anchor_network=resnet50(), positive_negative_network=resnet50(), **kwargs)
-    trainer.run()
-
-
-@kwargs_parameter_dict
-def train_triplet_resnext(*args, optimizer_decorator=None, **kwargs):
-    """
-    Train a Triplet ResNext architecture.
-    :param args: TripletTrainer arguments
-    :type: tuple
+    :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
+    distance from the anchor element to the negative, and the distance from the anchor to the negative.
+    :type: float
     :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: function
@@ -135,5 +127,29 @@ def train_triplet_resnext(*args, optimizer_decorator=None, **kwargs):
     class TripletTrainer(AbstractTrainer):
         pass
     trainer = TripletTrainer(
-        *args, anchor_network=resnext50_32x4d(), positive_negative_network=resnext50_32x4d(), **kwargs)
+        *args, anchor_network=resnet50(), positive_negative_network=resnet50(), margin=margin, **kwargs)
+    trainer.run()
+
+
+@kwargs_parameter_dict
+def train_triplet_resnext(*args, margin=.2, optimizer_decorator=None, **kwargs):
+    """
+    Train a Triplet ResNext architecture.
+    :param args: TripletTrainer arguments
+    :type: tuple
+    :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
+    distance from the anchor element to the negative, and the distance from the anchor to the negative.
+    :type: float
+    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    `optimizer` property with a specific optimizer.
+    :type: function
+    :param kwargs: TripletTrainer keyword arguments
+    :type: dict
+    """
+    @triplet
+    @optimizer_decorator
+    class TripletTrainer(AbstractTrainer):
+        pass
+    trainer = TripletTrainer(
+        *args, anchor_network=resnext50_32x4d(), positive_negative_network=resnext50_32x4d(), margin=margin, **kwargs)
     trainer.run()

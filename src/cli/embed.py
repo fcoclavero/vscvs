@@ -2,6 +2,7 @@ __author__ = ['Francisco Clavero']
 __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
+from src.models import ConvolutionalNetwork
 
 """ Creation of image embeddings given a trained model. """
 
@@ -15,6 +16,7 @@ from datetime import datetime
 from settings import CHECKPOINT_NAME_FORMAT, ROOT_DIR
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from src.embeddings import create_embeddings
+from src.models.convolutional.resnet import ResNet
 from src.models.convolutional.resnext import ResNext
 from src.utils import get_checkpoint_directory, remove_last_layer
 
@@ -48,13 +50,33 @@ def hog(_, dataset_name, embeddings_name, batch_size, workers, n_gpu,
 
 @embed.command()
 @pass_context_to_kwargs
-@click.option('--checkpoint', prompt='Checkpoint date', help='Checkpoint date (corresponds to its directory name.')
-@click.option('--epoch', prompt='Checkpoint epoch', help='Epoch corresponding to the model state to be loaded.')
-def cnn(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint, epoch):
+@click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
+@click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint to be loaded.')
+@click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
+def cnn(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
     click.echo('CNN embeddings for {} dataset'.format(dataset_name))
     checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'CNN', checkpoint)
-    net = torch.load(os.path.join(checkpoint_directory, '_net_{}.pth'.format(epoch)))
-    create_embeddings(net.embedding_network, dataset_name, embeddings_name, batch_size, workers, n_gpu)
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))
+    model = ConvolutionalNetwork()
+    model.load_state_dict(state_dict)
+    model = remove_last_layer(model)
+    create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
+
+
+@embed.command()
+@pass_context_to_kwargs
+@click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
+@click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint to be loaded.')
+@click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
+def resnet(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
+    click.echo('ResNet embeddings for {} dataset'.format(dataset_name))
+    date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
+    checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))  # this is and OrderedDict
+    out_features = next(reversed(state_dict.values())).shape[0]  # so the last value is the last layer's bias tensor
+    model = ResNet(out_features=out_features)  # so we must use that as `out_features` for compatibility
+    model.load_state_dict(state_dict)
+    create_embeddings(model.resnet_base, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
 
 @embed.command()
@@ -66,7 +88,8 @@ def resnext(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, 
     click.echo('ResNext embeddings for {} dataset'.format(dataset_name))
     date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
     checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))
-    model = ResNext(out_features=125)
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint))) # this is and OrderedDict
+    out_features = next(reversed(state_dict.values())).shape[0] # so the last value is the last layer's bias tensor
+    model = ResNext(out_features=out_features) # so we must use that as `out_features` for compatibility
     model.load_state_dict(state_dict)
     create_embeddings(model.resnext_base, dataset_name, embeddings_name, batch_size, workers, n_gpu)

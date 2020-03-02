@@ -73,8 +73,7 @@ def load_embedding_pickles(embeddings_name):
     return torch.cat([
         pickle.load(open(os.path.join(embedding_directory, f), 'rb')) for f in
         tqdm(sorted(os.listdir(embedding_directory), key=len), desc='Loading {} embeddings'.format(embeddings_name))
-        if 'tsne' not in f  # skip possible projection pickle in the embedding directory
-    ])
+        if 'tsne' not in f ]) # skip possible projection pickle in the embedding directory
 
 
 def get_top_k(query_embedding, queried_embeddings, k, distance):

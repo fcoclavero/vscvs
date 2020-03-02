@@ -68,6 +68,5 @@ def resnext(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, 
     checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
     state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))
     model = ResNext(out_features=125)
-    # model = ResNext(out_features=state_dict[list(state_dict)[-1]].shape[0])
-    model = remove_last_layer(model.load_state_dict(state_dict))
-    create_embeddings(model.embedding_network, dataset_name, embeddings_name, batch_size, workers, n_gpu)
+    model.load_state_dict(state_dict)
+    create_embeddings(model.resnext_base, dataset_name, embeddings_name, batch_size, workers, n_gpu)

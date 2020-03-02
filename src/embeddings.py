@@ -20,11 +20,12 @@ from tqdm import tqdm
 
 from src.datasets import get_dataset
 from src.utils import get_device, recreate_directory
-from src.utils.decorators import log_time
+from src.utils.decorators import log_time, torch_no_grad
 from src.visualization import plot_image_retrieval
 
 
 @log_time
+@torch_no_grad
 def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu):
     """
     Creates embedding vectors for each element in the given DataSet by batches, and saves each batch as a pickle
@@ -43,7 +44,7 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     :type: int
     """
     device = get_device(n_gpu)
-    model = model.to(device)
+    model = model.eval().to(device)
     # Load data
     dataset = get_dataset(dataset_name)
     # Create the data_loader
@@ -56,8 +57,7 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
         inputs = inputs.to(device)
         pickle.dump( # we pickle per file, as joining batches online results in massive RAM requirements
             model(inputs).to('cpu'),  # embeddings are sent to CPU before pickling, as a GPU might not be available
-            open(os.path.join(embedding_directory, '{}.pickle'.format(i)), 'wb') # when they are loaded
-        )
+            open(os.path.join(embedding_directory, '{}.pickle'.format(i)), 'wb')) # when they are loaded
 
 
 def load_embedding_pickles(embeddings_name):

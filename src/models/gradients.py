@@ -10,6 +10,8 @@ import torch
 
 import torch.nn.functional as F
 
+from src.utils.decorators import torch_no_grad
+
 
 class AbstractKernelConvolution(torch.nn.Module):
     """ Abstract nn.Module for creating convolutions with user defined kernels. """
@@ -41,6 +43,7 @@ class AbstractKernelConvolution(torch.nn.Module):
         """ Get the custom kernel for the implementation of the kernel convolution. """
         raise NotImplementedError
 
+    @torch_no_grad  # we won't need the gradient, so we use this option for better performance
     def forward(self, x):
         """
         Perform the convolution of the input with the Sobel kernel.
@@ -49,8 +52,7 @@ class AbstractKernelConvolution(torch.nn.Module):
         :return: the application of the Sobel filter over the input
         :type: torch.tensor
         """
-        with torch.no_grad():  # we won't need the gradient, so we use this option for better performance
-            return F.conv2d(x, self.weight, stride=self.stride, padding=self.padding, dilation=self.dilation)
+        return F.conv2d(x, self.weight, stride=self.stride, padding=self.padding, dilation=self.dilation)
 
     def to(self, *args, **kwargs):
         """ Override of `to` method to send the weight buffer to the new device. """

@@ -7,6 +7,7 @@ __status__ = 'Prototype'
 
 
 import functools
+import torch
 import warnings
 
 from datetime import datetime
@@ -107,6 +108,32 @@ def threaded(func):
         t = Thread(target=func, args=args, kwargs=kwargs)
         t.daemon = True
         t.start()
+    return wrapper
+
+
+def torch_no_grad(func):
+    """
+    Decorator that runs the decorated function in a context with disabled PyTorch gradient calculation.
+    Disabling gradient calculation is useful for inference, when you are sure that you will not call Tensor.backward().
+    It will reduce memory consumption for computations that would otherwise have requires_grad=True. In this mode, the
+    result of every computation will have `requires_grad=False`, even when the inputs have `requires_grad=True`.
+    :param func: the function to be decorated
+    :type: function
+    :return: the decorated function, which evaluates in a context with disabled gradient calculations.
+    :type: function
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        """
+        Wrapped function to be returned by the decorator.
+        :param args: original function arguments
+        :type: tuple
+        :param kwargs: original function keyword arguments
+        :type: dict
+        :return: original function evaluation
+        """
+        with torch.no_grad():
+            return func(*args, **kwargs)
     return wrapper
 
 

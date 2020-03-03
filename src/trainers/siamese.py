@@ -7,10 +7,11 @@ __status__ = 'Prototype'
 
 
 from ignite.metrics import Loss
-from torchvision.models import resnet50, resnext50_32x4d
 
 from src.loss_functions import ContrastiveLoss
 from src.models import ConvolutionalNetwork, SiameseNetwork
+from src.models.convolutional.resnet import ResNet
+from src.models.convolutional.resnext import ResNext
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
 from src.utils.decorators import kwargs_parameter_dict
@@ -28,13 +29,14 @@ def siamese(cls):
         """
         Trainer for a siamese network.
         """
-        def __init__(self, *args, embedding_network=None, margin=.2, **kwargs):
+        def __init__(self, *args, embedding_network_1=None, embedding_network_2=None, margin=.2, **kwargs):
             """
             Trainer constructor.
             :param args: AbstractTrainer arguments
             :type: tuple
-            :param embedding_network: the model to be used for each branch of the siamese architecture. The same
-            architecture will be used for embedding each image pair, and weights will be shared.
+            :param embedding_network_1: the model to be used for the first branch of the siamese architecture.
+            :type: torch.nn.Module
+            :param embedding_network_2: the model to be used for the second branch of the siamese architecture.
             :type: torch.nn.Module
             :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the
             embeddings of two examples as dissimilar. Dissimilar image pairs will be pushed apart unless their distance
@@ -43,13 +45,14 @@ def siamese(cls):
             :param kwargs: AbstractTrainer keyword arguments
             :type: dict
             """
-            self.embedding_network = embedding_network
+            self.embedding_network_1 = embedding_network_1
+            self.embedding_network_2 = embedding_network_2
             self.margin = margin
             super().__init__(*args, **kwargs)
 
         @property
         def initial_model(self):
-            return SiameseNetwork(self.embedding_network, self.embedding_network)
+            return SiameseNetwork(self.embedding_network_1, self.embedding_network_2)
 
         @property
         def loss(self):
@@ -57,7 +60,7 @@ def siamese(cls):
 
         @property
         def trainer_id(self):
-            return 'Siamese{}'.format(self.embedding_network.__class__.__name__)
+            return 'Siamese{}'.format(self.embedding_network_1.__class__.__name__)
 
         def _create_evaluator_engine(self):
             return create_siamese_evaluator(self.model, metrics={'loss': Loss(self.loss)}, device=self.device)
@@ -87,7 +90,8 @@ def train_siamese_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network=ConvolutionalNetwork(), margin=margin, **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_1=ConvolutionalNetwork(), # photos
+                             embedding_network_2=ConvolutionalNetwork(), margin=margin, **kwargs)
     trainer.run()
 
 
@@ -110,7 +114,8 @@ def train_siamese_resnet(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network=resnet50(), margin=margin, **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_1=ResNet(out_features=250, pretrained=True), # photos
+                             embedding_network_2=ResNet(out_features=250), margin=margin, **kwargs)
     trainer.run()
 
 
@@ -133,5 +138,6 @@ def train_siamese_resnext(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network=resnext50_32x4d(), margin=margin, **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_1=ResNext(out_features=250, pretrained=True), # photos
+                             embedding_network_2=ResNext(out_features=250), margin=margin, **kwargs)
     trainer.run()

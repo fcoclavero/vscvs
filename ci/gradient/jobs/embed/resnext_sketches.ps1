@@ -7,4 +7,3 @@ gradient jobs create `
                          'resnext --date 20-03-01T16-52 --tag photos --checkpoint net_best_train_6975 && ' + `
     'sh ci/gradient/cleanup.sh' `
 )
-CBtTVmYCGqDH

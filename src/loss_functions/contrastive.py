@@ -13,7 +13,7 @@ class ContrastiveLoss(torch.nn.Module):
     """
     Contrastive loss function for siamese networks.
     """
-    def __init__(self, margin=1.0):
+    def __init__(self, margin=.2):
         """
         Loss constructor
         :param margin: defines an acceptable threshold for two embeddings to be considered as dissimilar.

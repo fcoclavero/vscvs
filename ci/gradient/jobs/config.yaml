@@ -2,7 +2,7 @@
 #cluster: null
 #clusterId: null
 #command: null
-container: fcoclavero/vscvs
+container: fcoclavero/vscvs:beta
 #experimentId: null
 #ignoreFiles: null
 #isPreemptible: true

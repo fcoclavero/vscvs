@@ -9,7 +9,7 @@ pytest>=5.2
 pytest-arraydiff==0.3
 python-dotenv==0.10.3
 pytorch-ignite>=0.2
-PyYAML==5.1.2
+pyyaml==5.1.2
 scikit-learn==0.21.3
 tb-nightly
 torch>=1.3

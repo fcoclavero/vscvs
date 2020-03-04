@@ -10,7 +10,7 @@ from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 from torch.nn import CrossEntropyLoss
 
-from src.models import ConvolutionalNetwork
+from src.models import CNN
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.mixins import EarlyStoppingMixin
 from src.utils.data import prepare_batch
@@ -41,7 +41,7 @@ def cnn(cls):
 
         @property
         def initial_model(self):
-            return ConvolutionalNetwork()
+            return CNN()
 
         @property
         def loss(self):

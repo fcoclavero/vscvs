@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 from ignite.metrics import Loss
 
 from src.loss_functions import ContrastiveLoss
-from src.models import ConvolutionalNetwork, SiameseNetwork
+from src.models import CNN, SiameseNetwork
 from src.models.convolutional.resnet import ResNet
 from src.models.convolutional.resnext import ResNext
 from src.trainers.abstract_trainer import AbstractTrainer
@@ -90,8 +90,8 @@ def train_siamese_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network_1=ConvolutionalNetwork(), # photos
-                             embedding_network_2=ConvolutionalNetwork(), margin=margin, **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_1=CNN(),  # photos
+                             embedding_network_2=CNN(), margin=margin, **kwargs)
     trainer.run()
 
 

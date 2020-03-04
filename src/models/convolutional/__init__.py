@@ -1,1 +1,1 @@
-from src.models.convolutional.classification import ConvolutionalNetwork
+from src.models.convolutional.cnn import CNN

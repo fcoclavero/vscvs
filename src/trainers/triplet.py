@@ -13,7 +13,7 @@ from torch import nn
 from torch.utils.data._utils.collate import default_collate
 from torchvision.models import resnet50, resnext50_32x4d
 
-from src.models import ConvolutionalNetwork, TripletNetwork
+from src.models import CNN, TripletNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.triplet import create_triplet_evaluator, create_triplet_trainer
 from src.utils.collators import triplet_collate
@@ -104,8 +104,8 @@ def train_triplet_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, anchor_network=ConvolutionalNetwork(), # photos
-                             positive_negative_network=ConvolutionalNetwork(), margin=margin, **kwargs)
+    trainer = TripletTrainer(*args, anchor_network=CNN(),  # photos
+                             positive_negative_network=CNN(), margin=margin, **kwargs)
     trainer.run()
 
 

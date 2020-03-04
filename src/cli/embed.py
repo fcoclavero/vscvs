@@ -15,7 +15,7 @@ from datetime import datetime
 from settings import CHECKPOINT_NAME_FORMAT, ROOT_DIR
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from src.embeddings import create_embeddings
-from src.models import ConvolutionalNetwork
+from src.models import CNN
 from src.models.convolutional.resnet import ResNet
 from src.models.convolutional.resnext import ResNext
 from src.utils import get_checkpoint_directory, remove_last_layer
@@ -57,7 +57,7 @@ def cnn(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, chec
     click.echo('CNN embeddings for {} dataset'.format(dataset_name))
     checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'CNN', checkpoint)
     state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))
-    model = ConvolutionalNetwork()
+    model = CNN()
     model.load_state_dict(state_dict)
     model = remove_last_layer(model)
     create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)

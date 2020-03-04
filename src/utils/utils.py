@@ -56,6 +56,28 @@ def get_log_directory(model_name, tag=None, date=datetime.now()):
     return os.path.join(ROOT_DIR, 'data', 'logs', model_name, tag or '', date.strftime(CHECKPOINT_NAME_FORMAT))
 
 
+def get_out_features_from_model(model):
+    """
+    Return the number of features from the last layer of a PyTorch model.
+    :param model: the model
+    :type: torch.nn.Module
+    :return: the number of features of the last layer of `model`
+    :type: int
+    """
+    return get_out_features_from_state_dict(model.state_dict())
+
+
+def get_out_features_from_state_dict(state_dict):
+    """
+    Return the number of features from the last layer of a state_dict.
+    :param state_dict: the state_dict of a PyTorch model
+    :type: OrderedDict
+    :return: the number of features of the last layer of `state_dict`
+    :type: int
+    """
+    return next(reversed(state_dict.values())).shape[0] # OrderedDict guarantees last elem. in values list is last layer
+
+
 def get_subdirectories(path):
     """
     Get a list of all the child directories of the given path.

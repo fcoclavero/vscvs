@@ -35,4 +35,6 @@ class ResNext(nn.Module):
 
     def forward(self, x):
         x = F.relu(self.resnext_base(x))
-        return self.fully_connected(x)
+        x = self.fully_connected(x)
+        x = F.log_softmax(x, dim=-1)
+        return x

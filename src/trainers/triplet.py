@@ -70,7 +70,7 @@ def triplet(cls):
 
         @property
         def trainer_id(self):
-            return 'Siamese{}'.format(self.architecture_model.__class__.__name__)
+            return 'Siamese{}'.format(self.anchor_network.__class__.__name__)
 
         def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last, collate_fn=None):
             return super().create_data_loader(train_validation_split, batch_size, workers, drop_last,

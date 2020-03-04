@@ -15,10 +15,8 @@ from datetime import datetime
 from settings import CHECKPOINT_NAME_FORMAT, ROOT_DIR
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from src.embeddings import create_embeddings
-from src.models import CNN
-from src.models import ResNet
-from src.models import ResNext
-from src.utils import get_checkpoint_directory, remove_last_layer
+from src.models import CNN, ResNet, ResNext
+from src.utils import get_checkpoint_directory, remove_last_layer, get_out_features_from_state_dict
 
 
 @click.group()
@@ -72,9 +70,9 @@ def resnet(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, c
     click.echo('ResNet embeddings for {} dataset'.format(dataset_name))
     date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
     checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))  # this is and OrderedDict
-    out_features = next(reversed(state_dict.values())).shape[0]  # so the last value is the last layer's bias tensor
-    model = ResNet(out_features=out_features)  # so we must use that as `out_features` for compatibility
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))
+    out_features = get_out_features_from_state_dict(state_dict)
+    model = ResNet(out_features=out_features)
     model.load_state_dict(state_dict)
     create_embeddings(model.resnet_base, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
@@ -88,8 +86,8 @@ def resnext(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, 
     click.echo('ResNext embeddings for {} dataset'.format(dataset_name))
     date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
     checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint))) # this is and OrderedDict
-    out_features = next(reversed(state_dict.values())).shape[0] # so the last value is the last layer's bias tensor
-    model = ResNext(out_features=out_features) # so we must use that as `out_features` for compatibility
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))
+    out_features = get_out_features_from_state_dict(state_dict)
+    model = ResNext(out_features=out_features)
     model.load_state_dict(state_dict)
     create_embeddings(model.resnext_base, dataset_name, embeddings_name, batch_size, workers, n_gpu)

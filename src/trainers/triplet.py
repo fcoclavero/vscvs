@@ -2,8 +2,6 @@ __author__ = ['Francisco Clavero']
 __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
-from src.models import ResNet
-from src.models import ResNext
 
 """ Ignite trainer for a Triplet Network architecture. """
 
@@ -11,9 +9,8 @@ from src.models import ResNext
 from ignite.metrics import Loss
 from torch import nn
 from torch.utils.data._utils.collate import default_collate
-from torchvision.models import resnet50, resnext50_32x4d
 
-from src.models import CNN, TripletNetwork
+from src.models import CNN, ResNet, ResNext, TripletNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.triplet import create_triplet_evaluator, create_triplet_trainer
 from src.utils.collators import triplet_collate

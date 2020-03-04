@@ -71,7 +71,7 @@ class AbstractTrainer(ABC):
         self.parameter_dict = parameter_dict
         self.resume_date = datetime.strptime(resume_date, CHECKPOINT_NAME_FORMAT) if resume_date else resume_date
         self.resume_checkpoint = resume_checkpoint
-        self.start_epoch = 1
+        self.start_epoch = 0
         self.tag = tag
         self._load_checkpoint()
         self.epoch = self.start_epoch

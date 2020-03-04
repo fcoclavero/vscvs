@@ -2,6 +2,8 @@ __author__ = ['Francisco Clavero']
 __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
+from src.models.convolutional.resnet import ResNet
+from src.models.convolutional.resnext import ResNext
 
 """ Ignite trainer for a Triplet Network architecture. """
 
@@ -102,7 +104,7 @@ def train_triplet_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, anchor_network=ConvolutionalNetwork(),
+    trainer = TripletTrainer(*args, anchor_network=ConvolutionalNetwork(), # photos
                              positive_negative_network=ConvolutionalNetwork(), margin=margin, **kwargs)
     trainer.run()
 
@@ -126,8 +128,8 @@ def train_triplet_resnet(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(
-        *args, anchor_network=resnet50(), positive_negative_network=resnet50(), margin=margin, **kwargs)
+    trainer = TripletTrainer(*args, anchor_network=ResNet(out_features=250, pretrained=True), # photos
+                             positive_negative_network=ResNet(out_features=250), margin=margin, **kwargs)
     trainer.run()
 
 
@@ -150,6 +152,6 @@ def train_triplet_resnext(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(
-        *args, anchor_network=resnext50_32x4d(), positive_negative_network=resnext50_32x4d(), margin=margin, **kwargs)
+    trainer = TripletTrainer(*args, anchor_network=ResNext(out_features=250, pretrained=True), # photos
+                             positive_negative_network=ResNext(out_features=250), margin=margin, **kwargs)
     trainer.run()

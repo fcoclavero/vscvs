@@ -25,14 +25,23 @@ def triplet(context, **kwargs):
 
 @triplet.command()
 @pass_context_to_kwargs
-@click.option(
-    '--vector-dimension', prompt='CVS dimensionality', help='Dimensionality of the vector space.', default=300
-)
-@click.option('--margin', prompt='Margin', help='The margin for the Triplet Loss.', default=.2)
-@click.option('--lr', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
-@click.option('--beta1', prompt='Beta 1', help='Decay parameter for Adam optimizer.', default=.2)
-def cnn(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, dataset_name, vector_dimension,
-        margin, lr, beta1):
+def cnn(_, *args, **kwargs):
     from src.trainers.triplet import train_triplet_cnn
-    click.echo('triplet cnn - %s dataset' % dataset_name)
-    train_triplet_cnn(dataset_name, vector_dimension, resume, margin, workers, batch_size, n_gpu, epochs, lr, beta1)
+    click.echo('triplet cnn - {} dataset'.format(kwargs['dataset_name']))
+    train_triplet_cnn(*args, **kwargs)\
+
+
+@triplet.command()
+@pass_context_to_kwargs
+def resnet(_, *args, **kwargs):
+    from src.trainers.triplet import train_triplet_resnet
+    click.echo('triplet resnet - {} dataset'.format(kwargs['dataset_name']))
+    train_triplet_resnet(*args, **kwargs)\
+
+
+@triplet.command()
+@pass_context_to_kwargs
+def resnext(_, *args, **kwargs):
+    from src.trainers.triplet import train_triplet_resnext
+    click.echo('triplet resnext - {} dataset'.format(kwargs['dataset_name']))
+    train_triplet_resnext(*args, **kwargs)

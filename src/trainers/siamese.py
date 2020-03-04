@@ -10,8 +10,8 @@ from ignite.metrics import Loss
 
 from src.loss_functions import ContrastiveLoss
 from src.models import CNN, SiameseNetwork
-from src.models.convolutional.resnet import ResNet
-from src.models.convolutional.resnext import ResNext
+from src.models import ResNet
+from src.models import ResNext
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
 from src.utils.decorators import kwargs_parameter_dict

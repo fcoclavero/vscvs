@@ -2,8 +2,8 @@ __author__ = ['Francisco Clavero']
 __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
-from src.models.convolutional.resnet import ResNet
-from src.models.convolutional.resnext import ResNext
+from src.models import ResNet
+from src.models import ResNext
 
 """ Ignite trainer for a Triplet Network architecture. """
 

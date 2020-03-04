@@ -11,7 +11,7 @@ from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy, Prec
 from torch import round
 from torch.nn import CrossEntropyLoss
 
-from src.models.convolutional.resnext import ResNext
+from src.models import ResNext
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.mixins import EarlyStoppingMixin
 from src.utils.data import prepare_batch

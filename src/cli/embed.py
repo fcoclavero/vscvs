@@ -16,8 +16,8 @@ from settings import CHECKPOINT_NAME_FORMAT, ROOT_DIR
 from src.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from src.embeddings import create_embeddings
 from src.models import CNN
-from src.models.convolutional.resnet import ResNet
-from src.models.convolutional.resnext import ResNext
+from src.models import ResNet
+from src.models import ResNext
 from src.utils import get_checkpoint_directory, remove_last_layer
 
 

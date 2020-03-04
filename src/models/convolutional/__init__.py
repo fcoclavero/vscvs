@@ -1,1 +1,3 @@
-from src.models.convolutional.cnn import CNN
+from .cnn import CNN
+from .resnet import ResNet
+from .resnext import ResNext

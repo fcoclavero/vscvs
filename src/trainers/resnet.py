@@ -10,7 +10,7 @@ from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 from torch.nn import CrossEntropyLoss
 
-from src.models.convolutional.resnet import ResNet
+from src.models import ResNet
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.mixins import EarlyStoppingMixin
 from src.utils.data import prepare_batch

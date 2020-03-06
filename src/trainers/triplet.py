@@ -101,8 +101,8 @@ def train_triplet_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, anchor_network=CNN(),  # photos
-                             positive_negative_network=CNN(), margin=margin, **kwargs)
+    trainer = TripletTrainer(*args, anchor_network=CNN(out_features=250),  # photos
+                             positive_negative_network=CNN(out_features=250), margin=margin, **kwargs)
     trainer.run()
 
 

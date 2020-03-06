@@ -88,8 +88,8 @@ def train_siamese_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network_1=CNN(),  # photos
-                             embedding_network_2=CNN(), margin=margin, **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_1=CNN(out_features=250),  # photos
+                             embedding_network_2=CNN(out_features=250), margin=margin, **kwargs)
     trainer.run()
 
 

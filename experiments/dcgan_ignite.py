@@ -63,7 +63,7 @@ class Generator(Net):
     """
 
     def __init__(self, z_dim, nf, nc):
-        super(Generator, self).__init__()
+        super().__init__()
 
         self.net = nn.Sequential(
 
@@ -108,7 +108,7 @@ class Discriminator(Net):
     """
 
     def __init__(self, nc, nf):
-        super(Discriminator, self).__init__()
+        super().__init__()
 
         self.net = nn.Sequential(
 

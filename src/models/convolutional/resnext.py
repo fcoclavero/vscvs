@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 from torch import nn
 from torchvision.models import resnext50_32x4d
 
-from src.models.convolutional.mixins import ClassificationMixin, OutFeaturesMixin
+from src.models.mixins import ClassificationMixin, OutFeaturesMixin
 
 
 class ResNextBase(nn.Module):

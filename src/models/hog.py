@@ -19,7 +19,7 @@ class HOGLayer(torch.nn.Module):
     Source: https://gist.github.com/etienne87/b79c6b4aa0ceb2cff554c32a7079fa5a
     """
     def __init__(self, nbins=10, pool=8, max_angle=math.pi, stride=1, padding=1, dilation=1):
-        super(HOGLayer, self).__init__()
+        super().__init__()
         self.nbins = nbins
         self.stride = stride
         self.padding = padding
@@ -67,7 +67,7 @@ class HOG(torch.nn.Module):
         been shown that unsigned gradients work better than signed gradients for tasks such as pedestrian detection.
         :type: boolean
         """
-        super(HOG, self).__init__()
+        super().__init__()
         # Set hyperparameters
         self.cell_size = cell_size
         self.bins = bins

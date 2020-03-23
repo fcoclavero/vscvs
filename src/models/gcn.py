@@ -16,7 +16,7 @@ from src.models.hog import HOG
 from src.utils.data import prepare_batch_graph
 
 
-class ClassificationGCN(torch.nn.Module):
+class GCNClassification(torch.nn.Module):
     """
     GCN node classifier.
     """
@@ -30,7 +30,7 @@ class ClassificationGCN(torch.nn.Module):
         :param in_channels: length of node feature vectors.
         :type: int
         """
-        super(ClassificationGCN, self).__init__()
+        super().__init__()
         self.conv1 = GCNConv(in_channels, in_channels)
         self.conv2 = GCNConv(in_channels, num_classes)
 
@@ -79,11 +79,11 @@ class HOGGCN(torch.nn.Module):
         `os.cpu_count()` will be used.
         :type: int or None
         """
-        super(HOGGCN, self).__init__()
+        super().__init__()
         self.classes_dataframe = classes_dataframe
         self.processes = processes
         self.hog = HOG(in_channels=in_channels, cell_size=cell_size, bins=bins, signed_gradients=signed_gradients)
-        self.classification_gcn = ClassificationGCN(len(classes_dataframe), self.hog.descriptor_length(in_dimension))
+        self.classification_gcn = GCNClassification(len(classes_dataframe), self.hog.descriptor_length(in_dimension))
 
     def _batch_graph(self, batch, device=None, non_blocking=False):
         """

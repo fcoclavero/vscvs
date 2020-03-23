@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.models.convolutional.mixins import ClassificationMixin, OutFeaturesMixin
+from src.models.mixins import ClassificationMixin, OutFeaturesMixin
 
 
 class CNNBase(nn.Module):

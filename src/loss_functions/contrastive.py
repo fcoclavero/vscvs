@@ -20,7 +20,7 @@ class ContrastiveLoss(torch.nn.Module):
         :type: float
         """
         self.margin = margin
-        super(ContrastiveLoss, self).__init__()
+        super().__init__()
 
     def forward(self, x_0, x_1, y):
         """

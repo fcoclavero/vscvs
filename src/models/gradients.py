@@ -31,7 +31,7 @@ class AbstractKernelConvolution(torch.nn.Module):
         nice visualization of what dilation does.
         :type: int or tuple<int, int> with height and width dimensions, respectively
         """
-        super(AbstractKernelConvolution, self).__init__()
+        super().__init__()
         self.in_channels = in_channels
         self.stride = stride
         self.padding = padding

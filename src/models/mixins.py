@@ -6,9 +6,10 @@ __status__ = 'Prototype'
 """ Mixin for adapting a convolutional model for classification. """
 
 
-from torch import nn
-
 import torch.nn.functional as F
+
+from torch import nn
+from torch import sigmoid
 
 from src.utils import get_out_features_from_model
 
@@ -34,10 +35,36 @@ class OutFeaturesMixin:
         return x
 
 
-class ClassificationMixin(OutFeaturesMixin):
+class SigmoidMixin(OutFeaturesMixin):
     """
     Modifies the base model by adding a fully connected layer the same size as the number of possible classes, as well
-    as using a softmax function on the output of the new model.
+    as a log-softmax activation function after the output of extended model.
+    The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
+    `out_features` parameter used in the `OutFeaturesMixin` constructor.
+    """
+    def forward(self, x):
+        x = super().forward(x)
+        x = sigmoid(x)
+        return x
+
+
+class SoftmaxMixin(OutFeaturesMixin):
+    """
+    Modifies the base model by adding a fully connected layer the same size as the number of possible classes, as well
+    as a softmax activation function after the output of extended model.
+    The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
+    `out_features` parameter used in the `OutFeaturesMixin` constructor.
+    """
+    def forward(self, x):
+        x = super().forward(x)
+        x = F.softmax(x, dim=-1)
+        return x
+
+
+class LogSoftmaxMixin(OutFeaturesMixin):
+    """
+    Modifies the base model by adding a fully connected layer the same size as the number of possible classes, as well
+    as a log-softmax activation function after the output of extended model.
     The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
     `out_features` parameter used in the `OutFeaturesMixin` constructor.
     """

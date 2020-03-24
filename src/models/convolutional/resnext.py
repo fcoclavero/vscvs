@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 from torch import nn
 from torchvision.models import resnext50_32x4d
 
-from src.models.mixins import ClassificationMixin, OutFeaturesMixin
+from src.models.mixins import SigmoidMixin, SoftmaxMixin, LogSoftmaxMixin, OutFeaturesMixin
 
 
 class ResNextBase(nn.Module):
@@ -33,9 +33,17 @@ class ResNextBase(nn.Module):
         return self.base(x)
 
 
-class ResNextClassification(ClassificationMixin, ResNextBase):
+class ResNext(OutFeaturesMixin, ResNextBase):
     pass
 
 
-class ResNext(OutFeaturesMixin, ResNextBase):
+class ResNextSigmoid(SigmoidMixin, ResNextBase):
+    pass
+
+
+class ResNextSoftmax(SoftmaxMixin, ResNextBase):
+    pass
+
+
+class ResNextLogSoftmax(LogSoftmaxMixin, ResNextBase):
     pass

@@ -10,7 +10,7 @@ from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 from torch.nn import CrossEntropyLoss
 
-from src.models import CNNClassification
+from src.models import CNNLogSoftmax
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.mixins import EarlyStoppingMixin
 from src.utils.data import prepare_batch
@@ -41,7 +41,7 @@ def cnn(cls):
 
         @property
         def initial_model(self):
-            return CNNClassification(out_features=250)
+            return CNNLogSoftmax(out_features=250)
 
         @property
         def loss(self):

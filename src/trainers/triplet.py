@@ -10,7 +10,7 @@ from ignite.metrics import Loss
 from torch import nn
 from torch.utils.data._utils.collate import default_collate
 
-from src.models import CNN, ResNet, ResNext, TripletNetwork
+from src.models import CNNSoftmax, ResNetSoftmax, ResNextSoftmax, TripletNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.triplet import create_triplet_evaluator, create_triplet_trainer
 from src.utils.collators import triplet_collate
@@ -101,8 +101,8 @@ def train_triplet_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, anchor_network=CNN(out_features=250),  # photos
-                             positive_negative_network=CNN(out_features=250), margin=margin, **kwargs)
+    trainer = TripletTrainer(*args, anchor_network=CNNSoftmax(out_features=250),  # photos
+                             positive_negative_network=CNNSoftmax(out_features=250), margin=margin, **kwargs)
     trainer.run()
 
 
@@ -125,8 +125,8 @@ def train_triplet_resnet(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, anchor_network=ResNet(out_features=250, pretrained=True), # photos
-                             positive_negative_network=ResNet(out_features=250), margin=margin, **kwargs)
+    trainer = TripletTrainer(*args, anchor_network=ResNetSoftmax(out_features=250, pretrained=True), # photos
+                             positive_negative_network=ResNetSoftmax(out_features=250), margin=margin, **kwargs)
     trainer.run()
 
 
@@ -149,6 +149,6 @@ def train_triplet_resnext(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, anchor_network=ResNext(out_features=250, pretrained=True), # photos
-                             positive_negative_network=ResNext(out_features=250), margin=margin, **kwargs)
+    trainer = TripletTrainer(*args, anchor_network=ResNextSoftmax(out_features=250, pretrained=True), # photos
+                             positive_negative_network=ResNextSoftmax(out_features=250), margin=margin, **kwargs)
     trainer.run()

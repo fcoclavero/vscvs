@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 from ignite.metrics import Loss
 
 from src.loss_functions import ContrastiveLoss
-from src.models import CNN, ResNet, ResNext, SiameseNetwork
+from src.models import CNNSoftmax, ResNetSoftmax, ResNextSoftmax, SiameseNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
 from src.utils.decorators import kwargs_parameter_dict
@@ -88,8 +88,8 @@ def train_siamese_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network_1=CNN(out_features=250),  # photos
-                             embedding_network_2=CNN(out_features=250), margin=margin, **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_1=CNNSoftmax(out_features=250),  # photos
+                             embedding_network_2=CNNSoftmax(out_features=250), margin=margin, **kwargs)
     trainer.run()
 
 
@@ -112,8 +112,8 @@ def train_siamese_resnet(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network_1=ResNet(out_features=250, pretrained=True), # photos
-                             embedding_network_2=ResNet(out_features=250), margin=margin, **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_1=ResNetSoftmax(out_features=250, pretrained=True), # photos
+                             embedding_network_2=ResNetSoftmax(out_features=250), margin=margin, **kwargs)
     trainer.run()
 
 
@@ -136,6 +136,6 @@ def train_siamese_resnext(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class SiameseTrainer(AbstractTrainer):
         pass
-    trainer = SiameseTrainer(*args, embedding_network_1=ResNext(out_features=250, pretrained=True), # photos
-                             embedding_network_2=ResNext(out_features=250), margin=margin, **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_1=ResNextSoftmax(out_features=250, pretrained=True), # photos
+                             embedding_network_2=ResNextSoftmax(out_features=250), margin=margin, **kwargs)
     trainer.run()

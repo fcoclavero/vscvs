@@ -8,6 +8,8 @@ __status__ = 'Prototype'
 
 import torch
 
+import torch.nn.functional as F
+
 
 class ContrastiveLoss(torch.nn.Module):
     """
@@ -46,6 +48,8 @@ class ContrastiveLoss(torch.nn.Module):
         :return: the Contrastive Loss between `x_0` and `x_1`.
         :type: float
         """
+        x_0 = F.softmax(x_0, dim=-1)
+        x_1 = F.softmax(x_1, dim=-1)
         euclidean_distance = torch.nn.functional.pairwise_distance(x_0, x_1) # cross-domain euclidian distance
         return torch.mean(
             0.5 * (1 - y) * torch.pow(euclidean_distance, 2) +

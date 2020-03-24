@@ -10,7 +10,7 @@ from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 from torch.nn import CrossEntropyLoss
 
-from src.models import ResNet
+from src.models import ResNetLogSoftmax
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.mixins import EarlyStoppingMixin
 from src.utils.data import prepare_batch
@@ -47,7 +47,7 @@ def resnet(cls):
 
         @property
         def initial_model(self):
-            return ResNet(out_features=self.out_features, pretrained=self.pretrained)
+            return ResNetLogSoftmax(out_features=self.out_features, pretrained=self.pretrained)
 
         @property
         def loss(self):

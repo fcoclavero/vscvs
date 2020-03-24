@@ -11,7 +11,7 @@ from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy, Prec
 from torch import round
 from torch.nn import CrossEntropyLoss
 
-from src.models import ResNext
+from src.models import ResNextLogSoftmax
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.mixins import EarlyStoppingMixin
 from src.utils.data import prepare_batch
@@ -48,7 +48,7 @@ def resnext(cls):
 
         @property
         def initial_model(self):
-            return ResNext(out_features=self.out_features, pretrained=self.pretrained)
+            return ResNextLogSoftmax(out_features=self.out_features, pretrained=self.pretrained)
 
         @property
         def loss(self):

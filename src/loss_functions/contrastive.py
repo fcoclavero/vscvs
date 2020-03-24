@@ -20,7 +20,7 @@ class ContrastiveLoss(torch.nn.Module):
         :type: float
         """
         self.margin = margin
-        super(ContrastiveLoss, self).__init__()
+        super().__init__()
 
     def forward(self, x_0, x_1, y):
         """
@@ -46,8 +46,7 @@ class ContrastiveLoss(torch.nn.Module):
         :return: the Contrastive Loss between `x_0` and `x_1`.
         :type: float
         """
-        euclidean_distance = torch.nn.functional.pairwise_distance(x_0, x_1) # cross-domain euclidian distance
-        return torch.mean(
-            0.5 * (1 - y) * torch.pow(euclidean_distance, 2) +
-            0.5 * y * torch.clamp(self.margin -  torch.pow(euclidean_distance, 2), min=0.0)
-        )
+        euclidean_distances_squared = torch.nn.functional.pairwise_distance(x_0, x_1).pow(2) # cross-domain
+        losses = 0.5 * ((1 - y) * euclidean_distances_squared +
+                        y * torch.clamp(self.margin -  euclidean_distances_squared, min=0.0))
+        return losses.mean()

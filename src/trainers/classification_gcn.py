@@ -10,7 +10,7 @@ from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy
 from torch.nn import CrossEntropyLoss
 
 from src.datasets import get_dataset
-from src.models import ClassificationGCN
+from src.models import GCNClassification
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.classification_gcn import create_classification_gcn_evaluator, \
     create_classification_gcn_trainer
@@ -51,7 +51,7 @@ def classification_gcn(cls):
         @property
         def initial_model(self):
             dataset = get_dataset(self.dataset_name)
-            return ClassificationGCN(len(dataset.classes), 11)
+            return GCNClassification(len(dataset.classes), 11)
 
         @property
         def loss(self):

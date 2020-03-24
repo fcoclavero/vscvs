@@ -1,3 +1,3 @@
-from .cnn import CNN
-from .resnet import ResNet
-from .resnext import ResNext
+from .cnn import *
+from .resnet import *
+from .resnext import *

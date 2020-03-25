@@ -208,10 +208,8 @@ def prepare_batch_siamese(batch, device=None, non_blocking=False):
     :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
     """
     images_0, images_1 = batch
-    images_0, images_1 = prepare_batch(images_0, device, non_blocking), prepare_batch(images_1, device, non_blocking)
     target = siamese_target(images_0, images_1)
-    target = convert_tensor(target, device=device, non_blocking=non_blocking)
-    return images_0, images_1, target
+    return [convert_tensor(elem, device=device, non_blocking=non_blocking) for elem in [images_0, images_1, target]]
 
 
 def prepare_batch_triplet(batch, device=None, non_blocking=False):

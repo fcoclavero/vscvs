@@ -28,7 +28,7 @@ def create_siamese_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
-    :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch.Tensor,torch.Tensor) (optional)
+    :type: Callable<args:`batch`,`device`,`non_blocking`, ret:tuple<torch.Tensor,torch.Tensor,torch.Tensor>> (optional)
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """
@@ -37,17 +37,15 @@ def create_siamese_trainer(model, optimizer, loss_fn, device=None, non_blocking=
 
     def _update(engine, batch):
         # Unpack batch
-        images_1, images_2 = prepare_batch(batch, device=device, non_blocking=non_blocking)
+        images_1, images_2, target = prepare_batch(batch, device=device, non_blocking=non_blocking)
         # Reset gradients
         optimizer.zero_grad()
         # Training mode
         model.train()
         # Train over batch triplets - we assume batch items have their data in the `0` position
-        embeddings_1, embeddings_2 = model(images_1[0], images_2[0])
-        # Create target tensor, where 0 indicates that the corresponding image pair are similar (same class), and 1
-        # indicates that the pair is dissimilar
-        target = (images_1[1] != images_2[1]).int()
-        contrastive_loss = loss_fn(embeddings_1, embeddings_2, target)
+        embeddings_0, embeddings_1 = model(images_1[0], images_2[0])
+        # Compute the contrastive loss
+        contrastive_loss = loss_fn(embeddings_0, embeddings_1, target)
         # Accumulate gradients
         contrastive_loss.backward()
         # Update model wights
@@ -87,9 +85,9 @@ def create_siamese_evaluator(model, metrics=None, device=None, non_blocking=Fals
     def _inference(engine, batch):
         model.eval()
         with torch.no_grad():
-            images_1, images_2 = prepare_batch(batch, device=device, non_blocking=non_blocking)
-            embeddings_1, embeddings_2 = model(images_1[0], images_2[0])
-            return output_transform(embeddings_1, embeddings_2)
+            images_0, images_1, target = prepare_batch(batch, device=device, non_blocking=non_blocking)
+            embeddings_0, embeddings_1 = model(images_0[0], images_1[0])
+            return output_transform(embeddings_0, embeddings_1, target)
 
     engine = Engine(_inference)
 

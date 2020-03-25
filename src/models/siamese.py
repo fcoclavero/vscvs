@@ -16,31 +16,31 @@ class SiameseNetwork(nn.Module):
     has penalizes similar embeddings for two images of different classes, as well as dissimilar embeddings for two
     images of the same class.
     """
-    def __init__(self, embedding_network_1, embedding_network_2):
+    def __init__(self, embedding_network_0, embedding_network_1):
         """
         Model constructor.
-        :param embedding_network_1: the network that will encode the first element of each sample pair.
+        :param embedding_network_0: the network that will encode the first element of each sample pair.
         :type: torch.nn.module
-        :param embedding_network_2: the network that will encode the first element of each sample pair.
+        :param embedding_network_1: the network that will encode the first element of each sample pair.
         :type: torch.nn.module
         """
         super().__init__()
+        self.embedding_network_0 = embedding_network_0
         self.embedding_network_1 = embedding_network_1
-        self.embedding_network_2 = embedding_network_2
 
-    def forward(self, input_1, input_2):
+    def forward(self, input_0, input_1):
         """
         Perform a forward pass on the network, computing the embeddings for both inputs.
-        :param input_1: the first network input
+        :param input_0: the first network input
         :type: torch.Tensor with a size compatible with `embedding_network_1`
-        :param input_2: the second network input
+        :param input_1: the second network input
         :type: torch.Tensor with a size compatible with `embedding_network_2`
         :return: the embeddings for both inputs
         :type: torch.Tensor, torch.Tensor
         """
+        embedding_0 = self.embedding_network_0(input_0)
         embedding_1 = self.embedding_network_1(input_1)
-        embedding_2 = self.embedding_network_2(input_2)
-        return embedding_1, embedding_2
+        return embedding_0, embedding_1
 
 
 class SiameseNetworkShared(nn.Module):
@@ -60,16 +60,16 @@ class SiameseNetworkShared(nn.Module):
         super().__init__()
         self.embedding_network = embedding_network
 
-    def forward(self, input_1, input_2):
+    def forward(self, input_0, input_1):
         """
         Perform a forward pass on the network, computing the embeddings for both inputs.
-        :param input_1: the first network input
+        :param input_0: the first network input
         :type: torch.Tensor with a size compatible with `embedding_network`
-        :param input_2: the second network input
+        :param input_1: the second network input
         :type: torch.Tensor with a size compatible with `embedding_network`
         :return: the embeddings for both inputs
         :type: torch.Tensor, torch.Tensor
         """
+        embedding_0 = self.embedding_network(input_0)
         embedding_1 = self.embedding_network(input_1)
-        embedding_2 = self.embedding_network(input_2)
-        return embedding_1, embedding_2
+        return embedding_0, embedding_1

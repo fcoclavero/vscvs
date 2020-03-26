@@ -14,7 +14,7 @@ from src.models import CNNSoftmax, ResNetSoftmax, ResNextSoftmax, TripletNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.triplet import create_triplet_evaluator, create_triplet_trainer
 from src.utils.collators import triplet_collate
-from src.utils.decorators import kwargs_parameter_dict
+from src.decorators import kwargs_parameter_dict
 
 
 def triplet(cls):

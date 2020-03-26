@@ -9,7 +9,7 @@ import torch
 import torch.nn.functional as F
 
 from src.models.gradients import SobelX, SobelY
-from src.utils.decorators import torch_no_grad
+from src.decorators import torch_no_grad
 
 
 class HOGLayer(torch.nn.Module):

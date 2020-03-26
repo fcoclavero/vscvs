@@ -15,7 +15,7 @@ from torch.multiprocessing import Pool
 from torch.utils.data import Subset
 from torch_geometric.data import Data
 
-from src.utils.decorators import deprecated
+from src.decorators import deprecated
 
 
 def batch_clique_graph(batch, classes_dataframe, processes=None):

@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 from src.datasets import get_dataset
 from src.utils import get_device, recreate_directory
-from src.utils.decorators import log_time, torch_no_grad
+from src.decorators import log_time, torch_no_grad
 from src.visualization import plot_image_retrieval
 
 

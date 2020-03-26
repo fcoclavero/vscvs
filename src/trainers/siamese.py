@@ -12,7 +12,7 @@ from src.loss_functions import ContrastiveLoss
 from src.models import CNNSoftmax, ResNetSoftmax, ResNextSoftmax, SiameseNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
-from src.utils.decorators import kwargs_parameter_dict
+from src.decorators import kwargs_parameter_dict
 
 
 def siamese(cls):

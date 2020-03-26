@@ -15,7 +15,7 @@ from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.classification_gcn import create_classification_gcn_evaluator, \
     create_classification_gcn_trainer
 from src.utils.data import prepare_batch_graph
-from src.utils.decorators import kwargs_parameter_dict
+from src.decorators import kwargs_parameter_dict
 
 
 def classification_gcn(cls):

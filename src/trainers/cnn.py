@@ -14,7 +14,7 @@ from src.models import CNNLogSoftmax
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.mixins import EarlyStoppingMixin
 from src.utils.data import prepare_batch
-from src.utils.decorators import kwargs_parameter_dict
+from src.decorators import kwargs_parameter_dict
 
 
 def cnn(cls):

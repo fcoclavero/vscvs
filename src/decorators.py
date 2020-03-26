@@ -3,7 +3,7 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" General utility decorators. """
+""" General decorators. """
 
 
 import functools

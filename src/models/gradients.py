@@ -10,7 +10,7 @@ import torch
 
 import torch.nn.functional as F
 
-from src.utils.decorators import torch_no_grad
+from src.decorators import torch_no_grad
 
 
 class AbstractKernelConvolution(torch.nn.Module):

@@ -10,7 +10,7 @@ import torch
 
 from ignite.engine import Engine
 
-from src.utils.initialize_weights import initialize_weights
+from src.utils import initialize_weights
 from src.utils.data import prepare_batch
 
 

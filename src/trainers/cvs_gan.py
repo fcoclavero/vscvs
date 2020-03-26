@@ -22,13 +22,12 @@ from ignite.engine import Events
 
 from settings import ROOT_DIR
 from src.datasets import get_dataset
-from src.utils import get_device, get_checkpoint_directory
+from src.utils import get_device, get_checkpoint_directory, initialize_weights
 from src.utils.collators import sketchy_mixed_collate
 from src.trainers.engines.cvs_gan import create_csv_gan_trainer
 from src.models.discriminators.intermodal import InterModalDiscriminator
 from src.models.generators.images import ImageEncoder
 from src.utils.data import dataset_split, prepare_batch_gan
-from src.utils.initialize_weights import initialize_weights
 
 
 def train_cvs_gan(dataset_name, vector_dimension, train_test_split=.7, train_validation_split=.8, learning_rate=0.0002,

@@ -114,7 +114,7 @@ class SketchyImageNames(Sketchy):
         :param index: the index of an image
         :type: int
         :return: a tuple with the image's pixel matrix, class and name
-        :type: tuple(torch.Tensor, int, str)
+        :type: tuple<torch.Tensor, int, str>
         """
         # tuple concatenation: https://stackoverflow.com/a/8538676
         return super().__getitem__(index) + (self.__get_image_name__(index),)
@@ -130,7 +130,7 @@ class SketchyImageNames(Sketchy):
         :param name: the image name
         :type: str
         :return: a tuple with the image's pixel matrix, class and name
-        :type: tuple(torch.Tensor, int, str)
+        :type: tuple<torch.Tensor, int, str>
         """
         index = next( # stop iterator on first match and return index
             i for i, path_class in enumerate(self.imgs) # return index
@@ -212,7 +212,7 @@ class SketchyMixedBatches(Dataset):
         :type: int
         :return: a tuple with the photos's pixel matrix, the associated sketches' pixel
         matrices, and the images' class
-        :type: tuple(torch.Tensor, list<torch.Tensor>, int)
+        :type: tuple<torch.Tensor, list<torch.Tensor>, int>
         """
         photo, cls, name = self.photos_dataset[index]
         return photo, torch.stack([self.sketch_dataset[i][0] for i in self.__sketches__[index]]), cls

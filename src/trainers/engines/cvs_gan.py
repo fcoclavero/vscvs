@@ -41,11 +41,11 @@ def create_csv_gan_trainer(generator, discriminator, generator_optimizer, discri
     :param photos_label: the binary label (1 or 0) to identify images as belonging to the photo
     modality. The label for sketches is deduced as the opposite of the given value.
     :param device: device type specification
-    :type: str (optional) (default: None)
+    :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
-    :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch.Tensor,torch.Tensor) (optional)
+    :type: Callable (args:`batch`, `device`, `non_blocking`, ret:tuple<torch.Tensor, torch.Tensor> (optional)
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """

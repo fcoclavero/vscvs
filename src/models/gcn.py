@@ -92,7 +92,7 @@ class HOGGCN(torch.nn.Module):
         :param batch: data to be sent to device.
         :type: list
         :param device: device type specification
-        :type: str (optional) (default: None)
+        :type: str of torch.device (optional) (default: None)
         :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
         :type: bool (optional)
         """

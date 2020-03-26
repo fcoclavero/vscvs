@@ -17,7 +17,7 @@ def create_classification_gcn_trainer(prepare_batch_graph, model, classes_datafr
     Factory function for creating an ignite trainer Engine for a classification GCN.
     :param prepare_batch_graph: batch preparation logic that takes a simple `x` and `y` batch and returns the
     corresponding batch graph
-    :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch_geometric.data.Data, torch.Tensor)
+    :type: Callable (args:`batch`, `device`, `non_blocking`, ret:tuple<torch_geometric.data.Data, torch.Tensor>
     :param model: the generator model - generates vectors from images
     :type: torch.nn.Module
     :param classes_dataframe: dataframe containing class names and their word vectors
@@ -27,7 +27,7 @@ def create_classification_gcn_trainer(prepare_batch_graph, model, classes_datafr
     :param loss_fn: the triplet loss
     :type: torch.nn loss function
     :param device: device type specification
-    :type: str (optional) (default: None)
+    :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
@@ -61,7 +61,7 @@ def create_classification_gcn_evaluator(prepare_batch_graph, model, classes_data
     a tuple of `(batch_pred, batch_y)` by default.
     :param prepare_batch_graph: batch preparation logic that takes a simple `x` and `y` batch and returns the
     corresponding batch graph
-    :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch_geometric.data.Data, torch.Tensor)
+    :type: Callable (args:`batch`, `device`, `non_blocking`, ret:tuple<torch_geometric.data.Data, torch.Tensor>
     :param model: the model to train.
     :type: torch.nn.Module
     :param classes_dataframe: dataframe containing class names and their word vectors
@@ -69,7 +69,7 @@ def create_classification_gcn_evaluator(prepare_batch_graph, model, classes_data
     :param metrics: map of metric names to Metrics.
     :type: dict<str:<ignite.metrics.Metric>>
     :param device: device type specification. Applies to both model and batches.
-    :type: str (optional) (default: None)
+    :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`

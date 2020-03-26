@@ -139,7 +139,7 @@ def prepare_batch(batch, device=None, non_blocking=False):
     :param batch: data to be sent to device.
     :type: list
     :param device: device type specification
-    :type: str (optional) (default: None)
+    :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :return: 2-tuple with batch elements and labels.
@@ -156,7 +156,7 @@ def prepare_batch_gan(batch, device=None, non_blocking=False):
     :param batch: data to be sent to device.
     :type: list
     :param device: device type specification
-    :type: str (optional) (default: None)
+    :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :return: tuple with adversarial batches.
@@ -179,7 +179,7 @@ def prepare_batch_graph(batch, classes_dataframe, device=None, non_blocking=Fals
     :param classes_dataframe: dataframe containing class names and their word vectors
     :type: pandas.Dataframe
     :param device: device type specification
-    :type: str (optional) (default: None)
+    :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
@@ -201,7 +201,7 @@ def prepare_batch_siamese(batch, device=None, non_blocking=False):
     :param batch: data to be sent to device.
     :type: list
     :param device: device type specification
-    :type: str (optional) (default: None)
+    :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :return: 3-tuple with batches of siamese pairs and their target label.
@@ -219,7 +219,7 @@ def prepare_batch_triplet(batch, device=None, non_blocking=False):
     :param batch: data to be sent to device.
     :type: list
     :param device: device type specification
-    :type: str (optional) (default: None)
+    :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :return: 3-tuple with triplet batches. Triplet index i corresponds to the i-th element of each tensor in the

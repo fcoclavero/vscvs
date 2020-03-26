@@ -28,11 +28,11 @@ def create_triplet_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     :param vector_dimension: the dimensionality of the common vector space.
     :type: int
     :param device: device type specification
-    :type: str (optional) (default: None)
+    :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
-    :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch.Tensor,torch.Tensor) (optional)
+    :type: Callable (args:`batch`, `device`, `non_blocking`, ret:tuple<torch.Tensor, torch.Tensor> (optional)
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """
@@ -83,15 +83,15 @@ def create_triplet_evaluator(model, metrics={}, device=None, non_blocking=False,
     :param: metrics: map of metric names to Metrics.
     :type: dict<str:<ignite.metrics.Metric>>
     :param device: device type specification. Applies to both model and batches.
-    :type: str (optional) (default: None)
+    :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
-    :type: Callable (args:`batch`,`device`,`non_blocking`, ret:tuple(torch.Tensor,torch.Tensor) (optional)
+    :type: Callable (args:`batch`, `device`, `non_blocking`, ret:tuple<torch.Tensor, torch.Tensor> (optional)
     :param output_transform: function that receives `x`, `y`, `y_pred` and the returns value to be assigned to engine's
     state.output after each iteration. Default is returning `(y_pred, y,)`, which fits output expected by metrics.
     If you change it you should use `output_transform` in metrics.
-    :type: Callable (args:`x`,`y`,`y_pred`, ret:tuple(torch.Tensor,torch.Tensor) (optional)
+    :type: Callable (args:`x`, `y`, `y_pred`, ret:tuple<torch.Tensor, torch.Tensor> (optional)
     :return: an evaluator engine with supervised inference function.
     :type: ignite.engine.Engine
     """

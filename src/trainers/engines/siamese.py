@@ -71,11 +71,11 @@ def create_siamese_evaluator(model, metrics=None, device=None, non_blocking=Fals
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
-    :type: Callable (args:`batch`, `device`, `non_blocking`, ret:tuple<torch.Tensor, torch.Tensor> (optional)
+    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
     :param output_transform: function that receives `x`, `y`, `y_pred` and the returns value to be assigned to engine's
     state.output after each iteration. Default is returning `(y_pred, y,)`, which fits output expected by metrics.
     If you change it you should use `output_transform` in metrics.
-    :type: Callable (args:`x`, `y`, `y_pred`, ret:tuple<torch.Tensor, torch.Tensor> (optional)
+    :type: Callable<args: `x`, `y`, `y_pred`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
     :return: an evaluator engine with supervised inference function.
     :type: ignite.engine.Engine
     """

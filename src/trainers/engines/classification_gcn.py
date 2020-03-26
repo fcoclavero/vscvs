@@ -17,7 +17,7 @@ def create_classification_gcn_trainer(prepare_batch_graph, model, classes_datafr
     Factory function for creating an ignite trainer Engine for a classification GCN.
     :param prepare_batch_graph: batch preparation logic that takes a simple `x` and `y` batch and returns the
     corresponding batch graph
-    :type: Callable (args:`batch`, `device`, `non_blocking`, ret:tuple<torch_geometric.data.Data, torch.Tensor>
+    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch_geometric.data.Data, torch.Tensor>>
     :param model: the generator model - generates vectors from images
     :type: torch.nn.Module
     :param classes_dataframe: dataframe containing class names and their word vectors
@@ -61,7 +61,7 @@ def create_classification_gcn_evaluator(prepare_batch_graph, model, classes_data
     a tuple of `(batch_pred, batch_y)` by default.
     :param prepare_batch_graph: batch preparation logic that takes a simple `x` and `y` batch and returns the
     corresponding batch graph
-    :type: Callable (args:`batch`, `device`, `non_blocking`, ret:tuple<torch_geometric.data.Data, torch.Tensor>
+    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch_geometric.data.Data, torch.Tensor>>
     :param model: the model to train.
     :type: torch.nn.Module
     :param classes_dataframe: dataframe containing class names and their word vectors

@@ -18,7 +18,7 @@ def create_hog_gcn_trainer(prepare_batch, model, classes_dataframe, optimizer, l
     graphs where node feature vectors correspond to batch image HOG feature vectors and vertex weights correspond to the
     distance of class name strings' document vectors.
     :param prepare_batch: image batch preparation logic
-    :type: Callable (args:`batch`, `device`, `non_blocking`, ret:tuple<torch.Tensor, torch.Tensor>
+    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>>
     :param model: the generator model - generates vectors from images
     :type: torch.nn.Module
     :param classes_dataframe: dataframe containing class names and their word vectors
@@ -62,7 +62,7 @@ def create_hog_gcn_evaluator(prepare_batch, model, classes_dataframe, metrics=No
     NOTE: `engine.state.output` for this engine is defined by `output_transform` parameter and is
     a tuple of `(batch_pred, batch_y)` by default.
     :param prepare_batch: image batch preparation logic
-    :type: Callable (args:`batch`, `device`, `non_blocking`, ret:tuple<torch_geometric.data.Data, torch.Tensor>
+    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch_geometric.data.Data, torch.Tensor>>
     :param model: the model to train.
     :type: torch.nn.Module
     :param classes_dataframe: dataframe containing class names and their word vectors

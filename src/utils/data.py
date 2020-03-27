@@ -232,20 +232,20 @@ def prepare_batch_triplet(batch, device=None, non_blocking=False):
 def random_simple_split(data, split_proportion=.8):
     """
     Splits incoming data into two sets, randomly and with no overlapping. Returns the two resulting data objects along
-    with two arrays containing the original indexes of each element.
+    with two arrays containing the original indices of each element.
     :param data: the data to be split
     :type: indexed obj
     :param split_proportion: proportion of the data to be assigned to the fist split subset. As this function returns
     two subsets, this parameter must be strictly between 0.0 and 1.0
     :type: float
-    :return: the two resulting datasets and the original indexes lists
+    :return: the two resulting datasets and the original indices lists
     :type: indexed obj, indexed obj, list<int>, list<int>
     """
     assert 0. < split_proportion < 1.
-    indexes = list(range(len(data))) # all indexes in data
-    random.shuffle(indexes)
+    indices = list(range(len(data))) # all indices in data
+    random.shuffle(indices)
     split_index = int(len(data) * split_proportion)
-    return data[indexes[:split_index]], data[indexes[split_index:]], indexes[:split_index], indexes[split_index:]
+    return data[indices[:split_index]], data[indices[split_index:]], indices[:split_index], indices[split_index:]
 
 
 def siamese_target(images_0, images_1):

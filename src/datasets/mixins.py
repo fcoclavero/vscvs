@@ -89,7 +89,7 @@ class FilenameIndexedMixin:
     """
     def __init__(self, *args, **kwargs):
         """
-        Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indexes
+        Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indices
         as values for efficient retrieval after initialization.
         """
         super().__init__(*args, **kwargs)
@@ -114,7 +114,7 @@ class BinaryEncodingMixin:
     def __init__(self, *args, **kwargs):
         """
         Initialize de base Dataset class and compute the length (in digits) of the binary form of the largest index in
-        the dataset. This is used to determine a standard binary encoding length for all indexes.
+        the dataset. This is used to determine a standard binary encoding length for all indices.
         """
         super().__init__(*args, **kwargs)
         self.max_binary_digits = len(str_to_bin_array(len(self.targets)))

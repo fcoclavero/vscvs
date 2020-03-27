@@ -28,7 +28,8 @@ def create_siamese_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
-    :type: Callable<args:`batch`,`device`,`non_blocking`, ret:tuple<torch.Tensor,torch.Tensor,torch.Tensor>> (optional)
+    :type: Callable<args: `batch`,`device`,`non_blocking`, ret: tuple<torch.Tensor,torch.Tensor,torch.Tensor>>
+    (optional)
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """

@@ -6,9 +6,8 @@ __status__ = 'Prototype'
 """ Ignite trainer for a siamese network. """
 
 
-from ignite.metrics import Loss
-
 from src.loss_functions import ContrastiveLoss
+from src.metrics import SiameseLoss
 from src.models import CNNSoftmax, ResNetSoftmax, ResNextSoftmax, SiameseNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
@@ -61,7 +60,7 @@ def siamese(cls):
             return 'Siamese{}'.format(self.embedding_network_1.__class__.__name__)
 
         def _create_evaluator_engine(self):
-            return create_siamese_evaluator(self.model, metrics={'loss': Loss(self.loss)}, device=self.device)
+            return create_siamese_evaluator(self.model, metrics={'loss': SiameseLoss(self.loss)}, device=self.device)
 
         def _create_trainer_engine(self):
             return create_siamese_trainer(self.model, self.optimizer, self.loss, device=self.device)

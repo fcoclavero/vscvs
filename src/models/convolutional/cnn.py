@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.models.mixins import SigmoidMixin, SoftmaxMixin, LogSoftmaxMixin, OutFeaturesMixin
+from src.models.mixins import NormalizedMixin, SigmoidMixin, SoftmaxMixin, LogSoftmaxMixin, OutFeaturesMixin
 
 
 class CNNBase(nn.Module):
@@ -46,6 +46,10 @@ class CNNBase(nn.Module):
 
 
 class CNN(OutFeaturesMixin, CNNBase):
+    pass
+
+
+class CNNNormalized(NormalizedMixin, CNNBase):
     pass
 
 

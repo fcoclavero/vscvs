@@ -35,6 +35,32 @@ class OutFeaturesMixin:
         return x
 
 
+class NormalizedMixin(OutFeaturesMixin):
+    """
+    Modifies the base model by adding a fully connected layer the same size as the number of possible classes, as well
+    as normalizing the output of extended model.
+    The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
+    `out_features` parameter used in the `OutFeaturesMixin` constructor.
+    """
+    def __init__(self, *args, p=2, dim=1, eps=1e-12, **kwargs):
+        """
+        Initialize model.
+        :param p: the exponent value in the norm formulation. Default: 2
+        :type: float
+        :param dim: the dimension to reduce. Default: 1
+        :type: int
+        :param eps: small value to avoid division by zero. Default: 1e-12
+        :type: float
+        """
+        super().__init__(*args, **kwargs)
+        self.p, self.dim, self.eps = p, dim, eps
+
+    def forward(self, x):
+        x = super().forward(x)
+        x = F.normalize(x, p=self.p, dim=self.dim, eps=self.eps)
+        return x
+
+
 class SigmoidMixin(OutFeaturesMixin):
     """
     Modifies the base model by adding a fully connected layer the same size as the number of possible classes, as well

@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 from torch import nn
 from torchvision.models import resnet50
 
-from src.models.mixins import SigmoidMixin, SoftmaxMixin, LogSoftmaxMixin, OutFeaturesMixin
+from src.models.mixins import NormalizedMixin, SigmoidMixin, SoftmaxMixin, LogSoftmaxMixin, OutFeaturesMixin
 
 
 class ResNetBase(nn.Module):
@@ -36,6 +36,10 @@ class ResNetBase(nn.Module):
 
 
 class ResNet(OutFeaturesMixin, ResNetBase):
+    pass
+
+
+class ResNetNormalized(NormalizedMixin, ResNetBase):
     pass
 
 

@@ -9,6 +9,7 @@ __status__ = 'Prototype'
 import random
 import torch
 
+from collections import defaultdict
 from ignite.utils import convert_tensor
 from itertools import repeat
 from torch.multiprocessing import Pool
@@ -85,6 +86,20 @@ def dataset_split_successive(dataset, *split_proportions):
         remaining_n = max(0, remaining_n - subset_length)
     subset_lengths.append(remaining_n)
     return torch.utils.data.random_split(dataset, [int(subset_length) for subset_length in subset_lengths])
+
+
+def images_by_class(dataset):
+    """
+    Creates an image dictionary with class keys, useful for efficient online pair or triplet generation.
+    :param dataset: the torch dataset from which the dictionary will be generated
+    :type: torch.utils.data.Dataset
+    :return: a dictionary with `dataset` classes as keys and a list of `dataset` indices as values
+    :type: dict
+    """
+    images_dict = defaultdict(list)  # if a new key used, it will be initialized with an empty list by default
+    for image_index, image_class in enumerate(dataset.targets):  # `dataset.target` contains the class of each image
+        images_dict[image_class].append(image_index)
+    return images_dict
 
 
 def output_transform_gan(output):

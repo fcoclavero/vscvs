@@ -8,10 +8,10 @@ __status__ = 'Prototype'
 
 import torch
 
-from collections import defaultdict
 from random import choice, randint
 
 from src.utils import str_to_bin_array
+from src.utils.data import images_by_class
 
 
 class SiameseMixin:
@@ -50,9 +50,7 @@ class TripletMixin:
         triplet generation.
         """
         super().__init__(*args, **kwargs)
-        self.class_images = defaultdict(list) # if new key is used, it will be initialized with an empty list by default
-        for image_index, image_class in enumerate(self.targets): # `self.target` contains the class of each image
-            self.class_images[image_class].append(image_index)
+        self.image_dict = images_by_class(self)
 
     def __get_random_item__(self, cls):
         """
@@ -62,7 +60,7 @@ class TripletMixin:
         :return: an item tuple
         :type: tuple
         """
-        return super().__getitem__(choice(self.class_images[cls]))
+        return super().__getitem__(choice(self.image_dict[cls]))
 
     def __getitem__(self, index):
         """

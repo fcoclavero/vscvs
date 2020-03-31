@@ -77,12 +77,17 @@ class AbstractTrainer(ABC):
         self.epoch = self.start_epoch
         self.step = 0
         self.train_loader, self.validation_loader = \
-            self.create_data_loaders(train_validation_split, batch_size, workers, drop_last)
+            self._create_data_loaders(train_validation_split, batch_size, workers, drop_last)
         self.trainer_engine = self._create_trainer_engine()
         self.evaluator_engine = self._create_evaluator_engine()
         self.timer = self._create_timer()
+        self.progressbar = tqdm(
+            initial=0, leave=False, total=len(self.train_loader), desc=self.progressbar_description.format(0))
+        self.writer = SummaryWriter(self.log_directory)
         self._add_event_handlers()
         super().__init__(*args, **kwargs)
+
+    """ Abstract properties. """
 
     @property
     @abstractmethod
@@ -115,6 +120,28 @@ class AbstractTrainer(ABC):
         pass
 
     @property
+    @abstractmethod
+    def trainer_id(self):
+        """
+        Getter for the trainer id, a unique str to identify the trainer. The corresponding `data` directory sub-folders
+        will get a name containing this id.
+        :return: the trainer id
+        :type: str
+        """
+        pass
+
+    """ Properties. """
+
+    @property
+    def progressbar_description(self):
+        """
+        The format string to be displayed beside the `tqdm` progressbar.
+        :return: the progressbar description string
+        :type: str
+        """
+        return 'TRAINING => loss: {:.6f}'
+
+    @property
     def trainer_checkpoint(self):
         """
         Getter for the serialized checkpoint dictionary, which contains the values of the trainer's fields that should
@@ -134,72 +161,94 @@ class AbstractTrainer(ABC):
             'tag': self.tag
         }
 
-    @property
+    """ Abstract methods. """
+
     @abstractmethod
-    def trainer_id(self):
+    def _create_trainer_engine(self):
         """
-        Getter for the trainer id, a unique str to identify the trainer. The corresponding `data` directory sub-folders
-        will get a name containing this id.
-        :return: the trainer id
-        :type: str
+        Creates an Ignite training engine for the target model.
+        :return: a trainer engine for the target model
+        :type: ignite.Engine
         """
         pass
 
+    """ Event handler methods. """
+
+    def _event_cleanup(self, _):
+        """
+        Safely cleanup the elements used during training: close the progressbar and log writer.
+        """
+        self.writer.close()
+        self.progressbar.close()
+
+    def _event_log_training_output(self, trainer):
+        """
+        Write the trainer state output to the progressbar and tensorboard log writer.
+        :param trainer: the ignite trainer engine this event was bound to.
+        :type: ignite.engine.Engine
+        """
+        self.writer.add_scalar('training_output', trainer.state.output, self.step)
+        self.progressbar.desc = self.progressbar_description.format(trainer.state.output)
+
+    def _event_log_training_results(self, _):
+        """
+        Run the evaluator engine on the training data and output the results.
+        """
+        self.evaluator_engine.run(self.train_loader)
+        metrics = self.evaluator_engine.state.metrics
+        print('\nTraining results - epoch: {}'.format(self.epoch))
+        for key, value in metrics.items():
+            self.writer.add_scalar('training_{}'.format(key), value, self.step)
+            print('{}: {:.6f}'.format(key, value))
+
+    def _event_log_validation_results(self, _):
+        """
+        Run the evaluator engine on the training data and output the results.
+        """
+        self.evaluator_engine.run(self.validation_loader)
+        metrics = self.evaluator_engine.state.metrics
+        print('\nValidation results - epoch: {}'.format(self.epoch))
+        for key, value in metrics.items():
+            self.writer.add_scalar('validation_{}'.format(key), value, self.step)
+            print('{}: {:.6f}'.format(key, value))
+
+    def _event_reset_progressbar(self, _):
+        """
+        Reset the progressbar in order to be used to track the progress of the next epoch.
+        """
+        self.progressbar.n = self.progressbar.last_print_n = 0
+        self.progressbar.reset(total=len(self.train_loader))
+
+    def _event_update_epoch_counter(self, _):
+        """
+        Update the AbstractTrainer's epoch counter.
+        """
+        self.epoch += 1
+
+    def _event_update_progressbar_step(self, _):
+        """
+        Update the progressbar's counter.
+        """
+        self.progressbar.update(1)
+
+    def _event_update_step_counter(self, _):
+        """
+        Update the AbstractTrainer's step counter.
+        """
+        self.step += 1
+
+    def _event_save_trainer_checkpoint(self, _):
+        """
+        Create the serialized checkpoint dictionary for the current trainer state, and save it.
+        """
+        torch.save(self.trainer_checkpoint, os.path.join(self.checkpoint_directory, 'trainer.pth'))
+
+    """ Methods. """
+
     def _add_event_handlers(self):
         """
-        Adds a progressbar and a summary writer to output the current training status. Adds event handlers to output
-        common messages and update the progressbar.
+        Add event handlers to output common messages and update the progressbar.
         """
-        progressbar_description = 'TRAINING => loss: {:.6f}'
-        progressbar = tqdm(initial=0, leave=False, total=len(self.train_loader), desc=progressbar_description.format(0))
-        writer = SummaryWriter(self.log_directory)
-
-        @self.trainer_engine.on(Events.ITERATION_COMPLETED)
-        def update_step_counter(trainer):
-            self.step += 1
-
-        @self.trainer_engine.on(Events.ITERATION_COMPLETED)
-        def log_training_loss(trainer):
-            writer.add_scalar('training_loss', trainer.state.output, self.step)
-            progressbar.desc = progressbar_description.format(trainer.state.output)
-            progressbar.update(1)
-
-        @self.trainer_engine.on(Events.EPOCH_COMPLETED)
-        def update_epoch_counter(trainer):
-            self.epoch += 1
-
-        @self.trainer_engine.on(Events.EPOCH_COMPLETED)
-        def log_training_results(trainer):
-            self.evaluator_engine.run(self.train_loader)
-            metrics = self.evaluator_engine.state.metrics
-            print('\nTraining results - epoch: {}'.format(self.epoch))
-            for key, value in metrics.items():
-                writer.add_scalar('training_{}'.format(key), value, self.step)
-                print('{}: {:.6f}'.format(key, value))
-
-        @self.trainer_engine.on(Events.EPOCH_COMPLETED)
-        def log_validation_results(trainer):
-            self.evaluator_engine.run(self.validation_loader)
-            metrics = self.evaluator_engine.state.metrics
-            print('\nValidation results - epoch: {}'.format(self.epoch))
-            for key, value in metrics.items():
-                writer.add_scalar('validation_{}'.format(key), value, self.step)
-                print('{}: {:.6f}'.format(key, value))
-
-        @self.trainer_engine.on(Events.EPOCH_COMPLETED)
-        def update_trainer_checkpoint(trainer):
-            self._save_trainer_checkpoint()
-
-        @self.trainer_engine.on(Events.EPOCH_COMPLETED)
-        def reset_progressbar(trainer):
-            progressbar.n = progressbar.last_print_n = 0
-            progressbar.reset(total=len(self.train_loader))
-
-        @self.trainer_engine.on(Events.COMPLETED)
-        def cleanup(trainer):
-            writer.close()
-            progressbar.close()
-
         periodic_checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to periodically
             self.checkpoint_directory, filename_prefix='net_latest', # save model objects to disc.
             save_interval=1, n_saved=3, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
@@ -209,11 +258,20 @@ class AbstractTrainer(ABC):
             save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
         )
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
+        self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, self._event_log_training_output)
+        self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, self._event_update_progressbar_step)
+        self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, self._event_update_step_counter)
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, best_checkpoint_saver, {'train': self.model})
+        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_log_training_results)
+        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_log_validation_results)
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, periodic_checkpoint_saver, {'train': self.model})
+        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_save_trainer_checkpoint)
+        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_reset_progressbar)
+        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_update_epoch_counter)
+        self.trainer_engine.add_event_handler(Events.COMPLETED, self._event_cleanup)
         self.trainer_engine.add_event_handler(Events.COMPLETED, periodic_checkpoint_saver, {'complete': self.model})
 
-    def create_data_loaders(self, train_validation_split, batch_size, workers, drop_last, collate_fn=None):
+    def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last, collate_fn=None):
         """
         Create training and validation data loaders, placing a total of `len(self.dataset) * train_validation_split`
         elements in the training subset.
@@ -241,15 +299,6 @@ class AbstractTrainer(ABC):
                              a resulting validation set smaller than `batch_size`.')
         return loaders
 
-    @abstractmethod
-    def _create_evaluator_engine(self):
-        """
-        Creates an Ignite evaluator engine for the target model.
-        :return: an evaluator engine for the target model
-        :type: ignite.Engine
-        """
-        pass
-
     def _create_timer(self):
         """
         Create and attach a new timer to the trainer, registering callbacks.
@@ -260,15 +309,6 @@ class AbstractTrainer(ABC):
         timer.attach(self.trainer_engine, start=Events.EPOCH_STARTED, resume=Events.ITERATION_STARTED,
                      pause=Events.ITERATION_COMPLETED, step=Events.ITERATION_COMPLETED)
         return timer
-
-    @abstractmethod
-    def _create_trainer_engine(self):
-        """
-        Creates an Ignite training engine for the target model.
-        :return: a trainer engine for the target model
-        :type: ignite.Engine
-        """
-        pass
 
     def _load_checkpoint(self):
         """
@@ -301,12 +341,6 @@ class AbstractTrainer(ABC):
         """
         previous_trainer_checkpoint = torch.load(os.path.join(previous_checkpoint_directory, 'trainer.pth'))
         self.start_epoch = previous_trainer_checkpoint['start_epoch'] + previous_trainer_checkpoint['epochs']
-
-    def _save_trainer_checkpoint(self):
-        """
-        Create the serialized checkpoint dictionary for the current trainer state, and save it.
-        """
-        torch.save(self.trainer_checkpoint, os.path.join(self.checkpoint_directory, 'trainer.pth'))
 
     def run(self):
         """

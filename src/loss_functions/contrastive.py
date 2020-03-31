@@ -27,20 +27,23 @@ class ContrastiveLoss(torch.nn.Module):
         Compute the Contrastive Loss between two embeddings, given the label indicating whether the two embeddings
         belong to the same class. The Contrastive Loss is defined as:
 
-        $L_c(x_0, x_1, y) = \frac{1}{2}(1-y)D^2(x_0,x_1) + \frac{1}{2}y\{m-D^2(x_0,x_1)\}_{+}$
+        $L_c(x_0, x_1, y) = \frac{1}{2}(1 - y)D^2(x_0, x_1) + \frac{1}{2}y\{m - D^2(x_0, x_1)\}_{+}$
 
         where $x_0$ and $x_1$ are the two embeddings, $y$ is the training pair label, such that
 
-        $y=\left\{\begin{array}{ll}0  & \text{if } (x_0,x_1) \text{ are similar} \\ 1 & \text{if } (x_0,x_1)
+        $y=\left\{\begin{array}{ll}0  & \text{if } (x_0, x_1) \text{ are similar} \\ 1 & \text{if } (x_0, x_1)
         \text{ are dissimilar} \end{array} \right.$
 
         $\{.\}$ is the hinge loss function, and $m$ is the parameter defining an acceptable threshold for $x_0$ and
         $x_1$ to be considered as dissimilar.
 
+        Thus, the objective of the loss function is that the embeddings of positive pairs are close together in the
+        embedding space, while the embeddings of negative pairs are at least as far as the margin.
+
         As seen in [this paper](https://www.sciencedirect.com/science/article/abs/pii/S0097849317302194)
-        :param x_0: the first embedding.
+        :param x_0: the first embeddings.
         :type: torch.Tensor
-        :param x_1: the second embedding.
+        :param x_1: the second embeddings.
         :type: torch.Tensor
         :param y: the training pair label indicating the similarity between `x_0` and `x_1`.
         :return: the Contrastive Loss between `x_0` and `x_1`.

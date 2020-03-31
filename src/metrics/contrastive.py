@@ -54,7 +54,7 @@ class SiameseAccuracy(SiameseMetric):
         self._num_correct = 0
         self._num_examples = 0
 
-    @sync_all_reduce("_sum", "_num_examples")
+    @sync_all_reduce('_sum', '_num_examples')
     def compute(self):
         """
         Computes the average loss based on it's accumulated state. This is called at the end of each epoch.
@@ -128,7 +128,7 @@ class SiameseLoss(SiameseMetric):
         self._sum = 0
         self._num_examples = 0
 
-    @sync_all_reduce("_sum", "_num_examples")
+    @sync_all_reduce('_sum', '_num_examples')
     def compute(self):
         """
         Computes the average loss based on it's accumulated state. This is called at the end of each epoch.
@@ -168,3 +168,65 @@ class SiameseLoss(SiameseMetric):
         batch_size = self._batch_size(target)
         self._sum += average_loss.item() * batch_size
         self._num_examples += batch_size
+
+
+class SiameseAverageDistances(SiameseMetric):
+    """
+    Computes the average distances for positive and negative pairs in a Siamese network.
+    """
+    def __init__(self, *args, batch_size=lambda x: len(x), **kwargs):
+        """
+        :param args: SiameseMetric arguments
+        :type: tuple
+        :param batch_size: callable taking a target tensor returns the first dimension size (usually the batch size).
+        :type: Callable<args: 'tensor', ret: int>
+        :param kwargs: SiameseMetric keyword arguments
+        :type: dict
+        """
+        super().__init__(*args, **kwargs)
+        self._batch_size = batch_size
+        self._sum_positive = 0
+        self._sum_negative = 0
+        self._num_examples_positive = 0
+        self._num_examples_negative = 0
+
+    @sync_all_reduce('_sum_positive', '_num_examples_positive', '_sum_negative', '_num_examples_negative')
+    def compute(self):
+        """
+        Computes the average distance between positive and negative pairs, separately, based on the accumulated state.
+        This is called at the end of each epoch.
+        :return: the actual average distances
+        :type: tuple<float>
+        :raises NotComputableError: when the metric cannot be computed
+        """
+        if self._num_examples_positive == 0 or self._num_examples_negative == 0:
+            raise NotComputableError('SiameseAverageDistances needs at least one example per target to be computed.')
+
+        return self._sum_positive / self._num_examples_positive, self._sum_negative / self._num_examples_negative
+
+    @reinit__is_reduced
+    def reset(self):
+        """
+        Resets the metric to it's initial state. This is called at the start of each epoch.
+        """
+        self._sum_positive = 0
+        self._sum_negative = 0
+        self._num_examples_positive = 0
+        self._num_examples_negative = 0
+
+    @reinit__is_reduced
+    def update(self, output):
+        """
+        Updates the metric's state using the passed batch output. This is called once for each batch.
+        :param output: the output of the engine's process function, using the siamese format: 3-tuple with the
+        first pair elements' embeddings, the second pair elements' embeddings, and the targets.
+        :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+        """
+        embeddings_0, embeddings_1, target = output
+        batch_size = self._batch_size(target)
+        euclidean_distances_squared = torch.nn.functional.pairwise_distance(embeddings_0, embeddings_1).pow(2)
+        batch_sum_negative = (euclidean_distances_squared * target).sum() # target 1 means negative pair
+        self._sum_negative += batch_sum_negative
+        self._sum_positive += euclidean_distances_squared.sum() - batch_sum_negative
+        self._num_examples_negative += target.sum()
+        self._num_examples_positive += batch_size - target.sum()

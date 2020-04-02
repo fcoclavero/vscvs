@@ -10,7 +10,7 @@ from ignite.metrics import Loss
 from torch import nn
 from torch.utils.data._utils.collate import default_collate
 
-from src.models import CNNSoftmax, ResNetSoftmax, ResNextSoftmax, TripletNetwork
+from src.models import CNNNormalized, ResNetNormalized, ResNextNormalized, TripletNetwork
 from src.trainers.abstract_trainer import AbstractTrainer
 from src.trainers.engines.triplet import create_triplet_evaluator, create_triplet_trainer
 from src.utils.collators import triplet_collate
@@ -40,14 +40,7 @@ def triplet(cls):
             and negative elements in each triplet.
             :type: torch.nn.Module
             :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
-            distance from the anchor element to the negative, and the distance from the anchor to the negative. The
-            objective of the loss function is that the distance between the representations of the anchor and the
-            negative is greater (and bigger than the margin) than the distance between the anchor and the positive.
-            There are three kinds of triplets: easy triplets ( |(a,n)| > |(a,p)| + m ), hard triplets
-            ( |(a,n)| < |(a,p)| ) and semi-hard triplets ( |(a,p)| < |(a,n)| < |(a,p)| + m ).
-            Good triplet selection (sufficient hard triplets, and few easy triplets) is essential for better training
-            and model performance.
-            See: https://gombru.github.io/assets/ranking_loss/triplets_negatives.png
+            distance from the anchor element to the negative, and the distance from the anchor to the negative.
             :type: float
             :param kwargs: AbstractTrainer keyword arguments
             :type: dict
@@ -67,7 +60,7 @@ def triplet(cls):
 
         @property
         def trainer_id(self):
-            return 'Siamese{}'.format(self.anchor_network.__class__.__name__)
+            return 'Triplet{}'.format(self.anchor_network.__class__.__name__)
 
         def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last, collate_fn=None):
             return super().create_data_loader(train_validation_split, batch_size, workers, drop_last,
@@ -101,8 +94,9 @@ def train_triplet_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, anchor_network=CNNSoftmax(out_features=250),  # photos
-                             positive_negative_network=CNNSoftmax(out_features=250), margin=margin, **kwargs)
+
+    trainer = TripletTrainer(*args, anchor_network=CNNNormalized(out_features=250),
+                             positive_negative_network=CNNNormalized(out_features=250), margin=margin, **kwargs)
     trainer.run()
 
 
@@ -125,8 +119,9 @@ def train_triplet_resnet(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, anchor_network=ResNetSoftmax(out_features=250, pretrained=True), # photos
-                             positive_negative_network=ResNetSoftmax(out_features=250), margin=margin, **kwargs)
+
+    trainer = TripletTrainer(*args, anchor_network=ResNetNormalized(out_features=250, pretrained=True),
+                             positive_negative_network=ResNetNormalized(out_features=250), margin=margin, **kwargs)
     trainer.run()
 
 
@@ -149,6 +144,7 @@ def train_triplet_resnext(*args, margin=.2, optimizer_decorator=None, **kwargs):
     @optimizer_decorator
     class TripletTrainer(AbstractTrainer):
         pass
-    trainer = TripletTrainer(*args, anchor_network=ResNextSoftmax(out_features=250, pretrained=True), # photos
-                             positive_negative_network=ResNextSoftmax(out_features=250), margin=margin, **kwargs)
+
+    trainer = TripletTrainer(*args, anchor_network=ResNextNormalized(out_features=250, pretrained=True),
+                             positive_negative_network=ResNextNormalized(out_features=250), margin=margin, **kwargs)
     trainer.run()

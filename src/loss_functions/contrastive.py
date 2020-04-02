@@ -8,19 +8,25 @@ __status__ = 'Prototype'
 
 import torch
 
+from .mixins import ReductionMixin
 
-class ContrastiveLoss(torch.nn.Module):
+
+class ContrastiveLoss(ReductionMixin, torch.nn.Module):
     """
     Contrastive loss function for siamese networks.
     """
-    def __init__(self, margin=.2):
+    def __init__(self, *args, margin=.2, **kwargs):
         """
-        Loss constructor
+        Loss constructor.
+        :param args: mixin arguments
+        :type: list
         :param margin: defines an acceptable threshold for two embeddings to be considered as dissimilar.
         :type: float
+        :param kwargs: mixin keyword arguments
+        :type: dict
         """
         self.margin = margin
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
     def forward(self, x_0, x_1, y):
         """
@@ -50,6 +56,6 @@ class ContrastiveLoss(torch.nn.Module):
         :type: float
         """
         euclidean_distances_squared = torch.nn.functional.pairwise_distance(x_0, x_1).pow(2) # cross-domain
-        losses = 0.5 * ((1 - y) * euclidean_distances_squared +
+        losses =  0.5 * ((1 - y) * euclidean_distances_squared +
                         y * torch.clamp(self.margin -  euclidean_distances_squared, min=0.0))
-        return losses.mean()
+        return self.reduce(losses)

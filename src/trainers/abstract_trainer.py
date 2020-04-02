@@ -251,11 +251,11 @@ class AbstractTrainer(ABC):
         """
         periodic_checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to periodically
             self.checkpoint_directory, filename_prefix='net_latest', # save model objects to disc.
-            save_interval=1, n_saved=3, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
+            n_saved=3, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
         )
         best_checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to save the best
             self.checkpoint_directory, filename_prefix='net_best', # performing models
-            save_interval=1, n_saved=5, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
+            n_saved=5, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
         )
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, self._event_log_training_output)

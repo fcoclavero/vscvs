@@ -1,4 +1,4 @@
-gradient jobs create `
+gradient experiments run singlenode `
 --name create_classes_photos `
 --optionsFile config.yaml `
 --command ( `

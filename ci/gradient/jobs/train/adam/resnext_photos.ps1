@@ -1,4 +1,4 @@
-gradient jobs create `
+gradient experiments run singlenode `
 --name train_resnext_adam_photos `
 --optionsFile config.yaml `
 --command ( `

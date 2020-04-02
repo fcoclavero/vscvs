@@ -28,5 +28,4 @@ projectId: prya1pizz
 #workingDirectory: null
 workspace: https://github.com/fcoclavero/vscvs.git
 #workspaceArchive: null
-workspaceRef: dev
-#workspaceUrl: null
+workspaceRef: siemese

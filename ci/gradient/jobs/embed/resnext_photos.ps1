@@ -1,4 +1,4 @@
-gradient jobs create `
+gradient experiments run singlenode `
 --name embed_resnext_photos `
 --optionsFile config.yaml `
 --command ( `

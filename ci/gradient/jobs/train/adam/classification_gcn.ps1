@@ -1,4 +1,4 @@
-gradient jobs create `
+gradient experiments run singlenode `
 --name train_classification_gcn_adam `
 --optionsFile config.yaml `
 --command ( `

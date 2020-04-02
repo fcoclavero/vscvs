@@ -1,4 +1,4 @@
-gradient jobs create `
+gradient experiments run singlenode `
 --name hello_world `
 --optionsFile config.yaml `
 --command ( `

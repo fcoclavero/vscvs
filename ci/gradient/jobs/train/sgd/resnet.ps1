@@ -1,4 +1,4 @@
-gradient jobs create `
+gradient experiments run singlenode `
 --name train_resnet_sgd `
 --optionsFile config.yaml `
 --command ( `

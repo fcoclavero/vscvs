@@ -1,4 +1,4 @@
-gradient jobs create `
+gradient experiments run singlenode `
 --name embed_hog_sketches `
 --optionsFile config.yaml `
 --command ( `

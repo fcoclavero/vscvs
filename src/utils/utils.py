@@ -9,6 +9,7 @@ __status__ = 'Prototype'
 import os
 import shutil
 import torch
+import yaml
 
 from datetime import datetime
 from torch import nn as nn
@@ -118,6 +119,17 @@ def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2,
     elif classname.find('BatchNorm') != -1:
         nn.init.normal_(model.weight.data, batch_norm_mean, batch_norm_std)
         nn.init.constant_(model.bias.data, batch_norm_bias)
+
+
+def load_yaml(file_path):
+    """
+    Load a yaml file as a Python dictionary.
+    :param file_path: the absolute or relative path to the yaml file.
+    :type: str
+    :return: the contents of the yaml file, as a Python dictionary.
+    :type: dict
+    """
+    return yaml.load(open(file_path, 'r'), Loader=yaml.Loader)
 
 
 def recreate_directory(directory_path):

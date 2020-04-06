@@ -26,6 +26,6 @@ projectId: prya1pizz
 #startedByUserId: null
 #useDockerfile: null
 #workingDirectory: null
-workspace: https://github.com/fcoclavero/vscvs.git
+workspaceUrl: https://github.com/fcoclavero/vscvs.git
 #workspaceArchive: null
 workspaceRef: siemese

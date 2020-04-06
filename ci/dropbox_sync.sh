@@ -1,1 +1,0 @@
-find data | while read file; do echo "$file"; target="Workspace/Python/Tesis/paperspace/"$file; ci/dbxcli put "$file" "$target"; done

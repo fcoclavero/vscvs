@@ -7,6 +7,7 @@ __status__ = 'Prototype'
 
 
 import os
+import re
 import shutil
 import torch
 import yaml
@@ -15,6 +16,28 @@ from datetime import datetime
 from torch import nn as nn
 
 from settings import CHECKPOINT_NAME_FORMAT, ROOT_DIR
+
+
+def camel_to_snake_case(str):
+    """
+    Convert the format of the given string from CamelCase to snake_case.
+    :param str: the string in CamelCase format.
+    :type: str
+    :return: the same string, but in snake_case format.
+    :type: str
+    """
+    return re.sub(r'(?<!^)(?=[A-Z])', '_', str).lower()
+
+
+def camel_to_snake_case_dict_keys(dictionary):
+    """
+    Convert the format of the given dictionary keys from CamelCase to snake_case.
+    :param dictionary: the dictionary with keys in CamelCase format.
+    :type: dict
+    :return: the same dictionary, but with it's keys formatted in snake_case.
+    :type: dict
+    """
+    return {camel_to_snake_case(key) : value for key, value in dictionary.items()}
 
 
 def get_device(n_gpu):

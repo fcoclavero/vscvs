@@ -1,4 +1,4 @@
-# Run from `vscvs/ci/docker` context. Ej: `docker build -t vscvs ci/docker`
+# Build from project root: `docker build -t vscvs .`
 # To upload to Dockerhub:
 # 1) Tag the latest image: `docker tag f0a5d49e616f fcoclavero/vscvs:latest`
 # 2) Push to the container registry: `docker push fcoclavero/vscvs`
@@ -44,8 +44,8 @@ RUN conda install -y pytorch torchvision ignite cudatoolkit=10.1 -c pytorch
 
 # Module requirements
 
-COPY /requirements/textpreprocess.txt /textpreprocess.txt
-COPY /requirements/wordvectors.txt /wordvectors.txt
+COPY modules/textpreprocess/requirements.txt /textpreprocess.txt
+COPY modules/wordvectors/requirements.txt /wordvectors.txt
 RUN pip install -r /textpreprocess.txt && \
     pip install -r /wordvectors.txt
 RUN python -c "import nltk; nltk.download('averaged_perceptron_tagger'); nltk.download('punkt')" && \
@@ -53,5 +53,5 @@ RUN python -c "import nltk; nltk.download('averaged_perceptron_tagger'); nltk.do
 
 # Project requirements
 
-COPY /requirements/vscvs.txt /requirements.txt
-RUN pip install -r /requirements.txt
+COPY requirements.txt /vscvs.txt
+RUN pip install -r /vscvs.txt

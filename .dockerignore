@@ -118,7 +118,6 @@ data/pickles/*
 data/embeddings/*
 data/logs/*
 data/checkpoints/*
-data/Cora
 
 # Numerous files
 experiments/vectors/*

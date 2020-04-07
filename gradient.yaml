@@ -1,0 +1,31 @@
+#apiKey: null
+#cluster: null
+#clusterId: null
+#command: null
+container: fcoclavero/vscvs
+#experimentId: null
+#ignoreFiles: null
+#isPreemptible: true
+#isPublic: null
+#jobEnv:
+#  DATA_DIR: /storage/data
+#  EMBEDDINGS_DIR: /storage/data/embeddings
+machineType: P4000 # K80 # C3
+#module: false
+#name: null
+#nodeAttrs: null
+#ports: null
+#project: null
+projectId: prya1pizz
+#python-command: false
+#registryPassword: null
+#registryUsername: null
+#relDockerfilePath: null
+#script: null
+#shell: false
+#startedByUserId: null
+#useDockerfile: null
+#workingDirectory: null
+workspaceUrl: https://github.com/fcoclavero/vscvs.git
+#workspaceArchive: null
+workspaceRef: siemese

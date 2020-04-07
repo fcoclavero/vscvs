@@ -3,7 +3,7 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" Custom ignite metrics. """
+""" Custom Ignite metrics for siamese networks. """
 
 
 import torch
@@ -13,8 +13,6 @@ from ignite.exceptions import NotComputableError
 from ignite.metrics import Metric
 from ignite.metrics.metric import sync_all_reduce, reinit__is_reduced
 
-from src.utils.data import output_transform_siamese
-
 
 class SiameseMetric(Metric, ABC):
     """
@@ -23,16 +21,13 @@ class SiameseMetric(Metric, ABC):
     `{'embeddings_0': embeddings_0, 'embeddings_1': embeddings_1, 'target': target}`. This makes more sense in this
     setting than the default `(y_pred, y)` or `{'y_pred': y_pred, 'y': y}` input (useful in supervised training).
     """
-    def __init__(self, output_transform=output_transform_siamese, device=None):
+    def __init__(self, output_transform=lambda x: x, device=None):
         """
         Class constructor.
-        :param output_transform: function that receives `embeddings_0` (first elements of each siamese pair in the
-        batch), `embeddings_1` (second elements of each siamese pair in the batch), and `target` (target tensor,
-        indicating whether each pair is similar or dissimilar) and the returns value to be assigned to the engine's
-        state.output after each iteration. Default is returning either `(embeddings_0, embeddings_1, target)` or
-        `{'embeddings_0': embeddings_0, 'embeddings_1': embeddings_1, 'target': target}`.
-        :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>>
-        (optional) (default: `output_transform_siamese`)
+        :param output_transform: a callable that is used to transform the output of the `process_function` of an
+        `ignite.engine.Engine` output into the form expected by the metric. In the case of siamese metrics, this is a
+        3-tuple with the first pair elements' embeddings, the second pair elements' embeddings, and the targets.
+        :type: Callable<args: `output`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
         :param device: device type specification.
         :type: str of torch.device (optional) (default: None)
         """
@@ -41,7 +36,8 @@ class SiameseMetric(Metric, ABC):
 
 class SiameseAccuracy(SiameseMetric):
     """
-    Computes the average loss for a Siamese network.
+    Computes the average accuracy for a siamese network, defined as the accuracy of the best distance decision
+    threshold for classifying batch elements into their targets (similar/dissimilar).
     """
     def __init__(self, *args, **kwargs):
         """
@@ -54,11 +50,11 @@ class SiameseAccuracy(SiameseMetric):
         self._num_correct = 0
         self._num_examples = 0
 
-    @sync_all_reduce('_sum', '_num_examples')
+    @sync_all_reduce('_num_correct', '_num_examples')
     def compute(self):
         """
-        Computes the average loss based on it's accumulated state. This is called at the end of each epoch.
-        :return: the actual average loss
+        Computes the average accuracy based on it's accumulated state. This is called at the end of each epoch.
+        :return: the actual average accuracy
         :type: float
         :raises NotComputableError: when the metric cannot be computed
         """
@@ -85,7 +81,7 @@ class SiameseAccuracy(SiameseMetric):
         :raises ValueError: when loss function cannot be computed
         """
         embeddings_0, embeddings_1, target = output
-        batch_size = target.shape(0)
+        batch_size = target.shape[0]
         # Compute distances between paired embeddings. Similar elements should be at a smaller distance.
         distances = torch.nn.functional.pairwise_distance(embeddings_0, embeddings_1).pow(2)
         # Get the indices of the sorted `distances` array to be able to sort the target tensor in that order.
@@ -96,13 +92,13 @@ class SiameseAccuracy(SiameseMetric):
         # lowest [largest] possible threshold (a distance smaller [larger] than the smallest [largest] pairwise
         distance_threshold_decisions = torch.cat([ # distance) should classify all elements as dissimilar [similar].
             torch.zeros([1, batch_size]), # minimum decision threshold, all zeros
-            torch.tril(torch.ones(batch_size, batch_size), diagonal=1)]) # progressively increase threshold
+            torch.tril(torch.ones(batch_size, batch_size))]) # progressively increase threshold
         # Repeat sorted target tensor to do the `==` operation in parallel
         sorted_target_repeat = sorted_target.repeat(batch_size + 1).view(batch_size + 1, batch_size)
         # Do `==` to find where classes match and reduce to obtain the matches for each threshold
         matching_classes = (sorted_target_repeat == distance_threshold_decisions).sum(dim=0)
         # Find the threshold with the best classification accuracy (the threshold with most matches) and update fields
-        self._num_correct += matching_classes[torch.argmax(matching_classes)]
+        self._num_correct += int(matching_classes[torch.argmax(matching_classes)])
         self._num_examples += batch_size
 
 
@@ -158,8 +154,12 @@ class SiameseLoss(SiameseMetric):
         :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
         :raises ValueError: when loss function cannot be computed
         """
-        embeddings_0, embeddings_1, target, kwargs = output
-        kwargs = kwargs if kwargs else {} # kwargs for the loss function
+        if len(output) == 3:
+            kwargs = {}
+            embeddings_0, embeddings_1, target = output
+        else:
+            embeddings_0, embeddings_1, target, kwargs = output
+
         average_loss = self._loss_fn(embeddings_0, embeddings_1, target, **kwargs)
 
         if len(average_loss.shape) != 0:
@@ -173,6 +173,8 @@ class SiameseLoss(SiameseMetric):
 class SiameseAverageDistances(SiameseMetric):
     """
     Computes the average distances for positive and negative pairs in a Siamese network.
+    This is a utility class to define the `SiameseAveragePositiveDistance` and `SiameseAverageNegativeDistance` metrics.
+    As this class returns a tuple, it will cause a logging error if used directly on a Trainer.
     """
     def __init__(self, *args, batch_size=lambda x: len(x), **kwargs):
         """

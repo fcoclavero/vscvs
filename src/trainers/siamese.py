@@ -53,16 +53,18 @@ def siamese(cls):
 
         @property
         def loss(self):
-            return ContrastiveLoss(margin=self.margin)
+            return ContrastiveLoss(margin=self.margin, reduction='mean')
 
         @property
         def trainer_id(self):
             return 'Siamese{}'.format(self.embedding_network_1.__class__.__name__)
 
         def _create_evaluator_engine(self):
-            return create_siamese_evaluator(self.model, device=self.device,
-                                            metrics={'loss': SiameseLoss(self.loss), 'distances': SiameseAverageDistances()})
-                                            # metrics={'accuracy': SiameseAccuracy(), 'distances': SiameseAverageDistances(), 'loss': SiameseLoss(self.loss)})
+            average_distances = SiameseAverageDistances()
+            return create_siamese_evaluator(self.model, device=self.device, metrics={
+                'accuracy': SiameseAccuracy(), 'average_positive_distance': average_distances[0],
+                'average_negative_distance': average_distances[1], 'loss': SiameseLoss(self.loss)
+            })
 
         def _create_trainer_engine(self):
             return create_siamese_trainer(self.model, self.optimizer, self.loss, device=self.device)

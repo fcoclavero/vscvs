@@ -115,21 +115,37 @@ def output_transform_gan(output):
     return y_pred, y  # output format is according to `Accuracy` docs
 
 
-def output_transform_siamese(embeddings_0, embeddings_1, target):
+def output_transform_siamese_evaluator(embeddings_0, embeddings_1, target):
     """
-    Receives the output of a siamese network, the embeddings of each image, and the returns value to be assigned to
-    engine's state.output after each iteration, in this case the distances between each image pair.
+    Receives the result of a siamese network evaluator engine (the embeddings of each image and the target tensor) and
+    returns value to be assigned to engine's state.output after each iteration.
     :param embeddings_0: torch tensor containing the embeddings for the first image of each image pair.
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
     :param embeddings_1: torch tensor containing the embeddings for the second image of each image pair.
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
     :param target: tensor with the contrastive loss target for each pair (0 for similar images, 1 otherwise).
     :type: torch.Tensor
-    :return: the distance between each image pair, which will be assigned to the Ignite engine's state.output after
-    each iteration.
-    :type: torch.Tensor with shape `batch_size`
+    :return: value to be assigned to engine's state.output after each iteration, which must fit that expected by the
+    metrics. By default in a siamese network it is the embeddings of each image pair and their target tensor.
+    :type: tuple<torch.Tensor>
     """
     return embeddings_0, embeddings_1, target
+
+
+def output_transform_siamese_trainer(embeddings_0, embeddings_1, target, loss):
+    """
+    Receives the result of a siamese network trainer engine (the embeddings of each image, the target tensor and the
+    loss module) and returns value to be assigned to engine's state.output after each iteration.
+    :param embeddings_0: torch tensor containing the embeddings for the first image of each image pair.
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :param embeddings_1: torch tensor containing the embeddings for the second image of each image pair.
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :param target: tensor with the contrastive loss target for each pair (0 for similar images, 1 otherwise).
+    :type: torch.Tensor
+    :return: value to be assigned to engine's state.output after each iteration, which by default is the loss value.
+    :type: tuple<torch.Tensor>
+    """
+    return loss.item()
 
 
 def output_transform_triplet(embeddings_1, embeddings_2):

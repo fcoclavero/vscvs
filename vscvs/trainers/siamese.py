@@ -7,7 +7,7 @@ __status__ = 'Prototype'
 
 
 from vscvs.loss_functions import ContrastiveLoss
-from vscvs.metrics import SiameseAccuracy, SiameseAverageDistances, SiameseLoss
+from vscvs.metrics.contrastive import Accuracy, AverageDistances, Loss
 from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, SiameseNetwork
 from vscvs.trainers.abstract_trainer import AbstractTrainer
 from vscvs.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
@@ -60,11 +60,10 @@ def siamese(cls):
             return 'Siamese{}'.format(self.embedding_network_1.__class__.__name__)
 
         def _create_evaluator_engine(self):
-            average_distances = SiameseAverageDistances()
+            average_distances = AverageDistances()
             return create_siamese_evaluator(self.model, device=self.device, metrics={
-                'accuracy': SiameseAccuracy(), 'average_positive_distance': average_distances[0],
-                'average_negative_distance': average_distances[1], 'loss': SiameseLoss(self.loss)
-            })
+                'accuracy': Accuracy(), 'average_positive_distance': average_distances[0],
+                'average_negative_distance': average_distances[1], 'loss': Loss(self.loss)})
 
         def _create_trainer_engine(self):
             return create_siamese_trainer(self.model, self.optimizer, self.loss, device=self.device)

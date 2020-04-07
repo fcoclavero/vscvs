@@ -3,7 +3,7 @@ __email__ = ['fcoclavero32@gmail.com']
 __status__ = 'Prototype'
 
 
-""" Custom Ignite metrics for siamese networks. """
+""" Custom Ignite metrics for triplet networks. """
 
 
 import torch
@@ -14,19 +14,19 @@ from ignite.metrics import Metric
 from ignite.metrics.metric import sync_all_reduce, reinit__is_reduced
 
 
-class SiameseMetric(Metric, ABC):
+class TripletMetric(Metric, ABC):
     """
-    Base class for ignite metrics for siamese networks. They receive batch pair embeddings and their target tensor,
-    indicating whether each pair is similar (0) or dissimilar (1): either `(embeddings_0, embeddings_1, target)` or
-    `{'embeddings_0': embeddings_0, 'embeddings_1': embeddings_1, 'target': target}`. This makes more sense in this
-    setting than the default `(y_pred, y)` or `{'y_pred': y_pred, 'y': y}` input (useful in supervised training).
+    Base class for ignite metrics for triplet networks. They receive batch triplet embeddings: either
+    `(anchor_embeddings, positive_embeddings, negative_embeddings)` or `{'anchor_embeddings': anchor_embeddings,
+    'positive_embeddings': positive_embeddings, 'negative_embeddings': negative_embeddings}`. This makes more sense in
+    this setting than the default `(y_pred, y)` or `{'y_pred': y_pred, 'y': y}` input (useful in supervised training).
     """
     def __init__(self, output_transform=lambda x: x, device=None):
         """
         Class constructor.
         :param output_transform: a callable that is used to transform the output of the `process_function` of an
-        `ignite.engine.Engine` output into the form expected by the metric. In the case of siamese metrics, this is a
-        3-tuple with the first pair elements' embeddings, the second pair elements' embeddings, and the targets.
+        `ignite.engine.Engine` output into the form expected by the metric. In the case of triplet metrics, this is a
+        3-tuple with the triplet embeddings
         :type: Callable<args: `output`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
         :param device: device type specification.
         :type: str of torch.device (optional) (default: None)
@@ -34,16 +34,16 @@ class SiameseMetric(Metric, ABC):
         super().__init__(output_transform=output_transform, device=device)
 
 
-class Accuracy(SiameseMetric):
+class Accuracy(TripletMetric):
     """
-    Computes the average accuracy for a siamese network, defined as the accuracy of the best distance decision
-    threshold for classifying batch elements into their targets (similar/dissimilar).
+    Computes the average accuracy for a triplet network, defined as the proportion of triplets in which the positive
+    embedding is closer to the anchor than the negative embedding (this is the desired behaviour).
     """
     def __init__(self, *args, **kwargs):
         """
-        :param args: SiameseMetric arguments
+        :param args: TripletMetric arguments
         :type: tuple
-        :param kwargs: SiameseMetric keyword arguments
+        :param kwargs: TripletMetric keyword arguments
         :type: dict
         """
         super().__init__(*args, **kwargs)
@@ -59,7 +59,7 @@ class Accuracy(SiameseMetric):
         :raises NotComputableError: when the metric cannot be computed
         """
         if self._num_examples == 0:
-            raise NotComputableError('SiameseAccuracy must have at least one example before it can be computed.')
+            raise NotComputableError('TripletAccuracy must have at least one example before it can be computed.')
 
         return self._num_correct / self._num_examples
 
@@ -75,47 +75,37 @@ class Accuracy(SiameseMetric):
     def update(self, output):
         """
         Updates the metric's state using the passed batch output. This is called once for each batch.
-        :param output: the output of the engine's process function, using the siamese format: 3-tuple with the
-        first pair elements' embeddings, the second pair elements' embeddings, and the targets.
+        :param output: the output of the engine's process function, using the triplet format: 3-tuple with the
+        triplet elements' embeddings.
         :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
         :raises ValueError: when loss function cannot be computed
         """
-        embeddings_0, embeddings_1, target = output
-        batch_size = target.shape[0]
-        # Compute distances between paired embeddings. Similar elements should be at a smaller distance.
-        distances = torch.nn.functional.pairwise_distance(embeddings_0, embeddings_1).pow(2)
-        # Get the indices of the sorted `distances` array to be able to sort the target tensor in that order.
-        sorted_indices = distances.argsort(dim=-1)
-        # We will now compare the actual similar/dissimilar labels of the sorted target tensor ...
-        sorted_target = torch.tensor([target[i] for i in sorted_indices])
-        # ... with a threshold-based classification at every possible threshold (using the existing distances). The
-        # lowest [largest] possible threshold (a distance smaller [larger] than the smallest [largest] pairwise
-        distance_threshold_decisions = torch.cat([ # distance) should classify all elements as dissimilar [similar].
-            torch.zeros([1, batch_size]), # minimum decision threshold, all zeros
-            torch.tril(torch.ones(batch_size, batch_size))]) # progressively increase threshold
-        # Repeat sorted target tensor to do the `==` operation in parallel
-        sorted_target_repeat = sorted_target.repeat(batch_size + 1).view(batch_size + 1, batch_size)
-        # Do `==` to find where classes match and reduce to obtain the matches for each threshold
-        matching_classes = (sorted_target_repeat == distance_threshold_decisions).sum(dim=0)
-        # Find the threshold with the best classification accuracy (the threshold with most matches) and update fields
-        self._num_correct += int(matching_classes[torch.argmax(matching_classes)])
+        anchor_embeddings, positive_embeddings, negative_embeddings = output
+        batch_size = anchor_embeddings.shape[0]
+        # Compute distances between the anchors and the positives and negatives, which should be at a greater distance.
+        positive_distances = torch.nn.functional.pairwise_distance(anchor_embeddings, positive_embeddings).pow(2)
+        negative_distances = torch.nn.functional.pairwise_distance(anchor_embeddings, negative_embeddings).pow(2)
+        # Find the triplets where the desirable condition is met, that `positive_distances[i] < negative_distances[i]`
+        condition = positive_distances < negative_distances
+        # Update metric fields
+        self._num_correct += condition.sum()
         self._num_examples += batch_size
 
 
-class Loss(SiameseMetric):
+class Loss(TripletMetric):
     """
-    Computes the average loss for a siamese network.
+    Computes the average loss for a triplet network.
     """
     def __init__(self, loss_fn, *args, batch_size=lambda x: len(x), **kwargs):
         """
-        :param args: SiameseMetric arguments
+        :param args: TripletMetric arguments
         :type: tuple
-        :param loss_fn: callable taking image pair embeddings and their target tensor, optionally other arguments, and
-        returns the average loss over all observations in the batch.
-        :type: Callable<args: `embeddings_0`, `embeddings_1`, `target`, ret: float>
+        :param loss_fn: callable taking triplet embeddings and optionally other arguments, and returns the average loss
+        over all observations in the batch.
+        :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`, ret: float>
         :param batch_size: callable taking a target tensor returns the first dimension size (usually the batch size).
         :type: Callable<args: 'tensor', ret: int>
-        :param kwargs: SiameseMetric keyword arguments
+        :param kwargs: TripletMetric keyword arguments
         :type: dict
         """
         super().__init__(*args, **kwargs)
@@ -149,40 +139,40 @@ class Loss(SiameseMetric):
     def update(self, output):
         """
         Updates the metric's state using the passed batch output. This is called once for each batch.
-        :param output: the output of the engine's process function, using the siamese format: 3-tuple with the
-        first pair elements' embeddings, the second pair elements' embeddings, and the targets.
+        :param output: the output of the engine's process function, using the triplet format: 3-tuple with the
+        triplet elements' embeddings.
         :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
         :raises ValueError: when loss function cannot be computed
         """
         if len(output) == 3:
             kwargs = {}
-            embeddings_0, embeddings_1, target = output
+            anchor_embeddings, positive_embeddings, negative_embeddings = output
         else:
-            embeddings_0, embeddings_1, target, kwargs = output
+            anchor_embeddings, positive_embeddings, negative_embeddings, kwargs = output
 
-        average_loss = self._loss_fn(embeddings_0, embeddings_1, target, **kwargs)
+        average_loss = self._loss_fn(anchor_embeddings, positive_embeddings, negative_embeddings, **kwargs)
 
         if len(average_loss.shape) != 0:
             raise ValueError('loss_fn did not return the average loss.')
 
-        batch_size = self._batch_size(target)
+        batch_size = self._batch_size(anchor_embeddings)
         self._sum += average_loss.item() * batch_size
         self._num_examples += batch_size
 
 
-class AverageDistances(SiameseMetric):
+class AverageDistances(TripletMetric):
     """
-    Computes the average distances for positive and negative pairs in a siamese network.
-    This is a utility class to define the `SiameseAveragePositiveDistance` and `SiameseAverageNegativeDistance` metrics.
+    Computes the average distances from the anchor to the positive and negative elements of each triplet.
+    This is a utility class to define the `TripletAveragePositiveDistance` and `TripletAverageNegativeDistance` metrics.
     As this class returns a tuple, it will cause a logging error if used directly on a Trainer.
     """
     def __init__(self, *args, batch_size=lambda x: len(x), **kwargs):
         """
-        :param args: SiameseMetric arguments
+        :param args: TripletMetric arguments
         :type: tuple
         :param batch_size: callable taking a target tensor returns the first dimension size (usually the batch size).
         :type: Callable<args: 'tensor', ret: int>
-        :param kwargs: SiameseMetric keyword arguments
+        :param kwargs: TripletMetric keyword arguments
         :type: dict
         """
         super().__init__(*args, **kwargs)
@@ -195,8 +185,8 @@ class AverageDistances(SiameseMetric):
     @sync_all_reduce('_sum_positive', '_num_examples_positive', '_sum_negative', '_num_examples_negative')
     def compute(self):
         """
-        Computes the average distance between positive and negative pairs, separately, based on the accumulated state.
-        This is called at the end of each epoch.
+        Computes the average distance  from the anchor to the positive and negative elements of each triplet, based on
+        the accumulated state. This is called at the end of each epoch.
         :return: the actual average distances
         :type: tuple<float>
         :raises NotComputableError: when the metric cannot be computed
@@ -220,15 +210,13 @@ class AverageDistances(SiameseMetric):
     def update(self, output):
         """
         Updates the metric's state using the passed batch output. This is called once for each batch.
-        :param output: the output of the engine's process function, using the siamese format: 3-tuple with the
-        first pair elements' embeddings, the second pair elements' embeddings, and the targets.
+        :param output: the output of the engine's process function, using the triplet format: 3-tuple with triplet
+        elements' embeddings.
         :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
         """
-        embeddings_0, embeddings_1, target = output
-        batch_size = self._batch_size(target)
-        euclidean_distances_squared = torch.nn.functional.pairwise_distance(embeddings_0, embeddings_1).pow(2)
-        batch_sum_negative = (euclidean_distances_squared * target).sum() # target 1 means negative pair
-        self._sum_negative += batch_sum_negative
-        self._sum_positive += euclidean_distances_squared.sum() - batch_sum_negative
-        self._num_examples_negative += target.sum()
-        self._num_examples_positive += batch_size - target.sum()
+        anchor_embeddings, positive_embeddings, negative_embeddings = output
+        batch_size = self._batch_size(anchor_embeddings)
+        self._sum_positive = torch.nn.functional.pairwise_distance(anchor_embeddings, positive_embeddings).pow(2)
+        self._sum_negative = torch.nn.functional.pairwise_distance(anchor_embeddings, negative_embeddings).pow(2)
+        self._num_examples_negative += batch_size
+        self._num_examples_positive += batch_size

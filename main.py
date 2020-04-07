@@ -16,7 +16,7 @@ load_dotenv()
 import click
 import warnings
 
-from src.cli import create, embed, gradient, measure, retrieve, show, train
+from vscvs.cli import create, embed, gradient, measure, retrieve, show, train
 
 
 # Suppress gensim 'detected Windows; aliasing chunkize to chunkize_serial' warning

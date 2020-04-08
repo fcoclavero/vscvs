@@ -14,7 +14,16 @@ from torch import sigmoid
 from vscvs.utils import get_out_features_from_model
 
 
-class OutFeaturesMixin:
+class ModuleMixin:
+    """
+    Utility class that defines `Module` methods that will be available to the mixins in this package via a `super()`
+    call, as they are meant to be used in multiple inheritance with `torch.nn.Module`.
+    """
+    def forward(self, x):
+        raise NotImplementedError
+
+
+class OutFeaturesMixin(ModuleMixin):
     """
     Modifies the base model with an additional fully connected layer to match the desired output features.
     The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional

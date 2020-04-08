@@ -6,7 +6,7 @@ __status__ = 'Prototype'
 """ Mixins with the code needed to add different functionality to Trainers. """
 
 
-from ignite.engine import Events
+from ignite.engine import Engine, Events
 from ignite.handlers import EarlyStopping
 
 
@@ -15,6 +15,9 @@ class EarlyStoppingMixin:
     Mixin class for adding early stopping to a Trainer. The mixin must be inherited after the AbstractTrainer class in
     order to have access to the Trainer's `evaluator_engine` and `trainer_engine`.
     """
+    evaluator_engine: Engine
+    trainer_engine: Engine
+
     def __init__(self, *args, early_stopping_patience=5, **kwargs):
         """
         Mixin constructor which creates and attaches an EarlyStopping handler to the Trainer.

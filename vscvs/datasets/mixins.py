@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 import torch
 
 from random import choice, randint
-from typing import List, Tuple
+from typing import Callable, List, Tuple
 
 from vscvs.utils import str_to_bin_array
 from vscvs.utils.data import images_by_class
@@ -17,16 +17,15 @@ from vscvs.utils.data import images_by_class
 
 class DatasetMixin:
     """
-    Utility class that defines `Dataset` methods that will be available to the mixins in this package via a `super()`
+    Utility class that type hints `Dataset` methods that will be available to the mixins in this package via a `super()`
     call, as they are meant to be used in multiple inheritance with `torch.utils.data.Dataset`.
     """
-    def __getitem__(self, item):
-        raise NotImplementedError
+    __getitem__: Callable[[int], tuple]
 
 
 class SiameseMixin(DatasetMixin):
     """
-    Mixin class for loading random pairs on `__get_item__` for any Dataset. Must be used with a torch.Dataset subclass,
+    Mixin class for loading random pairs on `__getitem__` for any Dataset. Must be used with a torch.Dataset subclass,
     as it assumes the existence of the `classes`, `class_to_idx` and `imgs` fields.
     """
     __len__: int
@@ -53,7 +52,7 @@ class SiameseMixin(DatasetMixin):
 
 class TripletMixin(DatasetMixin):
     """
-    Mixin class for loading triplets on `__get_item__` for any Dataset. Must be used with a torch.Dataset subclass,
+    Mixin class for loading triplets on `__getitem__` for any Dataset. Must be used with a torch.Dataset subclass,
     as it assumes the existence of the `classes`, `class_to_idx` and `imgs` fields.
     """
     classes: List[str]

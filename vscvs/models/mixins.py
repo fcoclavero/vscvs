@@ -8,19 +8,18 @@ __status__ = 'Prototype'
 
 import torch.nn.functional as F
 
-from torch import nn
-from torch import sigmoid
+from torch import nn, sigmoid, Tensor
+from typing import Callable
 
 from vscvs.utils import get_out_features_from_model
 
 
 class ModuleMixin:
     """
-    Utility class that defines `Module` methods that will be available to the mixins in this package via a `super()`
+    Utility class that type hints `Module` methods that will be available to the mixins in this package via a `super()`
     call, as they are meant to be used in multiple inheritance with `torch.nn.Module`.
     """
-    def forward(self, x):
-        raise NotImplementedError
+    forward: Callable[[Tensor], Tensor]
 
 
 class OutFeaturesMixin(ModuleMixin):

@@ -7,7 +7,7 @@ __status__ = 'Prototype'
 
 
 from torch.nn import Module
-from torch.optim import Adam, SGD
+from torch.optim import Adam, AdamW, SGD
 
 
 class ModuleMixin:
@@ -54,6 +54,17 @@ class AdamOptimizerMixin(ModuleMixin):
     def optimizer(self):
         return Adam(self.model.parameters(), lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
                     weight_decay=self.weight_decay, amsgrad=self.amsgrad)
+
+
+class AdamWOptimizerMixin(AdamOptimizerMixin):
+    """
+    Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with an
+    [AdamW](https://pytorch.org/docs/stable/optim.html#torch.optim.AdamW) optimizer.
+    """
+    @property
+    def optimizer(self):
+        return AdamW(self.model.parameters(), lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
+                     weight_decay=self.weight_decay, amsgrad=self.amsgrad)
 
 
 class SGDOptimizerMixin(ModuleMixin):

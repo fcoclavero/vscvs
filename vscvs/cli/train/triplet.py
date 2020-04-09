@@ -20,7 +20,7 @@ from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 @pass_kwargs_to_context
 def triplet(context, **kwargs):
     """ Train a triplet model. """
-    context.obj['dataset_name'] = context.obj['dataset_name'] + '-triplets'
+    context.obj['dataset_name'] = context.obj['dataset_name'] + '-triplet'
 
 
 @triplet.command()

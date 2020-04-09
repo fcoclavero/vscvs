@@ -51,6 +51,10 @@ def triplet(cls):
             super().__init__(*args, **kwargs)
 
         @property
+        def collate_function(self):
+            return triplet_collate(default_collate)
+
+        @property
         def initial_model(self):
             return TripletNetwork(self.anchor_network, self.positive_negative_network)
 
@@ -61,10 +65,6 @@ def triplet(cls):
         @property
         def trainer_id(self):
             return 'Triplet{}'.format(self.anchor_network.__class__.__name__)
-
-        def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last, collate_fn=None):
-            return super().create_data_loader(train_validation_split, batch_size, workers, drop_last,
-                                              collate_fn=triplet_collate(default_collate))
 
         def _create_evaluator_engine(self):
             average_distances = AverageDistances()

@@ -8,15 +8,13 @@ __status__ = 'Prototype'
 
 import torch
 
-import torch.nn.functional as F
-
 from ignite.engine import Engine
 
-from vscvs.utils.data import output_transform_triplet, prepare_batch_triplet
+from vscvs.utils.data import output_transform_triplet_evaluator, output_transform_triplet_trainer, prepare_batch_triplet
 
 
 def create_triplet_trainer(model, optimizer, loss_fn, device=None, non_blocking=False,
-                           prepare_batch=prepare_batch_triplet):
+                           prepare_batch=prepare_batch_triplet, output_transform=output_transform_triplet_trainer):
     """
     Factory function for creating an ignite trainer Engine for a triplet CNN.
     :param model: the generator model - generates vectors from images
@@ -33,6 +31,10 @@ def create_triplet_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
     :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
+    :param output_transform: function that receives the result of a triplet network trainer engine and returns value to
+    be assigned to engine's state.output after each iteration.
+    :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`, `loss`, ret: object>>
+    (optional)
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """
@@ -40,40 +42,21 @@ def create_triplet_trainer(model, optimizer, loss_fn, device=None, non_blocking=
         model.to(device)
 
     def _update(engine, batch):
-        # Unpack batch
-        anchors, positives, negatives = prepare_batch(batch, device=device, non_blocking=non_blocking)
-        # Reset gradients
-        optimizer.zero_grad()
-        # Training mode
-        model.train()
+        anchors, positives, negatives = prepare_batch(batch, device=device, non_blocking=non_blocking) # unpack batch
+        optimizer.zero_grad() # reset gradients
+        model.train() # training mode
         # Train over batch triplets - we assume batch items have their data in the `0` position
         anchor_embedding, positive_embedding, negative_embedding = model(anchors[0], positives[0], negatives[0])
-        distance_to_positive = F.pairwise_distance(anchor_embedding, positive_embedding, 2)
-        distance_to_negative = F.pairwise_distance(anchor_embedding, negative_embedding, 2)
-        # Create target tensor. A target of -1 denotes that the first input should be ranked lower (have lesser value)
-        # than the second input, fitting our case: first (second) input is distance to positive (negative). See (b)
-        target = -torch.ones(anchors[1].size()[0], device=device) # anchors[1] are the classes, shape = `[batch_size]`
-        # (b) Compute the triplet loss: https://pytorch.org/docs/stable/nn.html#torch.nn.MarginRankingLoss
-        triplet_loss = loss_fn(distance_to_positive, distance_to_negative, target) # = d2positive - d2negative + margin
-        # Accumulate gradients
-        triplet_loss.backward()
-        # Update model wights
-        optimizer.step()
-
-        def accuracy(dista, distb):
-            margin_acc = 0
-            pred = (dista - distb - margin_acc).cpu().data
-            return (pred > 0).sum() * 1.0 / dista.size()[0]
-
-        # Return loss and average distances for logging
-        return triplet_loss, torch.mean(distance_to_positive), torch.mean(distance_to_negative), \
-               accuracy(distance_to_positive, distance_to_negative)
+        triplet_loss = loss_fn(anchor_embedding, positive_embedding, negative_embedding) # compute the triplet loss
+        triplet_loss.backward() # accumulate gradients
+        optimizer.step() # update model wights
+        return output_transform(anchor_embedding, positive_embedding, negative_embedding, triplet_loss)
 
     return Engine(_update)
 
 
-def create_triplet_evaluator(model, metrics={}, device=None, non_blocking=False, prepare_batch=prepare_batch_triplet,
-                             output_transform=output_transform_triplet):
+def create_triplet_evaluator(model, metrics={}, device=None, non_blocking=False,
+                             prepare_batch=prepare_batch_triplet, output_transform=output_transform_triplet_evaluator):
     """
     Factory function for creating an evaluator for supervised models.
     NOTE: `engine.state.output` for this engine is defined by `output_transform` parameter and is
@@ -88,10 +71,10 @@ def create_triplet_evaluator(model, metrics={}, device=None, non_blocking=False,
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
     :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
-    :param output_transform: function that receives `x`, `y`, `y_pred` and the returns value to be assigned to engine's
-    state.output after each iteration. Default is returning `(y_pred, y,)`, which fits output expected by metrics.
-    If you change it you should use `output_transform` in metrics.
-    :type: Callable<args: `x`, `y`, `y_pred`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
+    :param output_transform: function that receives the result of a triplet network evaluator engine and returns the
+    value to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
+    :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`,
+                    ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
     :return: an evaluator engine with supervised inference function.
     :type: ignite.engine.Engine
     """

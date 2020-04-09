@@ -6,10 +6,10 @@ __status__ = 'Prototype'
 """ Ignite trainer for a Triplet Network architecture. """
 
 
-from ignite.metrics import Loss
-from torch import nn
 from torch.utils.data._utils.collate import default_collate
 
+from vscvs.loss_functions import TripletLoss
+from vscvs.metrics.triplet import Accuracy, AverageDistances, Loss
 from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, TripletNetwork
 from vscvs.trainers.abstract_trainer import AbstractTrainer
 from vscvs.trainers.engines.triplet import create_triplet_evaluator, create_triplet_trainer
@@ -51,23 +51,26 @@ def triplet(cls):
             super().__init__(*args, **kwargs)
 
         @property
+        def collate_function(self):
+            return triplet_collate(default_collate)
+
+        @property
         def initial_model(self):
             return TripletNetwork(self.anchor_network, self.positive_negative_network)
 
         @property
         def loss(self):
-            return nn.MarginRankingLoss(margin=self.margin, reduction='mean')
+            return TripletLoss(margin=self.margin, reduction='mean')
 
         @property
         def trainer_id(self):
             return 'Triplet{}'.format(self.anchor_network.__class__.__name__)
 
-        def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last, collate_fn=None):
-            return super().create_data_loader(train_validation_split, batch_size, workers, drop_last,
-                                              collate_fn=triplet_collate(default_collate))
-
         def _create_evaluator_engine(self):
-            return create_triplet_evaluator(self.model, metrics={'loss': Loss(self.loss)}, device=self.device)
+            average_distances = AverageDistances()
+            return create_triplet_evaluator(self.model, device=self.device, metrics={
+                'accuracy': Accuracy(), 'average_positive_distance': average_distances[0],
+                'average_negative_distance': average_distances[1], 'loss': Loss(self.loss)})
 
         def _create_trainer_engine(self):
             return create_triplet_trainer(self.model, self.optimizer, self.loss, device=self.device)

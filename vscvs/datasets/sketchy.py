@@ -46,10 +46,7 @@ class Sketchy(ImageFolder):
                 transforms.ToTensor(),
                 transforms.Normalize(
                     list((0.5 for _ in range(in_channels))), # mean sequence for each channel
-                    list((0.5 for _ in range(in_channels))) # std sequence for each channel
-                ),
-            ])
-        )
+                    list((0.5 for _ in range(in_channels))))])) # std sequence for each channel
 
     @property
     def classes_dataframe(self):
@@ -90,7 +87,7 @@ class SketchyImageNames(Sketchy):
     also it's name. This is used by the SketchyMixedBatches Dataset to find the sketches associated
     with each photo.
     """
-    def __get_image_name__(self, index):
+    def _get_image_name(self, index):
         """
         Get name of the image indexed at `index`. This id can the be used to find the sketches
         associated with the image.
@@ -102,6 +99,28 @@ class SketchyImageNames(Sketchy):
         path = self.imgs[index][0]
         filename = os.path.split(path)[-1]
         return filename.split('.')[0] # remove file extension
+
+    def get_image_indices(self, pattern):
+        """
+        Get a list of dataset indices for all images matching the given pattern.
+        :param pattern: the pattern that returned images names must match
+        :type: str
+        :return: a list of images' pixel matrix
+        :type: list<torch.Tensor>
+        """
+        return [ # create a list of indices
+            i for i, path_class in enumerate(self.imgs) # return index
+            if re.match(pattern, os.path.split(path_class[0])[-1])] # if last part of path matches regex
+
+    def get_images(self, pattern):
+        """
+        Get a list of pixel matrices for all images matching the given pattern.
+        :param pattern: the pattern that returned images names must match
+        :type: str
+        :return: a list of images' pixel matrix
+        :type: list<torch.Tensor>
+        """
+        return [self[index][0] for index in self.get_image_indices(pattern)]
 
     @dispatch((int, torch.Tensor)) # single argument, either <int> or <Tensor>
     def __getitem__(self, index):
@@ -117,7 +136,7 @@ class SketchyImageNames(Sketchy):
         :type: tuple<torch.Tensor, int, str>
         """
         # tuple concatenation: https://stackoverflow.com/a/8538676
-        return super().__getitem__(index) + (self.__get_image_name__(index),)
+        return super()[index] + (self._get_image_name(index),)
 
     @dispatch(str)  # single argument, <str>
     def __getitem__(self, name):
@@ -134,32 +153,8 @@ class SketchyImageNames(Sketchy):
         """
         index = next( # stop iterator on first match and return index
             i for i, path_class in enumerate(self.imgs) # return index
-            if re.match(name, os.path.split(path_class[0])[-1]) # if last part of path matches regex
-        )
-        return super().__getitem__(index) + (name,) # tuple concatenation
-
-    def get_image_indices(self, pattern):
-        """
-        Get a list of dataset indices for all images matching the given pattern.
-        :param pattern: the pattern that returned images names must match
-        :type: str
-        :return: a list of images' pixel matrix
-        :type: list<torch.Tensor>
-        """
-        return [ # create a list of indices
-            i for i, path_class in enumerate(self.imgs) # return index
-            if re.match(pattern, os.path.split(path_class[0])[-1]) # if last part of path matches regex
-        ]
-
-    def get_images(self, pattern):
-        """
-        Get a list of pixel matrices for all images matching the given pattern.
-        :param pattern: the pattern that returned images names must match
-        :type: str
-        :return: a list of images' pixel matrix
-        :type: list<torch.Tensor>
-        """
-        return [self.__getitem__(index)[0] for index in self.get_image_indices(pattern)]
+            if re.match(name, os.path.split(path_class[0])[-1])) # if last part of path matches regex
+        return super()[index] + (name,) # tuple concatenation
 
 
 class SketchyMixedBatches(Dataset):
@@ -193,8 +188,7 @@ class SketchyMixedBatches(Dataset):
             self.__sketches__ = pickle.load(open(r'data\image_sketch_indices.pickle', 'rb'))
         except Exception as e:
             self.__sketches__ = [  # list that contains a list of sketches for each photo in the dataset
-                self.sketch_dataset.get_image_indices(photo[2]) for photo in tqdm(self.photos_dataset)
-            ]
+                self.sketch_dataset.get_image_indices(photo[2]) for photo in tqdm(self.photos_dataset)            ]
             pickle.dump(self.__sketches__, open(r'data\image_sketch_indices.pickle', 'wb'))
 
     def __len__(self):

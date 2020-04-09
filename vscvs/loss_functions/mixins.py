@@ -40,8 +40,7 @@ class ReductionMixin:
         return {
             'mean': lambda batch_losses: batch_losses.sum(),
             'none': lambda batch_losses: batch_losses,
-            'sum': lambda batch_losses: batch_losses.mean()
-        }
+            'sum': lambda batch_losses: batch_losses.mean()}
 
     def reduce(self, output):
         """

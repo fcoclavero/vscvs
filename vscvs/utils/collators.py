@@ -13,7 +13,7 @@ def sketchy_mixed_collate(batch):
     """
     Custom collate_fn, used to pack a batch of dataset items. By default, torch stacks the input items
     to from a tensor of size N*C*H*W, so every item in the batch must have the same dimensions.
-    Given that we stack sketches for each photo (in __get_item__), and the number of sketches is variable,
+    Given that we stack sketches for each photo (in __getitem__), and the number of sketches is variable,
     we have to use a custom collate_fn.
     :param batch: list of Dataset items with length equal to the batch size.
     :type: list<Tuple>

@@ -74,20 +74,19 @@ def resnet(cls):
 
 
 @kwargs_parameter_dict
-def train_resnet(*args, optimizer_decorator=None, **kwargs):
+def train_resnet(*args, optimizer_mixin=None, **kwargs):
     """
     Train a ResNet image classifier.
     :param args: ResNetTrainer arguments
     :type: tuple
-    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
-    :type: function
+    :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: ResNetTrainer keyword arguments
     :type: dict
     """
     @resnet
-    @optimizer_decorator
-    class ResNetTrainer(AbstractTrainer, EarlyStoppingMixin):
+    class ResNetTrainer(optimizer_mixin, AbstractTrainer, EarlyStoppingMixin):
         pass
     trainer = ResNetTrainer(*args, **kwargs)
     trainer.run()

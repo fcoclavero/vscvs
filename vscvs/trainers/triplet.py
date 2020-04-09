@@ -79,7 +79,7 @@ def triplet(cls):
 
 
 @kwargs_parameter_dict
-def train_triplet_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
+def train_triplet_cnn(*args, margin=.2, optimizer_mixin=None, **kwargs):
     """
     Train a Triplet CNN architecture.
     :param args: TripletTrainer arguments
@@ -87,15 +87,14 @@ def train_triplet_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
     :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
     distance from the anchor element to the negative, and the distance from the anchor to the negative.
     :type: float
-    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
-    :type: function
+    :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: TripletTrainer keyword arguments
     :type: dict
     """
     @triplet
-    @optimizer_decorator
-    class TripletTrainer(AbstractTrainer):
+    class TripletTrainer(optimizer_mixin, AbstractTrainer):
         pass
 
     trainer = TripletTrainer(*args, anchor_network=CNNNormalized(out_features=250),
@@ -104,7 +103,7 @@ def train_triplet_cnn(*args, margin=.2, optimizer_decorator=None, **kwargs):
 
 
 @kwargs_parameter_dict
-def train_triplet_resnet(*args, margin=.2, optimizer_decorator=None, **kwargs):
+def train_triplet_resnet(*args, margin=.2, optimizer_mixin=None, **kwargs):
     """
     Train a Triplet ResNet architecture.
     :param args: TripletTrainer arguments
@@ -112,15 +111,14 @@ def train_triplet_resnet(*args, margin=.2, optimizer_decorator=None, **kwargs):
     :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
     distance from the anchor element to the negative, and the distance from the anchor to the negative.
     :type: float
-    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
-    :type: function
+    :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: TripletTrainer keyword arguments
     :type: dict
     """
     @triplet
-    @optimizer_decorator
-    class TripletTrainer(AbstractTrainer):
+    class TripletTrainer(optimizer_mixin, AbstractTrainer):
         pass
 
     trainer = TripletTrainer(*args, anchor_network=ResNetNormalized(out_features=250, pretrained=True),
@@ -129,7 +127,7 @@ def train_triplet_resnet(*args, margin=.2, optimizer_decorator=None, **kwargs):
 
 
 @kwargs_parameter_dict
-def train_triplet_resnext(*args, margin=.2, optimizer_decorator=None, **kwargs):
+def train_triplet_resnext(*args, margin=.2, optimizer_mixin=None, **kwargs):
     """
     Train a Triplet ResNext architecture.
     :param args: TripletTrainer arguments
@@ -137,15 +135,14 @@ def train_triplet_resnext(*args, margin=.2, optimizer_decorator=None, **kwargs):
     :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
     distance from the anchor element to the negative, and the distance from the anchor to the negative.
     :type: float
-    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
-    :type: function
+    :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: TripletTrainer keyword arguments
     :type: dict
     """
     @triplet
-    @optimizer_decorator
-    class TripletTrainer(AbstractTrainer):
+    class TripletTrainer(optimizer_mixin, AbstractTrainer):
         pass
 
     trainer = TripletTrainer(*args, anchor_network=ResNextNormalized(out_features=250, pretrained=True),

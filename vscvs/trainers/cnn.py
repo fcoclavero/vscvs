@@ -63,20 +63,19 @@ def cnn(cls):
 
 
 @kwargs_parameter_dict
-def train_cnn(*args, optimizer_decorator=None, **kwargs):
+def train_cnn(*args, optimizer_mixin=None, **kwargs):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param args: CNNTrainer arguments
     :type: tuple
-    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
-    :type: function
+    :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: CNNTrainer keyword arguments
     :type: dict
     """
     @cnn
-    @optimizer_decorator
-    class CNNTrainer(AbstractTrainer, EarlyStoppingMixin):
+    class CNNTrainer(optimizer_mixin, AbstractTrainer, EarlyStoppingMixin):
         pass
     trainer = CNNTrainer(*args, **kwargs)
     trainer.run()

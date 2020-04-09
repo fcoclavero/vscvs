@@ -94,20 +94,19 @@ def hog_gcn(cls):
 
 
 @kwargs_parameter_dict
-def train_hog_gcn(*args, optimizer_decorator=None, **kwargs):
+def train_hog_gcn(*args, optimizer_mixin=None, **kwargs):
     """
     Train a HOGGCN image classifier.
     :param args: HOGGCNTrainer arguments
     :type: tuple
-    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
-    :type: function
+    :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: HOGGCNTrainer keyword arguments
     :type: dict
     """
     @hog_gcn
-    @optimizer_decorator
-    class HOGGCNTrainer(AbstractTrainer):
+    class HOGGCNTrainer(optimizer_mixin, AbstractTrainer):
         pass
     trainer = HOGGCNTrainer(*args, **kwargs)
     trainer.run()

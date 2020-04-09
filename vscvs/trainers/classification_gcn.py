@@ -77,20 +77,19 @@ def classification_gcn(cls):
 
 
 @kwargs_parameter_dict
-def train_classification_gcn(*args, optimizer_decorator=None, **kwargs):
+def train_classification_gcn(*args, optimizer_mixin=None, **kwargs):
     """
     Train a ClassificationGCN image classifier.
     :param args: ClassificationGCNTrainer arguments
     :type: tuple
-    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
-    :type: function
+    :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: ClassificationGCNTrainer keyword arguments
     :type: dict
     """
     @classification_gcn
-    @optimizer_decorator
-    class ClassificationGCNTrainer(AbstractTrainer):
+    class ClassificationGCNTrainer(optimizer_mixin, AbstractTrainer):
         pass
     trainer = ClassificationGCNTrainer(*args, **kwargs)
     trainer.run()

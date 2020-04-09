@@ -84,20 +84,19 @@ def resnext(cls):
 
 
 @kwargs_parameter_dict
-def train_resnext(*args, optimizer_decorator=None, **kwargs):
+def train_resnext(*args, optimizer_mixin=None, **kwargs):
     """
     Train a ResNext image classifier.
     :param args: ResNextTrainer arguments
     :type: tuple
-    :param optimizer_decorator: class decorator for creating Trainer classes that override the `AbstractTrainer`'s
+    :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
-    :type: function
+    :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: ResNextTrainer keyword arguments
     :type: dict
     """
     @resnext
-    @optimizer_decorator
-    class ResNextTrainer(AbstractTrainer, EarlyStoppingMixin):
+    class ResNextTrainer(optimizer_mixin, AbstractTrainer, EarlyStoppingMixin):
         pass
     trainer = ResNextTrainer(*args, **kwargs)
     trainer.run()

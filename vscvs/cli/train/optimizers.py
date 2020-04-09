@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 import click
 
 from vscvs.cli.decorators import pass_kwargs_to_context
-from vscvs.trainers.decorators import adam_optimizer, sgd_optimizer
+from vscvs.trainers.mixins import AdamOptimizerMixin, SGDOptimizerMixin
 
 
 @click.group()
@@ -24,9 +24,9 @@ from vscvs.trainers.decorators import adam_optimizer, sgd_optimizer
 @click.option('--amsgrad', prompt='Amsgrad', default=False, help='Whether to use the AMSGrad variant.')
 @pass_kwargs_to_context
 def adam(context, **kwargs):
-    """ Train models using an SGD optimizer. """
+    """ Train models using an Adam optimizer. """
     context.obj['betas'] = (context.obj.pop('beta_1'), context.obj.pop('beta_2'))
-    context.obj['optimizer_decorator'] = adam_optimizer
+    context.obj['optimizer_mixin'] = AdamOptimizerMixin
 
 
 @click.group()
@@ -35,4 +35,4 @@ def adam(context, **kwargs):
 @pass_kwargs_to_context
 def sgd(context, **kwargs):
     """ Train models using an SGD optimizer. """
-    context.obj['optimizer_decorator'] = sgd_optimizer
+    context.obj['optimizer_mixin'] = SGDOptimizerMixin

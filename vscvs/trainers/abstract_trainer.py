@@ -164,6 +164,15 @@ class AbstractTrainer(ABC):
     """ Abstract methods. """
 
     @abstractmethod
+    def _create_evaluator_engine(self):
+        """
+        Creates an Ignite evaluator engine for the target model.
+        :return: an evaluator engine for the target model
+        :type: ignite.Engine
+        """
+        pass
+
+    @abstractmethod
     def _create_trainer_engine(self):
         """
         Creates an Ignite training engine for the target model.

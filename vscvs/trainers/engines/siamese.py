@@ -40,13 +40,13 @@ def create_siamese_trainer(model, optimizer, loss_fn, device=None, non_blocking=
         model.to(device)
 
     def _update(engine, batch):
-        images_1, images_2, target = prepare_batch(batch, device=device, non_blocking=non_blocking) # Unpack batch
-        optimizer.zero_grad() # Reset gradients
-        model.train() # Training mode
-        embeddings_0, embeddings_1 = model(images_1[0], images_2[0]) # Train over batch pairs. Actual images in `0` idx
-        contrastive_loss = loss_fn(embeddings_0, embeddings_1, target) # Compute the contrastive loss
-        contrastive_loss.backward() # Accumulate gradients
-        optimizer.step() # Update model weights
+        images_1, images_2, target = prepare_batch(batch, device=device, non_blocking=non_blocking) # unpack batch
+        optimizer.zero_grad() # reset gradients
+        model.train() # training mode
+        embeddings_0, embeddings_1 = model(images_1[0], images_2[0]) # train over batch pairs. Actual images in `0` idx
+        contrastive_loss = loss_fn(embeddings_0, embeddings_1, target) # compute the contrastive loss
+        contrastive_loss.backward() # accumulate gradients
+        optimizer.step() # update model weights
         return output_transform(embeddings_0, embeddings_1, target, contrastive_loss)
 
     return Engine(_update)
@@ -68,8 +68,8 @@ def create_siamese_evaluator(model, metrics=None, device=None, non_blocking=Fals
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
     :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
-    :param output_transform: function that receives the result of a siamese network evaluator engine and returns value
-    to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
+    :param output_transform: function that receives the result of a siamese network evaluator engine and returns the
+    value to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
     :type: Callable<args:`embeddings_0`, `embeddings_1`, `target`, ret:tuple<torch.Tensor, torch.Tensor, torch.Tensor>>
     (optional)
     :return: an evaluator engine with supervised inference function.

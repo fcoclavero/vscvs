@@ -126,7 +126,7 @@ def output_transform_siamese_evaluator(embeddings_0, embeddings_1, target):
     :param target: tensor with the contrastive loss target for each pair (0 for similar images, 1 otherwise).
     :type: torch.Tensor
     :return: value to be assigned to engine's state.output after each iteration, which must fit that expected by the
-    metrics. By default in a siamese network it is the embeddings of each image pair and their target tensor.
+    metrics. By default, in a siamese network, it is the embeddings of each image pair and their target tensor.
     :type: tuple<torch.Tensor>
     """
     return embeddings_0, embeddings_1, target
@@ -142,25 +142,47 @@ def output_transform_siamese_trainer(embeddings_0, embeddings_1, target, loss):
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
     :param target: tensor with the contrastive loss target for each pair (0 for similar images, 1 otherwise).
     :type: torch.Tensor
+    :param loss: the loss module.
+    :type: torch.nn.Module
     :return: value to be assigned to engine's state.output after each iteration, which by default is the loss value.
     :type: tuple<torch.Tensor>
     """
     return loss.item()
 
 
-def output_transform_triplet(embeddings_1, embeddings_2):
+def output_transform_triplet_evaluator(anchor_embeddings, positive_embeddings, negative_embeddings):
     """
-    Receives the output of a siamese network, the embeddings of each image, and the returns value to be assigned to
-    engine's state.output after each iteration, in this case the distances between each image pair.
-    :param embeddings_1: torch tensor containing the embeddings for the first image of each image pair.
+    Receives the result of a triplet network evaluator engine (the embeddings of each triplet element) and
+    returns value to be assigned to engine's state.output after each iteration.
+    :param anchor_embeddings: torch tensor containing the embeddings for the anchor elements.
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
-    :param embeddings_2: torch tensor containing the embeddings for the second image of each image pair.
+    :param positive_embeddings: torch tensor containing the embeddings for the positive elements (same class as anchor).
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
-    :return: the distance between each image pair, which will be assigned to the Ignite engine's state.output after
-    each iteration.
-    :type: torch.Tensor with shape `batch_size`
+    :param negative_embeddings: torch tensor containing the embeddings for the negative elements (same class as anchor).
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :return: value to be assigned to engine's state.output after each iteration, which must fit that expected by the
+    metrics. By default, in a triplet network, it is the embeddings of each triplet.
+    :type: tuple<torch.Tensor>
     """
-    return torch.nn.functional.pairwise_distance(embeddings_1, embeddings_2)
+    return anchor_embeddings, positive_embeddings, negative_embeddings
+
+
+def output_transform_triplet_trainer(anchor_embeddings, positive_embeddings, negative_embeddings, loss):
+    """
+    Receives the result of a triplet network trainer engine (the embeddings of each triplet element and the loss
+    module) and returns value to be assigned to engine's state.output after each iteration.
+    :param anchor_embeddings: torch tensor containing the embeddings for the anchor elements.
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :param positive_embeddings: torch tensor containing the embeddings for the positive elements (same class as anchor).
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :param negative_embeddings: torch tensor containing the embeddings for the negative elements (same class as anchor).
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :param loss: the loss module.
+    :type: torch.nn.Module
+    :return: value to be assigned to engine's state.output after each iteration, which by default is the loss value.
+    :type: tuple<torch.Tensor>
+    """
+    return loss.item()
 
 
 def prepare_batch(batch, device=None, non_blocking=False):
@@ -177,7 +199,7 @@ def prepare_batch(batch, device=None, non_blocking=False):
     :type: tuple<torch.Tensor, torch.Tensor>
     """
     x, y, *_ = batch # unpack extra parameters into `_`
-    return (convert_tensor(element, device=device, non_blocking=non_blocking) for element in [x, y])
+    return tuple(convert_tensor(element, device=device, non_blocking=non_blocking) for element in [x, y])
 
 
 def prepare_batch_gan(batch, device=None, non_blocking=False):
@@ -194,11 +216,9 @@ def prepare_batch_gan(batch, device=None, non_blocking=False):
     :type: tuple<torch.Tensor, list<torch.Tensor>, torch.Tensor>
     """
     photos, sketches, classes = batch
-    return (
-        convert_tensor(photos, device=device, non_blocking=non_blocking),
-        [convert_tensor(sketch, device=device, non_blocking=non_blocking) for sketch in sketches],
-        convert_tensor(classes, device=device, non_blocking=non_blocking)
-    )
+    return convert_tensor(photos, device=device, non_blocking=non_blocking), \
+           [convert_tensor(sketch, device=device, non_blocking=non_blocking) for sketch in sketches], \
+           convert_tensor(classes, device=device, non_blocking=non_blocking)
 
 
 def prepare_batch_graph(batch, classes_dataframe, device=None, non_blocking=False, processes=None):
@@ -240,7 +260,7 @@ def prepare_batch_siamese(batch, device=None, non_blocking=False):
     """
     images_0, images_1 = batch
     target = siamese_target(images_0, images_1)
-    return [convert_tensor(elem, device=device, non_blocking=non_blocking) for elem in [images_0, images_1, target]]
+    return tuple(convert_tensor(i, device=device, non_blocking=non_blocking) for i in [images_0, images_1, target])
 
 
 def prepare_batch_triplet(batch, device=None, non_blocking=False):
@@ -257,7 +277,7 @@ def prepare_batch_triplet(batch, device=None, non_blocking=False):
     returned tuple.
     :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
     """
-    return (prepare_batch(images, device, non_blocking) for images in batch) # `batch` is 3-tuple with triplet batches
+    return tuple(prepare_batch(images, device, non_blocking) for images in batch) # `batch` is triplet batches tuple
 
 
 def random_simple_split(data, split_proportion=.8):

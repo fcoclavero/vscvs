@@ -172,6 +172,18 @@ class AbstractTrainer(ABC):
         """
         pass
 
+    """ Properties. """
+
+    @property
+    def collate_function(self):
+        """
+        Merges a list of samples to form a mini-batch of Tensor(s). Used when using batched loading from a
+        map-style dataset.
+        :return: the collate function
+        :type: callable
+        """
+        return None
+
     """ Event handler methods. """
 
     def _event_cleanup(self, _):
@@ -271,7 +283,7 @@ class AbstractTrainer(ABC):
         self.trainer_engine.add_event_handler(Events.COMPLETED, self._event_cleanup)
         self.trainer_engine.add_event_handler(Events.COMPLETED, periodic_checkpoint_saver, {'complete': self.model})
 
-    def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last, collate_fn=None):
+    def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last):
         """
         Create training and validation data loaders, placing a total of `len(self.dataset) * train_validation_split`
         elements in the training subset.
@@ -285,14 +297,11 @@ class AbstractTrainer(ABC):
         divisible by the batch size). If `False` and the dataset size is not divisible by the batch size, the last
         batch will have a smaller size than the rest.
         :type: bool
-        :param collate_fn :merges a list of samples to form a mini-batch of Tensor(s). Used when using batched loading
-        from a map-style dataset.
-        :type: callable
         :return: two DataLoaders, the first for the training data and the second for the validation data.
         :type: torch.utils.data.DataLoader
         """
         loaders = [DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=workers, drop_last=drop_last,
-                              collate_fn=collate_fn)
+                              collate_fn=self.collate_function)
                    for subset in dataset_split_successive(self.dataset, train_validation_split)]
         if not len(loaders[-1]):
             raise ValueError('Empty validation loader. This might be caused by having `drop_last=True` and \

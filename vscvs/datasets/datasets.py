@@ -6,7 +6,7 @@ __status__ = 'Prototype'
 """ Register datasets here to make them available in the CLI. """
 
 
-from vscvs.datasets.multimodal import SiameseDataset
+from vscvs.datasets.multimodal import SiameseDataset, TripletDataset
 from vscvs.datasets.sketchy import *
 
 
@@ -61,6 +61,16 @@ DATASETS = {
         lambda *args, **kwargs: SketchyImageNames('sketchy-test-sketches', *args, **kwargs),
     'sketchy-siamese':
         lambda *args, **kwargs: SiameseDataset(
+            Sketchy('sketchy-photos', *args, **kwargs),
+            Sketchy('sketchy-sketches', *args, **kwargs)
+        ),
+    'sketchy-test-triplet':
+        lambda *args, **kwargs: TripletDataset(
+            Sketchy('sketchy-test-photos', *args, **kwargs),
+            Sketchy('sketchy-test-sketches', *args, **kwargs)
+        ),
+    'sketchy-triplet':
+        lambda *args, **kwargs: TripletDataset(
             Sketchy('sketchy-photos', *args, **kwargs),
             Sketchy('sketchy-sketches', *args, **kwargs)
         ),

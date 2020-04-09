@@ -9,23 +9,34 @@ __status__ = 'Prototype'
 import torch
 
 from random import choice, randint
+from typing import Callable, List, Tuple
 
 from vscvs.utils import str_to_bin_array
 from vscvs.utils.data import images_by_class
 
 
-class SiameseMixin:
+class DatasetMixin:
     """
-    Mixin class for loading random pairs on `__get_item__` for any Dataset. Must be used with a torch.Dataset subclass,
+    Utility class that type hints `Dataset` methods that will be available to the mixins in this package via a `super()`
+    call, as they are meant to be used in multiple inheritance with `torch.utils.data.Dataset`.
+    """
+    __getitem__: Callable[[int], tuple]
+
+
+class SiameseMixin(DatasetMixin):
+    """
+    Mixin class for loading random pairs on `__getitem__` for any Dataset. Must be used with a torch.Dataset subclass,
     as it assumes the existence of the `classes`, `class_to_idx` and `imgs` fields.
     """
-    def __get_random_item__(self):
+    __len__: int
+
+    def _get_random_item(self):
         """
         Get a random item from the Dataset.
         :return: an item tuple
         :type: tuple
         """
-        return super().__getitem__(randint(0, len(self) - 1))
+        return super()[randint(0, len(self) - 1)]
 
     def __getitem__(self, index):
         """
@@ -36,14 +47,17 @@ class SiameseMixin:
         :return: a 2-tuple with the item corresponding to `index`, along with another random item.
         :type: tuple
         """
-        return super().__getitem__(index), self.__get_random_item__()
+        return super()[index], self._get_random_item()
 
 
-class TripletMixin:
+class TripletMixin(DatasetMixin):
     """
-    Mixin class for loading triplets on `__get_item__` for any Dataset. Must be used with a torch.Dataset subclass,
+    Mixin class for loading triplets on `__getitem__` for any Dataset. Must be used with a torch.Dataset subclass,
     as it assumes the existence of the `classes`, `class_to_idx` and `imgs` fields.
     """
+    classes: List[str]
+    targets: List[int]
+
     def __init__(self, *args, **kwargs):
         """
         Initialize de base Dataset class and create a image index dictionary with class keys, for efficient online
@@ -52,7 +66,7 @@ class TripletMixin:
         super().__init__(*args, **kwargs)
         self.image_dict = images_by_class(self)
 
-    def __get_random_item__(self, cls):
+    def _get_random_item(self, cls):
         """
         Get a random item from the specified class.
         :param cls: the class idx
@@ -60,7 +74,7 @@ class TripletMixin:
         :return: an item tuple
         :type: tuple
         """
-        return super().__getitem__(choice(self.image_dict[cls]))
+        return super()[choice(self.image_dict[cls])]
 
     def __getitem__(self, index):
         """
@@ -71,11 +85,11 @@ class TripletMixin:
         :return: a 3-tuple with the anchor, positive and negative
         :type: tuple
         """
-        anchor = super().__getitem__(index)
+        anchor = super()[index]
         positive_class = self.targets[index]
         negative_classes = list(range(0, positive_class)) + list(range(positive_class + 1, len(self.classes)))
-        positive = self.__get_random_item__(positive_class)
-        negative = self.__get_random_item__(choice(negative_classes))
+        positive = self._get_random_item(positive_class)
+        negative = self._get_random_item(choice(negative_classes))
         return anchor, positive, negative
 
 
@@ -85,6 +99,9 @@ class FilenameIndexedMixin:
     The mixin must be used with a torch.Dataset subclass, as it assumes the existence of the `imgs` field and a
     `__getitem__` with the default Dataset indexation.
     """
+    __getitem__: Tuple[torch.Tensor]
+    imgs: List[tuple]
+
     def __init__(self, *args, **kwargs):
         """
         Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indices
@@ -109,6 +126,8 @@ class BinaryEncodingMixin:
     """
     Mixin class for adding unique binary encoding descriptors for each element in the dataset.
     """
+    targets: List[int]
+
     def __init__(self, *args, **kwargs):
         """
         Initialize de base Dataset class and compute the length (in digits) of the binary form of the largest index in
@@ -117,18 +136,20 @@ class BinaryEncodingMixin:
         super().__init__(*args, **kwargs)
         self.max_binary_digits = len(str_to_bin_array(len(self.targets)))
 
-    def __get_binary_encoding__(self, index):
+    def _get_binary_encoding(self, index):
         bin_arr = torch.tensor(str_to_bin_array(index, self.max_binary_digits))
         return bin_arr
 
     def __getitem__(self, item):
-        return self.__get_binary_encoding__(item), self.targets[item]
+        return self._get_binary_encoding(item), self.targets[item]
 
 
 class OneHotEncodingMixin:
     """
     Mixin class for adding unique one-hot encoding descriptors for each element in the dataset.
     """
+    targets: List[int]
+
     def __init__(self, *args, **kwargs):
         """
         Initialize de base Dataset class and create a tensor with all one hot encodings.
@@ -136,8 +157,8 @@ class OneHotEncodingMixin:
         super().__init__(*args, **kwargs)
         self.encodings = torch.eye(len(self.targets))
 
-    def __get_one_hot_encoding__(self, index):
+    def _get_one_hot_encoding(self, index):
         return self.encodings[index]
 
     def __getitem__(self, item):
-        return self.__get_one_hot_encoding__(item), self.targets[item]
+        return self._get_one_hot_encoding(item), self.targets[item]

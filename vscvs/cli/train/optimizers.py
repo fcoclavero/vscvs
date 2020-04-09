@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 import click
 
 from vscvs.cli.decorators import pass_kwargs_to_context
-from vscvs.trainers.mixins import AdamOptimizerMixin, AdamWOptimizerMixin, SGDOptimizerMixin
+from vscvs.trainers.mixins import AdamOptimizerMixin, AdamWOptimizerMixin, RMSpropOptimizerMixin, SGDOptimizerMixin
 
 
 @click.group()
@@ -44,6 +44,21 @@ def adam_w(context, **kwargs):
     """ Train models using an Adam optimizer. """
     context.obj['betas'] = (context.obj.pop('beta_1'), context.obj.pop('beta_2'))
     context.obj['optimizer_mixin'] = AdamWOptimizerMixin
+
+
+@click.group()
+@click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=2e-4)
+@click.option('--alpha', prompt='Alpha', default=.99, help='Smoothing constant.')
+@click.option('--epsilon', prompt='Epsilon', default=1e-8,
+              help='Term added to the denominator to improve numerical stability .')
+@click.option('--weight-decay', prompt='Weight decay', default=0.0, help='Weight decay (L2 penalty).')
+@click.option('--momentum', prompt='Momentum', help='Momentum factor.', default=0.0)
+@click.option('--centered', prompt='Amsgrad', default=False,
+              help='whether to compute the centered RMSProp (gradient normalized by an estimation of its variance).')
+@pass_kwargs_to_context
+def rms_prop(context, **kwargs):
+    """ Train models using an Adam optimizer. """
+    context.obj['optimizer_mixin'] = RMSpropOptimizerMixin
 
 
 @click.group()

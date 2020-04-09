@@ -9,7 +9,7 @@ __status__ = 'Prototype'
 import click
 
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
-from vscvs.cli.train.optimizers import adam, sgd
+from vscvs.cli.train.optimizers import adam, adam_w, rms_prop, sgd
 from vscvs.cli.train.siamese import siamese
 from vscvs.cli.train.triplet import triplet
 
@@ -129,7 +129,7 @@ def train(context, **kwargs):
 """ Add every simple and compound trainer command to each optimizer trainer group """
 
 
-for optimizer_group in [adam, sgd]:
+for optimizer_group in [adam, adam_w, rms_prop, sgd]:
     # Compound trainer commands
     optimizer_group.add_command(siamese)
     optimizer_group.add_command(triplet)
@@ -146,4 +146,6 @@ for optimizer_group in [adam, sgd]:
 
 
 train.add_command(adam)
+train.add_command(adam_w)
+train.add_command(rms_prop)
 train.add_command(sgd)

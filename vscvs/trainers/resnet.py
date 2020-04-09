@@ -6,6 +6,7 @@ __status__ = 'Prototype'
 """ Ignite trainers for ResNet classification networks. """
 
 
+from abc import ABC
 from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
 from torch.nn import CrossEntropyLoss
@@ -17,60 +18,50 @@ from vscvs.utils.data import prepare_batch
 from vscvs.decorators import kwargs_parameter_dict
 
 
-def resnet(cls):
+class AbstractResNetTrainer(AbstractTrainer, ABC):
     """
-    Class decorator for creating Trainer classes with the common options needed for a ResNet model.
-    :param cls: a Trainer class
-    :type: AbstractTrainer subclass
-    :return: `cls`, but implementing the common options for training a ResNet model
-    :type: `cls.__class__`
+    Abstract class for creating Trainer classes with the common options needed for a ResNet model.
     """
-    class Trainer(cls):
+    def __init__(self, *args, out_features=125, pretrained=False, **kwargs):
         """
-        Trainer for a ResNext image classifier.
+        Trainer constructor.
+        :param args: Trainer arguments
+        :type: tuple
+        :param out_features: number of output features. If `None`, defaults to 1000.
+        :type: int or None
+        :param pretrained: if True, uses a model pre-trained on ImageNet.
+        :type: boolean
+        :param kwargs: Trainer keyword arguments
+        :type: dict
         """
-        def __init__(self, *args, out_features=125, pretrained=False, **kwargs):
-            """
-            Trainer constructor.
-            :param args: AbstractSGDOptimizerTrainer and EarlyStoppingMixin arguments
-            :type: tuple
-            :param out_features: number of output features. If `None`, defaults to 1000.
-            :type: int or None
-            :param pretrained: if True, uses a model pre-trained on ImageNet.
-            :type: boolean
-            :param kwargs: AbstractSGDOptimizerTrainer and EarlyStoppingMixin keyword arguments
-            :type: dict
-            """
-            self.out_features = out_features
-            self.pretrained = pretrained
-            super().__init__(*args, **kwargs)
+        self.out_features = out_features
+        self.pretrained = pretrained
+        super().__init__(*args, **kwargs)
 
-        @property
-        def initial_model(self):
-            return ResNetLogSoftmax(out_features=self.out_features, pretrained=self.pretrained)
+    @property
+    def initial_model(self):
+        return ResNetLogSoftmax(out_features=self.out_features, pretrained=self.pretrained)
 
-        @property
-        def loss(self):
-            return CrossEntropyLoss()
+    @property
+    def loss(self):
+        return CrossEntropyLoss()
 
-        @property
-        def trainer_id(self):
-            return 'ResNet'
+    @property
+    def trainer_id(self):
+        return 'ResNet'
 
-        @staticmethod
-        def _score_function(engine):
-            validation_loss = engine.state.metrics['loss']
-            return -validation_loss
+    @staticmethod
+    def _score_function(engine):
+        validation_loss = engine.state.metrics['loss']
+        return -validation_loss
 
-        def _create_evaluator_engine(self):
-            return create_supervised_evaluator(
-                self.model, metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss)}, device=self.device)
+    def _create_evaluator_engine(self):
+        return create_supervised_evaluator(
+            self.model, metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss)}, device=self.device)
 
-        def _create_trainer_engine(self):
-            return create_supervised_trainer(
-                self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
-
-    return Trainer
+    def _create_trainer_engine(self):
+        return create_supervised_trainer(
+            self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
 
 
 @kwargs_parameter_dict
@@ -85,8 +76,7 @@ def train_resnet(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: ResNetTrainer keyword arguments
     :type: dict
     """
-    @resnet
-    class ResNetTrainer(optimizer_mixin, AbstractTrainer, EarlyStoppingMixin):
+    class ResNetTrainer(optimizer_mixin, AbstractResNetTrainer, EarlyStoppingMixin):
         pass
     trainer = ResNetTrainer(*args, **kwargs)
     trainer.run()

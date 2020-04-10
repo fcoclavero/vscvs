@@ -84,9 +84,9 @@ def create_triplet_evaluator(model, metrics={}, device=None, non_blocking=False,
     def _inference(engine, batch):
         model.eval()
         with torch.no_grad():
-            x, y = prepare_batch(batch, device=device, non_blocking=non_blocking)
-            y_pred = model(x)
-            return output_transform(x, y, y_pred)
+            anchors, positives, negatives = prepare_batch(batch, device=device, non_blocking=non_blocking)
+            anchor_embedding, positive_embedding, negative_embedding = model(anchors[0], positives[0], negatives[0])
+            return output_transform(anchor_embedding, positive_embedding, negative_embedding)
 
     engine = Engine(_inference)
 

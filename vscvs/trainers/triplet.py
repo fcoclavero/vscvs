@@ -22,7 +22,8 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a triplet architecture.
     """
-    def __init__(self, *args, anchor_network=None, positive_negative_network=None, margin=.2, **kwargs):
+    def __init__(self, *args, anchor_network=None, positive_negative_network=None, loss_reduction='mean',
+                 margin=.2, **kwargs):
         """
         Trainer constructor.
         :param args: Trainer arguments
@@ -32,6 +33,9 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
         :param positive_negative_network: the model to be used for computing image embeddings for the positive
         and negative elements in each triplet.
         :type: torch.nn.Module
+        :param loss_reduction: reduction to apply to batch element loss values to obtain the loss for the whole batch.
+`       Must correspond to a valid reduction for the `ContrastiveLoss`.
+        :type: str
         :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
         distance from the anchor element to the negative, and the distance from the anchor to the negative.
         :type: float
@@ -40,6 +44,7 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
         """
         self.anchor_network = anchor_network
         self.positive_negative_network = positive_negative_network
+        self.loss_reduction = loss_reduction
         self.margin = margin
         super().__init__(*args, **kwargs)
 
@@ -53,7 +58,7 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
 
     @property
     def loss(self):
-        return TripletLoss(margin=self.margin, reduction='mean')
+        return TripletLoss(margin=self.margin, reduction=self.loss_reduction)
 
     @property
     def trainer_id(self):

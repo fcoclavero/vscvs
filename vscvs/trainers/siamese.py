@@ -20,7 +20,8 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a siamese architecture.
     """
-    def __init__(self, *args, embedding_network_1=None, embedding_network_2=None, margin=.2, **kwargs):
+    def __init__(self, *args, embedding_network_1=None, embedding_network_2=None, loss_reduction='mean',
+                 margin=.2, **kwargs):
         """
         Trainer constructor.
         :param args: Trainer arguments
@@ -29,6 +30,9 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
         :type: torch.nn.Module
         :param embedding_network_2: the model to be used for the second branch of the siamese architecture.
         :type: torch.nn.Module
+        :param loss_reduction: reduction to apply to batch element loss values to obtain the loss for the whole batch.
+`       Must correspond to a valid reduction for the `ContrastiveLoss`.
+        :type: str
         :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the
         embeddings of two examples as dissimilar. Dissimilar image pairs will be pushed apart unless their distance
         is already greater than the margin. Similar sketch–image pairs will be pulled together in the feature space.
@@ -38,6 +42,7 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
         """
         self.embedding_network_1 = embedding_network_1
         self.embedding_network_2 = embedding_network_2
+        self.loss_reduction = loss_reduction
         self.margin = margin
         super().__init__(*args, **kwargs)
 
@@ -47,7 +52,7 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
 
     @property
     def loss(self):
-        return ContrastiveLoss(margin=self.margin, reduction='mean')
+        return ContrastiveLoss(margin=self.margin, reduction=self.loss_reduction)
 
     @property
     def trainer_id(self):

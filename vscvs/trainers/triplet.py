@@ -11,7 +11,7 @@ from torch.utils.data._utils.collate import default_collate
 
 from vscvs.loss_functions import TripletLoss
 from vscvs.metrics.triplet import Accuracy, AverageDistances, Loss
-from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, TripletNetwork
+from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, TripletSharedPositiveNegative
 from vscvs.trainers.abstract_trainer import AbstractTrainer
 from vscvs.trainers.engines.triplet import create_triplet_evaluator, create_triplet_trainer
 from vscvs.utils.collators import triplet_collate
@@ -54,7 +54,7 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
 
     @property
     def initial_model(self):
-        return TripletNetwork(self.anchor_network, self.positive_negative_network)
+        return TripletSharedPositiveNegative(self.anchor_network, self.positive_negative_network)
 
     @property
     def loss(self):

@@ -127,8 +127,8 @@ class TripletDataset(MultimodalDataset):
     Dataset class for loading random online triplets on `__getitem__` for the given pair of Datasets. The first Dataset
     is used as base: the length of the triplet Dataset corresponds to that of the first dataset, and the first item in
     the triplets returned on `__getitem__` corresponds to the item with the requested index in the base dataset (the
-    triplet anchor). Other two random item from the second dataset, one with the same class as the anchor (the positive)
-    and one of a different random class (the negative).
+    triplet anchor). Other two random items from the second dataset are drawn, one with the same class as the anchor
+    (the positive) and one of a different random class (the negative).
     """
     def __init__(self, base_dataset, paired_dataset, *args, **kwargs):
         """

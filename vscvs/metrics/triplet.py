@@ -216,7 +216,7 @@ class AverageDistances(TripletMetric):
         """
         anchor_embeddings, positive_embeddings, negative_embeddings = output
         batch_size = self._batch_size(anchor_embeddings)
-        self._sum_positive = torch.nn.functional.pairwise_distance(anchor_embeddings, positive_embeddings).pow(2)
-        self._sum_negative = torch.nn.functional.pairwise_distance(anchor_embeddings, negative_embeddings).pow(2)
+        self._sum_positive = torch.nn.functional.pairwise_distance(anchor_embeddings, positive_embeddings).pow(2).sum()
+        self._sum_negative = torch.nn.functional.pairwise_distance(anchor_embeddings, negative_embeddings).pow(2).sum()
         self._num_examples_negative += batch_size
         self._num_examples_positive += batch_size

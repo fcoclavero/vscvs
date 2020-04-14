@@ -6,6 +6,7 @@ __status__ = 'Prototype'
 """ Trainer class decorators with the implementation of common features, such as common optimizers. """
 
 
+from adabound import AdaBound
 from torch.nn import Module
 from torch.optim import Adam, AdamW, RMSprop, SGD
 
@@ -29,6 +30,49 @@ class OptimizerMixin:
         """
         self.learning_rate = learning_rate
         super().__init__(*args, **kwargs)
+
+
+class AdaBoundOptimizerMixin(OptimizerMixin):
+    """
+        Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with an
+        [AdaBound](https://github.com/Luolc/AdaBound) optimizer.
+        """
+
+    def __init__(self, *args, betas=(.9, .999), final_learning_rate=.1, gamma=1e-3, epsilon=1e-08, weight_decay=0,
+                 amsbound=False, **kwargs):
+        """
+        Trainer constructor that receives the optimizer parameters.
+        :param args: arguments for additional mixins
+        :param betas: coefficients used for computing running averages of gradient and its square
+        :type: Tuple<float, float>
+        :type: tuple
+        :param final_learning_rate: final (SGD) learning rate.
+        :type: float
+        :param gamma: convergence speed of the bound functions.
+        :type: float
+        :param epsilon: term added to the denominator to improve numerical stability
+        :type: float
+        :param weight_decay: weight decay for L2 penalty
+        :type: float
+        :param amsbound: whether to use the AMSGrad variant of this algorithm from the paper [Adaptive Gradient Methods
+        with Dynamic Bound of Learning Rate]( https://openreview.net/forum?id=Bkg3g2R9FX)
+        :type: boolean
+        :param kwargs: keyword arguments for additional mixins
+        :type: dict
+        """
+        self.betas = betas
+        self.final_learning_rate = final_learning_rate
+        self.gamma = gamma
+        self.epsilon = epsilon
+        self.weight_decay = weight_decay
+        self.amsbound = amsbound
+        super().__init__(*args, **kwargs)
+
+    @property
+    def optimizer(self):
+        return AdaBound(
+            self.model.parameters(), lr=self.learning_rate, betas=self.betas, final_lr=self.final_learning_rate,
+            gamma=self.gamma, eps=self.epsilon, weight_decay=self.weight_decay, amsbound=self.amsbound)
 
 
 class AdamOptimizerMixin(OptimizerMixin):

@@ -14,7 +14,7 @@ from vscvs.metrics.triplet import Accuracy, AverageDistances, Loss
 from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, TripletSharedPositiveNegative
 from vscvs.trainers.abstract_trainer import AbstractTrainer
 from vscvs.trainers.engines.triplet import create_triplet_evaluator, create_triplet_trainer
-from vscvs.utils.collators import triplet_collate
+from vscvs.utils.collators import TripletCollate
 from vscvs.decorators import kwargs_parameter_dict
 
 
@@ -50,7 +50,7 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
 
     @property
     def collate_function(self):
-        return triplet_collate(default_collate)
+        return TripletCollate(default_collate)
 
     @property
     def initial_model(self):

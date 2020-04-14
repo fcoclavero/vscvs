@@ -9,7 +9,8 @@ __status__ = 'Prototype'
 import click
 
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
-from vscvs.cli.train.optimizers import adam, adam_w, rms_prop, sgd
+from vscvs.cli.train.optimizers import adabound, adam, adam_w, rms_prop, sgd
+# from vscvs.cli.train.gan import gan
 from vscvs.cli.train.siamese import siamese
 from vscvs.cli.train.triplet import triplet
 
@@ -56,21 +57,6 @@ def resnext(_, *args, **kwargs):
     from vscvs.trainers.resnext import train_resnext
     click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))
     train_resnext(*args, **kwargs)
-
-
-# @click.command()
-# @pass_context_to_kwargs
-# @click.option(
-#     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-#     type=click.Choice(['sketchy-mixed-batches', 'sketchy-test-mixed-batches'])
-# )
-# @click.option(
-#     '--vector-dimension', prompt='CVS dimensionality', help='Dimensionality of the common vector space.', default=300
-# )
-# def cvs_gan(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, dataset_name, vector_dimension):
-#     from vscvs.trainers.cvs_gan import train_cvs_gan
-#     click.echo('cvs gan - %s dataset' % dataset_name)
-#     train_cvs_gan(dataset_name, vector_dimension, workers, batch_size, n_gpu, epochs)
 
 
 @click.command()
@@ -126,10 +112,10 @@ def train(context, **kwargs):
     pass
 
 
-""" Add every simple and compound trainer command to each optimizer trainer group """
+""" Add trainer commands to each optimizer trainer group, then add the optimizer groups to the global `train` group. """
 
 
-for optimizer_group in [adam, adam_w, rms_prop, sgd]:
+for optimizer_group in [adabound, adam, adam_w, rms_prop, sgd]:
     # Compound trainer commands
     optimizer_group.add_command(siamese)
     optimizer_group.add_command(triplet)
@@ -137,15 +123,7 @@ for optimizer_group in [adam, adam_w, rms_prop, sgd]:
     optimizer_group.add_command(cnn)
     optimizer_group.add_command(resnet)
     optimizer_group.add_command(resnext)
-    # optimizer_group.add_command(cvs_gan)
     optimizer_group.add_command(classification_gcn)
     optimizer_group.add_command(hog_gcn)
-
-
-""" Add optimizer trainer groups to the global trainer group. """
-
-
-train.add_command(adam)
-train.add_command(adam_w)
-train.add_command(rms_prop)
-train.add_command(sgd)
+    # Add optimizer group to global `train` group
+    train.add_command(optimizer_group)

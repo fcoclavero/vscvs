@@ -26,7 +26,7 @@ def sketchy_mixed_collate(batch):
     return torch.stack(photos), sketches, torch.Tensor(classes)
 
 
-class triplet_collate:
+class TripletCollate:
     """
     Collate function factory that collates the anchor, positive and negative elements of a triplet using the
     provided collate function for individual items.

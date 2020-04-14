@@ -34,7 +34,7 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
         and negative elements in each triplet.
         :type: torch.nn.Module
         :param loss_reduction: reduction to apply to batch element loss values to obtain the loss for the whole batch.
-`       Must correspond to a valid reduction for the `ContrastiveLoss`.
+`       Must correspond to a valid reduction for the `TripletLoss`.
         :type: str
         :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
         distance from the anchor element to the negative, and the distance from the anchor to the negative.

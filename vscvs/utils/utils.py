@@ -169,9 +169,9 @@ def remove_last_layer(model):
     """
     Remove the last layer from a PyTorch model. This is useful for creating image embeddings from a classifier network.
     :param model: the PyTorch model to be modified
-    :type: pytorch.nn.module
+    :type: torch.nn.module
     :return: the modified network, without the last layer
-    :type: pytorch.nn.module
+    :type: torch.nn.module
     """
     return torch.nn.Sequential(*(list(model.children())[:-1]))
 

@@ -23,8 +23,6 @@ def create_triplet_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     :type: torch.optim.Optimizer
     :param loss_fn: the triplet loss
     :type: torch.nn loss function
-    :param vector_dimension: the dimensionality of the common vector space.
-    :type: int
     :param device: device type specification
     :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously

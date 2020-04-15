@@ -85,6 +85,7 @@ class AbstractTrainer(ABC):
             initial=0, leave=False, total=len(self.train_loader), desc=self.progressbar_description.format(0))
         self.writer = SummaryWriter(self.log_directory)
         self._add_event_handlers()
+        self._add_model_checkpoint_savers()
         super().__init__(*args, **kwargs)
 
     """ Abstract properties. """
@@ -184,6 +185,26 @@ class AbstractTrainer(ABC):
     """ Properties. """
 
     @property
+    def checkpoint_saver_best(self):
+        """
+        Checkpoint handler that can be used to save the best performing models
+        :return: the best performing checkpoint saver
+        :type: ModelCheckpoint
+        """
+        return ModelCheckpoint(self.checkpoint_directory, filename_prefix='net_best', n_saved=5, atomic=True,
+                               create_dir=True, save_as_state_dict=True, require_empty=False)
+
+    @property
+    def checkpoint_saver_periodic(self):
+        """
+        Checkpoint handler that can be used to periodically save model objects to disc.
+        :return: the periodic checkpoint saver
+        :type: ModelCheckpoint
+        """
+        return ModelCheckpoint(self.checkpoint_directory, filename_prefix='net_latest', n_saved=3, atomic=True,
+                               create_dir=True, save_as_state_dict=True, require_empty=False)
+
+    @property
     def collate_function(self):
         """
         Merges a list of samples to form a mini-batch of Tensor(s). Used when using batched loading from a
@@ -266,31 +287,30 @@ class AbstractTrainer(ABC):
 
     """ Methods. """
 
+    def _add_model_checkpoint_savers(self):
+        """
+        Add event handlers for saving model checkpoints.
+        """
+        checkpoint_saver_best = self.checkpoint_saver_best
+        checkpoint_saver_periodic = self.checkpoint_saver_periodic
+        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver_best, {'train': self.model})
+        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver_periodic, {'train': self.model})
+        self.trainer_engine.add_event_handler(Events.COMPLETED, checkpoint_saver_periodic, {'complete': self.model})
+
     def _add_event_handlers(self):
         """
         Add event handlers to output common messages and update the progressbar.
         """
-        periodic_checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to periodically
-            self.checkpoint_directory, filename_prefix='net_latest', # save model objects to disc.
-            n_saved=3, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
-        )
-        best_checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to save the best
-            self.checkpoint_directory, filename_prefix='net_best', # performing models
-            n_saved=5, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
-        )
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, self._event_log_training_output)
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, self._event_update_progressbar_step)
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, self._event_update_step_counter)
-        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, best_checkpoint_saver, {'train': self.model})
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_log_training_results)
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_log_validation_results)
-        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, periodic_checkpoint_saver, {'train': self.model})
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_save_trainer_checkpoint)
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_reset_progressbar)
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_update_epoch_counter)
         self.trainer_engine.add_event_handler(Events.COMPLETED, self._event_cleanup)
-        self.trainer_engine.add_event_handler(Events.COMPLETED, periodic_checkpoint_saver, {'complete': self.model})
 
     def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last):
         """

@@ -75,14 +75,11 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
 
 
 @kwargs_parameter_dict
-def train_triplet_cnn(*args, margin=.2, optimizer_mixin=None, **kwargs):
+def train_triplet_cnn(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Triplet CNN architecture.
     :param args: TripletTrainer arguments
     :type: tuple
-    :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
-    distance from the anchor element to the negative, and the distance from the anchor to the negative.
-    :type: float
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
@@ -92,19 +89,16 @@ def train_triplet_cnn(*args, margin=.2, optimizer_mixin=None, **kwargs):
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
         pass
     trainer = TripletTrainer(*args, anchor_network=CNNNormalized(out_features=250),
-                             positive_negative_network=CNNNormalized(out_features=250), margin=margin, **kwargs)
+                             positive_negative_network=CNNNormalized(out_features=250), **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_triplet_resnet(*args, margin=.2, optimizer_mixin=None, **kwargs):
+def train_triplet_resnet(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Triplet ResNet architecture.
     :param args: TripletTrainer arguments
     :type: tuple
-    :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
-    distance from the anchor element to the negative, and the distance from the anchor to the negative.
-    :type: float
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
@@ -114,19 +108,16 @@ def train_triplet_resnet(*args, margin=.2, optimizer_mixin=None, **kwargs):
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
         pass
     trainer = TripletTrainer(*args, anchor_network=ResNetNormalized(out_features=250, pretrained=True),
-                             positive_negative_network=ResNetNormalized(out_features=250), margin=margin, **kwargs)
+                             positive_negative_network=ResNetNormalized(out_features=250), **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_triplet_resnext(*args, margin=.2, optimizer_mixin=None, **kwargs):
+def train_triplet_resnext(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Triplet ResNext architecture.
     :param args: TripletTrainer arguments
     :type: tuple
-    :param margin: parameter for the triplet loss, defining the minimum acceptable difference between the
-    distance from the anchor element to the negative, and the distance from the anchor to the negative.
-    :type: float
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
@@ -136,5 +127,5 @@ def train_triplet_resnext(*args, margin=.2, optimizer_mixin=None, **kwargs):
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
         pass
     trainer = TripletTrainer(*args, anchor_network=ResNextNormalized(out_features=250, pretrained=True),
-                             positive_negative_network=ResNextNormalized(out_features=250), margin=margin, **kwargs)
+                             positive_negative_network=ResNextNormalized(out_features=250), **kwargs)
     trainer.run()

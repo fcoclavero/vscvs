@@ -33,7 +33,7 @@ def triplet(context, **kwargs):
 def cnn(_, *args, **kwargs):
     from vscvs.trainers.triplet import train_triplet_cnn
     click.echo('triplet cnn - {} dataset'.format(kwargs['dataset_name']))
-    train_triplet_cnn(*args, **kwargs)\
+    train_triplet_cnn(*args, **kwargs)
 
 
 @triplet.command()
@@ -41,7 +41,7 @@ def cnn(_, *args, **kwargs):
 def resnet(_, *args, **kwargs):
     from vscvs.trainers.triplet import train_triplet_resnet
     click.echo('triplet resnet - {} dataset'.format(kwargs['dataset_name']))
-    train_triplet_resnet(*args, **kwargs)\
+    train_triplet_resnet(*args, **kwargs)
 
 
 @triplet.command()

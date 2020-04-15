@@ -69,14 +69,11 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
 
 
 @kwargs_parameter_dict
-def train_siamese_cnn(*args, margin=.2, optimizer_mixin=None, **kwargs):
+def train_siamese_cnn(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Siamese CNN architecture.
     :param args: SiameseTrainer arguments
     :type: tuple
-    :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the embeddings
-    of two examples as dissimilar.
-    :type: float
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
@@ -86,7 +83,7 @@ def train_siamese_cnn(*args, margin=.2, optimizer_mixin=None, **kwargs):
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         pass
     trainer = SiameseTrainer(*args, embedding_network_1=CNNNormalized(out_features=250),  # photos
-                             embedding_network_2=CNNNormalized(out_features=250), margin=margin, **kwargs)
+                             embedding_network_2=CNNNormalized(out_features=250), **kwargs)
     trainer.run()
 
 
@@ -96,9 +93,6 @@ def train_siamese_resnet(*args, margin=.2, optimizer_mixin=None, **kwargs):
     Train a Siamese ResNet architecture.
     :param args: SiameseTrainer arguments
     :type: tuple
-    :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the embeddings
-    of two examples as dissimilar.
-    :type: float
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
@@ -108,7 +102,7 @@ def train_siamese_resnet(*args, margin=.2, optimizer_mixin=None, **kwargs):
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         pass
     trainer = SiameseTrainer(*args, embedding_network_1=ResNetNormalized(out_features=250, pretrained=True), # photos
-                             embedding_network_2=ResNetNormalized(out_features=250), margin=margin, **kwargs)
+                             embedding_network_2=ResNetNormalized(out_features=250), **kwargs)
     trainer.run()
 
 
@@ -118,9 +112,6 @@ def train_siamese_resnext(*args, margin=.2, optimizer_mixin=None, **kwargs):
     Train a Siamese ResNext architecture.
     :param args: SiameseTrainer arguments
     :type: tuple
-    :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the embeddings
-    of two examples as dissimilar.
-    :type: float
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
@@ -130,5 +121,5 @@ def train_siamese_resnext(*args, margin=.2, optimizer_mixin=None, **kwargs):
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         pass
     trainer = SiameseTrainer(*args, embedding_network_1=ResNextNormalized(out_features=250, pretrained=True),  # photos
-                             embedding_network_2=ResNextNormalized(out_features=250), margin=margin, **kwargs)
+                             embedding_network_2=ResNextNormalized(out_features=250), **kwargs)
     trainer.run()

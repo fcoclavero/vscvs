@@ -10,7 +10,7 @@ import click
 
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from vscvs.cli.train.optimizers import adabound, adam, adam_w, rms_prop, sgd
-# from vscvs.cli.train.gan import gan
+from vscvs.cli.train.gan import gan
 from vscvs.cli.train.siamese import siamese
 from vscvs.cli.train.triplet import triplet
 
@@ -117,6 +117,7 @@ def train(context, **kwargs):
 
 for optimizer_group in [adabound, adam, adam_w, rms_prop, sgd]:
     # Compound trainer commands
+    optimizer_group.add_command(gan)
     optimizer_group.add_command(siamese)
     optimizer_group.add_command(triplet)
     # Simple trainer commands

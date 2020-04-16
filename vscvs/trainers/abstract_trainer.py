@@ -67,7 +67,7 @@ class AbstractTrainer(ABC):
         self.device = get_device(n_gpu)
         self.epochs = epochs
         self.log_directory = get_log_directory(self.trainer_id, tag=tag, date=date)
-        self.model = self.initial_model.to(self.device)
+        self.model = self.initial_model
         self.parameter_dict = parameter_dict
         self.resume_date = datetime.strptime(resume_date, CHECKPOINT_NAME_FORMAT) if resume_date else resume_date
         self.resume_checkpoint = resume_checkpoint
@@ -112,16 +112,6 @@ class AbstractTrainer(ABC):
 
     @property
     @abstractmethod
-    def optimizer(self):
-        """
-        Getter for the optimizer to be used during training.
-        :return: an optimizer object
-        :type: torch.optim.Optimizer
-        """
-        pass
-
-    @property
-    @abstractmethod
     def trainer_id(self):
         """
         Getter for the trainer id, a unique str to identify the trainer. The corresponding `data` directory sub-folders
@@ -130,37 +120,6 @@ class AbstractTrainer(ABC):
         :type: str
         """
         pass
-
-    """ Properties. """
-
-    @property
-    def progressbar_description(self):
-        """
-        The format string to be displayed beside the `tqdm` progressbar.
-        :return: the progressbar description string
-        :type: str
-        """
-        return 'TRAINING => loss: {:.6f}'
-
-    @property
-    def trainer_checkpoint(self):
-        """
-        Getter for the serialized checkpoint dictionary, which contains the values of the trainer's fields that should
-        be saved in a trainer checkpoint.
-        :return: a checkpoint dictionary
-        :type: dict
-        """
-        return {
-            'average_epoch_duration': self.timer.value(),
-            'batch_size': self.batch_size,
-            'dataset_name': self.dataset_name,
-            'parameters': self.parameter_dict,
-            'resume_date': self.resume_date,
-            'resume_checkpoint': self.resume_checkpoint,
-            'start_epoch': self.start_epoch,
-            'epochs': self.epochs,
-            'tag': self.tag
-        }
 
     """ Abstract methods. """
 
@@ -179,6 +138,17 @@ class AbstractTrainer(ABC):
         Creates an Ignite training engine for the target model.
         :return: a trainer engine for the target model
         :type: ignite.Engine
+        """
+        pass
+
+    @abstractmethod
+    def _optimizer(self, parameters):
+        """
+        Creates an optimizer for the given parameters.
+        :param parameters: the torch objects to be optimized, typically the Trainer's model module parameters.
+        :type: list<torch.Tensor>
+        :return: an optimizer object
+        :type: torch.optim.Optimizer
         """
         pass
 
@@ -213,6 +183,44 @@ class AbstractTrainer(ABC):
         :type: callable
         """
         return None
+
+    @property
+    def optimizer(self):
+        """
+        Getter for the optimizer to be used during training.
+        :return: an optimizer object
+        :type: torch.optim.Optimizer
+        """
+        return self._optimizer(self.model.parameters())
+
+    @property
+    def progressbar_description(self):
+        """
+        The format string to be displayed beside the `tqdm` progressbar.
+        :return: the progressbar description string
+        :type: str
+        """
+        return 'TRAINING => loss: {:.6f}'
+
+    @property
+    def trainer_checkpoint(self):
+        """
+        Getter for the serialized checkpoint dictionary, which contains the values of the trainer's fields that should
+        be saved in a trainer checkpoint.
+        :return: a checkpoint dictionary
+        :type: dict
+        """
+        return {
+            'average_epoch_duration': self.timer.value(),
+            'batch_size': self.batch_size,
+            'dataset_name': self.dataset_name,
+            'parameters': self.parameter_dict,
+            'resume_date': self.resume_date,
+            'resume_checkpoint': self.resume_checkpoint,
+            'start_epoch': self.start_epoch,
+            'epochs': self.epochs,
+            'tag': self.tag
+        }
 
     """ Event handler methods. """
 

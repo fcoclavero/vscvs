@@ -34,10 +34,9 @@ class OptimizerMixin:
 
 class AdaBoundOptimizerMixin(OptimizerMixin):
     """
-        Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with an
-        [AdaBound](https://github.com/Luolc/AdaBound) optimizer.
-        """
-
+    Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with an
+    [AdaBound](https://github.com/Luolc/AdaBound) optimizer.
+    """
     def __init__(self, *args, betas=(.9, .999), final_learning_rate=.1, gamma=1e-3, epsilon=1e-08, weight_decay=0,
                  amsbound=False, **kwargs):
         """
@@ -68,11 +67,9 @@ class AdaBoundOptimizerMixin(OptimizerMixin):
         self.amsbound = amsbound
         super().__init__(*args, **kwargs)
 
-    @property
-    def optimizer(self):
-        return AdaBound(
-            self.model.parameters(), lr=self.learning_rate, betas=self.betas, final_lr=self.final_learning_rate,
-            gamma=self.gamma, eps=self.epsilon, weight_decay=self.weight_decay, amsbound=self.amsbound)
+    def _optimizer(self, parameters):
+        return AdaBound(parameters, lr=self.learning_rate, betas=self.betas, final_lr=self.final_learning_rate,
+                        gamma=self.gamma, eps=self.epsilon, weight_decay=self.weight_decay, amsbound=self.amsbound)
 
 
 class AdamOptimizerMixin(OptimizerMixin):
@@ -103,9 +100,8 @@ class AdamOptimizerMixin(OptimizerMixin):
         self.amsgrad = amsgrad
         super().__init__(*args, **kwargs)
 
-    @property
-    def optimizer(self):
-        return Adam(self.model.parameters(), lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
+    def _optimizer(self, parameters):
+        return Adam(parameters, lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
                     weight_decay=self.weight_decay, amsgrad=self.amsgrad)
 
 
@@ -150,9 +146,8 @@ class RMSpropOptimizerMixin(OptimizerMixin):
         self.centered = centered
         super().__init__(*args, **kwargs)
 
-    @property
-    def optimizer(self):
-        return RMSprop(self.model.parameters(), lr=self.learning_rate, alpha=self.alpha, eps=self.epsilon,
+    def _optimizer(self, parameters):
+        return RMSprop(parameters, lr=self.learning_rate, alpha=self.alpha, eps=self.epsilon,
                        weight_decay=self.weight_decay, momentum=self.momentum, centered=self.centered)
 
 
@@ -174,6 +169,5 @@ class SGDOptimizerMixin(OptimizerMixin):
         self.momentum = momentum
         super().__init__(*args, **kwargs)
 
-    @property
-    def optimizer(self):
-        return SGD(self.model.parameters(), lr=self.learning_rate, momentum=self.momentum)
+    def _optimizer(self, parameters):
+        return SGD(parameters, lr=self.learning_rate, momentum=self.momentum)

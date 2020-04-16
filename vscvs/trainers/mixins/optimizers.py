@@ -9,15 +9,13 @@ __status__ = 'Prototype'
 from adabound import AdaBound
 from torch.nn import Module
 from torch.optim import Adam, AdamW, RMSprop, SGD
+from typing import Callable
 
 
 class OptimizerMixin:
     """
-    Base class for optimizers. It also type hints `AbstractTrainer` methods that will be available to the mixins in this
-    package, as they are to be used in multiple inheritance with `vscvs.trainers.abstract_trainer.AbstractTrainer`.
+    Base class for optimizers.
     """
-    model: Module
-
     def __init__(self, *args, learning_rate=.01, **kwargs):
         """
         Trainer constructor that receives the optimizer parameters.
@@ -30,6 +28,25 @@ class OptimizerMixin:
         """
         self.learning_rate = learning_rate
         super().__init__(*args, **kwargs)
+
+
+class GANOptimizerMixin:
+    """
+    Base class for the optimizers of a GAN Trainer. These Trainers require two optimizers, one for the generator and
+    another for the discriminator. This Mixin is meant to be used with a normal OptimizerMixin.
+    """
+    _optimizer: Callable
+    discriminator: Module
+    generator: Module
+
+    @property
+    def optimizer(self):
+        """
+        Override of the `optimizer` property to return the optimizers for the two adversarial models.
+        :return: the optimizers for the generator and discriminator model modules.
+        :type: tuple<torch.optim.Optimizer, torch.optim.Optimizer>
+        """
+        return self._optimizer(self.generator), self._optimizer(self.discriminator)
 
 
 class AdaBoundOptimizerMixin(OptimizerMixin):

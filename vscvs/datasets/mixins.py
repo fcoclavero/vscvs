@@ -6,9 +6,13 @@ __status__ = 'Prototype'
 """ Mixins for adding additional features to DataSet objects. """
 
 
+import os
+import re
 import torch
 
+from multipledispatch import dispatch
 from random import choice, randint
+from torch.utils.data import Dataset
 from typing import Callable, List, Tuple
 
 from vscvs.utils import str_to_bin_array
@@ -17,10 +21,19 @@ from vscvs.utils.data import images_by_class
 
 class DatasetMixin:
     """
-    Utility class that type hints `Dataset` methods that will be available to the mixins in this package via a `super()`
-    call, as they are meant to be used in multiple inheritance with `torch.utils.data.Dataset`.
+    Utility class that type hints `Dataset` methods that will be available to the mixins in this package, as they are
+    meant to be used in multiple inheritance with `torch.utils.data.Dataset`.
     """
-    __getitem__: Callable[[int], tuple]
+    __add__: Callable[[Dataset], Dataset] # concatenates dataset parameter
+    __getitem__: Callable[[int], tuple] # get the item tuple for the given index
+
+
+class ImageFolderMixin(DatasetMixin):
+    """
+    Utility class that type hints `ImageFolder` methods that will be available to the mixins in this package, as they
+    are meant to be used in multiple inheritance with `torchvision.datasets.ImageFolder`.
+    """
+    imgs: List[Tuple[str, int]] # list of (image_class, class_index) tuples
 
 
 class SiameseMixin(DatasetMixin):
@@ -162,3 +175,76 @@ class OneHotEncodingMixin:
 
     def __getitem__(self, item):
         return self._get_one_hot_encoding(item), self.targets[item]
+
+
+class FilenameIndexingMixin(ImageFolderMixin):
+    """
+    Adds filename indexing to an ImageFolder dataset.
+    """
+    def _get_image_name(self, index):
+        """
+        Get name of the image indexed at `index`.
+        :param index: the index of an image
+        :type: int
+        :return: the name of the image: it's id
+        :type: str
+        """
+        path = self.imgs[index][0]
+        filename = os.path.split(path)[-1]
+        return filename.split('.')[0] # remove file extension
+
+    def get_image_indices(self, pattern):
+        """
+        Get a list of dataset indices for all images matching the given pattern.
+        :param pattern: the pattern that returned images names must match
+        :type: str
+        :return: a list of images' pixel matrix
+        :type: list<torch.Tensor>
+        """
+        return [ # create a list of indices
+            i for i, path_class in enumerate(self.imgs) # return index
+            if re.match(pattern, os.path.split(path_class[0])[-1])] # if last part of path matches regex
+
+    def get_images(self, pattern):
+        """
+        Get a list of pixel matrices for all images matching the given pattern.
+        :param pattern: the pattern that returned images names must match
+        :type: str
+        :return: a list of images' pixel matrix
+        :type: list<torch.Tensor>
+        """
+        return [self[index][0] for index in self.get_image_indices(pattern)]
+
+    @dispatch((int, torch.Tensor)) # single argument, either <int> or <Tensor>
+    def __getitem__(self, index):
+        """
+        Get an image's pixel matrix, class, and name from its positional index.
+        To support indexing by position and name simultaneously, this function was
+        transformed to a single dispatch generic function using the multiple-dispatch module.
+        https://docs.python.org/3/library/functools.html#functools.singledispatch
+        https://multiple-dispatch.readthedocs.io/en/latest/index.html
+        :param index: the index of an image
+        :type: int
+        :return: a tuple with the image's pixel matrix, class and name
+        :type: tuple<torch.Tensor, int, str>
+        """
+        # tuple concatenation: https://stackoverflow.com/a/8538676
+        return super()[index] + (self._get_image_name(index),)
+
+    @dispatch(str)  # single argument, <str>
+    def __getitem__(self, name):
+        """
+        Get an image's pixel matrix, class, and name from its name.
+        To support indexing by position and name simultaneously, this function was
+        transformed to a single dispatch generic function using the multiple-dispatch module.
+        https://docs.python.org/3/library/functools.html#functools.singledispatch
+        https://multiple-dispatch.readthedocs.io/en/latest/index.html
+        :param name: the image name
+        :type: str
+        :return: a tuple with the image's pixel matrix, class and name
+        :type: tuple<torch.Tensor, int, str>
+        """
+        index = next( # stop iterator on first match and return index
+            i for i, path_class in enumerate(self.imgs) # return index
+            if re.match(name, os.path.split(path_class[0])[-1])) # if last part of path matches regex
+        return super()[index] + (name,) # tuple concatenation

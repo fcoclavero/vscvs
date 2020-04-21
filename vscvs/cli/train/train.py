@@ -24,7 +24,7 @@ from vscvs.cli.train.triplet import triplet
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
-@click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+@click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
 def cnn(_,  *args, **kwargs):
     from vscvs.trainers.cnn import train_cnn
     click.echo('cnn - {} dataset'.format(kwargs['dataset_name']))
@@ -38,7 +38,7 @@ def cnn(_,  *args, **kwargs):
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
 @click.option('--pretrained', prompt='Pretrained', help='Whether to use pretrained model weights.', default=False)
-@click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+@click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
 def resnet(_, *args, **kwargs):
     from vscvs.trainers.resnet import train_resnet
     click.echo('resnet - {} dataset'.format(kwargs['dataset_name']))
@@ -52,7 +52,7 @@ def resnet(_, *args, **kwargs):
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
 )
 @click.option('--pretrained', prompt='Pretrained', help='Whether to use pretrained model weights.', default=False)
-@click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+@click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
 def resnext(_, *args, **kwargs):
     from vscvs.trainers.resnext import train_resnext
     click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))

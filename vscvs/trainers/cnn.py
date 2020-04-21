@@ -18,7 +18,7 @@ from vscvs.utils.data import prepare_batch
 from vscvs.decorators import kwargs_parameter_dict
 
 
-class AbstractCNNTrainer(AbstractTrainer, ABC):
+class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a CNN model.
     """
@@ -42,6 +42,11 @@ class AbstractCNNTrainer(AbstractTrainer, ABC):
     @property
     def loss(self):
         return CrossEntropyLoss()
+
+    @staticmethod
+    def _score_function(engine):
+        validation_loss = engine.state.metrics['loss']
+        return -validation_loss
 
     @property
     def trainer_id(self):
@@ -68,7 +73,7 @@ def train_cnn(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: CNNTrainer keyword arguments
     :type: dict
     """
-    class CNNTrainer(optimizer_mixin, AbstractCNNTrainer, EarlyStoppingMixin):
+    class CNNTrainer(optimizer_mixin, AbstractCNNTrainer):
         pass
     trainer = CNNTrainer(*args, **kwargs)
     trainer.run()

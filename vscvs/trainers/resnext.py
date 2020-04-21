@@ -19,7 +19,7 @@ from vscvs.utils.data import prepare_batch
 from vscvs.decorators import kwargs_parameter_dict
 
 
-class AbstractResNextTrainer(AbstractTrainer, ABC):
+class AbstractResNextTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a ResNext model.
     """
@@ -86,7 +86,7 @@ def train_resnext(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: ResNextTrainer keyword arguments
     :type: dict
     """
-    class ResNextTrainer(optimizer_mixin, AbstractResNextTrainer, EarlyStoppingMixin):
+    class ResNextTrainer(optimizer_mixin, AbstractResNextTrainer):
         pass
     trainer = ResNextTrainer(*args, **kwargs)
     trainer.run()

@@ -71,7 +71,7 @@ class AbstractTrainer(ABC):
         self.parameter_dict = parameter_dict
         self.resume_date = datetime.strptime(resume_date, CHECKPOINT_NAME_FORMAT) if resume_date else resume_date
         self.resume_checkpoint = resume_checkpoint
-        self.start_epoch = 0
+        self.start_epoch = 1
         self.tag = tag
         self._load_checkpoint()
         self.epoch = self.start_epoch
@@ -81,8 +81,8 @@ class AbstractTrainer(ABC):
         self.trainer_engine = self._create_trainer_engine()
         self.evaluator_engine = self._create_evaluator_engine()
         self.timer = self._create_timer()
-        self.progressbar = tqdm(
-            initial=0, leave=False, total=len(self.train_loader), desc=self.progressbar_description.format(0))
+        self.progressbar = tqdm(initial=0, leave=False, total=len(self.train_loader),
+                                desc=self.progressbar_description.format(self.epoch, self.last_epoch, 0.0))
         self.writer = SummaryWriter(self.log_directory)
         self._add_event_handlers()
         self._add_model_checkpoint_savers()
@@ -162,7 +162,7 @@ class AbstractTrainer(ABC):
         :type: ModelCheckpoint
         """
         return ModelCheckpoint(self.checkpoint_directory, filename_prefix='net_best', n_saved=5, atomic=True,
-                               create_dir=True, save_as_state_dict=True, require_empty=False)
+                               create_dir=True, require_empty=False)
 
     @property
     def checkpoint_saver_periodic(self):
@@ -171,8 +171,8 @@ class AbstractTrainer(ABC):
         :return: the periodic checkpoint saver
         :type: ModelCheckpoint
         """
-        return ModelCheckpoint(self.checkpoint_directory, filename_prefix='net_latest', n_saved=3, atomic=True,
-                               create_dir=True, save_as_state_dict=True, require_empty=False)
+        return ModelCheckpoint(self.checkpoint_directory, filename_prefix='net_periodic', n_saved=3, atomic=True,
+                               create_dir=True, require_empty=False)
 
     @property
     def collate_function(self):
@@ -183,6 +183,15 @@ class AbstractTrainer(ABC):
         :type: callable
         """
         return None
+
+    @property
+    def last_epoch(self):
+        """
+        Gets the last epoch that will be run.
+        :return: the last epoch.
+        :type: int
+        """
+        return self.start_epoch + self.epochs - 1
 
     @property
     def optimizer(self):
@@ -200,7 +209,7 @@ class AbstractTrainer(ABC):
         :return: the progressbar description string
         :type: str
         """
-        return 'TRAINING => loss: {:.6f}'
+        return 'TRAINING epoch {}/{} => loss: {:.5f}'
 
     @property
     def trainer_checkpoint(self):
@@ -238,7 +247,7 @@ class AbstractTrainer(ABC):
         :type: ignite.engine.Engine
         """
         self.writer.add_scalar('training_output', trainer.state.output, self.step)
-        self.progressbar.desc = self.progressbar_description.format(trainer.state.output)
+        self.progressbar.desc = self.progressbar_description.format(self.epoch, self.last_epoch, trainer.state.output)
 
     def _event_log_training_results(self, _):
         """
@@ -246,7 +255,7 @@ class AbstractTrainer(ABC):
         """
         self.evaluator_engine.run(self.train_loader)
         metrics = self.evaluator_engine.state.metrics
-        print('\nTraining results - epoch: {}'.format(self.epoch))
+        print('\nTraining results - epoch: {}/{}'.format(self.epoch, self.last_epoch))
         for key, value in metrics.items():
             self.writer.add_scalar('training_{}'.format(key), value, self.step)
             print('{}: {:.6f}'.format(key, value))
@@ -257,7 +266,7 @@ class AbstractTrainer(ABC):
         """
         self.evaluator_engine.run(self.validation_loader)
         metrics = self.evaluator_engine.state.metrics
-        print('\nValidation results - epoch: {}'.format(self.epoch))
+        print('\nValidation results - epoch: {}/{}'.format(self.epoch, self.last_epoch))
         for key, value in metrics.items():
             self.writer.add_scalar('validation_{}'.format(key), value, self.step)
             print('{}: {:.6f}'.format(key, value))
@@ -299,11 +308,10 @@ class AbstractTrainer(ABC):
         """
         Add event handlers for saving model checkpoints.
         """
-        checkpoint_saver_best = self.checkpoint_saver_best
-        checkpoint_saver_periodic = self.checkpoint_saver_periodic
-        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver_best, {'train': self.model})
-        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_saver_periodic, {'train': self.model})
-        self.trainer_engine.add_event_handler(Events.COMPLETED, checkpoint_saver_periodic, {'complete': self.model})
+        self.trainer_engine.add_event_handler(
+            Events.EPOCH_COMPLETED, self.checkpoint_saver_best,{'checkpoint': self.model})
+        self.trainer_engine.add_event_handler(
+            Events.EPOCH_COMPLETED, self.checkpoint_saver_periodic, {'checkpoint': self.model})
 
     def _add_event_handlers(self):
         """
@@ -392,4 +400,4 @@ class AbstractTrainer(ABC):
         """
         Run the trainer.
         """
-        self.trainer_engine.run(self.train_loader, max_epochs=self.epochs)
+        self.trainer_engine.run(self.train_loader, max_epochs=self.epochs )

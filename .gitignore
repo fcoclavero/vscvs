@@ -114,6 +114,7 @@ venv.bak/
 *.vec*
 
 # Big files
+data/cache/*
 data/pickles/*
 data/embeddings/*
 data/logs/*

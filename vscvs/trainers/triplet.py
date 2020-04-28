@@ -7,14 +7,12 @@ __status__ = 'Prototype'
 
 
 from abc import ABC
-from torch.utils.data._utils.collate import default_collate
 
 from vscvs.loss_functions import TripletLoss
 from vscvs.metrics.triplet import Accuracy, AverageDistances, Loss
 from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, TripletSharedPositiveNegative
 from vscvs.trainers.abstract_trainer import AbstractTrainer
 from vscvs.trainers.engines.triplet import create_triplet_evaluator, create_triplet_trainer
-from vscvs.utils.collators import TripletCollate
 from vscvs.decorators import kwargs_parameter_dict
 
 
@@ -47,10 +45,6 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
         self.loss_reduction = loss_reduction
         self.margin = margin
         super().__init__(*args, **kwargs)
-
-    @property
-    def collate_function(self):
-        return TripletCollate(default_collate)
 
     @property
     def initial_model(self):

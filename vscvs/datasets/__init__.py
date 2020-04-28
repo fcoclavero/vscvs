@@ -1,1 +1,1 @@
-from .datasets import get_dataset
+from .factory import get_dataset

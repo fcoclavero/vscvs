@@ -16,18 +16,18 @@ class ResNextBase(nn.Module):
     """
     ResNext model wrapper for easy swapping between ResNext models.
     """
-    def __init__(self, *args, pretrained=False, progress=True, **kwargs):
+    def __init__(self, pretrained=False, progress=True, **kwargs):
         """
         Initialize model.
         :param pretrained: if True, uses a model pre-trained on ImageNet.
         :type: boolean
         :param progress: if True, displays a progress bar of the download to stderr
         :type: boolean
-        :param kwargs: additional keyword arguments
+        :param kwargs: additional `resnext50_32x4d` keyword arguments
         :type: dict
         """
-        super().__init__(*args, **kwargs)
-        self.base = resnext50_32x4d(pretrained=pretrained, progress=progress)
+        super().__init__()
+        self.base = resnext50_32x4d(pretrained=pretrained, progress=progress, **kwargs)
 
     def forward(self, x):
         return self.base(x)

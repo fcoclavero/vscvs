@@ -46,7 +46,7 @@ class GANOptimizerMixin:
         :return: the optimizers for the generator and discriminator model modules.
         :type: tuple<torch.optim.Optimizer, torch.optim.Optimizer>
         """
-        return self._optimizer(self.generator), self._optimizer(self.discriminator)
+        return self._optimizer(self.generator.parameters()), self._optimizer(self.discriminator.parameters())
 
 
 class AdaBoundOptimizerMixin(OptimizerMixin):

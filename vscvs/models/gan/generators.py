@@ -8,6 +8,9 @@ __status__ = 'Prototype'
 
 import torch.nn as nn
 
+from itertools import chain
+from overrides import overrides
+
 
 class MultimodalEncoder(nn.Module):
     """
@@ -35,6 +38,19 @@ class MultimodalEncoder(nn.Module):
         :type: list<torch.Tensor>
         """
         return [embedding_network(i) for embedding_network, i in zip(self.mode_embedding_networks, mode_inputs)]
+
+    @overrides
+    def parameters(self, *args, **kwargs):
+        """
+        Override to return the parameters of each mode embedding network.
+        :param args: individual mode embedding network `parameters` method arguments.
+        :type: list
+        :param kwargs: individual mode embedding network `parameters` method keyword arguments.
+        :type: dict
+        :return: an iterator over all mode embedding network module parameters.
+        :type: iterator that yields module parameters
+        """
+        return chain(*[embedding_network.parameters() for embedding_network in self.mode_embedding_networks])
 
 
 class MultimodalEncoderShared(nn.Module):

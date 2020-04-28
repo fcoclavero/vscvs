@@ -102,7 +102,7 @@ def images_by_class(dataset):
     return images_dict
 
 
-def output_transform_gan(output):
+def output_transform_gan_evaluator(output):
     """
     Receives `x`, `y`, `y_pred` and the returns value to be assigned to engine's
     state.output after each iteration. Default is returning `(y_pred, y,)`, which fits output expected by metrics.
@@ -113,6 +113,24 @@ def output_transform_gan(output):
     y_pred = output['y_pred']
     y = output['y_true']
     return y_pred, y  # output format is according to `Accuracy` docs
+
+
+def output_transform_gan_trainer(embeddings_0, embeddings_1, target, loss):
+    """
+    Receives the result of a siamese network trainer engine (the embeddings of each image, the target tensor and the
+    loss module) and returns value to be assigned to engine's state.output after each iteration.
+    :param embeddings_0: torch tensor containing the embeddings for the first image of each image pair.
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :param embeddings_1: torch tensor containing the embeddings for the second image of each image pair.
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :param target: tensor with the contrastive loss target for each pair (0 for similar images, 1 otherwise).
+    :type: torch.Tensor
+    :param loss: the loss module.
+    :type: torch.nn.Module
+    :return: value to be assigned to engine's state.output after each iteration, which by default is the loss value.
+    :type: tuple<torch.Tensor>
+    """
+    return loss.item()
 
 
 def output_transform_siamese_evaluator(embeddings_0, embeddings_1, target):
@@ -202,25 +220,6 @@ def prepare_batch(batch, device=None, non_blocking=False):
     return tuple(convert_tensor(element, device=device, non_blocking=non_blocking) for element in [x, y])
 
 
-def prepare_batch_gan(batch, device=None, non_blocking=False):
-    """
-    Prepare batch for GAN training: pass to a device with options. Assumes the shape returned
-    by the SketchyMixedBatches Dataset.
-    :param batch: data to be sent to device.
-    :type: list
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
-    :return: tuple with adversarial batches.
-    :type: tuple<torch.Tensor, list<torch.Tensor>, torch.Tensor>
-    """
-    photos, sketches, classes = batch
-    return convert_tensor(photos, device=device, non_blocking=non_blocking), \
-           [convert_tensor(sketch, device=device, non_blocking=non_blocking) for sketch in sketches], \
-           convert_tensor(classes, device=device, non_blocking=non_blocking)
-
-
 def prepare_batch_graph(batch, classes_dataframe, device=None, non_blocking=False, processes=None):
     """
     Prepare batch for training: pass to a device with options. Assumes data and labels are the first
@@ -263,21 +262,20 @@ def prepare_batch_siamese(batch, device=None, non_blocking=False):
     return tuple(convert_tensor(i, device=device, non_blocking=non_blocking) for i in [images_0, images_1, target])
 
 
-def prepare_batch_triplet(batch, device=None, non_blocking=False):
+def prepare_batch_multimodal(batch, device=None, non_blocking=False):
     """
-    Prepare batch for triplet network training: pass to a device with options. Assumes the shape returned by a Dataset
-    implementing the `TripletMixin`.
+    Prepare batch for multimodal network training: pass to a device with options. Assumes the shape returned by a
+    `MultimodalDataset` subclass.
     :param batch: data to be sent to device.
     :type: list
     :param device: device type specification
     :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
-    :return: 3-tuple with triplet batches. Triplet index i corresponds to the i-th element of each tensor in the
-    returned tuple.
-    :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+    :return: tuple with multimodal batches.
+    :type: tuple<torch.Tensor, ...>
     """
-    return tuple(prepare_batch(images, device, non_blocking) for images in batch) # `batch` is triplet batches tuple
+    return tuple(prepare_batch(images, device, non_blocking) for images in batch)
 
 
 def random_simple_split(data, split_proportion=.8):

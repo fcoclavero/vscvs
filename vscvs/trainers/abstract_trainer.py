@@ -81,8 +81,7 @@ class AbstractTrainer(ABC):
         self.trainer_engine = self._create_trainer_engine()
         self.evaluator_engine = self._create_evaluator_engine()
         self.timer = self._create_timer()
-        self.progressbar = tqdm(initial=0, leave=False, total=len(self.train_loader),
-                                desc=self.progressbar_description.format(self.epoch, self.last_epoch, 0.0))
+        self.progressbar = self._progressbar
         self.writer = SummaryWriter(self.log_directory)
         self._add_event_handlers()
         self._add_model_checkpoint_savers()
@@ -153,6 +152,16 @@ class AbstractTrainer(ABC):
         pass
 
     """ Properties. """
+
+    @property
+    def _progressbar(self):
+        """
+        TQDM progressbar to display trainer progress.
+        :return: the trainer progressbar.
+        :type: tqdm.tqdm
+        """
+        return tqdm(initial=0, leave=False, total=len(self.train_loader),
+                    desc=self.progressbar_description.format(self.epoch, self.last_epoch, 0.0))
 
     @property
     def checkpoint_saver_best(self):

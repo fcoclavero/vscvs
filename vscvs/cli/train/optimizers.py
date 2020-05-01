@@ -26,7 +26,7 @@ from vscvs.trainers.mixins import AdaBoundOptimizerMixin, AdamOptimizerMixin, Ad
 @click.option('--weight-decay', prompt='Weight decay', default=0.0, help='Weight decay (L2 penalty).')
 @click.option('--amsbound', prompt='AmsBound', default=False, help='Whether to use the AMSBound variant.')
 @pass_kwargs_to_context
-def adabound(context, **kwargs):
+def adabound(context, **__):
     """ Train models using an AdaBound optimizer. """
     context.obj['betas'] = (context.obj.pop('beta_1'), context.obj.pop('beta_2'))
     context.obj['optimizer_mixin'] = AdaBoundOptimizerMixin
@@ -43,7 +43,7 @@ def adabound(context, **kwargs):
 @click.option('--weight-decay', prompt='Weight decay', default=0.0, help='Weight decay (L2 penalty).')
 @click.option('--amsgrad', prompt='Amsgrad', default=False, help='Whether to use the AMSGrad variant.')
 @pass_kwargs_to_context
-def adam(context, **kwargs):
+def adam(context, **__):
     """ Train models using an Adam optimizer. """
     context.obj['betas'] = (context.obj.pop('beta_1'), context.obj.pop('beta_2'))
     context.obj['optimizer_mixin'] = AdamOptimizerMixin
@@ -60,7 +60,7 @@ def adam(context, **kwargs):
 @click.option('--weight-decay', prompt='Weight decay', default=0.0, help='Weight decay (L2 penalty).')
 @click.option('--amsgrad', prompt='Amsgrad', default=False, help='Whether to use the AMSGrad variant.')
 @pass_kwargs_to_context
-def adam_w(context, **kwargs):
+def adam_w(context, **__):
     """ Train models using an AdamW optimizer. """
     context.obj['betas'] = (context.obj.pop('beta_1'), context.obj.pop('beta_2'))
     context.obj['optimizer_mixin'] = AdamWOptimizerMixin
@@ -76,7 +76,7 @@ def adam_w(context, **kwargs):
 @click.option('--centered', prompt='Amsgrad', default=False,
               help='whether to compute the centered RMSProp (gradient normalized by an estimation of its variance).')
 @pass_kwargs_to_context
-def rms_prop(context, **kwargs):
+def rms_prop(context, **__):
     """ Train models using an RMSProp optimizer. """
     context.obj['optimizer_mixin'] = RMSpropOptimizerMixin
 
@@ -85,6 +85,6 @@ def rms_prop(context, **kwargs):
 @click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=1e-3)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)
 @pass_kwargs_to_context
-def sgd(context, **kwargs):
+def sgd(context, **__):
     """ Train models using an SGD optimizer. """
     context.obj['optimizer_mixin'] = SGDOptimizerMixin

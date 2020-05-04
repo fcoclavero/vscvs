@@ -148,7 +148,7 @@ def retrieve_top_k(model, query_image_filename, query_dataset_name, queried_data
     # Load embeddings from pickle directory
     queried_embeddings = load_embedding_pickles(queried_embeddings_name).to(device)
     # Get the query image and create the embedding for it
-    image, image_class = query_dataset.getitem_by_filename(query_image_filename)
+    image, image_class = query_dataset[query_image_filename]
     # Send elements to the specified device
     image, model = [var.to(device) for var in [image, model]]
     query_embedding = model(image.unsqueeze(0)) # unsqueeze to add the missing dimension expected by the model

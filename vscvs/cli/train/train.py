@@ -9,7 +9,8 @@ __status__ = 'Prototype'
 import click
 
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
-from vscvs.cli.train.optimizers import adam, adam_w, rms_prop, sgd
+from vscvs.cli.train.optimizers import adabound, adam, adam_w, rms_prop, sgd
+from vscvs.cli.train.gan import gan
 from vscvs.cli.train.siamese import siamese
 from vscvs.cli.train.triplet import triplet
 
@@ -21,9 +22,8 @@ from vscvs.cli.train.triplet import triplet
 @pass_context_to_kwargs
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
-@click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
+@click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
 def cnn(_,  *args, **kwargs):
     from vscvs.trainers.cnn import train_cnn
     click.echo('cnn - {} dataset'.format(kwargs['dataset_name']))
@@ -34,10 +34,9 @@ def cnn(_,  *args, **kwargs):
 @pass_context_to_kwargs
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--pretrained', prompt='Pretrained', help='Whether to use pretrained model weights.', default=False)
-@click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+@click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
 def resnet(_, *args, **kwargs):
     from vscvs.trainers.resnet import train_resnet
     click.echo('resnet - {} dataset'.format(kwargs['dataset_name']))
@@ -48,29 +47,13 @@ def resnet(_, *args, **kwargs):
 @pass_context_to_kwargs
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--pretrained', prompt='Pretrained', help='Whether to use pretrained model weights.', default=False)
-@click.option('--early-stopping-patience', prompt='Patience', help='Early stopping patience, in epochs', default=5)
+@click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
 def resnext(_, *args, **kwargs):
     from vscvs.trainers.resnext import train_resnext
     click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))
     train_resnext(*args, **kwargs)
-
-
-# @click.command()
-# @pass_context_to_kwargs
-# @click.option(
-#     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-#     type=click.Choice(['sketchy-mixed-batches', 'sketchy-test-mixed-batches'])
-# )
-# @click.option(
-#     '--vector-dimension', prompt='CVS dimensionality', help='Dimensionality of the common vector space.', default=300
-# )
-# def cvs_gan(_, resume, train_validation_split, batch_size, epochs, workers, n_gpu, dataset_name, vector_dimension):
-#     from vscvs.trainers.cvs_gan import train_cvs_gan
-#     click.echo('cvs gan - %s dataset' % dataset_name)
-#     train_cvs_gan(dataset_name, vector_dimension, workers, batch_size, n_gpu, epochs)
 
 
 @click.command()
@@ -93,8 +76,7 @@ def classification_gcn(_, *args, **kwargs):
 @pass_context_to_kwargs
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--in-channels', prompt='In channels', help='Number of image color channels.', default=3)
 @click.option('--cell-size', prompt='Cell size', help='Gradient pooling size.', default=8)
 @click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
@@ -121,31 +103,24 @@ def hog_gcn(_, *args, **kwargs):
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
 @pass_kwargs_to_context
-def train(context, **kwargs):
+def train(*_, **__):
     """ Train a model. """
     pass
 
 
-""" Add every simple and compound trainer command to each optimizer trainer group """
+""" Add trainer commands to each optimizer trainer group, then add the optimizer groups to the global `train` group. """
 
 
-for optimizer_group in [adam, adam_w, rms_prop, sgd]:
+for optimizer_group in [adabound, adam, adam_w, rms_prop, sgd]:
     # Compound trainer commands
+    optimizer_group.add_command(gan)
     optimizer_group.add_command(siamese)
     optimizer_group.add_command(triplet)
     # Simple trainer commands
     optimizer_group.add_command(cnn)
     optimizer_group.add_command(resnet)
     optimizer_group.add_command(resnext)
-    # optimizer_group.add_command(cvs_gan)
     optimizer_group.add_command(classification_gcn)
     optimizer_group.add_command(hog_gcn)
-
-
-""" Add optimizer trainer groups to the global trainer group. """
-
-
-train.add_command(adam)
-train.add_command(adam_w)
-train.add_command(rms_prop)
-train.add_command(sgd)
+    # Add optimizer group to global `train` group
+    train.add_command(optimizer_group)

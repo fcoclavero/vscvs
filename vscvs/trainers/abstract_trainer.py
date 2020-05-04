@@ -30,7 +30,6 @@ class AbstractTrainer(ABC):
     def __init__(self, *args, batch_size=0, dataset_name=None, drop_last=False, epochs=1, n_gpu=0, parameter_dict=None,
                  resume_date=None, resume_checkpoint=None, tag=None, train_validation_split=.8, workers=6, **kwargs):
         """
-        Base constructor which sets default trainer parameters.
         :param args: mixin arguments
         :type: tuple
         :param batch_size: batch size during training
@@ -67,11 +66,11 @@ class AbstractTrainer(ABC):
         self.device = get_device(n_gpu)
         self.epochs = epochs
         self.log_directory = get_log_directory(self.trainer_id, tag=tag, date=date)
-        self.model = self.initial_model.to(self.device)
+        self.model = self.initial_model
         self.parameter_dict = parameter_dict
         self.resume_date = datetime.strptime(resume_date, CHECKPOINT_NAME_FORMAT) if resume_date else resume_date
         self.resume_checkpoint = resume_checkpoint
-        self.start_epoch = 0
+        self.start_epoch = 1
         self.tag = tag
         self._load_checkpoint()
         self.epoch = self.start_epoch
@@ -81,10 +80,10 @@ class AbstractTrainer(ABC):
         self.trainer_engine = self._create_trainer_engine()
         self.evaluator_engine = self._create_evaluator_engine()
         self.timer = self._create_timer()
-        self.progressbar = tqdm(
-            initial=0, leave=False, total=len(self.train_loader), desc=self.progressbar_description.format(0))
+        self.progressbar = self._progressbar
         self.writer = SummaryWriter(self.log_directory)
         self._add_event_handlers()
+        self._add_model_checkpoint_savers()
         super().__init__(*args, **kwargs)
 
     """ Abstract properties. """
@@ -111,16 +110,6 @@ class AbstractTrainer(ABC):
 
     @property
     @abstractmethod
-    def optimizer(self):
-        """
-        Getter for the optimizer to be used during training.
-        :return: an optimizer object
-        :type: torch.optim.Optimizer
-        """
-        pass
-
-    @property
-    @abstractmethod
     def trainer_id(self):
         """
         Getter for the trainer id, a unique str to identify the trainer. The corresponding `data` directory sub-folders
@@ -129,37 +118,6 @@ class AbstractTrainer(ABC):
         :type: str
         """
         pass
-
-    """ Properties. """
-
-    @property
-    def progressbar_description(self):
-        """
-        The format string to be displayed beside the `tqdm` progressbar.
-        :return: the progressbar description string
-        :type: str
-        """
-        return 'TRAINING => loss: {:.6f}'
-
-    @property
-    def trainer_checkpoint(self):
-        """
-        Getter for the serialized checkpoint dictionary, which contains the values of the trainer's fields that should
-        be saved in a trainer checkpoint.
-        :return: a checkpoint dictionary
-        :type: dict
-        """
-        return {
-            'average_epoch_duration': self.timer.value(),
-            'batch_size': self.batch_size,
-            'dataset_name': self.dataset_name,
-            'parameters': self.parameter_dict,
-            'resume_date': self.resume_date,
-            'resume_checkpoint': self.resume_checkpoint,
-            'start_epoch': self.start_epoch,
-            'epochs': self.epochs,
-            'tag': self.tag
-        }
 
     """ Abstract methods. """
 
@@ -181,7 +139,48 @@ class AbstractTrainer(ABC):
         """
         pass
 
+    @abstractmethod
+    def _optimizer(self, parameters):
+        """
+        Creates an optimizer for the given parameters.
+        :param parameters: the torch objects to be optimized, typically the Trainer's model module parameters.
+        :type: list<torch.Tensor>
+        :return: an optimizer object
+        :type: torch.optim.Optimizer
+        """
+        pass
+
     """ Properties. """
+
+    @property
+    def _progressbar(self):
+        """
+        TQDM progressbar to display trainer progress.
+        :return: the trainer progressbar.
+        :type: tqdm.tqdm
+        """
+        return tqdm(initial=0, leave=False, total=len(self.train_loader),
+                    desc=self.progressbar_description.format(self.epoch, self.last_epoch, 0.0))
+
+    @property
+    def checkpoint_saver_best(self):
+        """
+        Checkpoint handler that can be used to save the best performing models
+        :return: the best performing checkpoint saver
+        :type: ModelCheckpoint
+        """
+        return ModelCheckpoint(self.checkpoint_directory, filename_prefix='net_best', n_saved=5, atomic=True,
+                               create_dir=True, require_empty=False)
+
+    @property
+    def checkpoint_saver_periodic(self):
+        """
+        Checkpoint handler that can be used to periodically save model objects to disc.
+        :return: the periodic checkpoint saver
+        :type: ModelCheckpoint
+        """
+        return ModelCheckpoint(self.checkpoint_directory, filename_prefix='net_periodic', n_saved=3, atomic=True,
+                               create_dir=True, require_empty=False)
 
     @property
     def collate_function(self):
@@ -192,6 +191,53 @@ class AbstractTrainer(ABC):
         :type: callable
         """
         return None
+
+    @property
+    def last_epoch(self):
+        """
+        Gets the last epoch that will be run.
+        :return: the last epoch.
+        :type: int
+        """
+        return self.start_epoch + self.epochs - 1
+
+    @property
+    def optimizer(self):
+        """
+        Getter for the optimizer to be used during training.
+        :return: an optimizer object
+        :type: torch.optim.Optimizer
+        """
+        return self._optimizer(self.model.parameters())
+
+    @property
+    def progressbar_description(self):
+        """
+        The format string to be displayed beside the `tqdm` progressbar.
+        :return: the progressbar description string
+        :type: str
+        """
+        return 'TRAINING epoch {}/{} => loss: {:.5f}'
+
+    @property
+    def trainer_checkpoint(self):
+        """
+        Getter for the serialized checkpoint dictionary, which contains the values of the trainer's fields that should
+        be saved in a trainer checkpoint.
+        :return: a checkpoint dictionary
+        :type: dict
+        """
+        return {
+            'average_epoch_duration': self.timer.value(),
+            'batch_size': self.batch_size,
+            'dataset_name': self.dataset_name,
+            'parameters': self.parameter_dict,
+            'resume_date': self.resume_date,
+            'resume_checkpoint': self.resume_checkpoint,
+            'start_epoch': self.start_epoch,
+            'epochs': self.epochs,
+            'tag': self.tag
+        }
 
     """ Event handler methods. """
 
@@ -209,7 +255,7 @@ class AbstractTrainer(ABC):
         :type: ignite.engine.Engine
         """
         self.writer.add_scalar('training_output', trainer.state.output, self.step)
-        self.progressbar.desc = self.progressbar_description.format(trainer.state.output)
+        self.progressbar.desc = self.progressbar_description.format(self.epoch, self.last_epoch, trainer.state.output)
 
     def _event_log_training_results(self, _):
         """
@@ -217,7 +263,7 @@ class AbstractTrainer(ABC):
         """
         self.evaluator_engine.run(self.train_loader)
         metrics = self.evaluator_engine.state.metrics
-        print('\nTraining results - epoch: {}'.format(self.epoch))
+        print('\nTraining results - epoch: {}/{}'.format(self.epoch, self.last_epoch))
         for key, value in metrics.items():
             self.writer.add_scalar('training_{}'.format(key), value, self.step)
             print('{}: {:.6f}'.format(key, value))
@@ -228,7 +274,7 @@ class AbstractTrainer(ABC):
         """
         self.evaluator_engine.run(self.validation_loader)
         metrics = self.evaluator_engine.state.metrics
-        print('\nValidation results - epoch: {}'.format(self.epoch))
+        print('\nValidation results - epoch: {}/{}'.format(self.epoch, self.last_epoch))
         for key, value in metrics.items():
             self.writer.add_scalar('validation_{}'.format(key), value, self.step)
             print('{}: {:.6f}'.format(key, value))
@@ -266,31 +312,29 @@ class AbstractTrainer(ABC):
 
     """ Methods. """
 
+    def _add_model_checkpoint_savers(self):
+        """
+        Add event handlers for saving model checkpoints.
+        """
+        self.trainer_engine.add_event_handler(
+            Events.EPOCH_COMPLETED, self.checkpoint_saver_best,{'checkpoint': self.model})
+        self.trainer_engine.add_event_handler(
+            Events.EPOCH_COMPLETED, self.checkpoint_saver_periodic, {'checkpoint': self.model})
+
     def _add_event_handlers(self):
         """
         Add event handlers to output common messages and update the progressbar.
         """
-        periodic_checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to periodically
-            self.checkpoint_directory, filename_prefix='net_latest', # save model objects to disc.
-            n_saved=3, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
-        )
-        best_checkpoint_saver = ModelCheckpoint( # create a Checkpoint handler that can be used to save the best
-            self.checkpoint_directory, filename_prefix='net_best', # performing models
-            n_saved=5, atomic=True, create_dir=True, save_as_state_dict=True, require_empty=False
-        )
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, self._event_log_training_output)
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, self._event_update_progressbar_step)
         self.trainer_engine.add_event_handler(Events.ITERATION_COMPLETED, self._event_update_step_counter)
-        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, best_checkpoint_saver, {'train': self.model})
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_log_training_results)
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_log_validation_results)
-        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, periodic_checkpoint_saver, {'train': self.model})
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_save_trainer_checkpoint)
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_reset_progressbar)
         self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self._event_update_epoch_counter)
         self.trainer_engine.add_event_handler(Events.COMPLETED, self._event_cleanup)
-        self.trainer_engine.add_event_handler(Events.COMPLETED, periodic_checkpoint_saver, {'complete': self.model})
 
     def _create_data_loaders(self, train_validation_split, batch_size, workers, drop_last):
         """
@@ -364,4 +408,4 @@ class AbstractTrainer(ABC):
         """
         Run the trainer.
         """
-        self.trainer_engine.run(self.train_loader, max_epochs=self.epochs)
+        self.trainer_engine.run(self.train_loader, max_epochs=self.epochs )

@@ -102,17 +102,85 @@ def images_by_class(dataset):
     return images_dict
 
 
-def output_transform_gan(output):
+def output_transform_evaluator(_x, y, y_pred):
     """
-    Receives `x`, `y`, `y_pred` and the returns value to be assigned to engine's
-    state.output after each iteration. Default is returning `(y_pred, y,)`, which fits output expected by metrics.
-    :param output:
-    :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
-    :return:
+    Value to be assigned to engine's state.output after each iteration. This is the default format for classifiers.
+    :param _x: the input tensor.
+    :type: torch.tensor
+    :param y: the label or target tensor.
+    :param y_pred: the output of the model.
+    :type: torch.tensor
+    :return: the expected values for a default Ignite Metric, `y_pred` and `y`.
+    type: tuple<torch.tensor. torch.tensor>
     """
-    y_pred = output['y_pred']
-    y = output['y_true']
-    return y_pred, y  # output format is according to `Accuracy` docs
+    return y_pred, y
+
+
+def output_transform_trainer(_x, _y, _y_pred, loss):
+    """
+    Value to be assigned to engine's state.output after each iteration. This is the default format for classifiers.
+    :param _x: the input tensor.
+    :type: torch.tensor
+    :param _y: the label or target tensor.
+    :param _y_pred: the output of the model.
+    :type: torch.tensor
+    :param loss: the loss module for the network.
+    :type: torch.nn.Module
+    :return: value to be assigned to engine's state.output after each iteration, which by default is the loss value.
+    :type: tuple<torch.Tensor>
+    """
+    return loss.item()
+
+
+def output_transform_multimodal_gan_evaluator(embeddings, mode_predictions, mode_labels, generator_labels, classes):
+    """
+    Receives the result of a multimodal GAN evaluator engine and returns value to be assigned to engine's `state.output`
+    after each iteration.
+    :param embeddings: tensor with the embedding vectors for each batch element (thus one embedding per mode per
+    entity). The tensor has a shape of `[n_modes * batch_size, embedding_length]`.
+    :type: list<torch.tensor>
+    :param mode_predictions: tensor of shape `[n_modes * batch_size, n_modes]` with the probability of each element
+    to belong to each mode.
+    :type: torch.tensor
+    :param mode_labels: the actual mode labels for each element. Tensor of shape `[n_modes * batch_size, n_modes]`.
+    :type: torch.tensor
+    :param generator_labels: the labels used for the generator loss, usually the additive inverse of each mode label.
+    :type: torch.tensor
+    :param classes: the classes, or categories, of each entity in the dataset. Tensor of shape `[batch_size]`.
+    :type: torch.tensor
+    :return: the value to be assigned to engine's state.output after each iteration, which must fit that expected by the
+    metrics, which by default in a multimodal GAN is the element embeddings, mode predictions and labels, and classes.
+    :type: tuple<list<torch.tensor>, torch.tensor, torch.tensor, torch.tensor>
+    """
+    return embeddings, mode_predictions, mode_labels, generator_labels, classes
+
+
+def output_transform_multimodal_gan_trainer(_embeddings, _mode_predictions, _mode_labels, _generator_labels, _classes,
+                                            generator_loss, discriminator_loss):
+    """
+    Receives the result of a multimodal GAN trainer engine and returns value to be assigned to engine's state.output
+    after each iteration, which by default is the loss values.
+    :param _embeddings: list with the embedding vectors for each batch element of each mode (thus one embedding per mode
+    per entity). The list has a length equal to the number of modes and each embedding tensor has a shape of
+    `[n_modes, embedding_length]`.
+    :type: list<torch.tensor>
+    :param _mode_predictions: tensor of shape `[n_modes * batch_size, n_modes]` with the probability of each element
+    to belong to each mode.
+    :type: torch.tensor
+    :param _mode_labels: the actual mode labels for each element. Tensor of shape `[n_modes * batch_size, n_modes]`.
+    :type: torch.tensor
+    :param _generator_labels: the labels used for the generator loss, usually the additive inverse of each mode label.
+    :type: torch.tensor
+    :param _classes: the classes, or categories, of each entity in the dataset. Tensor of shape `[batch_size]`.
+    :type: torch.tensor
+    :param generator_loss: the loss module for the generator network.
+    :type: torch.nn.Module
+    :param discriminator_loss: the loss module for the discriminator network.
+    :type: torch.nn.Module
+    :return: value to be assigned to engine's state.output after each iteration.
+    :type: tuple<torch.Tensor, torch.Tensor>
+    """
+    return generator_loss.item(), discriminator_loss.item()
 
 
 def output_transform_siamese_evaluator(embeddings_0, embeddings_1, target):
@@ -125,22 +193,22 @@ def output_transform_siamese_evaluator(embeddings_0, embeddings_1, target):
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
     :param target: tensor with the contrastive loss target for each pair (0 for similar images, 1 otherwise).
     :type: torch.Tensor
-    :return: value to be assigned to engine's state.output after each iteration, which must fit that expected by the
+    :return: the value to be assigned to engine's state.output after each iteration, which must fit that expected by the
     metrics. By default, in a siamese network, it is the embeddings of each image pair and their target tensor.
     :type: tuple<torch.Tensor>
     """
     return embeddings_0, embeddings_1, target
 
 
-def output_transform_siamese_trainer(embeddings_0, embeddings_1, target, loss):
+def output_transform_siamese_trainer(_embeddings_0, _embeddings_1, _target, loss):
     """
     Receives the result of a siamese network trainer engine (the embeddings of each image, the target tensor and the
     loss module) and returns value to be assigned to engine's state.output after each iteration.
-    :param embeddings_0: torch tensor containing the embeddings for the first image of each image pair.
+    :param _embeddings_0: torch tensor containing the embeddings for the first image of each image pair.
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
-    :param embeddings_1: torch tensor containing the embeddings for the second image of each image pair.
+    :param _embeddings_1: torch tensor containing the embeddings for the second image of each image pair.
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
-    :param target: tensor with the contrastive loss target for each pair (0 for similar images, 1 otherwise).
+    :param _target: tensor with the contrastive loss target for each pair (0 for similar images, 1 otherwise).
     :type: torch.Tensor
     :param loss: the loss module.
     :type: torch.nn.Module
@@ -167,15 +235,15 @@ def output_transform_triplet_evaluator(anchor_embeddings, positive_embeddings, n
     return anchor_embeddings, positive_embeddings, negative_embeddings
 
 
-def output_transform_triplet_trainer(anchor_embeddings, positive_embeddings, negative_embeddings, loss):
+def output_transform_triplet_trainer(_anchor_embeddings, _positive_embeddings, _negative_embeddings, loss):
     """
     Receives the result of a triplet network trainer engine (the embeddings of each triplet element and the loss
     module) and returns value to be assigned to engine's state.output after each iteration.
-    :param anchor_embeddings: torch tensor containing the embeddings for the anchor elements.
+    :param _anchor_embeddings: torch tensor containing the embeddings for the anchor elements.
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
-    :param positive_embeddings: torch tensor containing the embeddings for the positive elements (same class as anchor).
+    :param _positive_embeddings: torch tensor containing the embeddings for the positive elements (same class as anchor).
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
-    :param negative_embeddings: torch tensor containing the embeddings for the negative elements (same class as anchor).
+    :param _negative_embeddings: torch tensor containing the embeddings for the negative elements (same class as anchor).
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
     :param loss: the loss module.
     :type: torch.nn.Module
@@ -200,25 +268,6 @@ def prepare_batch(batch, device=None, non_blocking=False):
     """
     x, y, *_ = batch # unpack extra parameters into `_`
     return tuple(convert_tensor(element, device=device, non_blocking=non_blocking) for element in [x, y])
-
-
-def prepare_batch_gan(batch, device=None, non_blocking=False):
-    """
-    Prepare batch for GAN training: pass to a device with options. Assumes the shape returned
-    by the SketchyMixedBatches Dataset.
-    :param batch: data to be sent to device.
-    :type: list
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
-    :return: tuple with adversarial batches.
-    :type: tuple<torch.Tensor, list<torch.Tensor>, torch.Tensor>
-    """
-    photos, sketches, classes = batch
-    return convert_tensor(photos, device=device, non_blocking=non_blocking), \
-           [convert_tensor(sketch, device=device, non_blocking=non_blocking) for sketch in sketches], \
-           convert_tensor(classes, device=device, non_blocking=non_blocking)
 
 
 def prepare_batch_graph(batch, classes_dataframe, device=None, non_blocking=False, processes=None):
@@ -263,21 +312,20 @@ def prepare_batch_siamese(batch, device=None, non_blocking=False):
     return tuple(convert_tensor(i, device=device, non_blocking=non_blocking) for i in [images_0, images_1, target])
 
 
-def prepare_batch_triplet(batch, device=None, non_blocking=False):
+def prepare_batch_multimodal(batch, device=None, non_blocking=False):
     """
-    Prepare batch for triplet network training: pass to a device with options. Assumes the shape returned by a Dataset
-    implementing the `TripletMixin`.
+    Prepare batch for multimodal network training: pass to a device with options. Assumes the shape returned by a
+    `MultimodalDataset` subclass.
     :param batch: data to be sent to device.
     :type: list
     :param device: device type specification
     :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
-    :return: 3-tuple with triplet batches. Triplet index i corresponds to the i-th element of each tensor in the
-    returned tuple.
-    :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+    :return: tuple with multimodal batches.
+    :type: tuple<torch.Tensor, ...>
     """
-    return tuple(prepare_batch(images, device, non_blocking) for images in batch) # `batch` is triplet batches tuple
+    return tuple(prepare_batch(images, device, non_blocking) for images in batch)
 
 
 def random_simple_split(data, split_proportion=.8):
@@ -312,7 +360,8 @@ def siamese_target(images_0, images_1):
     :return: tensor with the contrastive loss target.
     :type: torch.Tensor with shape `batch_size`
     """
-    return (images_0[1] != images_1[1]).int()
+    # noinspection PyUnresolvedReferences
+    return (images_0[1] != images_1[1]).int() # type inference results in `torch.tensor`, which has the `.int()` method
 
 
 def simple_split(data, split_proportion=.8):

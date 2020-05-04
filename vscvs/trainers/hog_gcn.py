@@ -8,13 +8,14 @@ __status__ = 'Prototype'
 
 from abc import ABC
 from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy
+from overrides import overrides
 from torch.nn import CrossEntropyLoss
+from typing import Callable
 
 from vscvs.datasets import get_dataset
 from vscvs.models import HOGGCN
 from vscvs.trainers.abstract_trainer import AbstractTrainer
 from vscvs.trainers.engines.hog_gcn import create_hog_gcn_evaluator, create_hog_gcn_trainer
-from vscvs.utils.data import prepare_batch
 from vscvs.decorators import kwargs_parameter_dict
 
 
@@ -27,7 +28,6 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
     def __init__(self, *args, dataset_name=None, in_channels=3, cell_size=8, bins=9, signed_gradients=False,
                  processes=None, **kwargs):
         """
-        Trainer constructor.
         :param args: Trainer arguments
         :type: tuple
         :param dataset_name: the name of the Dataset to be used for training
@@ -59,6 +59,7 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
         super().__init__(*args, dataset_name=self.dataset_name, **kwargs)
 
     @property
+    @overrides
     def initial_model(self):
         dataset = get_dataset(self.dataset_name)
         image_dimension = dataset[0][0].shape[1]
@@ -66,22 +67,25 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
                       self.signed_gradients, self.processes)
 
     @property
+    @overrides
     def loss(self):
         return CrossEntropyLoss()
 
     @property
+    @overrides
     def trainer_id(self):
         return 'HOGGCN'
 
+    @overrides
     def _create_evaluator_engine(self):
         return create_hog_gcn_evaluator(
-            prepare_batch, self.model, self.dataset.classes_dataframe, device=self.device, processes=self.processes,
-            metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss), 'recall': Recall(average=True),
-                     'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
+            self.model, device=self.device, metrics={
+                'accuracy': Accuracy(), 'loss': Loss(self.loss), 'recall': Recall(average=True),
+                'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
 
+    @overrides
     def _create_trainer_engine(self):
-        return create_hog_gcn_trainer(prepare_batch, self.model, self.dataset.classes_dataframe, self.optimizer,
-                                      self.loss, device=self.device, processes=self.processes)
+        return create_hog_gcn_trainer(self.model, self.optimizer, self.loss, device=self.device)
 
 
 @kwargs_parameter_dict
@@ -97,6 +101,6 @@ def train_hog_gcn(*args, optimizer_mixin=None, **kwargs):
     :type: dict
     """
     class HOGGCNTrainer(optimizer_mixin, AbstractHOGGCNTrainer):
-        pass
+        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = HOGGCNTrainer(*args, **kwargs)
     trainer.run()

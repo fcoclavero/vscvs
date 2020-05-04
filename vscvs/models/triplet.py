@@ -19,7 +19,6 @@ class TripletNetwork(nn.Module):
     """
     def __init__(self, anchor_embedding_network, positive_embedding_network, negative_embedding_network):
         """
-        Model constructor.
         :param anchor_embedding_network: the network that will encode the anchor element of each triplet.
         :type: torch.nn.module
         :param positive_embedding_network: the network that will encode the positive elements.
@@ -56,7 +55,6 @@ class TripletSharedAnchorPositive(TripletNetwork):
     """
     def __init__(self, anchor_positive_embedding_network, negative_embedding_network):
         """
-        Model constructor.
         :param anchor_positive_embedding_network: the network that will encode anchor and positive elements.
         :type: torch.nn.module
         :param negative_embedding_network: the network that will encode the negative elements.
@@ -72,7 +70,6 @@ class TripletSharedAnchorNegative(TripletNetwork):
     """
     def __init__(self, anchor_negative_embedding_network, positive_embedding_network):
         """
-        Model constructor.
         :param anchor_negative_embedding_network: the network that will encode anchor and negative elements.
         :type: torch.nn.module
         :param positive_embedding_network: the network that will encode the positive elements.
@@ -88,7 +85,6 @@ class TripletSharedPositiveNegative(TripletNetwork):
     """
     def __init__(self, anchor_embedding_network, positive_negative_embedding_network):
         """
-        Model constructor.
         :param anchor_embedding_network: the network that will encode the anchor elements of each triplet.
         :type: torch.nn.module
         :param positive_negative_embedding_network: the network that will encode positive and negative elements.
@@ -104,7 +100,6 @@ class TripletShared(TripletNetwork):
     """
     def __init__(self, embedding_network):
         """
-        Model constructor.
         :param embedding_network: the network that will encode all elements of each triplet.
         :type: torch.nn.module
         """

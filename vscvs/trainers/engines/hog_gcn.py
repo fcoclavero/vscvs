@@ -10,19 +10,18 @@ import torch
 
 from ignite.engine import Engine
 
+from vscvs.trainers.engines import attach_metrics
+from vscvs.utils.data import output_transform_evaluator, output_transform_trainer, prepare_batch as _prepare_batch
 
-def create_hog_gcn_trainer(prepare_batch, model, classes_dataframe, optimizer, loss_fn, device=None,
-                           non_blocking=False, processes=None):
+
+def create_hog_gcn_trainer(model, optimizer, loss_fn, device=None, non_blocking=False,
+                           prepare_batch=_prepare_batch, output_transform=output_transform_trainer):
     """
     Factory function for creating an ignite trainer Engine for a class classification GCN that creates batch clique
     graphs where node feature vectors correspond to batch image HOG feature vectors and vertex weights correspond to the
     distance of class name strings' document vectors.
-    :param prepare_batch: image batch preparation logic
-    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>>
     :param model: the generator model - generates vectors from images
     :type: torch.nn.Module
-    :param classes_dataframe: dataframe containing class names and their word vectors
-    :type: pandas.Dataframe
     :param optimizer: the optimizer to be used for the generator model
     :type: torch.optim.Optimizer
     :param loss_fn: the triplet loss
@@ -31,16 +30,17 @@ def create_hog_gcn_trainer(prepare_batch, model, classes_dataframe, optimizer, l
     :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
-    :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
-    will be used.
-    :type: int or None
+    :param prepare_batch: image batch preparation logic
+    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>>
+    :param output_transform: function that receives the result of the network trainer engine and returns value to
+    be assigned to engine's state.output after each iteration.
+    :type: Callable<args: `x`, `y`, `y_pred`, `loss`, ret: object>> (optional)
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """
-    if device:
-        model.to(device)
+    if device: model.to(device)
 
-    def _update(engine, batch):
+    def _update(_, batch):
         model.train() # # set training mode
         optimizer.zero_grad() # reset gradients
         image_batch = prepare_batch(batch, device=device, non_blocking=non_blocking)
@@ -48,57 +48,45 @@ def create_hog_gcn_trainer(prepare_batch, model, classes_dataframe, optimizer, l
         loss = loss_fn(y_pred, image_batch[1]) # compute loss
         loss.backward() # back propagation
         optimizer.step() # update model wights
-        return loss.item() # return loss for logging
+        return output_transform(*image_batch, y_pred, loss)
 
     return Engine(_update)
 
 
-def create_hog_gcn_evaluator(prepare_batch, model, classes_dataframe, metrics=None, device=None,
-                             non_blocking=False, processes=None):
+def create_hog_gcn_evaluator(model, metrics=None, device=None, non_blocking=False,
+                             prepare_batch=_prepare_batch, output_transform=output_transform_evaluator):
     """
     Factory function for creating an evaluator for a class classification GCN that creates batch clique graphs where
     node feature vectors correspond to batch image HOG feature vectors and vertex weights correspond to the distance of
     class name strings' document vectors.
     NOTE: `engine.state.output` for this engine is defined by `output_transform` parameter and is
     a tuple of `(batch_pred, batch_y)` by default.
-    :param prepare_batch: image batch preparation logic
-    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch_geometric.data.Data, torch.Tensor>>
     :param model: the model to train.
     :type: torch.nn.Module
-    :param classes_dataframe: dataframe containing class names and their word vectors
-    :type: pandas.Dataframe
     :param metrics: map of metric names to Metrics.
     :type: dict<str:<ignite.metrics.Metric>>
     :param device: device type specification. Applies to both model and batches.
     :type: str of torch.device (optional) (default: None)
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
     :type: bool (optional)
-    :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
-    will be used.
-    :type: int or None
+    :param prepare_batch: image batch preparation logic
+    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch_geometric.data.Data, torch.Tensor>>
+    :param output_transform: function that receives the result of the network trainer engine and returns value to
+    be assigned to engine's state.output after each iteration, which myst fit that expected by the metrics.
+    :type: Callable<args: `x`, `y`, `y_pred` , ret: tuple<torch.Tensor, torch.Tensor>> (optional)
     :return: an evaluator engine with supervised inference function.
     :type: ignite.engine.Engine
     """
-    metrics = metrics or {}
+    if device: model.to(device)
 
-    if device:
-        model.to(device)
-
-    def _output_transform(x, y, y_pred):
-        """ Value to be assigned to engine's state.output after each iteration. """
-        return y_pred, y  # output format is according to `Accuracy` docs
-
-    def _inference(engine, batch):
+    def _inference(_, batch):
         model.eval()
         with torch.no_grad():
             image_batch = prepare_batch(batch, device=device, non_blocking=non_blocking)
             x, y, *_ = image_batch
             y_pred = model(image_batch)  # feed data to model
-            return _output_transform(x, y, y_pred)
+            return output_transform(x, y, y_pred)
 
     engine = Engine(_inference)
-
-    for name, metric in metrics.items():
-        metric.attach(engine, name)
-
+    if metrics: attach_metrics(engine, metrics)
     return engine

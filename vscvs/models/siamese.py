@@ -18,7 +18,6 @@ class SiameseNetwork(nn.Module):
     """
     def __init__(self, embedding_network_0, embedding_network_1):
         """
-        Model constructor.
         :param embedding_network_0: the network that will encode the first element of each sample pair.
         :type: torch.nn.module
         :param embedding_network_1: the network that will encode the first element of each sample pair.
@@ -52,7 +51,6 @@ class SiameseNetworkShared(nn.Module):
     """
     def __init__(self, embedding_network):
         """
-        Model constructor.
         :param embedding_network: the network to be used in the siamese training. It must accept network inputs and
         produce network outputs.
         :type: torch.nn.module

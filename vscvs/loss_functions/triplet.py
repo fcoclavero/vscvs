@@ -17,7 +17,6 @@ class TripletLoss(ReductionMixin, torch.nn.Module):
     """
     def __init__(self, *args, margin=.2, **kwargs):
         """
-        Loss constructor.
         :param args: mixin arguments
         :type: list
         :param margin: parameter defining the minimum acceptable difference between the distance from the anchor element

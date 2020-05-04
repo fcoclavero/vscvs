@@ -102,6 +102,36 @@ def images_by_class(dataset):
     return images_dict
 
 
+def output_transform_evaluator(_x, y, y_pred):
+    """
+    Value to be assigned to engine's state.output after each iteration. This is the default format for classifiers.
+    :param _x: the input tensor.
+    :type: torch.tensor
+    :param y: the label or target tensor.
+    :param y_pred: the output of the model.
+    :type: torch.tensor
+    :return: the expected values for a default Ignite Metric, `y_pred` and `y`.
+    type: tuple<torch.tensor. torch.tensor>
+    """
+    return y_pred, y
+
+
+def output_transform_trainer(_x, _y, _y_pred, loss):
+    """
+    Value to be assigned to engine's state.output after each iteration. This is the default format for classifiers.
+    :param _x: the input tensor.
+    :type: torch.tensor
+    :param _y: the label or target tensor.
+    :param _y_pred: the output of the model.
+    :type: torch.tensor
+    :param loss: the loss module for the network.
+    :type: torch.nn.Module
+    :return: value to be assigned to engine's state.output after each iteration, which by default is the loss value.
+    :type: tuple<torch.Tensor>
+    """
+    return loss.item()
+
+
 def output_transform_multimodal_gan_evaluator(embeddings, mode_predictions, mode_labels, generator_labels, classes):
     """
     Receives the result of a multimodal GAN evaluator engine and returns value to be assigned to engine's `state.output`

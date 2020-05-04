@@ -8,7 +8,9 @@ __status__ = 'Prototype'
 
 from abc import ABC
 from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy
+from overrides import overrides
 from torch.nn import CrossEntropyLoss
+from typing import Callable
 
 from vscvs.datasets import get_dataset
 from vscvs.models import GCNClassification
@@ -40,29 +42,32 @@ class AbstractClassificationGCNTrainer(AbstractTrainer, ABC):
         super().__init__(*args, dataset_name=self.dataset_name, **kwargs)
 
     @property
+    @overrides
     def initial_model(self):
         dataset = get_dataset(self.dataset_name)
         return GCNClassification(len(dataset.classes), 11)
 
     @property
+    @overrides
     def loss(self):
         return CrossEntropyLoss()
 
     @property
+    @overrides
     def trainer_id(self):
         return 'ClassificationGCN'
 
+    @overrides
     def _create_evaluator_engine(self):
         return create_classification_gcn_evaluator(
-            prepare_batch_graph, self.model, self.dataset.classes_dataframe, device=self.device,
-            processes=self.processes, metrics={
+            self.model, self.dataset.classes_dataframe, device=self.device, processes=self.processes, metrics={
                 'accuracy': Accuracy(), 'loss': Loss(self.loss),
                 'recall': Recall(average=True), 'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
 
+    @overrides
     def _create_trainer_engine(self):
-        return create_classification_gcn_trainer(
-            prepare_batch_graph, self.model, self.dataset.classes_dataframe,
-            self.optimizer, self.loss, device=self.device, processes=self.processes)
+        return create_classification_gcn_trainer(self.model, self.optimizer, self.loss, self.dataset.classes_dataframe,
+                                                 device=self.device, processes=self.processes)
 
 
 @kwargs_parameter_dict
@@ -78,6 +83,6 @@ def train_classification_gcn(*args, optimizer_mixin=None, **kwargs):
     :type: dict
     """
     class ClassificationGCNTrainer(optimizer_mixin, AbstractClassificationGCNTrainer):
-        pass
+        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = ClassificationGCNTrainer(*args, **kwargs)
     trainer.run()

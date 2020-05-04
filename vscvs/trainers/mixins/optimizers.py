@@ -41,7 +41,7 @@ class GANOptimizerMixin:
     @property
     def optimizer(self):
         """
-        Override of the `optimizer` property to return the optimizers for the two adversarial models.
+        :override: return the optimizers for the two adversarial models.
         :return: the optimizers for the generator and discriminator model modules.
         :type: tuple<torch.optim.Optimizer, torch.optim.Optimizer>
         """
@@ -124,9 +124,8 @@ class AdamWOptimizerMixin(AdamOptimizerMixin):
     Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with an
     [AdamW](https://pytorch.org/docs/stable/optim.html#torch.optim.AdamW) optimizer.
     """
-    @property
-    def optimizer(self):
-        return AdamW(self.model.parameters(), lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
+    def _optimizer(self, parameters):
+        return AdamW(parameters, lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
                      weight_decay=self.weight_decay, amsgrad=self.amsgrad)
 
 

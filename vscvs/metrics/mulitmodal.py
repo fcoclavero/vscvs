@@ -33,16 +33,16 @@ class AbstractAverageDistances(Metric, ABC):
         self._num_examples_negative = 0
         super().__init__(*args, **kwargs)
 
-    @overrides
     @sync_all_reduce('_sum_positive', '_num_examples_positive', '_sum_negative', '_num_examples_negative')
+    @overrides
     def compute(self):
         if self._num_examples_positive == 0 or self._num_examples_negative == 0:
             raise NotComputableError('AverageDistances needs at least one example per target to be computed.')
         return self._sum_positive_distances / self._num_examples_positive, \
                self._sum_negative_distances / self._num_examples_negative
 
-    @overrides
     @reinit__is_reduced
+    @overrides
     def reset(self):
         self._sum_positive_distances = 0
         self._sum_negative_distances = 0

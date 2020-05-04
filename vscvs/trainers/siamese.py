@@ -7,9 +7,11 @@ __status__ = 'Prototype'
 
 
 from abc import ABC
+from overrides import overrides
+from typing import Callable
 
 from vscvs.loss_functions import ContrastiveLoss
-from vscvs.metrics.contrastive import Accuracy, AverageDistances, Loss
+from vscvs.metrics.siamese import AccuracySiamesePairs, AverageDistancesSiamesePairs, LossSiamesePairs
 from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, SiameseNetwork
 from vscvs.trainers.abstract_trainer import AbstractTrainer
 from vscvs.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
@@ -46,23 +48,28 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
         super().__init__(*args, **kwargs)
 
     @property
+    @overrides
     def initial_model(self):
         return SiameseNetwork(self.embedding_network_1, self.embedding_network_2)
 
     @property
+    @overrides
     def loss(self):
         return ContrastiveLoss(margin=self.margin, reduction=self.loss_reduction)
 
     @property
+    @overrides
     def trainer_id(self):
         return 'Siamese{}'.format(self.embedding_network_1.__class__.__name__)
 
+    @overrides
     def _create_evaluator_engine(self):
-        average_distances = AverageDistances()
+        average_distances = AverageDistancesSiamesePairs()
         return create_siamese_evaluator(self.model, device=self.device, metrics={
-            'accuracy': Accuracy(), 'average_positive_distance': average_distances[0],
-            'average_negative_distance': average_distances[1], 'loss': Loss(self.loss)})
+            'accuracy': AccuracySiamesePairs(), 'average_positive_distance': average_distances[0],
+            'average_negative_distance': average_distances[1], 'loss': LossSiamesePairs(self.loss)})
 
+    @overrides
     def _create_trainer_engine(self):
         return create_siamese_trainer(self.model, self.optimizer, self.loss, device=self.device)
 
@@ -80,14 +87,14 @@ def train_siamese_cnn(*args, optimizer_mixin=None, **kwargs):
     :type: dict
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
-        pass
+        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = SiameseTrainer(*args, embedding_network_1=CNNNormalized(out_features=250),  # photos
                              embedding_network_2=CNNNormalized(out_features=250), **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_siamese_resnet(*args, margin=.2, optimizer_mixin=None, **kwargs):
+def train_siamese_resnet(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Siamese ResNet architecture.
     :param args: SiameseTrainer arguments
@@ -99,14 +106,14 @@ def train_siamese_resnet(*args, margin=.2, optimizer_mixin=None, **kwargs):
     :type: dict
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
-        pass
+        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = SiameseTrainer(*args, embedding_network_1=ResNetNormalized(out_features=250, pretrained=True), # photos
                              embedding_network_2=ResNetNormalized(out_features=250), **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_siamese_resnext(*args, margin=.2, optimizer_mixin=None, **kwargs):
+def train_siamese_resnext(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Siamese ResNext architecture.
     :param args: SiameseTrainer arguments
@@ -118,7 +125,7 @@ def train_siamese_resnext(*args, margin=.2, optimizer_mixin=None, **kwargs):
     :type: dict
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
-        pass
+        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = SiameseTrainer(*args, embedding_network_1=ResNextNormalized(out_features=250, pretrained=True),  # photos
                              embedding_network_2=ResNextNormalized(out_features=250), **kwargs)
     trainer.run()

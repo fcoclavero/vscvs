@@ -55,6 +55,7 @@ class ContrastiveLoss(ReductionMixin, torch.nn.Module):
         :type: float
         """
         euclidean_distances_squared = torch.nn.functional.pairwise_distance(x_0, x_1).pow(2) # cross-domain
+        # noinspection PyTypeChecker
         losses =  0.5 * ((1 - y) * euclidean_distances_squared +
-                        y * torch.clamp(self.margin -  euclidean_distances_squared, min=0.0))
+                         y * torch.clamp(self.margin -  euclidean_distances_squared, min=0.0))
         return self.reduce(losses)

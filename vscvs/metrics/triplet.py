@@ -16,7 +16,7 @@ from overrides import overrides
 from vscvs.metrics.mulitmodal import AbstractAverageDistances
 
 
-class TripletAccuracy(Metric):
+class AccuracyTriplets(Metric):
     """
     Computes the average accuracy for a triplet network, defined as the proportion of triplets in which the positive
     embedding is closer to the anchor than the negative embedding (this is the desired behaviour).
@@ -32,21 +32,21 @@ class TripletAccuracy(Metric):
         self._num_examples = 0
         super().__init__(*args, **kwargs)
 
-    @overrides
     @sync_all_reduce('_num_correct', '_num_examples')
+    @overrides
     def compute(self):
         if self._num_examples == 0:
             raise NotComputableError('Accuracy must have at least one example before it can be computed.')
         return self._num_correct / self._num_examples
 
-    @overrides
     @reinit__is_reduced
+    @overrides
     def reset(self):
         self._num_correct = 0
         self._num_examples = 0
 
-    @overrides
     @reinit__is_reduced
+    @overrides
     def update(self, output):
         """
         :override: updates the metric's state using the passed triplet batch output.
@@ -67,12 +67,12 @@ class TripletAccuracy(Metric):
         self._num_examples += batch_size
 
 
-class TripletLoss(Loss):
+class LossTriplets(Loss):
     """
     Computes the average loss for a triplet network.
     """
-    @overrides
     @reinit__is_reduced
+    @overrides
     def update(self, output):
         """
         :override: updates the metric's state using the passed triplet batch output.
@@ -97,12 +97,12 @@ class TripletLoss(Loss):
         self._num_examples += batch_size
 
 
-class TripletAverageDistances(AbstractAverageDistances):
+class AverageDistancesTriplets(AbstractAverageDistances):
     """
     Computes the average distances from the anchor to the positive and negative elements of each triplet.
     """
-    @overrides
     @reinit__is_reduced
+    @overrides
     def update(self, output):
         """
         :override: updates the metric's state using the passed triplet batch output.

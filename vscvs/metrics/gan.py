@@ -13,7 +13,7 @@ from ignite.metrics.metric import sync_all_reduce, reinit__is_reduced
 from overrides import overrides
 
 
-class AbstractGANLoss(Metric, ABC):
+class AbstractLossGAN(Metric, ABC):
     """
     Computes the average loss for a GAN.
     """
@@ -35,27 +35,27 @@ class AbstractGANLoss(Metric, ABC):
         self._num_examples = 0
         super().__init__(*args, **kwargs)
 
-    @overrides
     @sync_all_reduce('_sum_generator_loss', '_sum_discriminator_loss', '_num_examples')
+    @overrides
     def compute(self):
         if self._num_examples == 0:
             raise NotComputableError('Loss must have at least one example before it can be computed.')
         return self._sum_generator_loss / self._num_examples, self._sum_discriminator_loss / self._num_examples
 
-    @overrides
     @reinit__is_reduced
+    @overrides
     def reset(self):
         self._sum_generator_loss = 0
         self._sum_discriminator_loss = 0
         self._num_examples = 0
 
 
-class MultimodalGANLoss(AbstractGANLoss):
+class LossMultimodalGAN(AbstractLossGAN):
     """
     Computes the average loss for a multimodal GAN.
     """
-    @overrides
     @reinit__is_reduced
+    @overrides
     def update(self, output):
         """
         :override: updates the metric's state using the passed GAN batch output.

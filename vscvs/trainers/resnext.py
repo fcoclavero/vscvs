@@ -9,8 +9,9 @@ __status__ = 'Prototype'
 from abc import ABC
 from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy, Precision
-from torch import round
+from overrides import overrides
 from torch.nn import CrossEntropyLoss
+from typing import Callable
 
 from vscvs.models import ResNextLogSoftmax
 from vscvs.trainers.abstract_trainer import AbstractTrainer
@@ -39,22 +40,27 @@ class AbstractResNextTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
         super().__init__(*args, **kwargs)
 
     @property
+    @overrides
     def initial_model(self):
         return ResNextLogSoftmax(out_features=self.out_features, pretrained=self.pretrained)
 
     @property
+    @overrides
     def loss(self):
         return CrossEntropyLoss()
 
     @property
+    @overrides
     def trainer_id(self):
         return 'ResNext'
 
     @staticmethod
+    @overrides
     def _score_function(engine):
         precision = engine.state.metrics['precision']
         return precision
 
+    @overrides
     def _create_evaluator_engine(self):
         return create_supervised_evaluator(
             self.model, device=self.device,
@@ -62,15 +68,10 @@ class AbstractResNextTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
                      'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10),
                      'precision': Precision(average=True)})
 
+    @overrides
     def _create_trainer_engine(self):
         return create_supervised_trainer(
             self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
-
-    @staticmethod
-    def _output_transform(output):
-        y_pred, y = output
-        y_pred = round(y_pred)
-        return y_pred, y
 
 
 @kwargs_parameter_dict
@@ -86,6 +87,6 @@ def train_resnext(*args, optimizer_mixin=None, **kwargs):
     :type: dict
     """
     class ResNextTrainer(optimizer_mixin, AbstractResNextTrainer):
-        pass
+        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = ResNextTrainer(*args, **kwargs)
     trainer.run()

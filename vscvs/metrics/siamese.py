@@ -16,7 +16,7 @@ from overrides import overrides
 from vscvs.metrics.mulitmodal import AbstractAverageDistances
 
 
-class SiameseAccuracy(Metric):
+class AccuracySiamesePairs(Metric):
     """
     Computes the average accuracy for a siamese network, defined as the accuracy of the best distance decision
     threshold for classifying batch elements into their targets (similar/dissimilar).
@@ -32,21 +32,21 @@ class SiameseAccuracy(Metric):
         self._num_examples = 0
         super().__init__(*args, **kwargs)
 
-    @overrides
     @sync_all_reduce('_num_correct', '_num_examples')
+    @overrides
     def compute(self):
         if self._num_examples == 0:
             raise NotComputableError('Accuracy must have at least one example before it can be computed.')
         return self._num_correct / self._num_examples
 
-    @overrides
     @reinit__is_reduced
+    @overrides
     def reset(self):
         self._num_correct = 0
         self._num_examples = 0
 
-    @overrides
     @reinit__is_reduced
+    @overrides
     def update(self, output):
         """
         :override: updates the metric's state using the passed siamese batch output.
@@ -77,12 +77,12 @@ class SiameseAccuracy(Metric):
         self._num_examples += batch_size
 
 
-class SiameseLoss(Loss):
+class LossSiamesePairs(Loss):
     """
     Computes the average loss for a siamese network.
     """
-    @overrides
     @reinit__is_reduced
+    @overrides
     def update(self, output):
         """
         :override: updates the metric's state using the passed siamese batch output.
@@ -107,12 +107,12 @@ class SiameseLoss(Loss):
         self._num_examples += batch_size
 
 
-class SiameseAverageDistances(AbstractAverageDistances):
+class AverageDistancesSiamesePairs(AbstractAverageDistances):
     """
     Computes the average distances for positive and negative pairs in a siamese network.
     """
-    @overrides
     @reinit__is_reduced
+    @overrides
     def update(self, output):
         """
         :override: updates the metric's state using the passed siamese batch output.

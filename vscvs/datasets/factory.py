@@ -82,7 +82,7 @@ DATASETS = {
 
 def get_dataset(dataset_name, *args, **kwargs):
     """
-    Get the Dataset instancing lambda from the dictionary and return it's evaluation. This way, a Dataset object is
+    Get the Dataset instancing lambda from the dictionary and return its evaluation. This way, a Dataset object is
     only instanced when this function is evaluated.
     :param dataset_name: the name of the Dataset to be instanced. Must be a key in the DATASETS dictionary.
     :type: str

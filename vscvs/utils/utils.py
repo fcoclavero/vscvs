@@ -34,7 +34,7 @@ def camel_to_snake_case_dict_keys(dictionary):
     Convert the format of the given dictionary keys from CamelCase to snake_case.
     :param dictionary: the dictionary with keys in CamelCase format.
     :type: dict
-    :return: the same dictionary, but with it's keys formatted in snake_case.
+    :return: the same dictionary, but with its keys formatted in snake_case.
     :type: dict
     """
     return {camel_to_snake_case(key) : value for key, value in dictionary.items()}

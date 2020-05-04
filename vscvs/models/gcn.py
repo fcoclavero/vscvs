@@ -22,7 +22,6 @@ class GCNClassification(torch.nn.Module):
     """
     def __init__(self, num_classes, in_channels):
         """
-        Module constructor.
         :param num_classes: number of possible node classes. The module output will be a vector with a length of
         `num_classes`, where the value in each position corresponds to the probability of a node belonging to
         each class.
@@ -58,7 +57,6 @@ class HOGGCN(torch.nn.Module):
     def __init__(self, classes_dataframe, in_dimension=256, in_channels=3, cell_size=8, bins=9, signed_gradients=False,
                  processes=None):
         """
-        Module constructor.
         :param classes_dataframe: dataframe containing all possible class names and their word vectors
         :type: pandas.Dataframe
         :param in_dimension: input image dimensions (assuming square images).

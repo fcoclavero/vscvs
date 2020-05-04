@@ -17,7 +17,6 @@ class MultimodalEncoder(nn.Module):
     """
     def __init__(self, *mode_embedding_networks):
         """
-        Model constructor.
         :param mode_embedding_networks: the embedding networks for each mode.
         :type: list<torch.nn.Module>
         """
@@ -45,7 +44,6 @@ class MultimodalEncoderShared(nn.Module):
     """
     def __init__(self, mode_embedding_network):
         """
-        Model constructor.
         :param mode_embedding_network: the embedding network for all modes.
         :type: torch.nn.Module
         """
@@ -72,7 +70,6 @@ class MultimodalEncoderCombined(nn.Module):
     """
     def __init__(self, shared_embedding_network, *individual_embedding_networks):
         """
-        Model constructor.
         :param shared_embedding_network: the embedding network that will be shared across modes. It will receive the
         outputs of each individual embedding network and produce a second embedding for each input.
         :type: torch.nn.Module

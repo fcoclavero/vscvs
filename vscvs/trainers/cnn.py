@@ -24,7 +24,6 @@ class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     """
     def __init__(self, *args, out_features=125, **kwargs):
         """
-        Trainer constructor.
         :param args: Trainer arguments
         :type: tuple
         :param out_features: number of output features. If `None`, defaults to 1000.

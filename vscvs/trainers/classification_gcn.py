@@ -25,7 +25,6 @@ class AbstractClassificationGCNTrainer(AbstractTrainer, ABC):
     """
     def __init__(self, *args, dataset_name=None, processes=None, **kwargs):
         """
-        Trainer constructor.
         :param args: Trainer arguments
         :type: tuple
         :param dataset_name: the name of the Dataset to be used for training

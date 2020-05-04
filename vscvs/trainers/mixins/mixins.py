@@ -20,7 +20,6 @@ class EarlyStoppingMixin(ABC):
 
     def __init__(self, *args, early_stopping_patience=5, **kwargs):
         """
-        Mixin constructor which creates and attaches an EarlyStopping handler to the Trainer.
         :param args: arguments for additional mixin
         :type: tuple
         :param early_stopping_patience: number of epochs to wait if there are no improvements to stop the training.

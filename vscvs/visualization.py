@@ -73,7 +73,7 @@ def plot_image_retrieval(query_image, query_image_class, query_dataset, queried_
 def plot_image(image, figsize=(8, 8), title=''):
     """
     Display a pyplot figure showing a random batch form the specified dataset.
-    :param image: a PyTorch formatted image with it's tensors in the first element.
+    :param image: a PyTorch formatted image with its tensors in the first element.
     :type: list<torch.Tensor, ...>
     :param figsize: figure width and height (respectively), in inches.
     :type: tuple<float, float>

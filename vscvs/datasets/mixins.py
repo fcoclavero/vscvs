@@ -90,7 +90,6 @@ class SiameseMixin(DatasetFolderMixin, ABC):
     """
     def __init__(self, *args, positive_pair_proportion=.5, **kwargs):
         """
-        Dataset constructor.
         :param args: super class arguments.
         :type: list
         :param positive_pair_proportion: proportion of pairs that will be positive (same class).

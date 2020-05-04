@@ -18,7 +18,6 @@ class OptimizerMixin:
     """
     def __init__(self, *args, learning_rate=.01, **kwargs):
         """
-        Trainer constructor that receives the optimizer parameters.
         :param args: arguments for additional mixins
         :type: tuple
         :param learning_rate: learning rate for optimizers
@@ -57,7 +56,6 @@ class AdaBoundOptimizerMixin(OptimizerMixin):
     def __init__(self, *args, betas=(.9, .999), final_learning_rate=.1, gamma=1e-3, epsilon=1e-08, weight_decay=0,
                  amsbound=False, **kwargs):
         """
-        Trainer constructor that receives the optimizer parameters.
         :param args: arguments for additional mixins
         :param betas: coefficients used for computing running averages of gradient and its square
         :type: Tuple<float, float>
@@ -96,7 +94,6 @@ class AdamOptimizerMixin(OptimizerMixin):
     """
     def __init__(self, *args, betas=(.9, .999), epsilon=1e-08, weight_decay=0, amsgrad=False, **kwargs):
         """
-        Trainer constructor that receives the optimizer parameters.
         :param args: arguments for additional mixins
         :type: tuple
         :param betas: coefficients used for computing running averages of gradient and its square
@@ -140,7 +137,6 @@ class RMSpropOptimizerMixin(OptimizerMixin):
     """
     def __init__(self, *args, alpha=.99, epsilon=1e-08, weight_decay=0, momentum=0, centered=False, **kwargs):
         """
-        Trainer constructor that receives the optimizer parameters.
         :param args: arguments for additional mixins
         :type: tuple
         :param alpha: the smoothing constant.
@@ -175,7 +171,6 @@ class SGDOptimizerMixin(OptimizerMixin):
     """
     def __init__(self, *args, momentum=.8, **kwargs):
         """
-        Trainer constructor that receives the optimizer parameters.
         :param args: arguments for additional mixins
         :type: tuple
         :param momentum: momentum parameter for SGD optimizer

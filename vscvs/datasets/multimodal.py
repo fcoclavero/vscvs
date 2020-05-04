@@ -26,8 +26,7 @@ class MultimodalDataset(Dataset):
     """
     def __init__(self, base_dataset, *args, **kwargs):
         """
-        Dataset constructor. Creates an image dictionary with class keys, for efficient online pair generation.
-        :param base_dataset: base of the siamese Dataset. The length of the multimodal Dataset corresponds to this
+        :param base_dataset: base of the multimodal Dataset. It's length of the multimodal Dataset corresponds to this
         dataset's length, and the first item in the pairs returned on `__getitem__` corresponds to item with the
         requested index in this dataset.
         :type: torch.utils.data.Dataset
@@ -54,7 +53,6 @@ class MultimodalDatasetFolder(MultimodalDataset):
     """
     def __init__(self, *args, **kwargs):
         """
-        Dataset constructor. Creates an image dictionary with class keys, for efficient online pair generation.
         :param args: base class arguments.
         :type: list
         :param kwargs: base class keyword arguments.
@@ -67,7 +65,7 @@ class MultimodalDatasetFolder(MultimodalDataset):
 
 class MultimodalEntityDataset(MultimodalDataset):
     """
-    Dataset class for datasets in which the same entity is available in different modes (for example an image and it's
+    Dataset class for datasets in which the same entity is available in different modes (for example an image and its
     textual annotation, or a photo and a sketch of that same photo). The `MultimodalEntityDataset` is defined with a
     base mode (the base dataset of the inherited `MultimodalDataset`). A tuple with one element from each mode is
     returned on `__getitem__` (one from the base dataset and one from each additional paired dataset). If more than one
@@ -79,7 +77,6 @@ class MultimodalEntityDataset(MultimodalDataset):
     """
     def __init__(self, base_dataset, *paired_datasets):
         """
-        Dataset constructor. Tries to load cache file if available, otherwise builds it.
         :param base_dataset: `MultimodalDataset` base dataset.
         :type: torch.utils.data.DatasetFolder
         :param paired_datasets: DatasetFolder object containing the entities of the base dataset, in different modes.
@@ -174,7 +171,6 @@ class SiameseDataset(SiameseMixin, MultimodalDatasetFolder):
     """
     def __init__(self, base_dataset, paired_dataset, *args, **kwargs):
         """
-        Dataset constructor. Creates an image dictionary with class keys, for efficient online pair generation.
         :param base_dataset: base dataset for the `MultimodalDatasetFolder` constructor arguments.
         :type: torch.utils.data.Dataset
         :param paired_dataset: the Dataset from which random accompanying items will be drawn upon each `__getitem__`.
@@ -217,7 +213,6 @@ class TripletDataset(TripletMixin, MultimodalDatasetFolder):
     """
     def __init__(self, base_dataset, paired_dataset, *args, **kwargs):
         """
-        Dataset constructor. Creates an image dictionary with class keys, for efficient online pair generation.
         :param base_dataset: base dataset for the `MultimodalDatasetFolder` constructor arguments.
         :type: torch.utils.data.Dataset
         :param paired_dataset: the Dataset from which random accompanying items will be drawn upon each `__getitem__`.

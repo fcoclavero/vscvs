@@ -30,7 +30,6 @@ class AbstractTrainer(ABC):
     def __init__(self, *args, batch_size=0, dataset_name=None, drop_last=False, epochs=1, n_gpu=0, parameter_dict=None,
                  resume_date=None, resume_checkpoint=None, tag=None, train_validation_split=.8, workers=6, **kwargs):
         """
-        Base constructor which sets default trainer parameters.
         :param args: mixin arguments
         :type: tuple
         :param batch_size: batch size during training

@@ -23,7 +23,6 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
     def __init__(self, *args, embedding_network_1=None, embedding_network_2=None, loss_reduction='mean',
                  margin=.2, **kwargs):
         """
-        Trainer constructor.
         :param args: Trainer arguments
         :type: tuple
         :param embedding_network_1: the model to be used for the first branch of the siamese architecture.

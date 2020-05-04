@@ -23,7 +23,6 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
     def __init__(self, *args, anchor_network=None, positive_negative_network=None, loss_reduction='mean',
                  margin=.2, **kwargs):
         """
-        Trainer constructor.
         :param args: Trainer arguments
         :type: tuple
         :param anchor_network: the model to be used for computing anchor image embeddings.

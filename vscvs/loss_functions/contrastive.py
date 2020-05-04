@@ -17,7 +17,6 @@ class ContrastiveLoss(ReductionMixin, torch.nn.Module):
     """
     def __init__(self, *args, margin=.2, **kwargs):
         """
-        Loss constructor.
         :param args: mixin arguments
         :type: list
         :param margin: defines an acceptable threshold for two embeddings to be considered as dissimilar.

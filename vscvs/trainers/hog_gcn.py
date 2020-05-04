@@ -27,7 +27,6 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
     def __init__(self, *args, dataset_name=None, in_channels=3, cell_size=8, bins=9, signed_gradients=False,
                  processes=None, **kwargs):
         """
-        Trainer constructor.
         :param args: Trainer arguments
         :type: tuple
         :param dataset_name: the name of the Dataset to be used for training

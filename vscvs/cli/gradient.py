@@ -22,7 +22,7 @@ def gradient(name):
     """ Launch jobs in the Paperspace cloud using the Gradient SDK. """
     print('Running command in Gradient.')
     experiment_client = ExperimentsClient(api_key=os.environ['GRADIENT_API_KEY'])
-    command_arguments = sys.argv[4:]  # first elements in `sys.argv` are the script name, the gradient command and it's options
+    command_arguments = sys.argv[4:]  # skipped elements are the script name, the gradient command and its options
     experiment_parameters = {
         'name': name,
         'experiment_env': dotenv_values('.env.gradient'),

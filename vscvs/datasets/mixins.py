@@ -6,120 +6,330 @@ __status__ = 'Prototype'
 """ Mixins for adding additional features to DataSet objects. """
 
 
+import os
+import re
 import torch
 
-from random import choice, randint
-from typing import Callable, List, Tuple
+from abc import ABC, abstractmethod
+from collections import defaultdict
+from multipledispatch import dispatch
+from numpy.random import choice
+from overrides import overrides
+from torch.utils.data import Dataset
+from typing import Callable, Dict, List, Tuple
 
 from vscvs.utils import str_to_bin_array
-from vscvs.utils.data import images_by_class
+
+
+""" Type hinting utility mixin classes. """
 
 
 class DatasetMixin:
     """
-    Utility class that type hints `Dataset` methods that will be available to the mixins in this package via a `super()`
-    call, as they are meant to be used in multiple inheritance with `torch.utils.data.Dataset`.
+    Utility class that type hints `Dataset` methods that will be available to the mixins that inherit this class, as
+    they are meant to be used in multiple inheritance with `torch.utils.data.Dataset`.
     """
-    __getitem__: Callable[[int], tuple]
+    __add__: Callable[[Dataset], Dataset] # concatenates dataset parameter
+    __getitem__: Callable[[int], tuple] # get the item tuple for the given index
+    __len__: int # number of data points in the dataset'
 
 
-class SiameseMixin(DatasetMixin):
+class DatasetFolderMixin(DatasetMixin):
     """
-    Mixin class for loading random pairs on `__getitem__` for any Dataset. Must be used with a torch.Dataset subclass,
-    as it assumes the existence of the `classes`, `class_to_idx` and `imgs` fields.
+    Utility class that type hints `DatasetFolder` methods that will be available to the mixins that inherit this class,
+    as they are meant to be used in multiple inheritance with `torchvision.datasets.DatasetFolder`.
     """
-    __len__: int
+    classes: List[str] # list of class names
+    class_to_idx: Dict[str, int] # dictionary from class_name to class_index
+    samples: List[Tuple[str, int]] # list of (sample_path, class_index) tuples
+    targets: List[int] # list of class_index values for each sample
 
-    def _get_random_item(self):
+
+class ImageFolderMixin(DatasetFolderMixin):
+    """
+    Utility class that type hints `ImageFolder` methods that will be available to the mixins that inherit this class, as
+    they are meant to be used in multiple inheritance with `torchvision.datasets.ImageFolder`.
+    """
+    imgs: List[Tuple[str, int]] # list of (image_path, class_index) tuples
+
+
+""" Actual mixins. """
+
+
+class ClassIndicesMixin(DatasetFolderMixin):
+    """
+    DatasetFolder mixin that creates a dictionary with dataset classes as keys and the corresponding dataset element
+    indices as values. These can the be accessed via the `get_class_element_indices` method.
+    """
+    def __init__(self, *args, **kwargs):
         """
-        Get a random item from the Dataset.
+        Initialize de base Dataset class and create class index dictionary.
+        :param args: base Dataset class arguments
+        :type: list
+        :param kwargs: base Dataset class keyword arguments
+        :type: dict
+        """
+        super().__init__(*args, **kwargs)
+        self.class_element_indices_dict = defaultdict(list)  # if new key used, it will be instanced with an empty list
+        for element_index, element_class in enumerate(self.targets):  # `self.target` contains the class of each element
+            self.class_element_indices_dict[element_class].append(element_index)
+
+    def get_class_element_indices(self, class_index):
+        """
+        Getter for all the elements of the requested class.
+        :param class_index: the class index.
+        :type: int
+        :return: a list with all the elements
+        """
+        return self.class_element_indices_dict[class_index]
+
+
+class SiameseMixin(DatasetFolderMixin, ABC):
+    """
+    Mixin class for loading random pairs on `__getitem__` for any `DatasetFolder` dataset.
+    """
+    def __init__(self, *args, positive_pair_proportion=.5, **kwargs):
+        """
+        :param args: super class arguments.
+        :type: list
+        :param positive_pair_proportion: proportion of pairs that will be positive (same class).
+        :type: float
+        :param kwargs: super class keyword arguments.
+        :type: dict
+        """
+        super().__init__(*args, **kwargs)
+        self.target_probabilities = [positive_pair_proportion, 1 - positive_pair_proportion] # siamese target value prob
+
+    def _get_pair(self, first_item_class_index):
+        """
+        Get a siamese pair from the paired dataset, which will be randomly positive (same class) or negative.
+        :param first_item_class_index: the index of the first siamese pair element's class.
+        :type: int
         :return: an item tuple
         :type: tuple
         """
-        return super()[randint(0, len(self) - 1)]
+        target = choice([0, 1], p=self.target_probabilities) # if `target==0` ...
+        negative_classes = self._negative_classes(first_item_class_index)
+        paired_item_cls = choice(negative_classes) if target else first_item_class_index # ... generate a positive pair
+        return self._get_random_paired_item(paired_item_cls)
+
+    @abstractmethod
+    def _get_random_paired_item(self, class_index):
+        """
+        Get a random element belonging to the specified class index to be paired with the item requested on the
+        `__getitem__` call.
+        :param class_index: the index of the class to which the returned item must belong.
+        :type: int
+        :return: a random item belonging to `class_index`.
+        :type: torch.Tensor
+        """
+        pass
+
+    def _negative_classes(self, class_index):
+        """
+        Return a list with all dataset classes that are not `class_index`.
+        :param class_index: the positive class index.
+        :type: int
+        :return: a list with all negative class indices.
+        :type: list<int>
+        """
+        classes = list(self.class_to_idx.values())
+        classes.remove(class_index)
+        return classes
 
     def __getitem__(self, index):
         """
         Modify the Dataset's `__getitem__` method, returning each requested item along with another random item from
-        the Dataset.
-        :param index: an item's index
+        the Dataset. The pair will be randomly positive (same class) or negative.
+        :param index: an item's index.
         :type: int
-        :return: a 2-tuple with the item corresponding to `index`, along with another random item.
+        :return: a 2-tuple with the item corresponding to `index`, along with another random item, randomly positive or
+        negative, according to `target_probabilities`.
         :type: tuple
         """
-        return super()[index], self._get_random_item()
+        item = super()[index]
+        item_class_index = item[1]
+        return item, self._get_pair(item_class_index)
 
 
-class TripletMixin(DatasetMixin):
+class SiameseSingleDatasetMixin(ClassIndicesMixin, SiameseMixin):
     """
-    Mixin class for loading triplets on `__getitem__` for any Dataset. Must be used with a torch.Dataset subclass,
-    as it assumes the existence of the `classes`, `class_to_idx` and `imgs` fields.
+    SiameseMixin for use on a single Dataset instance.
     """
-    classes: List[str]
-    targets: List[int]
+    @overrides
+    def _get_random_paired_item(self, class_index):
+        item_index = choice( # random index from list with all indices that belong to `class_index`
+            self.get_class_element_indices(class_index))
+        return self[item_index]
 
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize de base Dataset class and create a image index dictionary with class keys, for efficient online
-        triplet generation.
-        """
-        super().__init__(*args, **kwargs)
-        self.image_dict = images_by_class(self)
 
-    def _get_random_item(self, cls):
+class TripletMixin(DatasetFolderMixin):
+    """
+    Mixin class for loading online triplets on `__getitem__` for any `DatasetFolder` dataset.
+    """
+    def _get_random_negative(self, anchor_class_index):
         """
-        Get a random item from the specified class.
-        :param cls: the class idx
+        Get a random negative triplet element of a random class for an anchor belonging to the specified class index.
+        :param anchor_class_index: the class index of the triplet anchor.
         :type: int
-        :return: an item tuple
+        :return: a negative item tuple.
         :type: tuple
         """
-        return super()[choice(self.image_dict[cls])]
+        return self._get_random_triplet_item(choice(self._negative_classes(anchor_class_index)))
+
+    def _get_random_positive(self, anchor_class_index):
+        """
+        Get a random positive triplet element for an anchor belonging to the specified class index.
+        :param anchor_class_index: the class index of the triplet anchor.
+        :type: int
+        :return: an item tuple.
+        :type: tuple
+        """
+        return self._get_random_triplet_item(anchor_class_index)
+
+    @abstractmethod
+    def _get_random_triplet_item(self, class_index):
+        """
+        Get a random element belonging to the specified class index to be included in a triplet along with the item
+        requested on the `__getitem__` call. Thus, the returned item will be either the positive or negative triplet
+        element.
+        :param class_index: the class index.
+        :type: int
+        :return: a positive item tuple.
+        :type: tuple
+        """
+        pass
+
+    def _negative_classes(self, class_index):
+        """
+        Return a list with all dataset classes that are not `class_index`.
+        :param class_index: the positive class index.
+        :type: int
+        :return: a list with all negative class indices.
+        :type: list<int>
+        """
+        classes = list(self.class_to_idx.values())
+        classes.remove(class_index)
+        return classes
 
     def __getitem__(self, index):
         """
         Return a triplet consisting of an anchor (the indexed item), a positive (a random example of a different class),
         and a negative (a random example of the same class).
-        :param index: an item's index
+        :param index: an item's index.
         :type: int
-        :return: a 3-tuple with the anchor, positive and negative
+        :return: a 3-tuple with the anchor, positive and negative.
         :type: tuple
         """
         anchor = super()[index]
-        positive_class = self.targets[index]
-        negative_classes = list(range(0, positive_class)) + list(range(positive_class + 1, len(self.classes)))
-        positive = self._get_random_item(positive_class)
-        negative = self._get_random_item(choice(negative_classes))
-        return anchor, positive, negative
+        anchor_class_index = anchor[1]
+        return anchor, self._get_random_positive(anchor_class_index), self._get_random_negative(anchor_class_index)
 
 
-class FilenameIndexedMixin:
+class TripletSingleDatasetMixin(ClassIndicesMixin, TripletMixin):
     """
-    Mixin class for getting dataset items from a file name. It is intended to be used for retrieval tasks.
-    The mixin must be used with a torch.Dataset subclass, as it assumes the existence of the `imgs` field and a
-    `__getitem__` with the default Dataset indexation.
+    TripletMixin for use on a single Dataset instance.
     """
-    __getitem__: Tuple[torch.Tensor]
-    imgs: List[tuple]
+    @overrides
+    def _get_random_triplet_item(self, class_index):
+        """
+        Get a random element belonging to the specified class index to be included in a triplet along with the item
+        requested on the `__getitem__` call. Thus, the returned item will be either the positive or negative triplet
+        element.
+        :param class_index: the class index.
+        :type: int
+        :return: an item tuple.
+        :type: tuple
+        """
+        return super()[choice(self.get_class_element_indices(class_index))]
 
+
+class FileNameIndexedMixin(ImageFolderMixin):
+    """
+    Mixin class for getting dataset items from a file name.
+    To support indexing by index and name simultaneously, the `__getitem__` function was transformed to a single
+    dispatch generic function using the `multiple-dispatch` module.
+    Reference:
+        1. [Python dispatch](https://docs.python.org/3/library/functools.html#functools.singledispatch)
+        2. [multiple-dispatch module](https://multiple-dispatch.readthedocs.io/en/latest/index.html)
+    """
     def __init__(self, *args, **kwargs):
         """
         Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indices
         as values for efficient retrieval after initialization.
         """
         super().__init__(*args, **kwargs)
-        self.imgs_dict = {tup[0]: i for i, tup in enumerate(self.imgs)}
+        self._imgs_dict = {self._get_image_name(i): i for i in range(len(self.imgs))}
 
-    def getitem_by_filename(self, filename):
+    def _get_image_name(self, index):
         """
-        Get and item based on it's filename by getting the item's real index using the `imgs_dict` defined in the
-        FilenameIndexedMixin mixin and then using the index to retrieve the item using the default `__getitem__`.
-        :param filename: the filename of the item to be retrieved. Uses full paths.
+        Get name of the image indexed at `index`.
+        :param index: the index of an image.
+        :type: int
+        :return: the name of the image file.
         :type: str
-        :return: the corresponding Dataset item.
-        :type: same as the mixed Dataset's `__getitem__`
         """
-        return self[self.imgs_dict[filename]]
+        file_path = self.imgs[index][0]
+        filename = os.path.split(file_path)[-1]
+        return filename.split('.')[0]  # remove file extension
+
+    def filter_image_indices(self, pattern):
+        """
+        Get a list of dataset indices for all images with names matching the given pattern.
+        :param pattern: the pattern that returned images names must match.
+        :type: str
+        :return: a list of images that match the pattern.
+        :type: list<tuple>
+        """
+        return [ # create a list of indices
+            i for i, path_class in enumerate(self.imgs) # return index
+            if re.match(pattern, os.path.split(path_class[0])[-1])] # if last part of path matches regex
+
+    @dispatch((int, torch.Tensor))  # single argument, either <int> or <Tensor>
+    def __getitem__(self, index):
+        """
+        Dispatch to `super` method.
+        """
+        return super()[index]
+
+    @dispatch(str)  # single argument, <str>
+    def __getitem__(self, filename):
+        """
+        Get image index from filename, and dispatch to `super` method.
+        """
+        return super()[self._imgs_dict[filename]]
+
+
+class FilePathIndexedMixin(ImageFolderMixin):
+    """
+    Mixin class for getting dataset items from a file path. It is intended to be used for retrieval tasks.
+    To support indexing by index and path simultaneously, the `__getitem__` function was transformed to a single
+    dispatch generic function using the `multiple-dispatch` module.
+    Reference:
+        1. [Python dispatch](https://docs.python.org/3/library/functools.html#functools.singledispatch)
+        2. [multiple-dispatch module](https://multiple-dispatch.readthedocs.io/en/latest/index.html)
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize de base Dataset class and create a image index dictionary with file paths as keys and dataset indices
+        as values for efficient retrieval after initialization.
+        """
+        super().__init__(*args, **kwargs)
+        self._imgs_dict = {tup[0]: i for i, tup in enumerate(self.imgs)}
+
+    @dispatch((int, torch.Tensor))  # single argument, either <int> or <Tensor>
+    def __getitem__(self, index):
+        """
+        Dispatch to `super` method.
+        """
+        return super()[index]
+
+    @dispatch(str)  # single argument, <str>
+    def __getitem__(self, file_path):
+        """
+        Get image index from file path, and dispatch to `super` method.
+        """
+        return super()[self._imgs_dict[file_path]]
 
 
 class BinaryEncodingMixin:

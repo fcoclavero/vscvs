@@ -34,7 +34,7 @@ def camel_to_snake_case_dict_keys(dictionary):
     Convert the format of the given dictionary keys from CamelCase to snake_case.
     :param dictionary: the dictionary with keys in CamelCase format.
     :type: dict
-    :return: the same dictionary, but with it's keys formatted in snake_case.
+    :return: the same dictionary, but with its keys formatted in snake_case.
     :type: dict
     """
     return {camel_to_snake_case(key) : value for key, value in dictionary.items()}
@@ -169,9 +169,9 @@ def remove_last_layer(model):
     """
     Remove the last layer from a PyTorch model. This is useful for creating image embeddings from a classifier network.
     :param model: the PyTorch model to be modified
-    :type: pytorch.nn.module
+    :type: torch.nn.module
     :return: the modified network, without the last layer
-    :type: pytorch.nn.module
+    :type: torch.nn.module
     """
     return torch.nn.Sequential(*(list(model.children())[:-1]))
 

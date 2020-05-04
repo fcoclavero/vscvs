@@ -10,11 +10,14 @@ import torch
 
 from ignite.engine import Engine
 
-from vscvs.utils.data import prepare_batch_siamese, output_transform_siamese_evaluator, output_transform_siamese_trainer
+from vscvs.trainers.engines import attach_metrics
+from vscvs.utils.data import prepare_batch_siamese as _prepare_batch, \
+    output_transform_siamese_evaluator as output_transform_evaluator, \
+    output_transform_siamese_trainer as output_transform_trainer
 
 
 def create_siamese_trainer(model, optimizer, loss_fn, device=None, non_blocking=False,
-                           prepare_batch=prepare_batch_siamese, output_transform=output_transform_siamese_trainer):
+                           prepare_batch=_prepare_batch, output_transform=output_transform_trainer):
     """
     Factory function for creating an ignite trainer Engine for a siamese architecture.
     :param model: siamese network module that receives, embeds and computes embedding distances between image pairs.
@@ -36,10 +39,9 @@ def create_siamese_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """
-    if device:
-        model.to(device)
+    if device: model.to(device)
 
-    def _update(engine, batch):
+    def _update(_, batch):
         images_1, images_2, target = prepare_batch(batch, device=device, non_blocking=non_blocking) # unpack batch
         optimizer.zero_grad() # reset gradients
         model.train() # training mode
@@ -53,7 +55,7 @@ def create_siamese_trainer(model, optimizer, loss_fn, device=None, non_blocking=
 
 
 def create_siamese_evaluator(model, metrics=None, device=None, non_blocking=False,
-                             prepare_batch=prepare_batch_siamese, output_transform=output_transform_siamese_evaluator):
+                             prepare_batch=_prepare_batch, output_transform=output_transform_evaluator):
     """
     Factory function for creating an evaluator for supervised models.
     NOTE: `engine.state.output` for this engine is defined by `output_transform` parameter and is
@@ -70,15 +72,14 @@ def create_siamese_evaluator(model, metrics=None, device=None, non_blocking=Fals
     :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
     :param output_transform: function that receives the result of a siamese network evaluator engine and returns the
     value to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
-    :type: Callable<args:`embeddings_0`, `embeddings_1`, `target`, ret:tuple<torch.Tensor, torch.Tensor, torch.Tensor>>
+    :type: Callable<args:`embeddings_0`, `embeddings_1`, `target`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>>
     (optional)
     :return: an evaluator engine with supervised inference function.
     :type: ignite.engine.Engine
     """
-    if device:
-        model.to(device)
+    if device: model.to(device)
 
-    def _inference(engine, batch):
+    def _inference(_, batch):
         model.eval()
         with torch.no_grad():
             images_0, images_1, target = prepare_batch(batch, device=device, non_blocking=non_blocking)
@@ -86,8 +87,5 @@ def create_siamese_evaluator(model, metrics=None, device=None, non_blocking=Fals
             return output_transform(embeddings_0, embeddings_1, target)
 
     engine = Engine(_inference)
-
-    for name, metric in metrics.items():
-        metric.attach(engine, name)
-
+    if metrics: attach_metrics(engine, metrics)
     return engine

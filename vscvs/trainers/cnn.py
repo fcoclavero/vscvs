@@ -9,7 +9,9 @@ __status__ = 'Prototype'
 from abc import ABC
 from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from ignite.metrics import Accuracy, Loss
+from overrides import overrides
 from torch.nn import CrossEntropyLoss
+from typing import Callable
 
 from vscvs.models import CNNLogSoftmax
 from vscvs.trainers.abstract_trainer import AbstractTrainer
@@ -18,13 +20,12 @@ from vscvs.utils.data import prepare_batch
 from vscvs.decorators import kwargs_parameter_dict
 
 
-class AbstractCNNTrainer(AbstractTrainer, ABC):
+class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a CNN model.
     """
     def __init__(self, *args, out_features=125, **kwargs):
         """
-        Trainer constructor.
         :param args: Trainer arguments
         :type: tuple
         :param out_features: number of output features. If `None`, defaults to 1000.
@@ -36,21 +37,32 @@ class AbstractCNNTrainer(AbstractTrainer, ABC):
         super().__init__(*args, **kwargs)
 
     @property
+    @overrides
     def initial_model(self):
         return CNNLogSoftmax(out_features=self.out_features)
 
     @property
+    @overrides
     def loss(self):
         return CrossEntropyLoss()
 
+    @staticmethod
+    @overrides
+    def _score_function(engine):
+        validation_loss = engine.state.metrics['loss']
+        return -validation_loss
+
     @property
+    @overrides
     def trainer_id(self):
         return 'CNN'
 
+    @overrides
     def _create_evaluator_engine(self):
         return create_supervised_evaluator(
             self.model, metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss)}, device=self.device)
 
+    @overrides
     def _create_trainer_engine(self):
         return create_supervised_trainer(
             self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
@@ -68,7 +80,7 @@ def train_cnn(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: CNNTrainer keyword arguments
     :type: dict
     """
-    class CNNTrainer(optimizer_mixin, AbstractCNNTrainer, EarlyStoppingMixin):
-        pass
+    class CNNTrainer(optimizer_mixin, AbstractCNNTrainer):
+        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = CNNTrainer(*args, **kwargs)
     trainer.run()

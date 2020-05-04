@@ -12,7 +12,6 @@ class ReductionMixinMeta(type):
     """
     def __init__(cls, *args, **kwargs):
         """
-        Metaclass constructor.
         :param args: default metaclass constructor arguments.
         :type: list
         :param kwargs: default metaclass constructor keyword arguments.
@@ -52,7 +51,6 @@ class ReductionMixin(metaclass=ReductionMixinMeta):
     """
     def __init__(self, *args, reduction='mean', **kwargs):
         """
-        Adds `reduction` argument to the loss module constructor.
         :param args: mixin arguments
         :type: list
         :param reduction: specifies the reduction to apply on the output. Must correspond to a key in the

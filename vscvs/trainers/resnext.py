@@ -13,10 +13,10 @@ from overrides import overrides
 from torch.nn import CrossEntropyLoss
 from typing import Callable
 
+from .abstract_trainer import AbstractTrainer
+from .mixins import EarlyStoppingMixin
 from vscvs.models import ResNextLogSoftmax
-from vscvs.trainers.abstract_trainer import AbstractTrainer
-from vscvs.trainers.mixins import EarlyStoppingMixin
-from vscvs.utils.data import prepare_batch
+from vscvs.utils import prepare_batch
 from vscvs.decorators import kwargs_parameter_dict
 
 

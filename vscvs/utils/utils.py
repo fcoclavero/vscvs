@@ -18,15 +18,15 @@ from torch import nn as nn
 from settings import CHECKPOINT_NAME_FORMAT, ROOT_DIR
 
 
-def camel_to_snake_case(str):
+def camel_to_snake_case(camel_cased_string):
     """
     Convert the format of the given string from CamelCase to snake_case.
-    :param str: the string in CamelCase format.
+    :param camel_cased_string: the string in CamelCase format.
     :type: str
     :return: the same string, but in snake_case format.
     :type: str
     """
-    return re.sub(r'(?<!^)(?=[A-Z])', '_', str).lower()
+    return re.sub(r'(?<!^)(?=[A-Z])', '_', camel_cased_string).lower()
 
 
 def camel_to_snake_case_dict_keys(dictionary):
@@ -49,6 +49,17 @@ def get_device(n_gpu):
     :type: str
     """
     return torch.device('cuda:0' if (torch.cuda.is_available() and n_gpu > 0) else 'cpu')
+
+
+def get_cache_directory(cache_filename):
+    """
+    Get the path where a cache file should be stored.
+    :param cache_filename: the name of the cache file.
+    :type: str
+    :return: the model checkpoint path.
+    :type: str
+    """
+    return os.path.join(ROOT_DIR, 'cache', cache_filename)
 
 
 def get_checkpoint_directory(model_name, tag=None, date=datetime.now()):
@@ -142,6 +153,29 @@ def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2,
     elif classname.find('BatchNorm') != -1:
         nn.init.normal_(model.weight.data, batch_norm_mean, batch_norm_std)
         nn.init.constant_(model.bias.data, batch_norm_bias)
+
+
+def load_classification_model_from_checkpoint(model, checkpoint_name, date_string, tag):
+    """
+    Load a classification model from its state dictionary.
+    :param model: the model to be loaded.
+    :type: torch.nn.Module
+    :param checkpoint_name: the name of the checkpoint directory.
+    :type: str
+    :param date_string: the checkpoint date in string format.
+    :type: str
+    :param tag: the checkpoint tag, or subdirectory.
+    :type: str
+    :return: the mode, loaded with the state dictionary at the specified checkpoint.
+    :type: torch.nn.Module
+    """
+    date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
+    checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint_name)))
+    out_features = get_out_features_from_state_dict(state_dict)
+    model = model(out_features=out_features)
+    model.load_state_dict(state_dict)
+    return model
 
 
 def load_yaml(file_path):

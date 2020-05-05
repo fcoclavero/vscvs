@@ -63,7 +63,6 @@ class ClassIndicesMixin(DatasetFolderMixin):
     """
     def __init__(self, *args, **kwargs):
         """
-        Initialize de base Dataset class and create class index dictionary.
         :param args: base Dataset class arguments
         :type: list
         :param kwargs: base Dataset class keyword arguments
@@ -257,6 +256,10 @@ class FileNameIndexedMixin(ImageFolderMixin):
         """
         Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indices
         as values for efficient retrieval after initialization.
+        :param args: super class arguments.
+        :type: list
+        :param kwargs: super class keyword arguments.
+        :type: dict
         """
         super().__init__(*args, **kwargs)
         self._imgs_dict = {self._get_image_name(i): i for i in range(len(self.imgs))}
@@ -313,6 +316,10 @@ class FilePathIndexedMixin(ImageFolderMixin):
         """
         Initialize de base Dataset class and create a image index dictionary with file paths as keys and dataset indices
         as values for efficient retrieval after initialization.
+        :param args: super class arguments.
+        :type: list
+        :param kwargs: super class keyword arguments.
+        :type: dict
         """
         super().__init__(*args, **kwargs)
         self._imgs_dict = {tup[0]: i for i, tup in enumerate(self.imgs)}
@@ -342,11 +349,22 @@ class BinaryEncodingMixin:
         """
         Initialize de base Dataset class and compute the length (in digits) of the binary form of the largest index in
         the dataset. This is used to determine a standard binary encoding length for all indices.
+        :param args: super class arguments.
+        :type: list
+        :param kwargs: super class keyword arguments.
+        :type: dict
         """
         super().__init__(*args, **kwargs)
         self.max_binary_digits = len(str_to_bin_array(len(self.targets)))
 
     def _get_binary_encoding(self, index):
+        """
+        Get the binary encoding of the given index.
+        :param index: the index in decimal form.
+        :type: int
+        :return: a torch tensor with the binary form of the index.
+        :type: torch.Tensor
+        """
         bin_arr = torch.tensor(str_to_bin_array(index, self.max_binary_digits))
         return bin_arr
 
@@ -363,11 +381,22 @@ class OneHotEncodingMixin:
     def __init__(self, *args, **kwargs):
         """
         Initialize de base Dataset class and create a tensor with all one hot encodings.
+        :param args: super class arguments.
+        :type: list
+        :param kwargs: super class keyword arguments.
+        :type: dict
         """
         super().__init__(*args, **kwargs)
         self.encodings = torch.eye(len(self.targets))
 
     def _get_one_hot_encoding(self, index):
+        """
+        Get the one-hot-encoding of the given index.
+        :param index: the index in decimal form.
+        :type: int
+        :return: a torch tensor with the one-hot-encoding form of the index.
+        :type: torch.Tensor
+        """
         return self.encodings[index]
 
     def __getitem__(self, item):

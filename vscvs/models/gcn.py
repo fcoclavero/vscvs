@@ -10,10 +10,12 @@ import torch
 
 import torch.nn.functional as F
 
+from overrides import overrides
+# noinspection PyProtectedMember
 from torch_geometric.nn import GCNConv
 
 from vscvs.models.hog import HOG
-from vscvs.utils.data import prepare_batch_graph
+from vscvs.utils import prepare_batch_graph
 
 
 class GCNClassification(torch.nn.Module):
@@ -33,6 +35,7 @@ class GCNClassification(torch.nn.Module):
         self.conv1 = GCNConv(in_channels, in_channels)
         self.conv2 = GCNConv(in_channels, num_classes)
 
+    @overrides
     def forward(self, batch_graph):
         """
         Perform a forward pass through the module.
@@ -96,6 +99,7 @@ class HOGGCN(torch.nn.Module):
         """
         return prepare_batch_graph(batch, self.classes_dataframe, device, non_blocking, self.processes)
 
+    @overrides
     def forward(self, image_batch):
         """
         Perform a forward pass through the module.

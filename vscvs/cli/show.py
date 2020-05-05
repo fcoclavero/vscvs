@@ -39,8 +39,8 @@ def checkpoint(date, tag):
 def image(path):
     """ Display the image in the given path. """
     from PIL import Image
-    image = Image.open(path)
-    image.show()
+    img = Image.open(path)
+    img.show()
 
 
 @show.command()

@@ -74,7 +74,8 @@ class ReductionMixin(metaclass=ReductionMixinMeta):
         :return: the reduced output of the loss module
         :type: torch.Tensor
         """
-        return self.reductions[self.reduction](output)
+        # noinspection PyUnresolvedReferences
+        return self.reductions[self.reduction](output) # `reduction` property is a dict, so it does have `__getitem__`
 
     """ Make reduction class properties available to class instances. """
 

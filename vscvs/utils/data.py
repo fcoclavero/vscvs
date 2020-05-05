@@ -106,12 +106,12 @@ def output_transform_evaluator(_x, y, y_pred):
     """
     Value to be assigned to engine's state.output after each iteration. This is the default format for classifiers.
     :param _x: the input tensor.
-    :type: torch.tensor
+    :type: torch.Tensor
     :param y: the label or target tensor.
     :param y_pred: the output of the model.
-    :type: torch.tensor
+    :type: torch.Tensor
     :return: the expected values for a default Ignite Metric, `y_pred` and `y`.
-    type: tuple<torch.tensor. torch.tensor>
+    type: tuple<torch.Tensor. torch.Tensor>
     """
     return y_pred, y
 
@@ -120,10 +120,10 @@ def output_transform_trainer(_x, _y, _y_pred, loss):
     """
     Value to be assigned to engine's state.output after each iteration. This is the default format for classifiers.
     :param _x: the input tensor.
-    :type: torch.tensor
+    :type: torch.Tensor
     :param _y: the label or target tensor.
     :param _y_pred: the output of the model.
-    :type: torch.tensor
+    :type: torch.Tensor
     :param loss: the loss module for the network.
     :type: torch.nn.Module
     :return: value to be assigned to engine's state.output after each iteration, which by default is the loss value.
@@ -138,19 +138,19 @@ def output_transform_multimodal_gan_evaluator(embeddings, mode_predictions, mode
     after each iteration.
     :param embeddings: tensor with the embedding vectors for each batch element (thus one embedding per mode per
     entity). The tensor has a shape of `[n_modes * batch_size, embedding_length]`.
-    :type: list<torch.tensor>
+    :type: list<torch.Tensor>
     :param mode_predictions: tensor of shape `[n_modes * batch_size, n_modes]` with the probability of each element
     to belong to each mode.
-    :type: torch.tensor
+    :type: torch.Tensor
     :param mode_labels: the actual mode labels for each element. Tensor of shape `[n_modes * batch_size, n_modes]`.
-    :type: torch.tensor
+    :type: torch.Tensor
     :param generator_labels: the labels used for the generator loss, usually the additive inverse of each mode label.
-    :type: torch.tensor
+    :type: torch.Tensor
     :param classes: the classes, or categories, of each entity in the dataset. Tensor of shape `[batch_size]`.
-    :type: torch.tensor
+    :type: torch.Tensor
     :return: the value to be assigned to engine's state.output after each iteration, which must fit that expected by the
     metrics, which by default in a multimodal GAN is the element embeddings, mode predictions and labels, and classes.
-    :type: tuple<list<torch.tensor>, torch.tensor, torch.tensor, torch.tensor>
+    :type: tuple<list<torch.Tensor>, torch.Tensor, torch.Tensor, torch.Tensor>
     """
     return embeddings, mode_predictions, mode_labels, generator_labels, classes
 
@@ -163,16 +163,16 @@ def output_transform_multimodal_gan_trainer(_embeddings, _mode_predictions, _mod
     :param _embeddings: list with the embedding vectors for each batch element of each mode (thus one embedding per mode
     per entity). The list has a length equal to the number of modes and each embedding tensor has a shape of
     `[n_modes, embedding_length]`.
-    :type: list<torch.tensor>
+    :type: list<torch.Tensor>
     :param _mode_predictions: tensor of shape `[n_modes * batch_size, n_modes]` with the probability of each element
     to belong to each mode.
-    :type: torch.tensor
+    :type: torch.Tensor
     :param _mode_labels: the actual mode labels for each element. Tensor of shape `[n_modes * batch_size, n_modes]`.
-    :type: torch.tensor
+    :type: torch.Tensor
     :param _generator_labels: the labels used for the generator loss, usually the additive inverse of each mode label.
-    :type: torch.tensor
+    :type: torch.Tensor
     :param _classes: the classes, or categories, of each entity in the dataset. Tensor of shape `[batch_size]`.
-    :type: torch.tensor
+    :type: torch.Tensor
     :param generator_loss: the loss module for the generator network.
     :type: torch.nn.Module
     :param discriminator_loss: the loss module for the discriminator network.
@@ -361,7 +361,7 @@ def siamese_target(images_0, images_1):
     :type: torch.Tensor with shape `batch_size`
     """
     # noinspection PyUnresolvedReferences
-    return (images_0[1] != images_1[1]).int() # type inference results in `torch.tensor`, which has the `.int()` method
+    return (images_0[1] != images_1[1]).int() # type inference results in `torch.Tensor`, which has the `.int()` method
 
 
 def simple_split(data, split_proportion=.8):

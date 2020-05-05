@@ -7,18 +7,20 @@ __status__ = 'Prototype'
 
 
 import torch
-
 import torch.nn.functional as F
+
+from abc import abstractmethod
+from overrides import overrides
 
 from vscvs.decorators import torch_no_grad
 
 
 class AbstractKernelConvolution(torch.nn.Module):
-    """ Abstract nn.Module for creating convolutions with user defined kernels. """
-
+    """
+    Abstract module for creating convolutions with user defined kernels.
+    """
     def __init__(self, in_channels=3, stride=1, padding=1, dilation=1):
         """
-        Constructor. Saves convolution parameters.
         :param in_channels: the number of channels for inputs.
         :type: int
         :param stride: controls the stride for the cross-correlation.
@@ -44,13 +46,14 @@ class AbstractKernelConvolution(torch.nn.Module):
         raise NotImplementedError
 
     @torch_no_grad  # we won't need the gradient, so we use this option for better performance
+    @overrides
     def forward(self, x):
         """
         Perform the convolution of the input with the Sobel kernel.
         :param x: the image batch
-        :type: torch.tensor[batch_size, in_channels, x_dimension, y_dimension]
+        :type: torch.Tensor[batch_size, in_channels, x_dimension, y_dimension]
         :return: the application of the Sobel filter over the input
-        :type: torch.tensor
+        :type: torch.Tensor
         """
         return F.conv2d(x, self.weight, stride=self.stride, padding=self.padding, dilation=self.dilation)
 
@@ -60,7 +63,27 @@ class AbstractKernelConvolution(torch.nn.Module):
         return super().to(*args, **kwargs)
 
 
-class SobelX(AbstractKernelConvolution):
+class Abstract2DKernelConvolution(AbstractKernelConvolution):
+    """
+    Abstract module for performing 2D kernel convolutions over all input channels.
+    """
+    @property
+    @abstractmethod
+    def kernel_2d(self):
+        """
+        The 2D kernel for the convolution of the corresponding axis.
+        :return: the 2D kernel for corresponding axis.
+        :type: torch.Tensor
+        """
+        pass
+
+    @property
+    def kernel(self):
+        kernel = torch.stack([self.kernel_2d for _ in range(self.in_channels)]) # repeat kernel for each input channel
+        return kernel.unsqueeze(0)  # we must add and additional dimension to handle multiple inputs
+
+
+class SobelX(Abstract2DKernelConvolution):
     """
     Torch nn Layer for the Sobel operator along the x axis. It approximates the gradient along the x axis by
     filtering (convolution) the input with a specific kernel. The gradients are computed for all input channels using
@@ -68,13 +91,12 @@ class SobelX(AbstractKernelConvolution):
     Reference: https://en.wikipedia.org/wiki/Sobel_operator
     """
     @property
-    def kernel(self):
-        kernel_2d = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float)
-        kernel = torch.stack([kernel_2d for _ in range(self.in_channels)])  # repeat 2D kernel for each input channel
-        return kernel.unsqueeze(0)  # we must add and additional dimension to handle multiple inputs
+    @overrides
+    def kernel_2d(self):
+        return torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float)
 
 
-class SobelY(AbstractKernelConvolution):
+class SobelY(Abstract2DKernelConvolution):
     """
     Torch nn Layer for the Sobel operator along the y axis. It approximates the gradient along the y axis by
     filtering (convolution) the input with a specific kernel. The gradients are computed for all input channels using
@@ -82,13 +104,12 @@ class SobelY(AbstractKernelConvolution):
     Reference: https://en.wikipedia.org/wiki/Sobel_operator
     """
     @property
-    def kernel(self):
-        kernel_2d = torch.tensor([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=torch.float)
-        kernel = torch.stack([kernel_2d for _ in range(self.in_channels)])  # repeat 2D kernel for each input channel
-        return kernel.unsqueeze(0)  # we must add and additional dimension to handle multiple inputs
+    @overrides
+    def kernel_2d(self):
+        return torch.tensor([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=torch.float)
 
 
-class Laplacian(AbstractKernelConvolution):
+class Laplacian(Abstract2DKernelConvolution):
     """
     Torch nn Layer for the Laplacian derivative operator. It approximates the gradient magnitude along both axes by
     filtering (convolution) the input with a specific kernel. The gradients are computed for all input channels using
@@ -96,7 +117,6 @@ class Laplacian(AbstractKernelConvolution):
     Reference: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_gradients/py_gradients.html
     """
     @property
-    def kernel(self):
-        kernel_2d = torch.tensor([[0, 1, 0], [1, 4, 1], [0, 1, 0]], dtype=torch.float)
-        kernel = torch.stack([kernel_2d for _ in range(self.in_channels)])  # repeat 2D kernel for each input channel
-        return kernel.unsqueeze(0)  # we must add and additional dimension to handle multiple inputs
+    @overrides
+    def kernel_2d(self):
+        return  torch.tensor([[0, 1, 0], [1, 4, 1], [0, 1, 0]], dtype=torch.float)

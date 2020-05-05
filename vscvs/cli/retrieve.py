@@ -28,7 +28,7 @@ from vscvs.embeddings import retrieve_top_k
 @click.option('--k', prompt='Top k', help='The amount of top results to be retrieved', default=10)
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context
-def retrieve(context, **kwargs):
+def retrieve(context, **__):
     """ Image retrieval click group. """
     # Use the `_filenames` variant of the selected dataset to allow retrieval by filename
     click.echo('Querying {} embeddings'.format(context.obj['queried_embeddings_name']))

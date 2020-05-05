@@ -27,8 +27,7 @@ def gradient(name):
         'name': name,
         'experiment_env': dotenv_values('.env.gradient'),
         'command': 'python main.py {}'.format(' '.join(command_arguments)),
-        **camel_to_snake_case_dict_keys(load_yaml('gradient.yaml')) # shared experiment parameters, such as machine type
-    }
+        **camel_to_snake_case_dict_keys(load_yaml('gradient.yaml'))} # shared experiment parameters, such as machine type
     experiment_id = experiment_client.run_single_node(**experiment_parameters) # define and run experiment
     stream_logs(experiment_id)
     sys.exit() # terminate program after log stream
@@ -43,6 +42,7 @@ def stream_logs(experiment_id):
     experiment_client = ExperimentsClient(api_key=os.environ['GRADIENT_API_KEY'])
     log_stream = experiment_client.yield_logs(experiment_id)
     print('Streaming logs of experiment {}.'.format(experiment_id))
+    # noinspection PyBroadException
     try:
         while True:
             print(log_stream.send(None).message)

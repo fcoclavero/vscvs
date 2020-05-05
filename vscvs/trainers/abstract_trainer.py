@@ -20,7 +20,7 @@ from tqdm import tqdm
 from settings import CHECKPOINT_NAME_FORMAT
 from vscvs.datasets import get_dataset
 from vscvs.utils import get_device, get_checkpoint_directory, get_log_directory
-from vscvs.utils.data import dataset_split_successive
+from vscvs.utils import dataset_split_successive
 
 
 class AbstractTrainer(ABC):
@@ -353,8 +353,9 @@ class AbstractTrainer(ABC):
         :return: two DataLoaders, the first for the training data and the second for the validation data.
         :type: torch.utils.data.DataLoader
         """
+        # noinspection PyTypeChecker
         loaders = [DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=workers, drop_last=drop_last,
-                              collate_fn=self.collate_function)
+                              collate_fn=self.collate_function) # `collate_fn` parameter handles `None` vaLue
                    for subset in dataset_split_successive(self.dataset, train_validation_split)]
         if not len(loaders[-1]):
             raise ValueError('Empty validation loader. This might be caused by having `drop_last=True` and \

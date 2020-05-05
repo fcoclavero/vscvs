@@ -6,6 +6,7 @@ __status__ = 'Prototype'
 """ Adaptation of torchvision ResNext models to fit the different datasets. """
 
 
+from overrides import overrides
 from torch import nn
 from torchvision.models import resnext50_32x4d
 
@@ -18,7 +19,6 @@ class ResNextBase(nn.Module):
     """
     def __init__(self, pretrained=False, progress=True, **kwargs):
         """
-        Initialize model.
         :param pretrained: if True, uses a model pre-trained on ImageNet.
         :type: boolean
         :param progress: if True, displays a progress bar of the download to stderr
@@ -29,6 +29,7 @@ class ResNextBase(nn.Module):
         super().__init__()
         self.base = resnext50_32x4d(pretrained=pretrained, progress=progress, **kwargs)
 
+    @overrides
     def forward(self, x):
         return self.base(x)
 

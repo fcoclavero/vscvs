@@ -8,6 +8,8 @@ __status__ = 'Prototype'
 
 import torch.nn as nn
 
+from overrides import overrides
+
 
 class MultimodalEncoder(nn.Module):
     """
@@ -23,6 +25,7 @@ class MultimodalEncoder(nn.Module):
         super().__init__()
         self.mode_embedding_networks = nn.ModuleList(mode_embedding_networks)
 
+    @overrides
     def forward(self, *mode_inputs):
         """
         Perform a forward pass on the network which computes the embeddings for each mode by performing a forward pass

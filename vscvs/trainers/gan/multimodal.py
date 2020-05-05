@@ -11,9 +11,8 @@ from overrides import overrides
 from torch.nn import MSELoss
 from typing import Callable
 
-from vscvs.metrics.gan import LossMultimodalGAN
-from vscvs.models import ResNextNormalized
-from vscvs.models.gan import InterModalDiscriminatorSoftmax, MultimodalEncoder
+from vscvs.metrics import LossMultimodalGAN
+from vscvs.models import ResNextNormalized, InterModalDiscriminatorSoftmax, MultimodalEncoder
 from vscvs.trainers.gan import AbstractGANTrainer
 from vscvs.trainers.engines.gan import create_multimodal_gan_evaluator, create_multimodal_gan_trainer
 from vscvs.decorators import kwargs_parameter_dict

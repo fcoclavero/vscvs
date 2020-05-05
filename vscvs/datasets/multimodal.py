@@ -16,6 +16,7 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 
 from vscvs.datasets.mixins import SiameseMixin, TripletMixin
+from vscvs.utils import get_cache_directory
 
 
 class MultimodalDataset(Dataset):
@@ -39,11 +40,6 @@ class MultimodalDataset(Dataset):
         self.base_dataset = base_dataset
 
     def __len__(self):
-        """
-        Override the `__len__` property of the Dataset object to match the base Dataset.
-        :return: the length of the drawable items in the siamese Dataset.
-        :type: int
-        """
         return len(self.base_dataset)
 
 
@@ -93,7 +89,7 @@ class MultimodalEntityDataset(MultimodalDataset):
         :return: the file path of the cache file.
         :type: str
         """
-        return os.path.join('data', 'cache', self.cache_filename)
+        return get_cache_directory(self.cache_filename)
 
     @property
     def cache_filename(self):

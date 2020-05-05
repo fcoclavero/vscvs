@@ -12,7 +12,7 @@ from torch.utils.data import Subset
  
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from vscvs.datasets import get_dataset
-from vscvs.utils.data import random_simple_split
+from vscvs.utils import random_simple_split
 from vscvs.embeddings import average_class_recall, average_class_recall_parallel, load_embedding_pickles
 
 
@@ -28,7 +28,7 @@ def measure():
               type=click.Choice(['cosine', 'pairwise']))
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context
-def recall(context, **kwargs):
+def recall(_, **__):
     """ Image recall benchmarks click group. """
     pass
 
@@ -37,8 +37,7 @@ def recall(context, **kwargs):
 @pass_context_to_kwargs
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset that corresponds to the given embeddings.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--embeddings-name', prompt='Embeddings name', help='Name of the embeddings directory.')
 @click.option('--test-split', prompt='Test split', default=.2, help='Proportion of the dataset to be used for queries.')
 def same_class(_, dataset_name, embeddings_name, test_split, k, distance, n_gpu):
@@ -50,7 +49,7 @@ def same_class(_, dataset_name, embeddings_name, test_split, k, distance, n_gpu)
     query_dataset, queried_dataset = Subset(dataset, query_indices), Subset(dataset, queried_indices)
     average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu)
 
- 
+
 @measure.group()
 def cross_modal():
     """ Cross modal retrieval benchmarks click group. """
@@ -60,12 +59,10 @@ def cross_modal():
 @cross_modal.group()
 @click.option(
     '--query-dataset-name', prompt='Query dataset name', help='The name of the dataset that contains the query image.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option(
     '--queried-dataset-name', prompt='Queried dataset name', help='The name of the dataset that will be queried.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--query-embeddings-name', prompt='Query embeddings name', help='Query embeddings directory name.')
 @click.option('--queried-embeddings-name', prompt='Queried embeddings name', help='Queried embeddings directory name.')
 @click.option('--k', prompt='Top k', help='The amount of top results to be retrieved', default=10)
@@ -76,7 +73,7 @@ def cross_modal():
 @click.option('--processes', prompt='Number of parallel workers', default=1,
               help='The number of parallel workers to be used.')
 @pass_kwargs_to_context
-def recall(context, **kwargs):
+def recall(_, **__):
     """ Cross-modal image recall benchmarks click group. """
     pass
 
@@ -86,8 +83,7 @@ def recall(context, **kwargs):
 def same_class(_, query_dataset_name, queried_dataset_name, query_embeddings_name, queried_embeddings_name,
                k, distance, n_gpu, processes):
     click.echo('Calculating cross modal class recall@{} for the {} and {} embeddings'.format(
-        k, query_embeddings_name, queried_embeddings_name
-    ))
+        k, query_embeddings_name, queried_embeddings_name))
     query_dataset, queried_dataset = get_dataset(query_dataset_name), get_dataset(queried_dataset_name)
     query_embeddings = load_embedding_pickles(query_embeddings_name)
     queried_embeddings = load_embedding_pickles(queried_embeddings_name)

@@ -11,12 +11,11 @@ from overrides import overrides
 from torch.nn import BCEWithLogitsLoss
 from typing import Callable
 
-from vscvs.metrics.gan import LossMultimodalGAN
-from vscvs.models import ResNextNormalized
-from vscvs.models.gan import InterModalDiscriminator, MultimodalEncoder
-from vscvs.trainers.gan import AbstractGANTrainer
-from vscvs.trainers.engines.gan import create_multimodal_gan_evaluator, create_multimodal_gan_trainer,\
+from .gan import AbstractGANTrainer
+from ..engines.gan import create_multimodal_gan_evaluator, create_multimodal_gan_trainer, \
     prepare_bimodal_batch_variables
+from vscvs.metrics import LossMultimodalGAN
+from vscvs.models import ResNextNormalized, InterModalDiscriminator, MultimodalEncoder
 from vscvs.decorators import kwargs_parameter_dict
 
 

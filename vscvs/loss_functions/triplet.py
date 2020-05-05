@@ -8,6 +8,8 @@ __status__ = 'Prototype'
 
 import torch
 
+from overrides import overrides
+
 from .mixins import ReductionMixin
 
 
@@ -28,6 +30,7 @@ class TripletLoss(ReductionMixin, torch.nn.Module):
         self.margin = margin
         super().__init__(*args, **kwargs)
 
+    @overrides
     def forward(self, anchor, positive, negative):
         """
         Compute the Triplet Loss between a batch of triplets. The Triplet Loss is defined as:

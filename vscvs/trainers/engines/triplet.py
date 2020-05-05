@@ -11,7 +11,7 @@ import torch
 from ignite.engine import Engine
 
 from vscvs.trainers.engines import attach_metrics
-from vscvs.utils.data import output_transform_triplet_evaluator as output_transform_evaluator, \
+from vscvs.utils import output_transform_triplet_evaluator as output_transform_evaluator, \
     output_transform_triplet_trainer as output_transform_trainer, \
     prepare_batch_multimodal as _prepare_batch
 

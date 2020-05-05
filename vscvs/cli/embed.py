@@ -61,7 +61,7 @@ def resnet(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, c
     click.echo('ResNet embeddings for {} dataset'.format(dataset_name))
     from vscvs.models import ResNet
     model = load_classification_model_from_checkpoint(ResNet, checkpoint, date, tag)
-    create_embeddings(model.resnet_base, dataset_name, embeddings_name, batch_size, workers, n_gpu)
+    create_embeddings(model.base, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
 
 @embed.command()
@@ -73,4 +73,4 @@ def resnext(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, 
     from vscvs.models import ResNext
     click.echo('ResNext embeddings for {} dataset'.format(dataset_name))
     model = load_classification_model_from_checkpoint(ResNext, checkpoint, date, tag)
-    create_embeddings(model.resnext_base, dataset_name, embeddings_name, batch_size, workers, n_gpu)
+    create_embeddings(model.base, dataset_name, embeddings_name, batch_size, workers, n_gpu)

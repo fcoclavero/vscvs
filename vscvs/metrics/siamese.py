@@ -13,7 +13,7 @@ from ignite.metrics import Loss, Metric
 from ignite.metrics.metric import sync_all_reduce, reinit__is_reduced
 from overrides import overrides
 
-from vscvs.metrics.mulitmodal import AbstractAverageDistances
+from .mulitmodal import AbstractAverageDistances
 
 
 class AccuracySiamesePairs(Metric):
@@ -77,6 +77,7 @@ class AccuracySiamesePairs(Metric):
         self._num_examples += batch_size
 
 
+# noinspection DuplicatedCode
 class LossSiamesePairs(Loss):
     """
     Computes the average loss for a siamese network.

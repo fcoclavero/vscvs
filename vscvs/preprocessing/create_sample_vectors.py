@@ -6,8 +6,8 @@ __status__ = 'Prototype'
 """ Function for creating a dataset with random vectors, for testing purposes. """
 
 
-import pickle, random
-
+import pickle
+import random
 import pandas as pd
 
 from settings import DATA_SOURCES

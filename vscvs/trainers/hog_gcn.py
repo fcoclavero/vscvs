@@ -12,10 +12,10 @@ from overrides import overrides
 from torch.nn import CrossEntropyLoss
 from typing import Callable
 
+from .abstract_trainer import AbstractTrainer
+from .engines.hog_gcn import create_hog_gcn_evaluator, create_hog_gcn_trainer
 from vscvs.datasets import get_dataset
 from vscvs.models import HOGGCN
-from vscvs.trainers.abstract_trainer import AbstractTrainer
-from vscvs.trainers.engines.hog_gcn import create_hog_gcn_evaluator, create_hog_gcn_trainer
 from vscvs.decorators import kwargs_parameter_dict
 
 

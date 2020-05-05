@@ -13,6 +13,7 @@ from vscvs.trainers.mixins import AdaBoundOptimizerMixin, AdamOptimizerMixin, Ad
     RMSpropOptimizerMixin, SGDOptimizerMixin
 
 
+# noinspection DuplicatedCode
 @click.group()
 @click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=1e-3)
 @click.option('--beta-1', prompt='Beta 1', default=.9,
@@ -32,6 +33,7 @@ def adabound(context, **__):
     context.obj['optimizer_mixin'] = AdaBoundOptimizerMixin
 
 
+# noinspection DuplicatedCode
 @click.group()
 @click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=1e-3)
 @click.option('--beta-1', prompt='Beta 1', default=.9,
@@ -49,6 +51,7 @@ def adam(context, **__):
     context.obj['optimizer_mixin'] = AdamOptimizerMixin
 
 
+# noinspection DuplicatedCode
 @click.group()
 @click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=1e-3)
 @click.option('--beta-1', prompt='Beta 1', default=.9,
@@ -66,6 +69,7 @@ def adam_w(context, **__):
     context.obj['optimizer_mixin'] = AdamWOptimizerMixin
 
 
+# noinspection DuplicatedCode
 @click.group()
 @click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=1e-3)
 @click.option('--alpha', prompt='Alpha', default=.99, help='Smoothing constant.')
@@ -81,6 +85,7 @@ def rms_prop(context, **__):
     context.obj['optimizer_mixin'] = RMSpropOptimizerMixin
 
 
+# noinspection DuplicatedCode
 @click.group()
 @click.option('--learning-rate', prompt='Learning rate', help='Learning rate for the optimizer', default=1e-3)
 @click.option('--momentum', prompt='Momentum', help='Momentum parameter for SGD optimizer.', default=.2)

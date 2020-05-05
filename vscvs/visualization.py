@@ -10,7 +10,6 @@ import click
 import pickle
 import os
 import torch
-
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly.graph_objs as go
@@ -35,12 +34,9 @@ def display_sample_batch(dataset_name, batch_size, workers):
     :param workers: number of data loader workers.
     :type: int
     """
-    # Load data
-    dataset = get_dataset(dataset_name)
-    # Create the data_loader
-    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers)
-    # Plot the batch
-    plot_image_batch(next(iter(data_loader)))
+    dataset = get_dataset(dataset_name) # load data
+    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers) # create the data_loader
+    plot_image_batch(next(iter(data_loader))) # plot the batch
 
 
 def plot_image_retrieval(query_image, query_image_class, query_dataset, queried_dataset, top_distances, top_indices):
@@ -126,8 +122,7 @@ def plot_embedding_tsne(dataset_name, embeddings_name, load_projection=False):
         dataset_class_names = [dataset.classes[tup[1]] for tup in tqdm(dataset, desc='Retrieving image class names')]
         pickle.dump(projection, open(os.path.join(projection_pickle_dir, 'tsne.pickle'), 'wb'))
         pickle.dump(dataset_class_names, open(os.path.join(projection_pickle_dir, 'tsne_class_names.pickle'), 'wb'))
-    # Plot the resulting projection using plotly
-    trace = go.Scattergl(
+    trace = go.Scattergl( # plot the resulting projection using plotly
         x=projection[:, 0],
         y=projection[:, 1],
         text=dataset_class_names,
@@ -135,8 +130,6 @@ def plot_embedding_tsne(dataset_name, embeddings_name, load_projection=False):
         marker=dict(
             size=16,
             color=np.random.randn(len(projection)),
-            colorscale='Viridis'
-        )
-    )
+            colorscale='Viridis'))
     data = [trace]
     plot(data)

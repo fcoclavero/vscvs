@@ -8,8 +8,6 @@ __status__ = 'Prototype'
 
 import setuptools
 
-# tell setuptools about the package
-
 with open("README.md", "r") as fh:
     long_description = fh.read()
 

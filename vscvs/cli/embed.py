@@ -7,16 +7,10 @@ __status__ = 'Prototype'
 
 
 import click
-import os
-import torch
 
-from datetime import datetime
-
-from settings import CHECKPOINT_NAME_FORMAT, ROOT_DIR
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from vscvs.embeddings import create_embeddings
-from vscvs.models import CNN, ResNet, ResNext
-from vscvs.utils import get_checkpoint_directory, remove_last_layer, get_out_features_from_state_dict
+from vscvs.utils import load_classification_model_from_checkpoint, remove_last_layer
 
 
 @click.group()
@@ -38,8 +32,7 @@ def embed(context, **kwargs):
 @click.option('--cell-size', prompt='Cell size', help='Gradient pooling size.', default=8)
 @click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
 @click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
-def hog(_, dataset_name, embeddings_name, batch_size, workers, n_gpu,
-        in_channels, cell_size, bins, signed_gradients):
+def hog(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, in_channels, cell_size, bins, signed_gradients):
     click.echo('HOG embeddings for {} dataset'.format(dataset_name))
     from vscvs.models import HOG
     model = HOG(in_channels, cell_size, bins, signed_gradients)
@@ -53,11 +46,8 @@ def hog(_, dataset_name, embeddings_name, batch_size, workers, n_gpu,
 @click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
 def cnn(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
     click.echo('CNN embeddings for {} dataset'.format(dataset_name))
-    checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'CNN', checkpoint)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))
-    out_features = get_out_features_from_state_dict(state_dict)
-    model = CNN(out_features=out_features)
-    model.load_state_dict(state_dict)
+    from vscvs.models import CNN
+    model = load_classification_model_from_checkpoint(CNN, checkpoint, date, tag)
     model = remove_last_layer(model)
     create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
@@ -69,12 +59,8 @@ def cnn(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, chec
 @click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
 def resnet(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
     click.echo('ResNet embeddings for {} dataset'.format(dataset_name))
-    date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
-    checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))
-    out_features = get_out_features_from_state_dict(state_dict)
-    model = ResNet(out_features=out_features)
-    model.load_state_dict(state_dict)
+    from vscvs.models import ResNet
+    model = load_classification_model_from_checkpoint(ResNet, checkpoint, date, tag)
     create_embeddings(model.resnet_base, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
 
@@ -84,11 +70,7 @@ def resnet(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, c
 @click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint to be loaded.')
 @click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
 def resnext(_, dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
+    from vscvs.models import ResNext
     click.echo('ResNext embeddings for {} dataset'.format(dataset_name))
-    date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
-    checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint)))
-    out_features = get_out_features_from_state_dict(state_dict)
-    model = ResNext(out_features=out_features)
-    model.load_state_dict(state_dict)
+    model = load_classification_model_from_checkpoint(ResNext, checkpoint, date, tag)
     create_embeddings(model.resnext_base, dataset_name, embeddings_name, batch_size, workers, n_gpu)

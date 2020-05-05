@@ -11,7 +11,7 @@ import torch
 from ignite.engine import Engine
 
 from vscvs.trainers.engines import attach_metrics
-from vscvs.utils.data import prepare_batch_siamese as _prepare_batch, \
+from vscvs.utils import prepare_batch_siamese as _prepare_batch, \
     output_transform_siamese_evaluator as output_transform_evaluator, \
     output_transform_siamese_trainer as output_transform_trainer
 

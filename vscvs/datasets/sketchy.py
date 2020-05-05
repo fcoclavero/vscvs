@@ -22,10 +22,9 @@ class Sketchy(ImageFolder):
     Utility class for loading the sketchy dataset. It's original structure is compatible with
     the torch ImageFolder, so I will just subclass that and apply some transforms.
     """
-    def __init__(self, image_data_source, *custom_transforms, in_channels=3, **kwargs):
+    def __init__(self, image_data_source, *custom_transforms, in_channels=3, **__):
         """
-        Initialize the ImageFolder and perform transforms. Note that sketches and photos have the
-        same exact dimension in both the sketchy and sketchy_test datasets.
+        NOTE: sketches and photos have the same exact dimension in both the `sketchy` and `sketchy_test` datasets.
         :param image_data_source: the DATA_SOURCE name for images
         :type: str
         :param custom_transforms: additional transforms for the Dataset

@@ -10,11 +10,11 @@ from abc import ABC
 from overrides import overrides
 from typing import Callable
 
+from .abstract_trainer import AbstractTrainer
+from .engines.triplet import create_triplet_evaluator, create_triplet_trainer
 from vscvs.loss_functions import TripletLoss
-from vscvs.metrics.triplet import AccuracyTriplets, AverageDistancesTriplets, LossTriplets
+from vscvs.metrics import AccuracyTriplets, AverageDistancesTriplets, LossTriplets
 from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, TripletSharedPositiveNegative
-from vscvs.trainers.abstract_trainer import AbstractTrainer
-from vscvs.trainers.engines.triplet import create_triplet_evaluator, create_triplet_trainer
 from vscvs.decorators import kwargs_parameter_dict
 
 

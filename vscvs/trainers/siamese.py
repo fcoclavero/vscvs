@@ -10,11 +10,11 @@ from abc import ABC
 from overrides import overrides
 from typing import Callable
 
+from .abstract_trainer import AbstractTrainer
+from .engines.siamese import create_siamese_evaluator, create_siamese_trainer
 from vscvs.loss_functions import ContrastiveLoss
-from vscvs.metrics.siamese import AccuracySiamesePairs, AverageDistancesSiamesePairs, LossSiamesePairs
+from vscvs.metrics import AccuracySiamesePairs, AverageDistancesSiamesePairs, LossSiamesePairs
 from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, SiameseNetwork
-from vscvs.trainers.abstract_trainer import AbstractTrainer
-from vscvs.trainers.engines.siamese import create_siamese_evaluator, create_siamese_trainer
 from vscvs.decorators import kwargs_parameter_dict
 
 

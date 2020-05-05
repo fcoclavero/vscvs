@@ -20,7 +20,6 @@ class InterModalDiscriminatorBase(nn.Module):
     """
     def __init__(self, input_dimension=None):
         """
-        Initialize model.
         :param input_dimension: the size of the input vector (common vector space dimensionality).
         :type: int
         """
@@ -37,9 +36,6 @@ class InterModalDiscriminatorBase(nn.Module):
 
 class InterModalDiscriminator(OutFeaturesMixin, InterModalDiscriminatorBase):
     def __init__(self, *args, **kwargs):
-        """
-        Initialize model. 0 < output_value < 1.
-        """
         super().__init__(*args, out_features=1, **kwargs)
 
     @overrides
@@ -49,9 +45,6 @@ class InterModalDiscriminator(OutFeaturesMixin, InterModalDiscriminatorBase):
 
 class InterModalDiscriminatorSigmoid(SigmoidMixin, InterModalDiscriminatorBase):
     def __init__(self, *args, **kwargs):
-        """
-        Initialize model. 0 < output_value < 1.
-        """
         super().__init__(*args, out_features=1, **kwargs)
 
     @overrides
@@ -61,7 +54,4 @@ class InterModalDiscriminatorSigmoid(SigmoidMixin, InterModalDiscriminatorBase):
 
 class InterModalDiscriminatorSoftmax(SoftmaxMixin, InterModalDiscriminatorBase):
     def __init__(self, *args, **kwargs):
-        """
-        Initialize model. Values must sum 1 on dimension 1, that is for the 2D outputs for each example.
-        """
         super().__init__(*args, out_features=2, **kwargs)

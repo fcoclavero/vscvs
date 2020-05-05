@@ -8,6 +8,8 @@ __status__ = 'Prototype'
 
 import torch.nn as nn
 
+from overrides import overrides
+
 
 class TripletNetwork(nn.Module):
     """
@@ -31,6 +33,7 @@ class TripletNetwork(nn.Module):
         self.positive_embedding_network = positive_embedding_network
         self.negative_embedding_network = negative_embedding_network
 
+    @overrides
     def forward(self, anchor, positive, negative):
         """
         Perform a forward pass on the network, computing the embeddings for the triplet.

@@ -8,6 +8,8 @@ __status__ = 'Prototype'
 
 import torch.nn as nn
 
+from overrides import overrides
+
 
 class SiameseNetwork(nn.Module):
     """
@@ -27,6 +29,7 @@ class SiameseNetwork(nn.Module):
         self.embedding_network_0 = embedding_network_0
         self.embedding_network_1 = embedding_network_1
 
+    @overrides
     def forward(self, input_0, input_1):
         """
         Perform a forward pass on the network, computing the embeddings for both inputs.
@@ -58,6 +61,7 @@ class SiameseNetworkShared(nn.Module):
         super().__init__()
         self.embedding_network = embedding_network
 
+    @overrides
     def forward(self, input_0, input_1):
         """
         Perform a forward pass on the network, computing the embeddings for both inputs.

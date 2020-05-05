@@ -8,6 +8,8 @@ __status__ = 'Prototype'
 
 import torch
 
+from overrides import overrides
+
 from .mixins import ReductionMixin
 
 
@@ -27,6 +29,7 @@ class ContrastiveLoss(ReductionMixin, torch.nn.Module):
         self.margin = margin
         super().__init__(*args, **kwargs)
 
+    @overrides
     def forward(self, x_0, x_1, y):
         """
         Compute the Contrastive Loss between two embeddings, given the label indicating whether the two embeddings

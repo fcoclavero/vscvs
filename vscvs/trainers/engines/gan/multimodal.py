@@ -11,7 +11,7 @@ import torch
 from ignite.engine import Engine
 
 from vscvs.trainers.engines import attach_metrics
-from vscvs.utils.data import output_transform_multimodal_gan_evaluator as output_transform_evaluator, \
+from vscvs.utils import output_transform_multimodal_gan_evaluator as output_transform_evaluator, \
     output_transform_multimodal_gan_trainer as output_transform_trainer, \
     prepare_batch_multimodal as _prepare_batch
 
@@ -29,7 +29,7 @@ def prepare_multimodal_batch_variables(batch, device):
     :param device: the device type specification where the processing is to take place.
     :type: str of torch.device (optional) (default: None)
     :return: the batch-derived variables: `batch_size`, `classes`, `mode_labels`, `generator_labels`.
-    :type: tuple<torch.tensor, torch.tensor, torch.tensor, torch.tensor, torch.tensor>
+    :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor>
     """
     n_modes = len(batch)
     batch_size = len(batch[0][0])  # any mode should have same lengths

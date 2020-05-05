@@ -51,8 +51,8 @@ DATA_SOURCES = {
         'pickle': os.path.join(ROOT_DIR, 'data', 'pickles', 'discriminators', 'sample-vectors.pickle'),
         'dimensions': (100000, 100)
     },
-    'sample_vectors_onehot': {
-        'pickle': os.path.join(ROOT_DIR, 'data', 'pickles', 'discriminators', 'sample-vectors-onehot.pickle'),
+    'sample_vectors_one-hot': {
+        'pickle': os.path.join(ROOT_DIR, 'data', 'pickles', 'discriminators', 'sample-vectors-one-hot.pickle'),
         'dimensions': (100000, 100)
     }
 }

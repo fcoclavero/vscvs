@@ -23,10 +23,10 @@ def create_sample_vectors(n, dimension):
     :type: int
     """
     data = pd.DataFrame(columns=['class', 'vector'])
-    data['class'] = [random.randint(0, 1) for i in range(n)]
-    data['vector'] = data['class'].apply(lambda c: [c + random.uniform(0, 1) for i in range(dimension)])
+    data['class'] = [random.randint(0, 1) for _ in range(n)]
+    data['vector'] = data['class'].apply(lambda c: [c + random.uniform(0, 1) for _ in range(dimension)])
     pickle.dump(data, open(DATA_SOURCES['sample_vectors']['pickle']), 'wb') # save binary labeled data to the data dir
     data['class'] = data['class'].apply(lambda c: [1 - c, c]) # create one-hot encoded labels from the binary labels
-    pickle.dump(data, open(DATA_SOURCES['sample_vectors_onehot']['pickle'], 'wb')) # save to the data dir
+    pickle.dump(data, open(DATA_SOURCES['sample_vectors_one-hot']['pickle'], 'wb')) # save to the data dir
     DATA_SOURCES['sample_vectors']['dimensions'] = (n, dimension) # Update dimensions
-    DATA_SOURCES['sample_vectors_onehot']['dimensions'] = (n, dimension)
+    DATA_SOURCES['sample_vectors_one-hot']['dimensions'] = (n, dimension)

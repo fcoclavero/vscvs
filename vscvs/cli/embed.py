@@ -21,7 +21,7 @@ from vscvs.utils import load_classification_model_from_checkpoint, remove_last_l
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context
-def embed(context, **kwargs):
+def embed(_, **__):
     """ Image embedding creation click group. """
     pass
 

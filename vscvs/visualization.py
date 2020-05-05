@@ -107,6 +107,8 @@ def plot_embedding_tsne(dataset_name, embeddings_name, load_projection=False):
     :type: str
     :param embeddings_name: the name of the directory where the batch pickles will be saved.
     :type: str
+    :param load_projection: load projections from pickles.
+    :type: boolean
     """
     from vscvs.embeddings import load_embedding_pickles # import here to avoid circular import
     dataset = get_dataset(dataset_name)

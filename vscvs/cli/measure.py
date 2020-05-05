@@ -28,7 +28,7 @@ def measure():
               type=click.Choice(['cosine', 'pairwise']))
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context
-def recall(context, **kwargs):
+def recall(_, **__):
     """ Image recall benchmarks click group. """
     pass
 
@@ -73,7 +73,7 @@ def cross_modal():
 @click.option('--processes', prompt='Number of parallel workers', default=1,
               help='The number of parallel workers to be used.')
 @pass_kwargs_to_context
-def recall(context, **kwargs):
+def recall(_, **__):
     """ Cross-modal image recall benchmarks click group. """
     pass
 

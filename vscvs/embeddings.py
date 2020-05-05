@@ -207,6 +207,7 @@ def class_recall(queried_dataset, top_indices, query_image_class):
     images to the query image) have the same class as the query image
     :type: float
     """
+    # noinspection PyTypeChecker
     return reduce(lambda part, i: part + queried_dataset[i][1] == query_image_class, top_indices, 0) / len(top_indices)
 
 

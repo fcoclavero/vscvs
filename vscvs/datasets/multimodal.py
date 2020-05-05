@@ -39,7 +39,6 @@ class MultimodalDataset(Dataset):
         super().__init__(*args, **kwargs)
         self.base_dataset = base_dataset
 
-    @overrides
     def __len__(self):
         return len(self.base_dataset)
 

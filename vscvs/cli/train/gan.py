@@ -37,16 +37,18 @@ def multimodal(*_, **__):
 def default(_, *args, **kwargs):
     """ Train a generative adversarial model for common vector space creation. """
     from vscvs.trainers.gan import train_gan_multimodal
+    click.echo('multimodal GAN - {} dataset'.format(kwargs['dataset_name']))
     train_gan_multimodal(*args, **kwargs)
 
 
-# @multimodal.command()
-# @click.option('--loss-weight', help='Reduction function for the loss function.', default=None)
-# @pass_context_to_kwargs
-# def bimodal(_, *args, **kwargs):
-#     """ Train a generative adversarial model for common vector space creation. """
-#     from vscvs.trainers.gan import train_gan_multimodal
-#     train_gan_multimodal(*args, **kwargs)
+@multimodal.command()
+@click.option('--loss-weight', help='Reduction function for the loss function.', default=None)
+@pass_context_to_kwargs
+def bimodal(_, *args, **kwargs):
+    """ Train a generative adversarial model for bimodal common vector space creation. """
+    from vscvs.trainers.gan import train_gan_bimodal
+    click.echo('bimodal GAN - {} dataset'.format(kwargs['dataset_name']))
+    train_gan_bimodal(*args, **kwargs)
 
 
 @multimodal.command()

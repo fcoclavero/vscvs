@@ -11,6 +11,7 @@ from overrides import overrides
 from torch.nn import MSELoss
 from typing import Callable
 
+from vscvs.metrics.gan import LossMultimodalGAN
 from vscvs.models import ResNextNormalized
 from vscvs.models.gan import InterModalDiscriminatorSoftmax, MultimodalEncoder
 from vscvs.trainers.gan import AbstractGANTrainer
@@ -41,7 +42,9 @@ class AbstractMultiModalGANTrainer(AbstractGANTrainer, ABC):
 
     @overrides
     def _create_evaluator_engine(self):
-        return create_multimodal_gan_evaluator(*self.model, device=self.device, metrics={})
+        loss = LossMultimodalGAN(self.loss)
+        return create_multimodal_gan_evaluator(*self.model, device=self.device,
+                                               metrics={'generator_loss': loss[0], 'discriminator_loss': loss[1]})
 
     @overrides
     def _create_trainer_engine(self):

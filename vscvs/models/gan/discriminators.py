@@ -9,7 +9,9 @@ __status__ = 'Prototype'
 import torch.nn as nn
 import torch.nn.functional as F
 
-from vscvs.models.mixins import SigmoidMixin, SoftmaxMixin
+from overrides import overrides
+
+from vscvs.models.mixins import OutFeaturesMixin, SigmoidMixin, SoftmaxMixin
 
 
 class InterModalDiscriminatorBase(nn.Module):
@@ -26,10 +28,23 @@ class InterModalDiscriminatorBase(nn.Module):
         self.linear_0 = nn.Linear(input_dimension, 75)
         self.linear_1 = nn.Linear(75, 25)
 
+    @overrides
     def forward(self, x):
         x = F.relu(self.linear_0(x))
         x = F.relu(self.linear_1(x))
         return x
+
+
+class InterModalDiscriminator(OutFeaturesMixin, InterModalDiscriminatorBase):
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize model. 0 < output_value < 1.
+        """
+        super().__init__(*args, out_features=1, **kwargs)
+
+    @overrides
+    def forward(self, x):
+        return super().forward(x).view(-1)
 
 
 class InterModalDiscriminatorSigmoid(SigmoidMixin, InterModalDiscriminatorBase):
@@ -38,6 +53,10 @@ class InterModalDiscriminatorSigmoid(SigmoidMixin, InterModalDiscriminatorBase):
         Initialize model. 0 < output_value < 1.
         """
         super().__init__(*args, out_features=1, **kwargs)
+
+    @overrides
+    def forward(self, x):
+        return super().forward(x).view(-1)
 
 
 class InterModalDiscriminatorSoftmax(SoftmaxMixin, InterModalDiscriminatorBase):

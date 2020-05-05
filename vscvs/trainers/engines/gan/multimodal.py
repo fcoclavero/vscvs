@@ -16,8 +16,55 @@ from vscvs.utils.data import output_transform_multimodal_gan_evaluator as output
     prepare_batch_multimodal as _prepare_batch
 
 
+def prepare_multimodal_batch_variables(batch, device):
+    """
+    Compute batch-derived variables needed for multimodal GAN processing:
+    - `classes`: the classes of the entities present in the batch.
+    - `mode_labels`: labels indicating the mode of each element if sub-batch embeddings are stacked. One-hot encoded.
+    - `generator_labels`: the target vector for using the same loss function for the generator loss. In this case a
+      tensor with zero in the correct mode and an evenly distributed probability in the rest of the modes.
+      For example `[0, 1, 0]` -> `[0.5, 0, 0.5]`.
+    :param batch: tuple with the multimodal batch to be fed into the generator network.
+    :type: tuple<torch.Tensor, ...>
+    :param device: the device type specification where the processing is to take place.
+    :type: str of torch.device (optional) (default: None)
+    :return: the batch-derived variables: `batch_size`, `classes`, `mode_labels`, `generator_labels`.
+    :type: tuple<torch.tensor, torch.tensor, torch.tensor, torch.tensor, torch.tensor>
+    """
+    n_modes = len(batch)
+    batch_size = len(batch[0][0])  # any mode should have same lengths
+    classes = batch[0][1]  # any mode should have the same class idx
+    mode_labels = torch.cat([t.expand(batch_size, n_modes) for t in torch.diag(torch.ones(n_modes))]).to(device)
+    # noinspection PyTypeChecker
+    generator_labels = (1 - mode_labels.float()) / (n_modes - 1) # type is automatically inferred
+    return classes, mode_labels, generator_labels
+
+
+def prepare_bimodal_batch_variables(batch, device):
+    """
+    Alternative to `prepare_multimodal_batch_variables` that can be used in a bimodal setting, enabling the use of
+    the BCELoss instead of a multi-class classification or regression loss function. It modifies the following:
+    - `mode_labels`: labels indicating the mode of each element, which in this scenario are binary.
+    - `generator_labels`: the target vector for using the same loss function for the generator loss. In this case it
+      corresponds to `1 - mode_labels`.
+    :param batch: tuple with the multimodal batch to be fed into the generator network.
+    :type: tuple<torch.Tensor, ...>
+    :param device: the device type specification where the processing is to take place.
+    :type: str of torch.device (optional) (default: None)
+    :return: the batch-derived variables: `n_modes`, `batch_size`, `classes`, `mode_labels`, `generator_labels`.
+    :type: tuple
+    """
+    batch_size = len(batch[0][0])  # any mode should have same lengths
+    classes = batch[0][1]  # any mode should have the same class idx
+    mode_labels = torch.cat((torch.zeros(batch_size), torch.ones(batch_size))).to(device)
+    # noinspection PyTypeChecker
+    generator_labels = (1 - mode_labels) # type is automatically inferred
+    return classes, mode_labels, generator_labels
+
+
 def create_multimodal_gan_trainer(generator, discriminator, generator_optimizer, discriminator_optimizer, loss_fn,
                                   device=None, non_blocking=False, prepare_batch=_prepare_batch,
+                                  prepare_batch_variables=prepare_multimodal_batch_variables,
                                   output_transform=output_transform_trainer):
     """
     Factory function for creating an ignite trainer Engine for a multimodal GAN.
@@ -50,6 +97,9 @@ def create_multimodal_gan_trainer(generator, discriminator, generator_optimizer,
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
     :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
+    :param prepare_batch_variables: function that computes batch-derived variables needed for multimodal GAN processing:
+    `classes`, `mode_labels`, `generator_labels`.
+    :type: Callable<args: `batch`, `device`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
     :param output_transform: function that receives the result of a triplet network trainer engine and returns value to
     be assigned to engine's state.output after each iteration.
     :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`, `loss`, ret: object>>
@@ -68,7 +118,7 @@ def create_multimodal_gan_trainer(generator, discriminator, generator_optimizer,
         ###########################
 
         batch =  prepare_batch(batch, device=device, non_blocking=non_blocking)
-        n_modes, batch_size, classes, mode_labels, generator_labels = _multimodal_batch_variables(batch, device)
+        classes, mode_labels, generator_labels = prepare_batch_variables(batch, device)
 
         ############################
         # (1) Update G network: maximize log(D(G(z)))
@@ -98,7 +148,8 @@ def create_multimodal_gan_trainer(generator, discriminator, generator_optimizer,
 
 
 def create_multimodal_gan_evaluator(generator, discriminator, metrics=None, device=None, non_blocking=False,
-                                    prepare_batch=_prepare_batch, output_transform=output_transform_evaluator):
+                                    prepare_batch=_prepare_batch, output_transform=output_transform_evaluator,
+                                    prepare_batch_variables=prepare_multimodal_batch_variables):
     """
     Factory function for creating an evaluator for GAN models.
     NOTE: `engine.state.output` for this engine is defined by `output_transform` parameter and is
@@ -115,6 +166,9 @@ def create_multimodal_gan_evaluator(generator, discriminator, metrics=None, devi
     :type: bool (optional)
     :param prepare_batch: batch preparation logic
     :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
+    :param prepare_batch_variables: function that computes batch-derived variables needed for multimodal GAN processing:
+    `classes`, `mode_labels`, `generator_labels`.
+    :type: Callable<args: `batch`, `device`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
     :param output_transform: function that receives the result of a triplet network evaluator engine and returns the
     value to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
     :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`,
@@ -130,53 +184,12 @@ def create_multimodal_gan_evaluator(generator, discriminator, metrics=None, devi
         generator.eval()
         with torch.no_grad():
             batch = prepare_batch(batch, device=device, non_blocking=non_blocking)
-            n_modes, batch_size, classes, mode_labels, generator_labels = _multimodal_batch_variables(batch, device)
-            embeddings, mode_predictions = _forward_pass(generator, discriminator, batch)
+            classes, mode_labels, generator_labels = prepare_batch_variables(batch, device)
+            embedding_list = generator(*[sub_batch[0] for sub_batch in batch]) # forward pass with same mode sub-batches
+            embeddings = torch.cat(embedding_list)  # create a single discriminator batch from sub-batch list
+            mode_predictions = discriminator(embeddings)
             return output_transform(embeddings, mode_predictions, mode_labels, generator_labels, classes)
 
     engine = Engine(_inference)
     if metrics: attach_metrics(engine, metrics)
     return engine
-
-
-def _multimodal_batch_variables(batch, device):
-    """
-    Compute batch-derived variables needed for multimodal GAN processing:
-    - `n_modes`: the number of different modalities present in the batch.
-    - `batch_size`: the number of batch elements.
-    - `classes`: the classes of the entities present in the batch.
-    - `mode_labels`: labels indicating the mode of each element if sub-batch embeddings are stacked. One-hot encoded.
-    - `generator_labels`: the target vector for using the same loss function for the generator loss. In this case, ins
-    :param batch: tuple with the multimodal batch to be fed into the generator network.
-    :type: tuple<torch.Tensor, ...>
-    :param device: the device type specification where the processing is to take place.
-    :type: str of torch.device (optional) (default: None)
-    :return: the batch-derived variables: `n_modes`, `batch_size`, `classes`, `mode_labels`, `generator_labels`.
-    :type: tuple
-    """
-    n_modes = len(batch)
-    batch_size = len(batch[0][0])  # any mode should have same lengths
-    classes = batch[0][1]  # any mode should have the same class idx
-    mode_labels = torch.cat([t.expand(batch_size, n_modes) for t in torch.diag(torch.ones(n_modes))]).to(device)
-    # noinspection PyTypeChecker
-    generator_labels = (1 - mode_labels.float()) / (n_modes - 1) # type is automatically inferred
-    return n_modes, batch_size, classes, mode_labels, generator_labels
-
-
-def _forward_pass(generator, discriminator, batch):
-    """
-    Perform a forward pass through the multimodal GAN, generating embeddings for batch elements and performing mode
-    predictions for each of the resulting embeddings.
-    :param generator: the generator model.
-    :type: torch.nn.Module
-    :param discriminator: the discriminator model - classifies vectors as 'photo' or 'sketch'
-    :type: torch.nn.Module
-    :param batch: tuple with the multimodal batch to be fed into the generator network.
-    :type: tuple<torch.Tensor, ...>
-    :return: the generator embeddings and the discriminator mode predictions.
-    :type: tuple
-    """
-    embedding_list = generator(*[sub_batch[0] for sub_batch in batch])  # forward pass with same mode sub-batches
-    embeddings = torch.cat(embedding_list)  # create a single discriminator batch from sub-batch list
-    mode_predictions = discriminator(embeddings)
-    return embeddings, mode_predictions

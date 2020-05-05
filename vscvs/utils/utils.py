@@ -59,7 +59,7 @@ def get_cache_directory(cache_filename):
     :return: the model checkpoint path.
     :type: str
     """
-    return os.path.join(ROOT_DIR, 'cache', cache_filename)
+    return os.path.join(ROOT_DIR, 'data', 'cache', cache_filename)
 
 
 def get_checkpoint_directory(model_name, tag=None, date=datetime.now()):

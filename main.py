@@ -27,7 +27,7 @@ warnings.filterwarnings(action='ignore', category=FutureWarning, module='tensorb
 # Create a nested command from command groups in the src package
 @click.group()
 def cli():
-    """ Click group for all of the project's scripts. """
+    """ Sketch/image common vector space with semantic information. """
     pass
 
 

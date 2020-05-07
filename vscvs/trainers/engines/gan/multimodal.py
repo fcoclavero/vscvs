@@ -121,7 +121,7 @@ def create_multimodal_gan_trainer(generator, discriminator, generator_optimizer,
         classes, mode_labels, generator_labels = prepare_batch_variables(batch, device)
 
         ############################
-        # (1) Update G network: maximize log(D(G(z)))
+        # (1) Update G network
         ###########################
 
         generator.zero_grad()
@@ -132,7 +132,7 @@ def create_multimodal_gan_trainer(generator, discriminator, generator_optimizer,
         generator_optimizer.step()
 
         ############################
-        # (2) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
+        # (2) Update D network
         ###########################
 
         discriminator.zero_grad()

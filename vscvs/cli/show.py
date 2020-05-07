@@ -18,7 +18,7 @@ from vscvs.utils import get_checkpoint_directory, CHECKPOINT_NAME_FORMAT
 
 @click.group()
 def show():
-    """ Image visualization click group. """
+    """ Image visualization. """
     pass
 
 

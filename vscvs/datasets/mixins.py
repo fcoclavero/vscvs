@@ -427,9 +427,7 @@ class SiameseSingleDatasetMixin(ClassIndicesMixin, SiameseMixin):
     """
     @overrides
     def _get_random_paired_item(self, class_index):
-        item_index = choice( # random index from list with all indices that belong to `class_index`
-            self.get_class_element_indices(class_index))
-        return self[item_index]
+        return super(SiameseMixin, self).__getitem__(choice(self.get_class_element_indices(class_index)))
 
 
 class TripletMixin(DatasetFolderMixin):
@@ -501,13 +499,4 @@ class TripletSingleDatasetMixin(ClassIndicesMixin, TripletMixin):
     """
     @overrides
     def _get_random_triplet_item(self, class_index):
-        """
-        Get a random element belonging to the specified class index to be included in a triplet along with the item
-        requested on the `__getitem__` call. Thus, the returned item will be either the positive or negative triplet
-        element.
-        :param class_index: the class index.
-        :type: int
-        :return: an item tuple.
-        :type: tuple
-        """
-        return super()[choice(self.get_class_element_indices(class_index))]
+        return super(TripletMixin, self).__getitem__(choice(self.get_class_element_indices(class_index)))

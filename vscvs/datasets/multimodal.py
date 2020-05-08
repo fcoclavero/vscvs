@@ -10,7 +10,7 @@ from numpy.random import choice
 from overrides import overrides
 from torch.utils.data import Dataset
 
-from .mixins import SiameseMixin, TripletMixin, MultimodalEntityMixin
+from .mixins import SiameseMixin, SiameseSingleDatasetMixin, TripletMixin, MultimodalEntityMixin
 
 
 class MultimodalDataset(Dataset):
@@ -69,42 +69,11 @@ class MultimodalEntityDatasetFolder(MultimodalEntityMixin, MultimodalDatasetFold
     pass
 
 
-    @staticmethod
-    def _get_filename(element):
-        """
-        Get the filename of the given element.
-        :param element: a `DatasetFolder` element tuple. Assumes the standard tuple format, with the file path in the
-        first tuple index.
-        :type: tuple
-        :return: the file name of the element tuple
-        :type: str
-        """
-        file_path = element[0]
-        filename = os.path.split(file_path)[-1]
-        return filename.split('.')[0] # remove file extension
-
-    def _entity_indices(self):
-        """
-        Returns the entity indices object. The method tries to load the entity indices from cache, if available, and
-        otherwise creates and caches it.
-        :return: the entity indices object for the database.
-        :type: list<dict<int: list<int>>>
-        """
-        try:
-            entity_indices = pickle.load(open(self.cache_file_path, 'rb'))
-        except FileNotFoundError:
-            entity_indices = self._create_entity_indices
-            pickle.dump(entity_indices, open(self.cache_file_path, 'wb'))
-        return entity_indices
-
-    @overrides
-    def __getitem__(self, index):
-        """
-        Override: return the item at `index` in the base dataset, along with a random instance of the same element in
-        each of the modes defined by the different paired datasets.
-        """
-        return (self.base_dataset[index],
-                *[dataset[choice(self.entity_indexes[index][i])] for i, dataset in enumerate(self.paired_datasets)])
+class MultimodalEntitySiameseDataset(SiameseSingleDatasetMixin, MultimodalEntityDatasetFolder):
+    """
+    MultimodalEntityDataset subclass to load multimodal siamese pairs.
+    """
+    pass
 
 
 class SiameseDataset(SiameseMixin, MultimodalDatasetFolder):

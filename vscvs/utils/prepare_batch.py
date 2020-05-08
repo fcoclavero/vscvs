@@ -1,0 +1,148 @@
+__author__ = ['Francisco Clavero']
+__email__ = ['fcoclavero32@gmail.com']
+__status__ = 'Prototype'
+
+
+""" Batch preparation functions. """
+
+
+import torch
+
+from itertools import repeat
+from torch.multiprocessing import Pool
+from ignite.utils import convert_tensor
+from torch_geometric.data import Data
+
+
+def batch_clique_graph(batch, classes_dataframe, processes=None):
+    """
+    Creates a graph Data object from an image batch, to use with a semi-supervised graph learning model. The created
+    graph connects all batch elements with each other (clique graph) and graph vertex weights correspond to word
+    vector distances of class labels. Assumes data and labels are the first two parameters of each sample.
+    :param batch: data to be sent to device.
+    :type: list
+    :param classes_dataframe: dataframe containing class names and their word vectors
+    :type: pandas.Dataframe
+    :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
+    will be used.
+    :type: int or None
+    :return: the batch clique graph
+    :type: torch_geometric.data.Data
+    """
+    x, y, *_ = batch  # unpack extra parameters into `_`
+    edge_index = torch.stack([ # create the binary adjacency matrix for the clique graph
+        torch.arange(x.shape[0]).repeat_interleave(x.shape[0]), # each index repeated num_edges times
+        torch.arange(x.shape[0]).repeat(x.shape[0])]) # the index range repeated num_edges times
+    with Pool(processes=processes) as pool: # create edge weights from the word vector distances
+        edge_classes = torch.stack([y.repeat_interleave(y.shape[0]), y.repeat(y.shape[0])]).t().contiguous()
+        edge_attr = torch.stack(pool.starmap(
+            wordvector_distance, zip(edge_classes, repeat(torch.tensor(classes_dataframe['distances'])))))
+    return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y)
+
+
+def prepare_batch(batch, device=None, non_blocking=False):
+    """
+    Prepare batch for training: pass to a device with options. Assumes data and labels are the first
+    two parameters of each sample.
+    :param batch: data to be sent to device.
+    :type: list
+    :param device: device type specification
+    :type: str of torch.device (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
+    :return: 2-tuple with batch elements and labels.
+    :type: tuple<torch.Tensor, torch.Tensor>
+    """
+    x, y, *_ = batch # unpack extra parameters into `_`
+    return tuple(convert_tensor(element, device=device, non_blocking=non_blocking) for element in [x, y])
+
+
+def prepare_batch_graph(batch, classes_dataframe, device=None, non_blocking=False, processes=None):
+    """
+    Prepare batch for training: pass to a device with options. Assumes data and labels are the first
+    two parameters of each sample.
+    :param batch: data to be sent to device.
+    :type: list
+    :param classes_dataframe: dataframe containing class names and their word vectors
+    :type: pandas.Dataframe
+    :param device: device type specification
+    :type: str of torch.device (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
+    :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
+    will be used.
+    :type: int or None
+    :return: the batch clique graph
+    :type: torch_geometric.data.Data
+    """
+    graph = batch_clique_graph(batch, classes_dataframe, processes)
+    graph.apply(
+        lambda attr: convert_tensor(attr.float(), device=device, non_blocking=non_blocking), 'x', 'edge_attr')
+    return graph
+
+
+def prepare_batch_siamese(batch, device=None, non_blocking=False):
+    """
+    Prepare batch for siamese network training: pass to a device with options. Assumes the shape returned by a Dataset
+    implementing the `SiameseMixin`.
+    :param batch: data to be sent to device.
+    :type: list
+    :param device: device type specification
+    :type: str of torch.device (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
+    :return: 3-tuple with batches of siamese pairs and their target label.
+    :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+    """
+    images_0, images_1 = batch
+    target = siamese_target(images_0, images_1)
+    return tuple(convert_tensor(i, device=device, non_blocking=non_blocking) for i in [images_0, images_1, target])
+
+
+def prepare_batch_multimodal(batch, device=None, non_blocking=False):
+    """
+    Prepare batch for multimodal network training: pass to a device with options. Assumes the shape returned by a
+    `MultimodalDataset` subclass.
+    :param batch: data to be sent to device.
+    :type: list
+    :param device: device type specification
+    :type: str of torch.device (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
+    :return: tuple with multimodal batches.
+    :type: tuple<torch.Tensor, ...>
+    """
+    return tuple(prepare_batch(images, device, non_blocking) for images in batch)
+
+
+def siamese_target(images_0, images_1):
+    """
+    Creates the contrastive loss target vector for the given image pairs. A target of 0 is assigned when both images
+    in a pair are *similar* (have the same class), 1 otherwise.
+    :param images_0: standard image batch (tuple where the first element is the images tensor and the second element is
+    the labels tensor) for the first elements of each siamese pair.
+    :type: tuple<torch.Tensor, torch.Tensor>
+    :param images_1: standard image batch (tuple where the first element is the images tensor and the second element is
+    the labels tensor) for the second elements of each siamese pair.
+    :type: tuple<torch.Tensor, torch.Tensor>
+    :return: tensor with the contrastive loss target.
+    :type: torch.Tensor with shape `batch_size`
+    """
+    # noinspection PyUnresolvedReferences
+    return (images_0[1] != images_1[1]).int() # type inference results in `torch.Tensor`, which has the `.int()` method
+
+
+def wordvector_distance(indices, class_wordvector_distances):
+    """
+    Get the distance of two class word vectors, given a pre-computed distance matrix. This can be used to determine
+    edge weights between two batch graph nodes.
+    :param indices: the indices of the two classes. In the graph structure, the first index corresponds to the origin
+    vertex and the second index corresponds to the destination vertex.
+    :type: torch.Tensor with shape [2]
+    :param class_wordvector_distances: pre-computed class word vector distances for all the classes in the dataset. The
+    matrix is symmetrical.
+    :type:
+    :return: the distances between the word vectors of the classes specified in `indices`.
+    :type: float
+    """
+    return class_wordvector_distances[indices[0]][indices[1]]

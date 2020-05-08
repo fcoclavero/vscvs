@@ -6,17 +6,11 @@ __status__ = 'Prototype'
 """ Datasets for managing multimodal data loading. """
 
 
-import os
-import pickle
-import re
-
 from numpy.random import choice
 from overrides import overrides
 from torch.utils.data import Dataset
-from tqdm import tqdm
 
-from vscvs.datasets.mixins import SiameseMixin, TripletMixin
-from vscvs.utils import get_cache_directory
+from .mixins import SiameseMixin, TripletMixin, MultimodalEntityMixin
 
 
 class MultimodalDataset(Dataset):
@@ -61,67 +55,19 @@ class MultimodalDatasetFolder(MultimodalDataset):
         self.targets = self.base_dataset.targets
 
 
-class MultimodalEntityDataset(MultimodalDataset):
+class MultimodalEntityDataset(MultimodalEntityMixin, MultimodalDataset):
     """
-    Dataset class for datasets in which the same entity is available in different modes (for example an image and its
-    textual annotation, or a photo and a sketch of that same photo). The `MultimodalEntityDataset` is defined with a
-    base mode (the base dataset of the inherited `MultimodalDataset`). A tuple with one element from each mode is
-    returned on `__getitem__` (one from the base dataset and one from each additional paired dataset). If more than one
-    instance of the same entity is available for the same mode, a random instance is picked. Thus, the length of the
-    `__getitem__` tuple is the same as the number of modes, and each tuple item has a `shape[0]` of `batch_size` (the
-    remaining dimensions will depend on the format of each mode).
-    NOTE: we assume that the same entity in a different mode will be contained in a file with a name that contains the
-    name of the entity in the base dataset.
+    MultimodalEntity dataset.
     """
-    def __init__(self, base_dataset, *paired_datasets):
-        """
-        :param base_dataset: `MultimodalDataset` base dataset.
-        :type: torch.utils.data.DatasetFolder
-        :param paired_datasets: DatasetFolder object containing the entities of the base dataset, in different modes.
-        :type: list<torchvision.datasets.DatasetFolder>
-        """
-        super().__init__(base_dataset)
-        self.paired_datasets = paired_datasets
-        self.entity_indexes = self._entity_indices()
+    pass
 
-    @property
-    def cache_file_path(self):
-        """
-        File path of a `MultimodalEntityDataset` cache file.
-        :return: the file path of the cache file.
-        :type: str
-        """
-        return get_cache_directory(self.cache_filename)
 
-    @property
-    def cache_filename(self):
-        """
-        Filename of a `MultimodalEntityDataset` cache file.
-        :return: the filename string.
-        :type: str
-        """
-        return '{}.pickle'.format('-'.join([dataset.__class__.__name__ for dataset in [self, *self.paired_datasets]]))
+class MultimodalEntityDatasetFolder(MultimodalEntityMixin, MultimodalDatasetFolder):
+    """
+    MultimodalEntityDataset for DatasetFolder datasets.
+    """
+    pass
 
-    @property
-    def _create_entity_indices(self):
-        """
-        Create the entity indices for the dataset: a list of dictionaries, one for each paired dataset, that contains
-        the indices of all the elements in each corresponding paired dataset that correspond to the same entity in the
-        base dataset, with base dataset element indices as keys.
-        NOTE: this takes about 30 min. on a notebook i7. This could be optimized with multiprocessing, but it wasn't
-        worth it at the time.
-        :return: the entity indices object for the database.
-        :type: list<dict<int: list<int>>>
-        """
-        entity_indices = [] # contains a list for each base_dataset sample
-        desc = 'Creating entity indices.'
-        for i, base_sample in tqdm(enumerate(self.base_dataset.samples), desc=desc, total=len(self.base_dataset)):
-            entity_indices.append([]) # contains a list for each paired_dataset
-            pattern = self._get_filename(base_sample)
-            for j, paired_dataset in enumerate(self.paired_datasets):
-                entity_indices[i].append( # add list with all pattern matches in paired_datasets[j]
-                    [k for k, sample in enumerate(paired_dataset.samples) if re.search(pattern, sample[0])])
-        return entity_indices
 
     @staticmethod
     def _get_filename(element):

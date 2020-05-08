@@ -224,9 +224,9 @@ def output_transform_triplet_evaluator(anchor_embeddings, positive_embeddings, n
     returns value to be assigned to engine's state.output after each iteration.
     :param anchor_embeddings: torch tensor containing the embeddings for the anchor elements.
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
-    :param positive_embeddings: torch tensor containing the embeddings for the positive elements (same class as anchor).
+    :param positive_embeddings: torch tensor containing the embeddings for the positive elements (anchor class).
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
-    :param negative_embeddings: torch tensor containing the embeddings for the negative elements (same class as anchor).
+    :param negative_embeddings: torch tensor containing the embeddings for the negative elements (different class).
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
     :return: value to be assigned to engine's state.output after each iteration, which must fit that expected by the
     metrics. By default, in a triplet network, it is the embeddings of each triplet.
@@ -241,9 +241,9 @@ def output_transform_triplet_trainer(_anchor_embeddings, _positive_embeddings, _
     module) and returns value to be assigned to engine's state.output after each iteration.
     :param _anchor_embeddings: torch tensor containing the embeddings for the anchor elements.
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
-    :param _positive_embeddings: torch tensor containing the embeddings for the positive elements (same class as anchor).
+    :param _positive_embeddings: torch tensor containing the embeddings for the positive elements (anchor class).
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
-    :param _negative_embeddings: torch tensor containing the embeddings for the negative elements (same class as anchor).
+    :param _negative_embeddings: torch tensor containing the embeddings for the negative elements (different class).
     :type: torch.Tensor with shape `(embedding_size, batch_size)`
     :param loss: the loss module.
     :type: torch.nn.Module

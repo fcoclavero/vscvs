@@ -8,6 +8,7 @@ __status__ = 'Prototype'
 
 import os
 import re
+import pickle
 import torch
 
 from abc import ABC, abstractmethod
@@ -16,9 +17,11 @@ from multipledispatch import dispatch
 from numpy.random import choice
 from overrides import overrides
 from torch.utils.data import Dataset
+from torchvision.datasets import DatasetFolder
+from tqdm import tqdm
 from typing import Callable, Dict, List, Tuple
 
-from vscvs.utils import str_to_bin_array
+from vscvs.utils import get_cache_directory, str_to_bin_array
 
 
 """ Type hinting utility mixin classes. """
@@ -53,6 +56,14 @@ class ImageFolderMixin(DatasetFolderMixin):
     imgs: List[Tuple[str, int]] # list of (image_path, class_index) tuples
 
 
+class MultimodalDatasetMixin:
+    """
+    Utility class that type hints `MultimodalDataset` methods that will be available to the mixins that inherit this
+    class, as they are meant to be used in multiple inheritance with `vscvs.datasets.multimodal.MultimodalDataset`.
+    """
+    base_dataset: DatasetFolder
+
+
 """ Actual mixins. """
 
 
@@ -81,6 +92,105 @@ class ClassIndicesMixin(DatasetFolderMixin):
         :return: a list with all the elements
         """
         return self.class_element_indices_dict[class_index]
+
+
+class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
+    """
+    Dataset mixin for datasets in which the same entity is available in different modes (for example an image and its
+    textual annotation, or a photo and a sketch of that same photo). The resulting dataset is defined with a base mode
+    (the base dataset of the inherited `MultimodalDataset`). A tuple with one element from each mode is returned on
+    `__getitem__` (one from the base dataset and one from each additional paired dataset). If more than one instance of
+    the same entity is available for the same mode, a random instance is picked. Thus, the length of the `__getitem__`
+    tuple is the same as the number of modes, and each tuple item has a `shape[0]` of `batch_size` (the remaining
+    dimensions will depend on the format of each mode).
+    NOTE: we assume that the same entity in a different mode will be contained in a file with a name that contains the
+    name of the entity in the base dataset.
+    """
+    def __init__(self, base_dataset, *paired_datasets):
+        """
+        :param base_dataset: `MultimodalDataset` base dataset.
+        :type: torch.utils.data.DatasetFolder
+        :param paired_datasets: DatasetFolder object containing the entities of the base dataset, in different modes.
+        :type: list<torchvision.datasets.DatasetFolder>
+        """
+        super().__init__(base_dataset)
+        self.paired_datasets = paired_datasets
+        self.entity_indexes = self._entity_indices()
+
+    @property
+    def cache_file_path(self):
+        """
+        File path of a `MultimodalEntityDataset` cache file.
+        :return: the file path of the cache file.
+        :type: str
+        """
+        return get_cache_directory(self.cache_filename)
+
+    @property
+    def cache_filename(self):
+        """
+        Filename of a `MultimodalEntityDataset` cache file.
+        :return: the filename string.
+        :type: str
+        """
+        return '{}.pickle'.format('-'.join([dataset.__class__.__name__ for dataset in [self, *self.paired_datasets]]))
+
+    @property
+    def _create_entity_indices(self):
+        """
+        Create the entity indices for the dataset: a list of dictionaries, one for each paired dataset, that contains
+        the indices of all the elements in each corresponding paired dataset that correspond to the same entity in the
+        base dataset, with base dataset element indices as keys.
+        NOTE: this takes about 30 min. on a notebook i7. This could be optimized with multiprocessing, but it wasn't
+        worth it at the time.
+        :return: the entity indices object for the database.
+        :type: list<dict<int: list<int>>>
+        """
+        entity_indices = [] # contains a list for each base_dataset sample
+        desc = 'Creating entity indices.'
+        for i, base_sample in tqdm(enumerate(self.base_dataset.samples), desc=desc, total=len(self.base_dataset)):
+            entity_indices.append([]) # contains a list for each paired_dataset
+            pattern = self._get_filename(base_sample)
+            for j, paired_dataset in enumerate(self.paired_datasets):
+                entity_indices[i].append( # add list with all pattern matches in paired_datasets[j]
+                    [k for k, sample in enumerate(paired_dataset.samples) if re.search(pattern, sample[0])])
+        return entity_indices
+
+    @staticmethod
+    def _get_filename(element):
+        """
+        Get the filename of the given element.
+        :param element: a `DatasetFolder` element tuple. Assumes the standard tuple format, with the file path in the
+        first tuple index.
+        :type: tuple
+        :return: the file name of the element tuple
+        :type: str
+        """
+        file_path = element[0]
+        filename = os.path.split(file_path)[-1]
+        return filename.split('.')[0] # remove file extension
+
+    def _entity_indices(self):
+        """
+        Returns the entity indices object. The method tries to load the entity indices from cache, if available, and
+        otherwise creates and caches it.
+        :return: the entity indices object for the database.
+        :type: list<dict<int: list<int>>>
+        """
+        try:
+            entity_indices = pickle.load(open(self.cache_file_path, 'rb'))
+        except FileNotFoundError:
+            entity_indices = self._create_entity_indices
+            pickle.dump(entity_indices, open(self.cache_file_path, 'wb'))
+        return entity_indices
+
+    def __getitem__(self, index):
+        """
+        Override: return the item at `index` in the base dataset, along with a random instance of the same element in
+        each of the modes defined by the different paired datasets.
+        """
+        return (self.base_dataset[index],
+                *[dataset[choice(self.entity_indexes[index][i])] for i, dataset in enumerate(self.paired_datasets)])
 
 
 class SiameseMixin(DatasetFolderMixin, ABC):
@@ -146,7 +256,7 @@ class SiameseMixin(DatasetFolderMixin, ABC):
         negative, according to `target_probabilities`.
         :type: tuple
         """
-        item = super()[index]
+        item = super(SiameseMixin, self).__getitem__(index)
         item_class_index = self.targets[index]
         return item, self._get_pair(item_class_index)
 
@@ -220,7 +330,7 @@ class TripletMixin(DatasetFolderMixin):
         :return: a 3-tuple with the anchor, positive and negative.
         :type: tuple
         """
-        anchor = super()[index]
+        anchor = super(TripletMixin, self).__getitem__(index)
         anchor_class_index = self.targets[index]
         return anchor, self._get_random_positive(anchor_class_index), self._get_random_negative(anchor_class_index)
 

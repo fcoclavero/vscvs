@@ -67,6 +67,39 @@ class MultimodalDatasetMixin:
 """ Actual mixins. """
 
 
+class BinaryEncodingMixin:
+    """
+    Mixin class for adding unique binary encoding descriptors for each element in the dataset.
+    """
+    targets: List[int]
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize de base Dataset class and compute the length (in digits) of the binary form of the largest index in
+        the dataset. This is used to determine a standard binary encoding length for all indices.
+        :param args: super class arguments.
+        :type: list
+        :param kwargs: super class keyword arguments.
+        :type: dict
+        """
+        super().__init__(*args, **kwargs)
+        self.max_binary_digits = len(str_to_bin_array(len(self.targets)))
+
+    def _get_binary_encoding(self, index):
+        """
+        Get the binary encoding of the given index.
+        :param index: the index in decimal form.
+        :type: int
+        :return: a torch tensor with the binary form of the index.
+        :type: torch.Tensor
+        """
+        bin_arr = torch.tensor(str_to_bin_array(index, self.max_binary_digits))
+        return bin_arr
+
+    def __getitem__(self, item):
+        return self._get_binary_encoding(item), self.targets[item]
+
+
 class ClassIndicesMixin(DatasetFolderMixin):
     """
     DatasetFolder mixin that creates a dictionary with dataset classes as keys and the corresponding dataset element
@@ -92,6 +125,102 @@ class ClassIndicesMixin(DatasetFolderMixin):
         :return: a list with all the elements
         """
         return self.class_element_indices_dict[class_index]
+
+
+class FileNameIndexedMixin(ImageFolderMixin):
+    """
+    Mixin class for getting dataset items from a file name.
+    To support indexing by index and name simultaneously, the `__getitem__` function was transformed to a single
+    dispatch generic function using the `multiple-dispatch` module.
+    Reference:
+        1. [Python dispatch](https://docs.python.org/3/library/functools.html#functools.singledispatch)
+        2. [multiple-dispatch module](https://multiple-dispatch.readthedocs.io/en/latest/index.html)
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indices
+        as values for efficient retrieval after initialization.
+        :param args: super class arguments.
+        :type: list
+        :param kwargs: super class keyword arguments.
+        :type: dict
+        """
+        super().__init__(*args, **kwargs)
+        self._imgs_dict = {self._get_image_name(i): i for i in range(len(self.imgs))}
+
+    def _get_image_name(self, index):
+        """
+        Get name of the image indexed at `index`.
+        :param index: the index of an image.
+        :type: int
+        :return: the name of the image file.
+        :type: str
+        """
+        file_path = self.imgs[index][0]
+        filename = os.path.split(file_path)[-1]
+        return filename.split('.')[0]  # remove file extension
+
+    def filter_image_indices(self, pattern):
+        """
+        Get a list of dataset indices for all images with names matching the given pattern.
+        :param pattern: the pattern that returned images names must match.
+        :type: str
+        :return: a list of images that match the pattern.
+        :type: list<tuple>
+        """
+        return [ # create a list of indices
+            i for i, path_class in enumerate(self.imgs) # return index
+            if re.match(pattern, os.path.split(path_class[0])[-1])] # if last part of path matches regex
+
+    @dispatch((int, torch.Tensor))  # single argument, either <int> or <Tensor>
+    def __getitem__(self, index):
+        """
+        Dispatch to `super` method.
+        """
+        return super()[index]
+
+    @dispatch(str)  # single argument, <str>
+    def __getitem__(self, filename):
+        """
+        Get image index from filename, and dispatch to `super` method.
+        """
+        return super()[self._imgs_dict[filename]]
+
+
+class FilePathIndexedMixin(ImageFolderMixin):
+    """
+    Mixin class for getting dataset items from a file path. It is intended to be used for retrieval tasks.
+    To support indexing by index and path simultaneously, the `__getitem__` function was transformed to a single
+    dispatch generic function using the `multiple-dispatch` module.
+    Reference:
+        1. [Python dispatch](https://docs.python.org/3/library/functools.html#functools.singledispatch)
+        2. [multiple-dispatch module](https://multiple-dispatch.readthedocs.io/en/latest/index.html)
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize de base Dataset class and create a image index dictionary with file paths as keys and dataset indices
+        as values for efficient retrieval after initialization.
+        :param args: super class arguments.
+        :type: list
+        :param kwargs: super class keyword arguments.
+        :type: dict
+        """
+        super().__init__(*args, **kwargs)
+        self._imgs_dict = {tup[0]: i for i, tup in enumerate(self.imgs)}
+
+    @dispatch((int, torch.Tensor))  # single argument, either <int> or <Tensor>
+    def __getitem__(self, index):
+        """
+        Dispatch to `super` method.
+        """
+        return super()[index]
+
+    @dispatch(str)  # single argument, <str>
+    def __getitem__(self, file_path):
+        """
+        Get image index from file path, and dispatch to `super` method.
+        """
+        return super()[self._imgs_dict[file_path]]
 
 
 class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
@@ -191,6 +320,37 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         """
         return (self.base_dataset[index],
                 *[dataset[choice(self.entity_indexes[index][i])] for i, dataset in enumerate(self.paired_datasets)])
+
+
+class OneHotEncodingMixin:
+    """
+    Mixin class for adding unique one-hot encoding descriptors for each element in the dataset.
+    """
+    targets: List[int]
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize de base Dataset class and create a tensor with all one hot encodings.
+        :param args: super class arguments.
+        :type: list
+        :param kwargs: super class keyword arguments.
+        :type: dict
+        """
+        super().__init__(*args, **kwargs)
+        self.encodings = torch.eye(len(self.targets))
+
+    def _get_one_hot_encoding(self, index):
+        """
+        Get the one-hot-encoding of the given index.
+        :param index: the index in decimal form.
+        :type: int
+        :return: a torch tensor with the one-hot-encoding form of the index.
+        :type: torch.Tensor
+        """
+        return self.encodings[index]
+
+    def __getitem__(self, item):
+        return self._get_one_hot_encoding(item), self.targets[item]
 
 
 class SiameseMixin(DatasetFolderMixin, ABC):
@@ -351,163 +511,3 @@ class TripletSingleDatasetMixin(ClassIndicesMixin, TripletMixin):
         :type: tuple
         """
         return super()[choice(self.get_class_element_indices(class_index))]
-
-
-class FileNameIndexedMixin(ImageFolderMixin):
-    """
-    Mixin class for getting dataset items from a file name.
-    To support indexing by index and name simultaneously, the `__getitem__` function was transformed to a single
-    dispatch generic function using the `multiple-dispatch` module.
-    Reference:
-        1. [Python dispatch](https://docs.python.org/3/library/functools.html#functools.singledispatch)
-        2. [multiple-dispatch module](https://multiple-dispatch.readthedocs.io/en/latest/index.html)
-    """
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indices
-        as values for efficient retrieval after initialization.
-        :param args: super class arguments.
-        :type: list
-        :param kwargs: super class keyword arguments.
-        :type: dict
-        """
-        super().__init__(*args, **kwargs)
-        self._imgs_dict = {self._get_image_name(i): i for i in range(len(self.imgs))}
-
-    def _get_image_name(self, index):
-        """
-        Get name of the image indexed at `index`.
-        :param index: the index of an image.
-        :type: int
-        :return: the name of the image file.
-        :type: str
-        """
-        file_path = self.imgs[index][0]
-        filename = os.path.split(file_path)[-1]
-        return filename.split('.')[0]  # remove file extension
-
-    def filter_image_indices(self, pattern):
-        """
-        Get a list of dataset indices for all images with names matching the given pattern.
-        :param pattern: the pattern that returned images names must match.
-        :type: str
-        :return: a list of images that match the pattern.
-        :type: list<tuple>
-        """
-        return [ # create a list of indices
-            i for i, path_class in enumerate(self.imgs) # return index
-            if re.match(pattern, os.path.split(path_class[0])[-1])] # if last part of path matches regex
-
-    @dispatch((int, torch.Tensor))  # single argument, either <int> or <Tensor>
-    def __getitem__(self, index):
-        """
-        Dispatch to `super` method.
-        """
-        return super()[index]
-
-    @dispatch(str)  # single argument, <str>
-    def __getitem__(self, filename):
-        """
-        Get image index from filename, and dispatch to `super` method.
-        """
-        return super()[self._imgs_dict[filename]]
-
-
-class FilePathIndexedMixin(ImageFolderMixin):
-    """
-    Mixin class for getting dataset items from a file path. It is intended to be used for retrieval tasks.
-    To support indexing by index and path simultaneously, the `__getitem__` function was transformed to a single
-    dispatch generic function using the `multiple-dispatch` module.
-    Reference:
-        1. [Python dispatch](https://docs.python.org/3/library/functools.html#functools.singledispatch)
-        2. [multiple-dispatch module](https://multiple-dispatch.readthedocs.io/en/latest/index.html)
-    """
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize de base Dataset class and create a image index dictionary with file paths as keys and dataset indices
-        as values for efficient retrieval after initialization.
-        :param args: super class arguments.
-        :type: list
-        :param kwargs: super class keyword arguments.
-        :type: dict
-        """
-        super().__init__(*args, **kwargs)
-        self._imgs_dict = {tup[0]: i for i, tup in enumerate(self.imgs)}
-
-    @dispatch((int, torch.Tensor))  # single argument, either <int> or <Tensor>
-    def __getitem__(self, index):
-        """
-        Dispatch to `super` method.
-        """
-        return super()[index]
-
-    @dispatch(str)  # single argument, <str>
-    def __getitem__(self, file_path):
-        """
-        Get image index from file path, and dispatch to `super` method.
-        """
-        return super()[self._imgs_dict[file_path]]
-
-
-class BinaryEncodingMixin:
-    """
-    Mixin class for adding unique binary encoding descriptors for each element in the dataset.
-    """
-    targets: List[int]
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize de base Dataset class and compute the length (in digits) of the binary form of the largest index in
-        the dataset. This is used to determine a standard binary encoding length for all indices.
-        :param args: super class arguments.
-        :type: list
-        :param kwargs: super class keyword arguments.
-        :type: dict
-        """
-        super().__init__(*args, **kwargs)
-        self.max_binary_digits = len(str_to_bin_array(len(self.targets)))
-
-    def _get_binary_encoding(self, index):
-        """
-        Get the binary encoding of the given index.
-        :param index: the index in decimal form.
-        :type: int
-        :return: a torch tensor with the binary form of the index.
-        :type: torch.Tensor
-        """
-        bin_arr = torch.tensor(str_to_bin_array(index, self.max_binary_digits))
-        return bin_arr
-
-    def __getitem__(self, item):
-        return self._get_binary_encoding(item), self.targets[item]
-
-
-class OneHotEncodingMixin:
-    """
-    Mixin class for adding unique one-hot encoding descriptors for each element in the dataset.
-    """
-    targets: List[int]
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize de base Dataset class and create a tensor with all one hot encodings.
-        :param args: super class arguments.
-        :type: list
-        :param kwargs: super class keyword arguments.
-        :type: dict
-        """
-        super().__init__(*args, **kwargs)
-        self.encodings = torch.eye(len(self.targets))
-
-    def _get_one_hot_encoding(self, index):
-        """
-        Get the one-hot-encoding of the given index.
-        :param index: the index in decimal form.
-        :type: int
-        :return: a torch tensor with the one-hot-encoding form of the index.
-        :type: torch.Tensor
-        """
-        return self.encodings[index]
-
-    def __getitem__(self, item):
-        return self._get_one_hot_encoding(item), self.targets[item]

@@ -115,21 +115,43 @@ def prepare_batch_multimodal(batch, device=None, non_blocking=False):
     return tuple(prepare_batch(images, device, non_blocking) for images in batch)
 
 
-def siamese_target(images_0, images_1):
+def prepare_batch_multimodal_siamese(batch, device=None, non_blocking=False):
+    """
+    Prepare batch for siamese multimodal training: pass to a device with options. Assumes the shape returned by a
+    `MultimodalEntitySiameseDataset` subclass.
+    :param batch: data to be sent to device.
+    :type: list
+    :param device: device type specification
+    :type: str of torch.device (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
+    :return: tuple with siamese multimodal batches.
+    :type: tuple<torch.Tensor, ...>
+    """
+    entities_0, entities_1 = batch
+    assert torch.equal(entities_0[0][1], entities_0[1][1]) and torch.equal(entities_1[0][1], entities_1[1][1])
+    target = siamese_target(entities_0, entities_1, lambda x: x[0][1])
+    return prepare_batch_multimodal(entities_0), prepare_batch_multimodal(entities_1), \
+           convert_tensor(target, device=device, non_blocking=non_blocking)
+
+
+def siamese_target(elements_0, elements_1, get_classes=lambda x: x[1]):
     """
     Creates the contrastive loss target vector for the given image pairs. A target of 0 is assigned when both images
     in a pair are *similar* (have the same class), 1 otherwise.
-    :param images_0: standard image batch (tuple where the first element is the images tensor and the second element is
-    the labels tensor) for the first elements of each siamese pair.
+    :param elements_0: batch of the first elements of each siamese pair.
     :type: tuple<torch.Tensor, torch.Tensor>
-    :param images_1: standard image batch (tuple where the first element is the images tensor and the second element is
-    the labels tensor) for the second elements of each siamese pair.
+    :param elements_1: batch of the second elements of each siamese pair.
     :type: tuple<torch.Tensor, torch.Tensor>
+    :param get_classes: function that takes a standard batch from a siamese pair element and returns the labels tensor,
+    In a standard dataset, the input for this function is a tuple where the first element is the data tensor and the
+    second element is the labels tensor. In this default case the latter is returned.
+    :type: Callable[[torch.Tensor], torch.Tensor]
     :return: tensor with the contrastive loss target.
     :type: torch.Tensor with shape `batch_size`
     """
     # noinspection PyUnresolvedReferences
-    return (images_0[1] != images_1[1]).int() # type inference results in `torch.Tensor`, which has the `.int()` method
+    return (get_classes(elements_0) != get_classes(elements_1)).int() # `torch.Tensor` type is inferred
 
 
 def wordvector_distance(indices, class_wordvector_distances):

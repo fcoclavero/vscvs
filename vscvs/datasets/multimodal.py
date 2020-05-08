@@ -57,6 +57,8 @@ class MultimodalDatasetFolder(MultimodalDataset):
         super().__init__(*args, **kwargs)
         self.classes = self.base_dataset.classes
         self.class_to_idx = self.base_dataset.class_to_idx
+        self.samples = self.base_dataset.samples
+        self.targets = self.base_dataset.targets
 
 
 class MultimodalEntityDataset(MultimodalDataset):
@@ -112,7 +114,8 @@ class MultimodalEntityDataset(MultimodalDataset):
         :type: list<dict<int: list<int>>>
         """
         entity_indices = [] # contains a list for each base_dataset sample
-        for i, base_sample in tqdm(enumerate(self.base_dataset.samples), desc='Creating indices.', total=len(self)):
+        desc = 'Creating entity indices.'
+        for i, base_sample in tqdm(enumerate(self.base_dataset.samples), desc=desc, total=len(self.base_dataset)):
             entity_indices.append([]) # contains a list for each paired_dataset
             pattern = self._get_filename(base_sample)
             for j, paired_dataset in enumerate(self.paired_datasets):

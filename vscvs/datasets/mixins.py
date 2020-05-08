@@ -147,7 +147,7 @@ class SiameseMixin(DatasetFolderMixin, ABC):
         :type: tuple
         """
         item = super()[index]
-        item_class_index = item[1]
+        item_class_index = self.targets[index]
         return item, self._get_pair(item_class_index)
 
 
@@ -221,7 +221,7 @@ class TripletMixin(DatasetFolderMixin):
         :type: tuple
         """
         anchor = super()[index]
-        anchor_class_index = anchor[1]
+        anchor_class_index = self.targets[index]
         return anchor, self._get_random_positive(anchor_class_index), self._get_random_negative(anchor_class_index)
 
 

@@ -36,24 +36,27 @@ def multimodal(context, *args, **kwargs):
         train_gan_multimodal(*args, **kwargs)
 
 
-@multimodal.command()
-@click.option('--loss-weight', help='Reduction function for the loss function.', default=None)
+@multimodal.group(invoke_without_command=True)
 @pass_context_to_kwargs
-def bimodal(*args, **kwargs):
+@click.option('--loss-weight', help='Reduction function for the loss function.', default=None)
+@pass_kwargs_to_context
+def bimodal(context, *args, **kwargs):
     """ Train a generative adversarial model for bimodal common vector space creation. """
-    from vscvs.trainers.gan import train_gan_bimodal
-    click.echo('bimodal GAN - {} dataset'.format(kwargs['dataset_name']))
-    train_gan_bimodal(*args, **kwargs)
+    if context.invoked_subcommand is None:
+        from vscvs.trainers.gan import train_gan_bimodal
+        click.echo('bimodal GAN - {} dataset'.format(kwargs['dataset_name']))
+        train_gan_bimodal(*args, **kwargs)
 
 
-# @multimodal.command()
-# @pass_context_to_kwargs
-# @click.option('--margin', prompt='Margin', help='The margin for the contrastive loss.', default=.2)
-# def siamese(*args, dataset_name=None, **kwargs):
-#     """
-#     Train a generative adversarial model for common vector space creation, adding a contrastive term to the
-#     generator network loss.
-#     """
-#     from vscvs.trainers.gan import train_gan_multimodal_siamese
-#     dataset_name = dataset_name + '-siamese'
-#     train_gan_multimodal_siamese(*args, dataset_name=dataset_name, **kwargs)
+@bimodal.command()
+@pass_context_to_kwargs
+@click.option('--margin', prompt='Margin', help='The margin for the contrastive loss.', default=.2)
+def siamese(*args, dataset_name=None, **kwargs):
+    """
+    Train a generative adversarial model for common vector space creation, adding a contrastive term to the
+    generator network loss.
+    """
+    from vscvs.trainers.gan import train_gan_bimodal_siamese
+    dataset_name = dataset_name + '-siamese'
+    click.echo('bimodal GAN siamese - {} dataset'.format(dataset_name))
+    train_gan_bimodal_siamese(*args, dataset_name=dataset_name, **kwargs)

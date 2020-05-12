@@ -131,7 +131,8 @@ def prepare_batch_multimodal_siamese(batch, device=None, non_blocking=False):
     entities_0, entities_1 = batch
     assert torch.equal(entities_0[0][1], entities_0[1][1]) and torch.equal(entities_1[0][1], entities_1[1][1])
     target = siamese_target(entities_0, entities_1, lambda x: x[0][1])
-    return prepare_batch_multimodal(entities_0), prepare_batch_multimodal(entities_1), \
+    return prepare_batch_multimodal(entities_0, device, non_blocking),\
+           prepare_batch_multimodal(entities_1, device, non_blocking), \
            convert_tensor(target, device=device, non_blocking=non_blocking)
 
 

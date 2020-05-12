@@ -42,5 +42,5 @@ def pass_context_to_kwargs(func):
     def wrapper(context, *args, **kwargs):
         """ Extend kwargs with the context dict parameters. """
         kwargs = {**context.obj, **kwargs} if context.obj else kwargs
-        return context.invoke(func, context.obj, *args, **kwargs)
+        return context.invoke(func, *args, **kwargs)
     return functools.update_wrapper(wrapper, func)

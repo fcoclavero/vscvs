@@ -31,6 +31,7 @@ class ContrastiveLoss(ReductionMixin, torch.nn.Module):
 
     @overrides
     def forward(self, x_0, x_1, y):
+        # noinspection SpellCheckingInspection
         """
         Compute the Contrastive Loss between two embeddings, given the label indicating whether the two embeddings
         belong to the same class. The Contrastive Loss is defined as:

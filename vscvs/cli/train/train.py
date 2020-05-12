@@ -24,7 +24,8 @@ from vscvs.cli.train.triplet import triplet
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
-def cnn(_,  *args, **kwargs):
+def cnn(*args, **kwargs):
+    """ Train a CNN model. """
     from vscvs.trainers.cnn import train_cnn
     click.echo('cnn - {} dataset'.format(kwargs['dataset_name']))
     train_cnn(*args, **kwargs)
@@ -37,7 +38,8 @@ def cnn(_,  *args, **kwargs):
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--pretrained', prompt='Pretrained', help='Whether to use pretrained model weights.', default=False)
 @click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
-def resnet(_, *args, **kwargs):
+def resnet(*args, **kwargs):
+    """ Train a ResNet model. """
     from vscvs.trainers.resnet import train_resnet
     click.echo('resnet - {} dataset'.format(kwargs['dataset_name']))
     train_resnet(*args, **kwargs)
@@ -50,7 +52,8 @@ def resnet(_, *args, **kwargs):
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--pretrained', prompt='Pretrained', help='Whether to use pretrained model weights.', default=False)
 @click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
-def resnext(_, *args, **kwargs):
+def resnext(*args, **kwargs):
+    """ Train a ResNext model. """
     from vscvs.trainers.resnext import train_resnext
     click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))
     train_resnext(*args, **kwargs)
@@ -60,11 +63,11 @@ def resnext(_, *args, **kwargs):
 @pass_context_to_kwargs
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches'])
-)
+    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
               help='The number of parallel workers to be used for creating batch graphs.')
-def classification_gcn(_, *args, **kwargs):
+def classification_gcn(*args, **kwargs):
+    """ Train a Classification GCN model. """
     from vscvs.trainers.classification_gcn import train_classification_gcn
     dataset_name = kwargs.pop('dataset_name')
     click.echo('classification GCN - {} dataset'.format(dataset_name))
@@ -83,7 +86,8 @@ def classification_gcn(_, *args, **kwargs):
 @click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
 @click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
               help='The number of parallel workers to be used for creating batch graphs.')
-def hog_gcn(_, *args, **kwargs):
+def hog_gcn(*args, **kwargs):
+    """ Train a HOG GCN model. """
     from vscvs.trainers.hog_gcn import train_hog_gcn
     click.echo('HOG GCN - {} dataset'.format(kwargs['dataset_name']))
     train_hog_gcn(*args, **kwargs)
@@ -104,7 +108,7 @@ def hog_gcn(_, *args, **kwargs):
 @click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
 @pass_kwargs_to_context
 def train(*_, **__):
-    """ Train a model. """
+    """ Model training. """
     pass
 
 

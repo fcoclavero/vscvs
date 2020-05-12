@@ -18,7 +18,7 @@ from vscvs.embeddings import average_class_recall, average_class_recall_parallel
 
 @click.group()
 def measure():
-    """ Image retrieval benchmarks click group. """
+    """ Image retrieval benchmarks adn metrics. """
     pass
 
 
@@ -29,7 +29,7 @@ def measure():
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context
 def recall(_, **__):
-    """ Image recall benchmarks click group. """
+    """ Image recall benchmarks. """
     pass
 
 
@@ -40,9 +40,9 @@ def recall(_, **__):
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
 @click.option('--embeddings-name', prompt='Embeddings name', help='Name of the embeddings directory.')
 @click.option('--test-split', prompt='Test split', default=.2, help='Proportion of the dataset to be used for queries.')
-def same_class(_, dataset_name, embeddings_name, test_split, k, distance, n_gpu):
+def same_class(dataset_name, embeddings_name, test_split, k, distance, n_gpu):
+    """ Image recall of same class elements. """
     click.echo('Calculating class recall@{} for {} embeddings'.format(k, embeddings_name))
-    # Split dataset and embeddings into "query" and "queried" subsets
     dataset = get_dataset(dataset_name)
     embeddings = load_embedding_pickles(embeddings_name)
     query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(embeddings, test_split)
@@ -52,7 +52,7 @@ def same_class(_, dataset_name, embeddings_name, test_split, k, distance, n_gpu)
 
 @measure.group()
 def cross_modal():
-    """ Cross modal retrieval benchmarks click group. """
+    """ Cross modal retrieval benchmarks. """
     pass
  
  
@@ -74,14 +74,15 @@ def cross_modal():
               help='The number of parallel workers to be used.')
 @pass_kwargs_to_context
 def recall(_, **__):
-    """ Cross-modal image recall benchmarks click group. """
+    """ Cross-modal image recall benchmarks. """
     pass
 
 
 @recall.command()
 @pass_context_to_kwargs
-def same_class(_, query_dataset_name, queried_dataset_name, query_embeddings_name, queried_embeddings_name,
+def same_class(query_dataset_name, queried_dataset_name, query_embeddings_name, queried_embeddings_name,
                k, distance, n_gpu, processes):
+    """ Cross-modal image recall of same class elements. """
     click.echo('Calculating cross modal class recall@{} for the {} and {} embeddings'.format(
         k, query_embeddings_name, queried_embeddings_name))
     query_dataset, queried_dataset = get_dataset(query_dataset_name), get_dataset(queried_dataset_name)

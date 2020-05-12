@@ -12,6 +12,7 @@ from ignite.engine import Engine
 
 from vscvs.trainers.engines import attach_metrics
 from vscvs.utils import output_transform_multimodal_gan_evaluator as output_transform_evaluator, \
+    output_transform_multimodal_gan_siamese_evaluator as output_transform_evaluator_siamese, \
     output_transform_multimodal_gan_trainer as output_transform_trainer, \
     output_transform_multimodal_gan_siamese_trainer as output_transform_trainer_siamese, \
     prepare_batch_multimodal as _prepare_batch, \
@@ -77,6 +78,33 @@ def prepare_bimodal_batch_variables(batch, device):
     return classes, mode_labels, generator_labels
 
 
+def prepare_bimodal_siamese_tensors(embedding_list_0, embedding_list_1, siamese_target):
+    """
+    Create pairing of all possible mode combinations of siamese pairs.  For example, if there were two modes,
+    then the pairs would be `(elements_0_mode_0, elements_1_mode_0), (elements_0_mode_0, elements_1_mode_1),
+    (elements_0_mode_1, elements_1_mode_0), (elements_0_mode_1, elements_1_mode_1)`. This increases the amount
+    of training pairs for the generator.
+    :param embedding_list_0: list of generator output batches for the first siamese pairs. Each batch tensor in the list
+    corresponds to the generator outputs for batch element instances in a specific mode.
+    :type: list<torch.Tensor>
+    :param embedding_list_1: list of generator output batches for the second siamese pairs. Each batch tensor in the
+    list corresponds to the generator outputs for batch element instances in a specific mode. The mode order must match
+    that of `embedding_list_0`.
+    :type: list<torch.Tensor>
+    :param siamese_target: siamese target tensor for batch elements: tensor of length `batch_size` containing `0` if
+    siamese pairs in an index have the same class (similar pair) or `1` otherwise (dissimilar pair).
+    :type: torch.Tensor
+    :return: tuple with the siamese pair and target tensors for all possible mode combinations of multimodal batch
+    embeddings.
+    :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+    """
+    embedding_size = embedding_list_0[0].shape[1]
+    siamese_pair_0 = torch.stack(embedding_list_0).repeat_interleave(2, 0).view(-1, embedding_size)
+    siamese_pair_1 = torch.stack(embedding_list_1).repeat(2, 1, 1).view(-1, embedding_size)
+    siamese_target = siamese_target.repeat(4)
+    return siamese_pair_0, siamese_pair_1, siamese_target
+
+
 def create_multimodal_gan_trainer(
         generator, discriminator, generator_optimizer, discriminator_optimizer, loss_fn, device=None,
         non_blocking=False, prepare_batch=_prepare_batch, prepare_batch_variables=prepare_multimodal_batch_variables,
@@ -115,8 +143,8 @@ def create_multimodal_gan_trainer(
     :param prepare_batch_variables: function that computes batch-derived variables needed for multimodal GAN processing:
     `classes`, `mode_labels`, `generator_labels`.
     :type: Callable<args: `batch`, `device`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
-    :param output_transform: function that receives the result of a triplet network trainer engine and returns value to
-    be assigned to engine's state.output after each iteration.
+    :param output_transform: function that receives the result of a multimodal GAN trainer engine and returns the value
+    to be assigned to engine's state.output after each iteration.
     :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`, `loss`, ret: object>>
     (optional)
     :return: a trainer engine with the update function
@@ -192,8 +220,8 @@ def create_multimodal_gan_siamese_trainer(
     :param prepare_batch_variables: function that computes batch-derived variables needed for multimodal GAN processing:
     `classes`, `mode_labels`, `generator_labels`.
     :type: Callable<args: `batch`, `device`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
-    :param output_transform: function that receives the result of a triplet network trainer engine and returns value to
-    be assigned to engine's state.output after each iteration.
+    :param output_transform: function that receives the result of a multimodal siamese GAN trainer engine and returns
+    the value to be assigned to engine's state.output after each iteration.
     :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`, `loss`, ret: object>>
     (optional)
     :return: a trainer engine with the update function
@@ -217,25 +245,16 @@ def create_multimodal_gan_siamese_trainer(
         # (1) Update G network
         ###########################
 
-        # Forward pass same mode sub-batches
         generator.zero_grad()
-        embedding_list_0 = generator(*[sub_batch[0] for sub_batch in elements_0])
+        embedding_list_0 = generator(*[sub_batch[0] for sub_batch in elements_0]) # forward pass same mode sub-batches
         embedding_list_1 = generator(*[sub_batch[0] for sub_batch in elements_1])
-
-        # Create a single discriminator batch to allow us to do a single forward pass
-        embeddings = torch.cat([*embedding_list_0, *embedding_list_1])
+        embeddings = torch.cat([*embedding_list_0, *embedding_list_1]) # create a single discriminator batch to allow..
         # noinspection PyTypeChecker
-        generator_labels = torch.cat([generator_labels_0, generator_labels_1])
+        generator_labels = torch.cat([generator_labels_0, generator_labels_1]) # ..us to do a single forward pass
         mode_labels = torch.cat([mode_labels_0, mode_labels_1])
-        embedding_size = embeddings.shape[1]
 
-        # Create pairing of all possible mode combinations of siamese pairs.  For example, if there were two modes,
-        # then the pairs would be `(elements_0_mode_0, elements_1_mode_0), (elements_0_mode_0, elements_1_mode_1),
-        # (elements_0_mode_1, elements_1_mode_0), (elements_0_mode_1, elements_1_mode_1)`. This increases the amount
-        # of training pairs for the generator.
-        siamese_pair_0 = torch.stack(embedding_list_0).repeat_interleave(2, 0).view(-1, embedding_size)
-        siamese_pair_1 = torch.stack(embedding_list_1).repeat(2, 1, 1).view(-1, embedding_size)
-        siamese_target = siamese_target.repeat(4)
+        siamese_pair_0, siamese_pair_1, siamese_target = prepare_bimodal_siamese_tensors(
+            embedding_list_0, embedding_list_1, siamese_target)
 
         # Optimize network
         generator_loss = mode_loss_fn(discriminator(embeddings), generator_labels) + \
@@ -281,7 +300,7 @@ def create_multimodal_gan_evaluator(
     :param prepare_batch_variables: function that computes batch-derived variables needed for multimodal GAN processing:
     `classes`, `mode_labels`, `generator_labels`.
     :type: Callable<args: `batch`, `device`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
-    :param output_transform: function that receives the result of a triplet network evaluator engine and returns the
+    :param output_transform: function that receives the result of a multimodal GAN evaluator engine and returns the
     value to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
     :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`,
                     ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
@@ -294,6 +313,7 @@ def create_multimodal_gan_evaluator(
 
     def _inference(_, batch):
         generator.eval()
+        discriminator.eval()
         with torch.no_grad():
             batch = prepare_batch(batch, device=device, non_blocking=non_blocking)
             classes, mode_labels, generator_labels = prepare_batch_variables(batch, device)
@@ -301,6 +321,66 @@ def create_multimodal_gan_evaluator(
             embeddings = torch.cat(embedding_list)  # create a single discriminator batch from sub-batch list
             mode_predictions = discriminator(embeddings)
             return output_transform(embeddings, mode_predictions, mode_labels, generator_labels, classes)
+
+    engine = Engine(_inference)
+    if metrics: attach_metrics(engine, metrics)
+    return engine
+
+
+def create_multimodal_gan_siamese_evaluator(
+        generator, discriminator, metrics=None, device=None, non_blocking=False, prepare_batch=_prepare_batch,
+        output_transform=output_transform_evaluator_siamese,prepare_batch_variables=prepare_multimodal_batch_variables):
+    """
+    Factory function for creating an evaluator for a multimodal GAN with a contrastive loss term.
+    This engine is pretty much the same as the [normal multimodal GAN engine](create_multimodal_gan_evaluator), but
+    receives paired multimodal batches to allow the use of a contrastive term in the loss function that helps capture
+    relationships amongst the different classes in the resulting vector space.
+    :param generator: the generator model.
+    :type: torch.nn.Module
+    :param discriminator: the discriminator model - classifies vectors as 'photo' or 'sketch'
+    :type: torch.nn.Module
+    :param metrics: map of metric names to Metrics.
+    :type: dict<str:<ignite.metrics.Metric>>
+    :param device: device type specification. Applies to both model and batches.
+    :type: str of torch.device (optional) (default: None)
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
+    :type: bool (optional)
+    :param prepare_batch: batch preparation logic
+    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
+    :param prepare_batch_variables: function that computes batch-derived variables needed for multimodal GAN processing:
+    `classes`, `mode_labels`, `generator_labels`.
+    :type: Callable<args: `batch`, `device`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
+    :param output_transform: function that receives the result of a multimodal siamese GAN evaluator engine and returns
+    the value to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
+    :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`,
+                    ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
+    :return: an evaluator engine with supervised inference function.
+    :type: ignite.engine.Engine
+    """
+    if device:
+        generator.to(device)
+        discriminator.to(device)
+
+    # noinspection DuplicatedCode
+    def _inference(_, batch):
+        generator.eval()
+        discriminator.eval()
+        with torch.no_grad():
+            elements_0, elements_1, siamese_target = prepare_batch(batch, device=device, non_blocking=non_blocking)
+            classes_0, mode_labels_0, generator_labels_0 = prepare_batch_variables(elements_0, device)
+            classes_1, mode_labels_1, generator_labels_1 = prepare_batch_variables(elements_1, device)
+            generator.zero_grad()
+            embedding_list_0 = generator(*[sub_batch[0] for sub_batch in elements_0])
+            embedding_list_1 = generator(*[sub_batch[0] for sub_batch in elements_1])
+            embeddings = torch.cat([*embedding_list_0, *embedding_list_1])
+            # noinspection PyTypeChecker
+            generator_labels = torch.cat([generator_labels_0, generator_labels_1])
+            mode_labels = torch.cat([mode_labels_0, mode_labels_1])
+            siamese_pair_0, siamese_pair_1, siamese_target = prepare_bimodal_siamese_tensors(
+                embedding_list_0, embedding_list_1, siamese_target)
+            mode_predictions = discriminator(embeddings.detach())
+            return output_transform(
+                siamese_pair_0, siamese_pair_1, siamese_target, mode_predictions, mode_labels, generator_labels)
 
     engine = Engine(_inference)
     if metrics: attach_metrics(engine, metrics)

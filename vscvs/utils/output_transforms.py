@@ -52,7 +52,7 @@ def output_transform_multimodal_gan_evaluator(embeddings, mode_predictions, mode
     :type: torch.Tensor
     :param classes: the classes, or categories, of each entity in the dataset. Tensor of shape `[batch_size]`.
     :type: torch.Tensor
-    :return: the value to be assigned to engine's `state.output` after each iteration, which must fit that expected by the
+    :return: the value to be assigned to engine's `state.output` after each iteration, which must fit that expected by
     metrics, which by default in a multimodal GAN is the element embeddings, mode predictions and labels, and classes.
     :type: tuple<list<torch.Tensor>, torch.Tensor, torch.Tensor, torch.Tensor>
     """
@@ -85,6 +85,32 @@ def output_transform_multimodal_gan_trainer(_embeddings, _mode_predictions, _mod
     :type: tuple<torch.Tensor, torch.Tensor>
     """
     return generator_loss.item(), discriminator_loss.item()
+
+
+def output_transform_multimodal_gan_siamese_evaluator(
+        embeddings_0, embeddings_1, siamese_target, mode_predictions, mode_labels, generator_labels):
+    """
+    Receives the result of a multimodal GAN siamese evaluator engine and returns value to be assigned to engine's
+    `state.output` after each iteration.
+    :param embeddings_0: torch tensor containing the embeddings for the first image of each image pair.
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :param embeddings_1: torch tensor containing the embeddings for the second image of each image pair.
+    :type: torch.Tensor with shape `(embedding_size, batch_size)`
+    :param siamese_target: tensor with the contrastive loss target for each pair (0 for similar images, 1 otherwise).
+    :type: torch.Tensor
+    :param mode_predictions: tensor of shape `[n_modes * batch_size, n_modes]` with the probability of each element
+    to belong to each mode.
+    :type: torch.Tensor
+    :param mode_labels: the actual mode labels for each element. Tensor of shape `[n_modes * batch_size, n_modes]`.
+    :type: torch.Tensor
+    :param generator_labels: the labels used for the generator loss, usually the additive inverse of each mode label.
+    :type: torch.Tensor
+    :return: the value to be assigned to engine's `state.output` after each iteration, which must fit that expected by
+    the metrics, which by default in a multimodal siamese GAN is the element embedding siamese pairs, the siamese target
+    tensor, the mode predictions and labels.
+    :type: tuple<list<torch.Tensor>, torch.Tensor, torch.Tensor, torch.Tensor>
+    """
+    return embeddings_0, embeddings_1, siamese_target, mode_predictions, mode_labels, generator_labels
 
 
 def output_transform_multimodal_gan_siamese_trainer(

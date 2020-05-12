@@ -13,7 +13,7 @@ from typing import Callable
 
 from .gan import AbstractGANTrainer
 from ..engines.gan import create_multimodal_gan_evaluator, create_multimodal_gan_trainer, \
-    create_multimodal_gan_siamese_trainer, prepare_bimodal_batch_variables
+    create_multimodal_gan_siamese_evaluator, create_multimodal_gan_siamese_trainer, prepare_bimodal_batch_variables
 from vscvs.loss_functions import ContrastiveLoss
 from vscvs.metrics import LossMultimodalGAN
 from vscvs.models import ResNextNormalized, InterModalDiscriminator, MultimodalEncoder
@@ -86,7 +86,7 @@ class AbstractBiModalGANSiameseTrainer(AbstractBiModalGANTrainer, ABC):
     @overrides
     def _create_evaluator_engine(self):
         loss = LossMultimodalGAN(self.loss)
-        return create_multimodal_gan_evaluator(
+        return create_multimodal_gan_siamese_evaluator(
             *self.model, device=self.device, metrics={'generator_loss': loss[0], 'discriminator_loss': loss[1]},
             prepare_batch_variables=prepare_bimodal_batch_variables)
 

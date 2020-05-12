@@ -361,7 +361,6 @@ def create_multimodal_gan_siamese_evaluator(
         generator.to(device)
         discriminator.to(device)
 
-    # noinspection DuplicatedCode
     def _inference(_, batch):
         generator.eval()
         discriminator.eval()

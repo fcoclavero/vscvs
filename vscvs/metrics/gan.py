@@ -12,6 +12,8 @@ from ignite.metrics import Metric
 from ignite.metrics.metric import sync_all_reduce, reinit__is_reduced
 from overrides import overrides
 
+from .siamese import AverageDistancesSiamesePairs
+
 
 class AbstractLossGAN(Metric, ABC):
     """
@@ -80,3 +82,21 @@ class LossMultimodalGAN(AbstractLossGAN):
         self._sum_generator_loss += generator_loss.item() * batch_size
         self._sum_discriminator_loss += discriminator_loss.item() * batch_size
         self._num_examples += batch_size
+
+
+class AverageDistancesMultimodalSiamesePairs(AverageDistancesSiamesePairs):
+    """
+    Computes the average distances for positive and negative pairs in a multimodal siamese network.
+    """
+    @reinit__is_reduced
+    @overrides
+    def update(self, output):
+        """
+        :override: updates the metric's state using a multimodal siamese GAN batch output.
+        :param output: the output of the engine's process function, using the siamese format: 6-tuple with the
+        first pair elements' embeddings, the second pair elements' embeddings, the siamese targets, mode predictions,
+        mode labels, and generator labels.
+        :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor>
+        """
+        embeddings_0, embeddings_1, siamese_target, *_ = output
+        super().update(embeddings_0, embeddings_1, siamese_target,)

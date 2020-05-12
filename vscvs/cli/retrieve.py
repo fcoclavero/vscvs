@@ -28,9 +28,8 @@ from vscvs.embeddings import retrieve_top_k
 @click.option('--k', prompt='Top k', help='The amount of top results to be retrieved', default=10)
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
 @pass_kwargs_to_context
-def retrieve(context, **__):
-    """ Image retrieval click group. """
-    # Use the `_filenames` variant of the selected dataset to allow retrieval by filename
+def retrieve(context, *_, **__):
+    """ Image retrieval. """
     click.echo('Querying {} embeddings'.format(context.obj['queried_embeddings_name']))
     context.obj['query_dataset_name'] = context.obj['query_dataset_name'] + '-file-paths'
     context.obj['queried_dataset_name'] = context.obj['queried_dataset_name'] + '-file-paths'
@@ -42,8 +41,9 @@ def retrieve(context, **__):
 @click.option('--cell-size', prompt='Cell size', help='Gradient pooling size.', default=8)
 @click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
 @click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
-def hog(_, query_image_file_path, query_dataset_name, queried_dataset_name, queried_embeddings_name, k, n_gpu,
+def hog(query_image_file_path, query_dataset_name, queried_dataset_name, queried_embeddings_name, k, n_gpu,
         in_channels, cell_size, bins, signed_gradients):
+    """ Image retrieval for the HOG model. """
     from vscvs.models import HOG
     model = HOG(in_channels, cell_size, bins, signed_gradients)
     retrieve_top_k(
@@ -54,10 +54,10 @@ def hog(_, query_image_file_path, query_dataset_name, queried_dataset_name, quer
 @pass_context_to_kwargs
 @click.option('--checkpoint', prompt='Checkpoint date', help='Checkpoint date (corresponds to its directory name.')
 @click.option('--epoch', prompt='Checkpoint epoch', help='Epoch corresponding to the model state to be loaded.')
-def cnn(_, query_image_file_path, query_dataset_name, queried_dataset_name, queried_embeddings_name,
+def cnn(query_image_file_path, query_dataset_name, queried_dataset_name, queried_embeddings_name,
         k, n_gpu, checkpoint, epoch):
+    """ Image retrieval for the CNN model. """
     checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'cnn', checkpoint) # Load the model checkpoint
     net = torch.load(os.path.join(checkpoint_directory, '_net_{}.pth'.format(epoch)))
-    # This CNN is a classification model, so we will eliminate the last few layers to obtain embeddings with it
     retrieve_top_k(net.embedding_network, query_image_file_path, query_dataset_name, queried_dataset_name,
                    queried_embeddings_name, k, n_gpu)

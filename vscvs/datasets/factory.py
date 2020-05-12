@@ -6,8 +6,8 @@ __status__ = 'Prototype'
 """ Register datasets here to make them available in the CLI. """
 
 
-from vscvs.datasets.multimodal import MultimodalEntityDataset, SiameseDataset, TripletDataset
-from vscvs.datasets.sketchy import *
+from .multimodal import MultimodalEntityDatasetFolder, MultimodalEntitySiameseDataset, SiameseDataset, TripletDataset
+from .sketchy import *
 
 
 DATASETS = {
@@ -54,29 +54,31 @@ DATASETS = {
     'sketchy-siamese':
         lambda *args, **kwargs: SiameseDataset(
             Sketchy('sketchy-photos', *args, **kwargs),
-            SketchyClassIndices('sketchy-sketches', *args, **kwargs)
-        ),
+            SketchyClassIndices('sketchy-sketches', *args, **kwargs)),
     'sketchy-test-siamese':
         lambda *args, **kwargs: SiameseDataset(
             Sketchy('sketchy-test-photos', *args, **kwargs),
-            SketchyClassIndices('sketchy-test-sketches', *args, **kwargs)
-        ),
+            SketchyClassIndices('sketchy-test-sketches', *args, **kwargs)),
     'sketchy-test-triplet':
         lambda *args, **kwargs: TripletDataset(
             Sketchy('sketchy-test-photos', *args, **kwargs),
-            SketchyClassIndices('sketchy-test-sketches', *args, **kwargs)
-        ),
+            SketchyClassIndices('sketchy-test-sketches', *args, **kwargs)),
     'sketchy-triplet':
         lambda *args, **kwargs: TripletDataset(
             Sketchy('sketchy-photos', *args, **kwargs),
-            SketchyClassIndices('sketchy-sketches', *args, **kwargs)
-        ),
+            SketchyClassIndices('sketchy-sketches', *args, **kwargs)),
     'sketchy-multimodal':
-        lambda *args, **kwargs: MultimodalEntityDataset(Sketchy('sketchy-photos', *args, **kwargs),
-                                                        Sketchy('sketchy-sketches', *args, **kwargs)),
+        lambda *args, **kwargs: MultimodalEntityDatasetFolder(
+            Sketchy('sketchy-photos', *args, **kwargs),
+            Sketchy('sketchy-sketches', *args, **kwargs)),
     'sketchy-test-multimodal':
-        lambda *args, **kwargs: MultimodalEntityDataset(Sketchy('sketchy-test-photos', *args, **kwargs),
-                                                        Sketchy('sketchy-test-sketches', *args, **kwargs)),
+        lambda *args, **kwargs: MultimodalEntityDatasetFolder(
+            Sketchy('sketchy-test-photos', *args, **kwargs),
+            Sketchy('sketchy-test-sketches', *args, **kwargs)),
+    'sketchy-multimodal-siamese':
+        lambda *args, **kwargs: MultimodalEntitySiameseDataset(
+            Sketchy('sketchy-photos', *args, **kwargs),
+            Sketchy('sketchy-sketches', *args, **kwargs)),
 }
 
 

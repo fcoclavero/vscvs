@@ -21,14 +21,14 @@ from vscvs.loss_functions import ReductionMixin
     type=click.Choice(ReductionMixin.reduction_choices))
 @click.option('--margin', prompt='Margin', help='The margin for the triplet loss.', default=.2)
 @pass_kwargs_to_context
-def triplet(context, **__):
+def triplet(context, *_, **__):
     """ Train a triplet model. """
     context.obj['dataset_name'] = context.obj['dataset_name'] + '-triplet'
 
 
 @triplet.command()
 @pass_context_to_kwargs
-def cnn(_, *args, **kwargs):
+def cnn(*args, **kwargs):
     from vscvs.trainers.triplet import train_triplet_cnn
     click.echo('triplet cnn - {} dataset'.format(kwargs['dataset_name']))
     train_triplet_cnn(*args, **kwargs)
@@ -36,7 +36,7 @@ def cnn(_, *args, **kwargs):
 
 @triplet.command()
 @pass_context_to_kwargs
-def resnet(_, *args, **kwargs):
+def resnet(*args, **kwargs):
     from vscvs.trainers.triplet import train_triplet_resnet
     click.echo('triplet resnet - {} dataset'.format(kwargs['dataset_name']))
     train_triplet_resnet(*args, **kwargs)
@@ -44,7 +44,7 @@ def resnet(_, *args, **kwargs):
 
 @triplet.command()
 @pass_context_to_kwargs
-def resnext(_, *args, **kwargs):
+def resnext(*args, **kwargs):
     from vscvs.trainers.triplet import train_triplet_resnext
     click.echo('triplet resnext - {} dataset'.format(kwargs['dataset_name']))
     train_triplet_resnext(*args, **kwargs)

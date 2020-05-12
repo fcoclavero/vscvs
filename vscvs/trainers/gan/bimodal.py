@@ -13,8 +13,9 @@ from typing import Callable
 
 from .gan import AbstractGANTrainer
 from ..engines.gan import create_multimodal_gan_evaluator, create_multimodal_gan_trainer, \
-    prepare_bimodal_batch_variables
-from vscvs.metrics import LossMultimodalGAN
+    create_multimodal_gan_siamese_evaluator, create_multimodal_gan_siamese_trainer, prepare_bimodal_batch_variables
+from vscvs.loss_functions import ContrastiveLoss
+from vscvs.metrics import AverageDistancesMultimodalSiamesePairs, LossMultimodalGAN
 from vscvs.models import ResNextNormalized, InterModalDiscriminator, MultimodalEncoder
 from vscvs.decorators import kwargs_parameter_dict
 
@@ -57,6 +58,46 @@ class AbstractBiModalGANTrainer(AbstractGANTrainer, ABC):
                                              prepare_batch_variables=prepare_bimodal_batch_variables)
 
 
+class AbstractBiModalGANSiameseTrainer(AbstractBiModalGANTrainer, ABC):
+    """
+    Abstract class for creating Trainer classes with the common options needed for a bi-modal GAN architecture with
+    the addition of a contrastive term in the loss functions.
+    """
+    def __init__(self, *args, margin=.2, **kwargs):
+        """
+        :param args: AbstractBiModalGANTrainer arguments
+        :type: tuple
+        :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the
+        embeddings of two examples as dissimilar. Dissimilar image pairs will be pushed apart unless their distance
+        is already greater than the margin. Similar sketch–image pairs will be pulled together in the feature space.
+        :type: float
+        :param kwargs: AbstractBiModalGANTrainer keyword arguments
+        :type: dict
+        """
+        self.margin = margin
+        super().__init__(*args, **kwargs)
+
+    @property
+    @overrides
+    def loss(self):
+        return BCEWithLogitsLoss(reduction=self.loss_reduction, weight=self.loss_weight), \
+               ContrastiveLoss(margin=self.margin, reduction=self.loss_reduction)
+
+    @overrides
+    def _create_evaluator_engine(self):
+        average_distances = AverageDistancesMultimodalSiamesePairs()
+        loss = LossMultimodalGAN(self.loss)
+        return create_multimodal_gan_siamese_evaluator(
+            *self.model, device=self.device, prepare_batch_variables=prepare_bimodal_batch_variables, metrics={
+                'average_positive_distance': average_distances[0], 'average_negative_distance': average_distances[1],
+                'generator_loss': loss[0], 'discriminator_loss': loss[1]})
+
+    @overrides
+    def _create_trainer_engine(self):
+        return create_multimodal_gan_siamese_trainer(*self.model, *self.optimizer, *self.loss, device=self.device,
+                                                     prepare_batch_variables=prepare_bimodal_batch_variables)
+
+
 @kwargs_parameter_dict
 def train_gan_bimodal(*args, optimizer_mixin=None, **kwargs):
     """
@@ -75,4 +116,25 @@ def train_gan_bimodal(*args, optimizer_mixin=None, **kwargs):
                                 mode_embedding_networks=[ResNextNormalized(out_features=250, pretrained=True),
                                                          ResNextNormalized(out_features=250, pretrained=True)],
                                 **kwargs)
+    trainer.run()
+
+
+@kwargs_parameter_dict
+def train_gan_bimodal_siamese(*args, optimizer_mixin=None, **kwargs):
+    """
+    Train a bimodal GAN.
+    :param args: BiModalGANSiameseTrainer arguments
+    :type: tuple
+    :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
+    `optimizer` property with a specific optimizer.
+    :type: vscvs.trainers.mixins.OptimizerMixin
+    :param kwargs: BiModalGANSiameseTrainer keyword arguments
+    :type: dict
+    """
+    class BiModalGANSiameseTrainer(optimizer_mixin, AbstractBiModalGANSiameseTrainer):
+        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+    trainer = BiModalGANSiameseTrainer(*args, discriminator_network=InterModalDiscriminator(input_dimension=250),
+                                       mode_embedding_networks=[ResNextNormalized(out_features=250, pretrained=True),
+                                                                ResNextNormalized(out_features=250, pretrained=True)],
+                                       **kwargs)
     trainer.run()

@@ -12,9 +12,9 @@ import pickle
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
-from settings import DATA_SOURCES
-from vscvs.datasets.mixins import BinaryEncodingMixin, ClassIndicesMixin, FileNameIndexedMixin, FilePathIndexedMixin, \
+from .mixins import BinaryEncodingMixin, ClassIndicesMixin, FileNameIndexedMixin, FilePathIndexedMixin, \
     OneHotEncodingMixin,  SiameseSingleDatasetMixin, TripletSingleDatasetMixin
+from settings import DATA_SOURCES
 
 
 class Sketchy(ImageFolder):

@@ -21,14 +21,15 @@ from vscvs.loss_functions import ReductionMixin
     type=click.Choice(ReductionMixin.reduction_choices))
 @click.option('--margin', prompt='Margin', help='The margin for the contrastive loss.', default=.2)
 @pass_kwargs_to_context
-def siamese(context, **__):
+def siamese(context, *_, **__):
     """ Train a siamese model. """
     context.obj['dataset_name'] = context.obj['dataset_name'] + '-siamese'
 
 
 @siamese.command()
 @pass_context_to_kwargs
-def cnn(_, *args, **kwargs):
+def cnn(*args, **kwargs):
+    """ Train a siamese CNN model. """
     from vscvs.trainers.siamese import train_siamese_cnn
     click.echo('siamese cnn - {} dataset'.format(kwargs['dataset_name']))
     train_siamese_cnn(*args, **kwargs)
@@ -36,7 +37,8 @@ def cnn(_, *args, **kwargs):
 
 @siamese.command()
 @pass_context_to_kwargs
-def resnet(_, *args, **kwargs):
+def resnet(*args, **kwargs):
+    """ Train a siamese ResNet model. """
     from vscvs.trainers.siamese import train_siamese_resnet
     click.echo('siamese resnet - {} dataset'.format(kwargs['dataset_name']))
     train_siamese_resnet(*args, **kwargs)
@@ -44,7 +46,8 @@ def resnet(_, *args, **kwargs):
 
 @siamese.command()
 @pass_context_to_kwargs
-def resnext(_, *args, **kwargs):
+def resnext(*args, **kwargs):
+    """ Train a siamese ResNext model. """
     from vscvs.trainers.siamese import train_siamese_resnext
     click.echo('siamese resnext - {} dataset'.format(kwargs['dataset_name']))
     train_siamese_resnext(*args, **kwargs)

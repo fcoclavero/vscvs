@@ -19,9 +19,9 @@ class ReductionMixinMeta(type):
         """
         super().__init__(*args, **kwargs)
         cls._reductions = {
-            'mean': lambda batch_losses: batch_losses.sum(),
+            'mean': lambda batch_losses: batch_losses.mean(),
             'none': lambda batch_losses: batch_losses,
-            'sum': lambda batch_losses: batch_losses.mean()}
+            'sum': lambda batch_losses: batch_losses.sum()}
 
     @property
     def reductions(cls):

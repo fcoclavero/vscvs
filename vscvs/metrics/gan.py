@@ -6,6 +6,8 @@ __status__ = 'Prototype'
 """ Custom Ignite metrics for GANs. """
 
 
+import torch
+
 from abc import ABC
 from ignite.exceptions import NotComputableError
 from ignite.metrics import Metric
@@ -82,6 +84,24 @@ class LossMultimodalGAN(AbstractLossGAN):
         self._sum_generator_loss += generator_loss.item() * batch_size
         self._sum_discriminator_loss += discriminator_loss.item() * batch_size
         self._num_examples += batch_size
+
+
+class LossMultimodalSiamesePairs(LossMultimodalGAN):
+    """
+    Computes the loss for positive and negative pairs in a multimodal siamese network.
+    """
+    @reinit__is_reduced
+    @overrides
+    def update(self, output):
+        """
+        :override: updates the metric's state using a multimodal siamese GAN batch output.
+        :param output: the output of the engine's process function, using the multimodal siamese format: 6-tuple with
+        the first pair elements' embeddings, the second pair elements' embeddings, the siamese targets, mode
+        predictions, mode labels, and generator labels.
+        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
+        """
+        embeddings_0, embeddings_1, siamese_target, *args = output
+        super().update((torch.cat([embeddings_1, embeddings_0]), *args))
 
 
 class AverageDistancesMultimodalSiamesePairs(AverageDistancesSiamesePairs):

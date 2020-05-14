@@ -29,7 +29,7 @@ class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
         :param args: Trainer arguments
         :type: tuple
         :param out_features: number of output features. If `None`, defaults to 1000.
-        :type: int or None
+        :type: int
         :param kwargs: Trainer keyword arguments
         :type: dict
         """
@@ -49,7 +49,7 @@ class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     @staticmethod
     @overrides
     def _score_function(engine):
-        validation_loss = engine.state.metrics['loss']
+        validation_loss = engine.state.metrics['Loss']
         return -validation_loss
 
     @property
@@ -60,7 +60,7 @@ class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     @overrides
     def _create_evaluator_engine(self):
         return create_supervised_evaluator(
-            self.model, metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss)}, device=self.device)
+            self.model, metrics={'Accuracy': Accuracy(), 'Loss': Loss(self.loss)}, device=self.device)
 
     @overrides
     def _create_trainer_engine(self):

@@ -77,8 +77,8 @@ class AbstractGANTrainer(GANOptimizerMixin, AbstractTrainer, ABC):
         :param trainer: the ignite trainer engine this event was bound to.
         :type: ignite.engine.Engine
         """
-        self.writer.add_scalar('training_output_generator', trainer.state.output[0], self.step)
-        self.writer.add_scalar('training_output_discriminator', trainer.state.output[1], self.step)
+        self.writer.add_scalar('Trainer Output/generator', trainer.state.output[0], self.step)
+        self.writer.add_scalar('Trainer Output/discriminator', trainer.state.output[1], self.step)
         self.progressbar.desc = self.progressbar_description.format(self.epoch, self.last_epoch, *trainer.state.output)
 
     @overrides

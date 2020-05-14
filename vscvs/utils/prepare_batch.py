@@ -21,12 +21,12 @@ def batch_clique_graph(batch, classes_dataframe, processes=None):
     vector distances of class labels. Assumes data and labels are the first two parameters of each sample.
     :param batch: data to be sent to device.
     :type: list
-    :param classes_dataframe: dataframe containing class names and their word vectors
+    :param classes_dataframe: dataframe containing class names and their word vectors.
     :type: pandas.Dataframe
     :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
     will be used.
-    :type: int or None
-    :return: the batch clique graph
+    :type: int
+    :return: the batch clique graph.
     :type: torch_geometric.data.Data
     """
     x, y, *_ = batch  # unpack extra parameters into `_`
@@ -45,13 +45,13 @@ def prepare_batch(batch, device=None, non_blocking=False):
     Prepare batch for training: pass to a device with options. Assumes data and labels are the first
     two parameters of each sample.
     :param batch: data to be sent to device.
-    :type: list
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
+    :type: List[torch.Tensor]
+    :param device: (optional) (default: None) device type specification.
+    :type: str
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+    :type: bool
     :return: 2-tuple with batch elements and labels.
-    :type: tuple<torch.Tensor, torch.Tensor>
+    :type: Tuple[torch.Tensor, torch.Tensor]
     """
     x, y, *_ = batch # unpack extra parameters into `_`
     return tuple(convert_tensor(element, device=device, non_blocking=non_blocking) for element in [x, y])
@@ -62,16 +62,16 @@ def prepare_batch_graph(batch, classes_dataframe, device=None, non_blocking=Fals
     Prepare batch for training: pass to a device with options. Assumes data and labels are the first
     two parameters of each sample.
     :param batch: data to be sent to device.
-    :type: list
-    :param classes_dataframe: dataframe containing class names and their word vectors
+    :type: List[torch.Tensor]
+    :param classes_dataframe: dataframe containing class names and their word vectors.
     :type: pandas.Dataframe
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
+    :param device: (optional) (default: None) device type specification.
+    :type: str
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+    :type: bool
     :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
     will be used.
-    :type: int or None
+    :type: int
     :return: the batch clique graph
     :type: torch_geometric.data.Data
     """
@@ -86,13 +86,13 @@ def prepare_batch_siamese(batch, device=None, non_blocking=False):
     Prepare batch for siamese network training: pass to a device with options. Assumes the shape returned by a Dataset
     implementing the `SiameseMixin`.
     :param batch: data to be sent to device.
-    :type: list
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
+    :type: Tuple[List[torch.Tensor], List[torch.Tensor]]
+    :param device: (optional) (default: None) device type specification.
+    :type: str
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+    :type: bool
     :return: 3-tuple with batches of siamese pairs and their target label.
-    :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+    :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
     """
     images_0, images_1 = batch
     target = siamese_target(images_0, images_1)
@@ -104,15 +104,15 @@ def prepare_batch_multimodal(batch, device=None, non_blocking=False):
     Prepare batch for multimodal network training: pass to a device with options. Assumes the shape returned by a
     `MultimodalDataset` subclass.
     :param batch: data to be sent to device.
-    :type: list
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
-    :return: tuple with multimodal batches.
-    :type: tuple<torch.Tensor, ...>
+    :type: List[List[torch.Tensor]]
+    :param device: (optional) (default: None) device type specification.
+    :type: str
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+    :type: bool
+    :return: tuple of length `n_modes` with multimodal batches.
+    :type: List[List[torch.Tensor]]
     """
-    return tuple(prepare_batch(images, device, non_blocking) for images in batch)
+    return [prepare_batch(images, device, non_blocking) for images in batch]
 
 
 def prepare_batch_multimodal_siamese(batch, device=None, non_blocking=False):
@@ -120,13 +120,14 @@ def prepare_batch_multimodal_siamese(batch, device=None, non_blocking=False):
     Prepare batch for siamese multimodal training: pass to a device with options. Assumes the shape returned by a
     `MultimodalEntitySiameseDataset` subclass.
     :param batch: data to be sent to device.
-    :type: list
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
-    :return: tuple with siamese multimodal batches.
-    :type: tuple<torch.Tensor, ...>
+    :type: Tuple[List[List[torch.Tensor]], List[List[torch.Tensor]]]
+    :param device: (optional) (default: None) device type specification.
+    :type: str
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+    :type: bool
+    :return: 3-tuple with multimodal batches for the siamese pairs and their siamese target tensor, which contains a
+    `0` if a pair is similar (has the same class) or `1` otherwise.
+    :type: Tuple[List[List[torch.Tensor]], List[List[torch.Tensor]], torch.Tensor]
     """
     entities_0, entities_1 = batch
     assert torch.equal(entities_0[0][1], entities_0[1][1]) and torch.equal(entities_1[0][1], entities_1[1][1])
@@ -140,10 +141,12 @@ def siamese_target(elements_0, elements_1, get_classes=lambda x: x[1]):
     """
     Creates the contrastive loss target vector for the given image pairs. A target of 0 is assigned when both images
     in a pair are *similar* (have the same class), 1 otherwise.
-    :param elements_0: batch of the first elements of each siamese pair.
-    :type: tuple<torch.Tensor, torch.Tensor>
-    :param elements_1: batch of the second elements of each siamese pair.
-    :type: tuple<torch.Tensor, torch.Tensor>
+    :param elements_0: normal batch of the first elements of each siamese pair, which by default is a 2-tuple with the
+    elements tensor and a labels tensor.
+    :type: Tuple[torch.Tensor, torch.Tensor]
+    :param elements_1: batch of the second elements of each siamese pair, which by default is a 2-tuple with the
+    elements tensor and a labels tensor.
+    :type: Tuple[torch.Tensor, torch.Tensor]
     :param get_classes: function that takes a standard batch from a siamese pair element and returns the labels tensor,
     In a standard dataset, the input for this function is a tuple where the first element is the data tensor and the
     second element is the labels tensor. In this default case the latter is returned.
@@ -160,11 +163,11 @@ def wordvector_distance(indices, class_wordvector_distances):
     Get the distance of two class word vectors, given a pre-computed distance matrix. This can be used to determine
     edge weights between two batch graph nodes.
     :param indices: the indices of the two classes. In the graph structure, the first index corresponds to the origin
-    vertex and the second index corresponds to the destination vertex.
-    :type: torch.Tensor with shape [2]
+    vertex and the second index corresponds to the destination vertex. Tensor of shape `[2]`.
+    :type: torch.Tensor
     :param class_wordvector_distances: pre-computed class word vector distances for all the classes in the dataset. The
     matrix is symmetrical.
-    :type:
+    :type: pandas.Dataframe
     :return: the distances between the word vectors of the classes specified in `indices`.
     :type: float
     """

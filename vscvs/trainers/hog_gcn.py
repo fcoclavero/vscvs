@@ -43,10 +43,10 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
         using values between 0 and 360 degrees or between 0 and 180 degrees. If the latter are used, we call the
         gradient “unsigned” because a gradient and it’s negative are represented by the same numbers. Empirically it has
         been shown that unsigned gradients work better than signed gradients for tasks such as pedestrian detection.
-        :type: boolean
+        :type: bool
         :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then
         `os.cpu_count()` will be used.
-        :type: int or None
+        :type: int
         :param kwargs: Trainer keyword arguments
         :type: dict
         """
@@ -80,8 +80,8 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
     def _create_evaluator_engine(self):
         return create_hog_gcn_evaluator(
             self.model, device=self.device, metrics={
-                'accuracy': Accuracy(), 'loss': Loss(self.loss), 'recall': Recall(average=True),
-                'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
+                'Accuracy': Accuracy(), 'Loss': Loss(self.loss), 'Recall': Recall(average=True),
+                'Top K Categorical Accuracy': TopKCategoricalAccuracy(k=10)})
 
     @overrides
     def _create_trainer_engine(self):

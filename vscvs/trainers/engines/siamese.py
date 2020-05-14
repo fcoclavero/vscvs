@@ -25,17 +25,19 @@ def create_siamese_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     :param optimizer: the optimizer to be used for the siamese network
     :type: torch.optim.Optimizer
     :param loss_fn: contrastive loss function
-    :type: torch.nn loss function
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
+    :type: torch.nn.Module
+    :param device: (optional) (default: None) device type specification.
+    :type: str
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
-    :param prepare_batch: batch preparation logic
-    :type: Callable<args: `batch`,`device`,`non_blocking`, ret: tuple<torch.Tensor,torch.Tensor,torch.Tensor>>
-    (optional)
-    :param output_transform: function that receives the result of a siamese network trainer engine and returns value to
-    be assigned to engine's state.output after each iteration.
-    :type: Callable<args: `embeddings_0`, `embeddings_1`, `target`, `loss`, ret: object>> (optional)
+    :type: bool
+    :param prepare_batch: (optional) batch preparation logic. Takes a batch, the device and the `non_blocking`
+    option and returns the triplet tensors: the siamese pair tensors and the siamese target indicating pair similarity.
+    :type: Callable[[Tuple[List[torch.Tensor], List[torch.Tensor]]], str, bool],
+                    Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]
+    :param output_transform: (optional) function that receives the result of a siamese network trainer engine (the
+    siamese pair embeddings, siamese target and the loss module) and returns value to be assigned to the engine's
+    `state.output` after each iteration, typically the loss value.
+    :type: Callable[[torch.Tensor, torch.Tensor, torch.Tensor, torch.nn.Module], float]
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """
@@ -63,17 +65,19 @@ def create_siamese_evaluator(model, metrics=None, device=None, non_blocking=Fals
     :param model: the model to train.
     :type: torch.nn.Module
     :param metrics: map of metric names to Metrics.
-    :type: dict<str:<ignite.metrics.Metric>>
-    :param device: device type specification. Applies to both model and batches.
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
-    :param prepare_batch: batch preparation logic
-    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
-    :param output_transform: function that receives the result of a siamese network evaluator engine and returns the
-    value to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
-    :type: Callable<args:`embeddings_0`, `embeddings_1`, `target`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>>
-    (optional)
+    :type: Dict[str, ignite.metrics.Metric]]
+    :param device: (optional) (default: None) device type specification. Applies to both model and batches.
+    :type: str
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+    :type: bool
+    :param prepare_batch: (optional) batch preparation logic. Takes a batch, the device and the `non_blocking`
+    option and returns the triplet tensors: the siamese pair tensors and the siamese target indicating pair similarity.
+    :type: Callable[[Tuple[List[torch.Tensor], List[torch.Tensor]]], str, bool],
+                    Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]
+    :param output_transform: (optional) function that receives the result of a siamese network evaluator engine (the
+    siamese pair embeddings and the siamese target) and returns the value to be assigned to the engine's `state.output`
+    after each iteration, which must fit that expected by the metrics, typically all three input tensors.
+    :type: Callable[[torch.Tensor, torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]
     :return: an evaluator engine with supervised inference function.
     :type: ignite.engine.Engine
     """

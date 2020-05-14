@@ -28,7 +28,7 @@ class AbstractMultiModalGANTrainer(AbstractGANTrainer, ABC):
         :type: tuple
         :param mode_embedding_networks: the embedding networks for each mode. They will be used as generators for the
         generative adversarial formulation.
-        :type: list<torch.nn.Module>
+        :type: List[torch.nn.Module]
         :param kwargs: AbstractGANTrainer keyword arguments
         :type: dict
         """
@@ -43,7 +43,7 @@ class AbstractMultiModalGANTrainer(AbstractGANTrainer, ABC):
     def _create_evaluator_engine(self):
         loss = LossMultimodalGAN(self.loss)
         return create_multimodal_gan_evaluator(*self.model, device=self.device,
-                                               metrics={'generator_loss': loss[0], 'discriminator_loss': loss[1]})
+                                               metrics={'Loss/generator': loss[0], 'Loss/discriminator': loss[1]})
 
     @overrides
     def _create_trainer_engine(self):

@@ -166,7 +166,7 @@ class FileNameIndexedMixin(ImageFolderMixin):
         :param pattern: the pattern that returned images names must match.
         :type: str
         :return: a list of images that match the pattern.
-        :type: list<tuple>
+        :type: List[Tuple]
         """
         return [ # create a list of indices
             i for i, path_class in enumerate(self.imgs) # return index
@@ -240,7 +240,7 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         :param base_dataset: `MultimodalDataset` base dataset.
         :type: torch.utils.data.DatasetFolder
         :param paired_datasets: DatasetFolder object containing the entities of the base dataset, in different modes.
-        :type: list<torchvision.datasets.DatasetFolder>
+        :type: List[torchvision.datasets.DatasetFolder]
         """
         super().__init__(base_dataset)
         self.paired_datasets = paired_datasets
@@ -273,7 +273,7 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         NOTE: this takes about 30 min. on a notebook i7. This could be optimized with multiprocessing, but it wasn't
         worth it at the time.
         :return: the entity indices object for the database.
-        :type: list<dict<int: list<int>>>
+        :type: List[Dict[int, List[int]]]
         """
         entity_indices = [] # contains a list for each base_dataset sample
         desc = 'Creating entity indices.'
@@ -304,7 +304,7 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         Returns the entity indices object. The method tries to load the entity indices from cache, if available, and
         otherwise creates and caches it.
         :return: the entity indices object for the database.
-        :type: list<dict<int: list<int>>>
+        :type: List[Dict[int, List[int]]]
         """
         try:
             entity_indices = pickle.load(open(self.cache_file_path, 'rb'))
@@ -400,7 +400,7 @@ class SiameseMixin(DatasetFolderMixin, ABC):
         :param class_index: the positive class index.
         :type: int
         :return: a list with all negative class indices.
-        :type: list<int>
+        :type: List[int]
         """
         classes = list(self.class_to_idx.values())
         classes.remove(class_index)
@@ -473,7 +473,7 @@ class TripletMixin(DatasetFolderMixin):
         :param class_index: the positive class index.
         :type: int
         :return: a list with all negative class indices.
-        :type: list<int>
+        :type: List[int]
         """
         classes = list(self.class_to_idx.values())
         classes.remove(class_index)

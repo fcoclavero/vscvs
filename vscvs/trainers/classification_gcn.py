@@ -31,7 +31,7 @@ class AbstractClassificationGCNTrainer(AbstractTrainer, ABC):
         :type: str
         :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then
         `os.cpu_count()` will be used.
-        :type: int or None
+        :type: int
         :param kwargs: Trainer keyword arguments
         :type: dict
         """
@@ -59,8 +59,8 @@ class AbstractClassificationGCNTrainer(AbstractTrainer, ABC):
     def _create_evaluator_engine(self):
         return create_classification_gcn_evaluator(
             self.model, self.dataset.classes_dataframe, device=self.device, processes=self.processes, metrics={
-                'accuracy': Accuracy(), 'loss': Loss(self.loss),
-                'recall': Recall(average=True), 'top_k_categorical_accuracy': TopKCategoricalAccuracy(k=10)})
+                'Accuracy': Accuracy(), 'Loss': Loss(self.loss),
+                'Recall': Recall(average=True), 'Top K Categorical Accuracy': TopKCategoricalAccuracy(k=10)})
 
     @overrides
     def _create_trainer_engine(self):

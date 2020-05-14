@@ -75,10 +75,10 @@ class HOGGCN(torch.nn.Module):
         using values between 0 and 360 degrees or between 0 and 180 degrees. If the latter are used, we call the
         gradient “unsigned” because a gradient and it’s negative are represented by the same numbers. Empirically it has
         been shown that unsigned gradients work better than signed gradients for tasks such as pedestrian detection.
-        :type: boolean
+        :type: bool
         :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then
         `os.cpu_count()` will be used.
-        :type: int or None
+        :type: int
         """
         super().__init__()
         self.classes_dataframe = classes_dataframe
@@ -92,10 +92,10 @@ class HOGGCN(torch.nn.Module):
         two parameters of each sample.
         :param batch: data to be sent to device.
         :type: list
-        :param device: device type specification
-        :type: str of torch.device (optional) (default: None)
-        :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-        :type: bool (optional)
+        :param device: (optional) (default: None) device type specification.
+        :type: str
+        :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+        :type: bool
         """
         return prepare_batch_graph(batch, self.classes_dataframe, device, non_blocking, self.processes)
 

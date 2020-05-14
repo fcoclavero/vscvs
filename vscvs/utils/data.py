@@ -43,10 +43,10 @@ def dataset_split_successive(dataset, *split_proportions):
     taken from the original dataset using the first proportion. The following subsets are taken using the same logic,
     :param dataset: the dataset to be split.
     :type: torch.utils.data.Dataset
-    :param split_proportions: any number of split proportions.
-    :type: float $\in [0, 1]$
-    :return: the the resulting Datasets
-    :type: list<torch.utils.data.Dataset> same length as `split_proportions`
+    :param split_proportions: any number of split proportions. Must be a `float` $\in [0, 1]$.
+    :type: float
+    :return: the the resulting Datasets, with lengths matching `split_proportions * len(dataset)`.
+    :type: List[torch.utils.data.Dataset]
     """
     subset_lengths = []
     remaining_n = len(dataset)
@@ -77,12 +77,12 @@ def random_simple_split(data, split_proportion=.8):
     Splits incoming data into two sets, randomly and with no overlapping. Returns the two resulting data objects along
     with two arrays containing the original indices of each element.
     :param data: the data to be split
-    :type: indexed obj
+    :type: SupportsIndex
     :param split_proportion: proportion of the data to be assigned to the fist split subset. As this function returns
     two subsets, this parameter must be strictly between 0.0 and 1.0
     :type: float
-    :return: the two resulting datasets and the original indices lists
-    :type: indexed obj, indexed obj, list<int>, list<int>
+    :return: the two resulting datasets and the original index lists
+    :type: SupportsIndex, SupportsIndex, List[int], List[int]
     """
     assert 0. < split_proportion < 1.
     indices = list(range(len(data))) # all indices in data

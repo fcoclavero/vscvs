@@ -28,7 +28,7 @@ class HOG(torch.nn.Module):
         using values between 0 and 360 degrees or between 0 and 180 degrees. If the latter are used, we call the
         gradient “unsigned” because a gradient and it’s negative are represented by the same numbers. Empirically it has
         been shown that unsigned gradients work better than signed gradients for tasks such as pedestrian detection.
-        :type: boolean
+        :type: bool
         """
         super().__init__()
         # Set hyperparameters

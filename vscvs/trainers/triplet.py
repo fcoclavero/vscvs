@@ -66,8 +66,8 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
     def _create_evaluator_engine(self):
         average_distances = AverageDistancesTriplets()
         return create_triplet_evaluator(self.model, device=self.device, metrics={
-            'accuracy': AccuracyTriplets(), 'average_positive_distance': average_distances[0],
-            'average_negative_distance': average_distances[1], 'loss': LossTriplets(self.loss)})
+            'Accuracy': AccuracyTriplets(), 'Average Distance/positive': average_distances[0],
+            'Average Distance/negative': average_distances[1], 'Loss': LossTriplets(self.loss)})
 
     @overrides
     def _create_trainer_engine(self):

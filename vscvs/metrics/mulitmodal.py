@@ -22,7 +22,7 @@ class AbstractAverageDistances(Metric, ABC):
         :param args: Metric arguments
         :type: tuple
         :param batch_size: callable taking a target tensor returns the first dimension size (usually the batch size).
-        :type: Callable<args: 'tensor', ret: int>
+        :type: Callable[[torch.Tensor], int]
         :param kwargs: Metric keyword arguments
         :type: dict
         """

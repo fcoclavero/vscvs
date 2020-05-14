@@ -24,14 +24,14 @@ class AbstractKernelConvolution(torch.nn.Module):
         :param in_channels: the number of channels for inputs.
         :type: int
         :param stride: controls the stride for the cross-correlation.
-        :type: int or tuple<int, int> with height and width dimensions, respectively
+        :type: int or Tuple[int, int] with height and width dimensions, respectively
         :param padding: controls the amount of implicit zero-paddings on both sides for `padding` number of points for
         each dimension. Defaults to one to maintain input dimensions.
-        :type: int or tuple<int, int> with height and width dimensions, respectively
+        :type: int or Tuple[int, int] with height and width dimensions, respectively
         :param dilation: controls the spacing between the kernel points; also known as the à trous algorithm. It is
         harder to describe, but this [link](https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md) has a
         nice visualization of what dilation does.
-        :type: int or tuple<int, int> with height and width dimensions, respectively
+        :type: int or Tuple[int, int] with height and width dimensions, respectively
         """
         super().__init__()
         self.in_channels = in_channels

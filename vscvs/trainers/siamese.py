@@ -66,8 +66,8 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
     def _create_evaluator_engine(self):
         average_distances = AverageDistancesSiamesePairs()
         return create_siamese_evaluator(self.model, device=self.device, metrics={
-            'accuracy': AccuracySiamesePairs(), 'average_positive_distance': average_distances[0],
-            'average_negative_distance': average_distances[1], 'loss': LossSiamesePairs(self.loss)})
+            'Accuracy': AccuracySiamesePairs(), 'Average Distance/positive': average_distances[0],
+            'Average Distance/negative': average_distances[1], 'Loss': LossSiamesePairs(self.loss)})
 
     @overrides
     def _create_trainer_engine(self):

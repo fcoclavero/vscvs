@@ -37,7 +37,7 @@ class AbstractTrainer(ABC):
         :param dataset_name: the name of the Dataset to be used for training
         :type: str
         :param drop_last: whether to drop the last batch if it is not the same size as `batch_size`.
-        :type: boolean
+        :type: bool
         :param epochs: the number of epochs used for training
         :type: int
         :param n_gpu: number of GPUs available. Use 0 for CPU mode
@@ -144,7 +144,7 @@ class AbstractTrainer(ABC):
         """
         Creates an optimizer for the given parameters.
         :param parameters: the torch objects to be optimized, typically the Trainer's model module parameters.
-        :type: list<torch.Tensor>
+        :type: :type: List[torch.Tensor]
         :return: an optimizer object
         :type: torch.optim.Optimizer
         """
@@ -254,7 +254,7 @@ class AbstractTrainer(ABC):
         :param trainer: the ignite trainer engine this event was bound to.
         :type: ignite.engine.Engine
         """
-        self.writer.add_scalar('training_output', trainer.state.output, self.step)
+        self.writer.add_scalar('Trainer Output', trainer.state.output, self.step)
         self.progressbar.desc = self.progressbar_description.format(self.epoch, self.last_epoch, trainer.state.output)
 
     def _event_log_training_results(self, _):
@@ -265,7 +265,7 @@ class AbstractTrainer(ABC):
         metrics = self.evaluator_engine.state.metrics
         print('\nTraining results - epoch: {}/{}'.format(self.epoch, self.last_epoch))
         for key, value in metrics.items():
-            self.writer.add_scalar('training_{}'.format(key), value, self.step)
+            self.writer.add_scalar('{}/training'.format(key), value, self.step)
             print('{}: {:.6f}'.format(key, value))
 
     def _event_log_validation_results(self, _):
@@ -276,7 +276,7 @@ class AbstractTrainer(ABC):
         metrics = self.evaluator_engine.state.metrics
         print('\nValidation results - epoch: {}/{}'.format(self.epoch, self.last_epoch))
         for key, value in metrics.items():
-            self.writer.add_scalar('validation_{}'.format(key), value, self.step)
+            self.writer.add_scalar('{}/validation'.format(key), value, self.step)
             print('{}: {:.6f}'.format(key, value))
 
     def _event_reset_progressbar(self, _):

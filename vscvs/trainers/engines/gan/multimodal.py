@@ -23,10 +23,10 @@ def combine_batches(*batches):
     """
     Combine two multimodal batches.
     :param batches: list of the multimodal batch tuples to be combined.
-    :type: list<tuple<torch.Tensor, ...>>
+    :type: List[List[torch.Tensor]]
     :return: a combined multimodal batch, with a `batch_size` that is equal to the sum of the batch sizes of the batches
     in `batches`.
-    :type: tuple<torch.Tensor, ...>
+    :type: List[torch.Tensor]
     """
     return tuple((torch.cat([batch[i][0] for batch in batches]), torch.cat([batch[i][1] for batch in batches]))
                  for i in range(len(batches[0])))
@@ -41,11 +41,11 @@ def prepare_multimodal_batch_variables(batch, device):
       tensor with zero in the correct mode and an evenly distributed probability in the rest of the modes.
       For example `[0, 1, 0]` -> `[0.5, 0, 0.5]`.
     :param batch: tuple with the multimodal batch to be fed into the generator network.
-    :type: tuple<torch.Tensor, ...>
+    :type: List[List[torch.Tensor]]
     :param device: the device type specification where the processing is to take place.
-    :type: str of torch.device (optional) (default: None)
-    :return: the batch-derived variables: `batch_size`, `classes`, `mode_labels`, `generator_labels`.
-    :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor>
+    :type: str
+    :return: the batch-derived variables: `classes`, `mode_labels` and `generator_labels`.
+    :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
     """
     n_modes = len(batch)
     batch_size = len(batch[0][0])  # any mode should have same lengths
@@ -64,11 +64,11 @@ def prepare_bimodal_batch_variables(batch, device):
     - `generator_labels`: the target vector for using the same loss function for the generator loss. In this case it
       corresponds to `1 - mode_labels`.
     :param batch: tuple with the multimodal batch to be fed into the generator network.
-    :type: tuple<torch.Tensor, ...>
-    :param device: the device type specification where the processing is to take place.
-    :type: str of torch.device (optional) (default: None)
-    :return: the batch-derived variables: `n_modes`, `batch_size`, `classes`, `mode_labels`, `generator_labels`.
-    :type: tuple
+    :type: Tuple[List[torch.Tensor], List[torch.Tensor]]
+    :param device: (optional) (default: None) device type specification.
+    :type: str
+    :return: the batch-derived variables: `classes`, `mode_labels`, `generator_labels`.
+    :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
     """
     batch_size = len(batch[0][0])  # any mode should have same lengths
     classes = batch[0][1]  # any mode should have the same class idx
@@ -86,17 +86,17 @@ def prepare_bimodal_siamese_tensors(embedding_list_0, embedding_list_1, siamese_
     of training pairs for the generator.
     :param embedding_list_0: list of generator output batches for the first siamese pairs. Each batch tensor in the list
     corresponds to the generator outputs for batch element instances in a specific mode.
-    :type: list<torch.Tensor>
+    :type: List[torch.Tensor]
     :param embedding_list_1: list of generator output batches for the second siamese pairs. Each batch tensor in the
     list corresponds to the generator outputs for batch element instances in a specific mode. The mode order must match
     that of `embedding_list_0`.
-    :type: list<torch.Tensor>
+    :type: List[torch.Tensor]
     :param siamese_target: siamese target tensor for batch elements: tensor of length `batch_size` containing `0` if
     siamese pairs in an index have the same class (similar pair) or `1` otherwise (dissimilar pair).
     :type: torch.Tensor
     :return: tuple with the siamese pair and target tensors for all possible mode combinations of multimodal batch
     embeddings.
-    :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+    :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
     """
     embedding_size = embedding_list_0[0].shape[1]
     siamese_pair_0 = torch.stack(embedding_list_0).repeat_interleave(2, 0).view(-1, embedding_size)
@@ -133,20 +133,23 @@ def create_multimodal_gan_trainer(
     :param discriminator_optimizer: the optimizer to be used for the discriminator model
     :type: torch.optim.Optimizer
     :param loss_fn: the loss function for the GAN model
-    :type: torch.nn loss function
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
-    :param prepare_batch: batch preparation logic
-    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
-    :param prepare_batch_variables: function that computes batch-derived variables needed for multimodal GAN processing:
-    `classes`, `mode_labels`, `generator_labels`.
-    :type: Callable<args: `batch`, `device`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
-    :param output_transform: function that receives the result of a multimodal GAN trainer engine and returns the value
-    to be assigned to engine's state.output after each iteration.
-    :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`, `loss`, ret: object>>
-    (optional)
+    :type: torch.nn.Module
+    :param device: (optional) (default: None) device type specification.
+    :type: str
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+    :type: bool
+    :param prepare_batch: (optional) batch preparation logic. Takes a batch, the device and the `non_blocking`
+    option and returns a tuple of length `n_modes` with multimodal batches.
+    :type: Callable[[List[List[torch.Tensor]], str, bool], List[List[torch.Tensor]]]
+    :param prepare_batch_variables: (optional) function that receives a batch and the device and computes batch-derived
+    variables needed for multimodal GAN processing: `classes`, `mode_labels`, `generator_labels`.
+    :type: Callable[[List[List[torch.Tensor]], str], Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]
+    :param output_transform: (optional) function that receives the result of a multimodal GAN trainer engine (the
+    embeddings for all element instances, discriminator mode predictions, element mode labels, element generator labels,
+    class labels, the generator loss module and the discriminator loss module) and returns value to be assigned to
+    the engine's `state.output` after each iteration, typically the loss values.
+    :type: Callable[[List[torch.Tensor], torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.nn.Module,
+    torch.nn.Module], Tuple[float, float]]
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """
@@ -208,22 +211,26 @@ def create_multimodal_gan_siamese_trainer(
     :param discriminator_optimizer: the optimizer to be used for the discriminator model
     :type: torch.optim.Optimizer
     :param mode_loss_fn: the loss function for mode prediction.
-    :type: torch.nn loss function
+    :type: torch.nn.Module
     :param siamese_loss_fn: the loss function for siamese pairs.
-    :type: torch.nn loss function
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
-    :param prepare_batch: batch preparation logic
-    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
-    :param prepare_batch_variables: function that computes batch-derived variables needed for multimodal GAN processing:
-    `classes`, `mode_labels`, `generator_labels`.
-    :type: Callable<args: `batch`, `device`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
-    :param output_transform: function that receives the result of a multimodal siamese GAN trainer engine and returns
-    the value to be assigned to engine's state.output after each iteration.
-    :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`, `loss`, ret: object>>
-    (optional)
+    :type: torch.nn.Module
+    :param device: (optional) (default: None) device type specification.
+    :type: str
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+    :type: bool
+    :param prepare_batch: (optional) batch preparation logic. Takes a batch, the device and the `non_blocking`
+    option and returns a 3-tuple with multimodal batches for the siamese pairs and their siamese target tensor.
+    :type: Callable[[Tuple[List[List[torch.Tensor]], List[List[torch.Tensor]]]], str, bool],
+                    Tuple[List[List[torch.Tensor]], List[List[torch.Tensor]], torch.Tensor]]
+    :param prepare_batch_variables: (optional) function that receives a batch and the device and computes batch-derived
+    variables needed for multimodal GAN processing: `classes`, `mode_labels`, `generator_labels`.
+    :type: Callable[[List[List[torch.Tensor]], str], Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]
+    :param output_transform: (optional) function that receives the result of a multimodal siamese GAN trainer engine
+    (the embeddings for all element instances for both siamese multimodal batches, the siamese target, discriminator
+    mode predictions, element mode labels, element generator labels, and the generator and discriminator loss modules)
+    and returns value to be assigned to the engine's `state.output` after each iteration, typically the loss values.
+    :type: Callable[[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor,
+    torch.nn.Module, torch.nn.Module], Tuple[float, float]]
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """
@@ -290,20 +297,23 @@ def create_multimodal_gan_evaluator(
     :param discriminator: the discriminator model - classifies vectors as 'photo' or 'sketch'
     :type: torch.nn.Module
     :param metrics: map of metric names to Metrics.
-    :type: dict<str:<ignite.metrics.Metric>>
-    :param device: device type specification. Applies to both model and batches.
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
-    :param prepare_batch: batch preparation logic
-    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
-    :param prepare_batch_variables: function that computes batch-derived variables needed for multimodal GAN processing:
-    `classes`, `mode_labels`, `generator_labels`.
-    :type: Callable<args: `batch`, `device`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
-    :param output_transform: function that receives the result of a multimodal GAN evaluator engine and returns the
-    value to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
-    :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`,
-                    ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
+    :type: Dict[str, ignite.metrics.Metric]]
+    :param device: (optional) (default: None) device type specification. Applies to both model and batches.
+    :type: str
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+    :type: bool
+    :param prepare_batch: (optional) batch preparation logic. Takes a batch, the device and the `non_blocking`
+    option and returns a tuple of length `n_modes` with multimodal batches.
+    :type: Callable[[List[List[torch.Tensor]], str, bool],List[List[torch.Tensor]]]
+    :param prepare_batch_variables: (optional) function that receives a batch and the device and computes batch-derived
+    variables needed for multimodal GAN processing: `classes`, `mode_labels`, `generator_labels`.
+    :type: Callable[[List[List[torch.Tensor]], str], Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]
+    :param output_transform: (optional) function that receives the result of a multimodal GAN evaluator engine (the
+    embeddings for all element instances, discriminator mode predictions, element mode labels, element generator labels,
+    and the class labels) and returns value to be assigned to the engine's `state.output` after each iteration,
+    which must fit that expected by metric, typically all input elements.
+    :type: Callable[[List[torch.Tensor], torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor],
+                    Tuple[List[torch.Tensor], torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]]
     :return: an evaluator engine with supervised inference function.
     :type: ignite.engine.Engine
     """
@@ -340,20 +350,24 @@ def create_multimodal_gan_siamese_evaluator(
     :param discriminator: the discriminator model - classifies vectors as 'photo' or 'sketch'
     :type: torch.nn.Module
     :param metrics: map of metric names to Metrics.
-    :type: dict<str:<ignite.metrics.Metric>>
-    :param device: device type specification. Applies to both model and batches.
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
-    :param prepare_batch: batch preparation logic
-    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
-    :param prepare_batch_variables: function that computes batch-derived variables needed for multimodal GAN processing:
-    `classes`, `mode_labels`, `generator_labels`.
-    :type: Callable<args: `batch`, `device`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
-    :param output_transform: function that receives the result of a multimodal siamese GAN evaluator engine and returns
-    the value to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
-    :type: Callable<args: `anchor_embeddings`, `positive_embeddings`, `negative_embeddings`,
-                    ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>> (optional)
+    :type: Dict[str, ignite.metrics.Metric]]
+    :param device: (optional) (default: None) device type specification. Applies to both model and batches.
+    :type: str
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
+    :type: bool
+    :param prepare_batch: (optional) batch preparation logic. Takes a batch, the device and the `non_blocking`
+    option and returns a 3-tuple with multimodal batches for the siamese pairs and their siamese target tensor.
+    :type: Callable[[Tuple[List[List[torch.Tensor]], List[List[torch.Tensor]]]], str, bool],
+                    Tuple[List[List[torch.Tensor]], List[List[torch.Tensor]], torch.Tensor]]
+    :param prepare_batch_variables: (optional) function that receives a batch and the device and computes batch-derived
+    variables needed for multimodal GAN processing: `classes`, `mode_labels`, `generator_labels`.
+    :type: Callable[[List[List[torch.Tensor]], str], Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]
+    :param output_transform: (optional) function that receives the result of a multimodal siamese GAN evaluator engine
+    (the embeddings for all element instances for both siamese multimodal batches, the siamese target, discriminator
+    mode predictions, element mode labels and element generator labels) and returns value to be assigned to the engine's
+    `state.output` after each iteration, which must fit that expected by metric, typically all input elements.
+    :type: Callable[[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor],
+                    Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]]
     :return: an evaluator engine with supervised inference function.
     :type: ignite.engine.Engine
     """

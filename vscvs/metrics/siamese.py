@@ -52,7 +52,7 @@ class AccuracySiamesePairs(Metric):
         :override: updates the metric's state using the passed siamese batch output.
         :param output: the output of the engine's process function, using the siamese format: 3-tuple with the
         first pair elements' embeddings, the second pair elements' embeddings, and the targets.
-        :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
         :raises ValueError: when loss function cannot be computed
         """
         embeddings_0, embeddings_1, target = output
@@ -89,7 +89,7 @@ class LossSiamesePairs(Loss):
         :override: updates the metric's state using the passed siamese batch output.
         :param output: the output of the engine's process function, using the siamese format: 3-tuple with the
         first pair elements' embeddings, the second pair elements' embeddings, and the targets.
-        :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
         :raises ValueError: when loss function cannot be computed
         """
         if len(output) == 3:
@@ -119,7 +119,7 @@ class AverageDistancesSiamesePairs(AbstractAverageDistances):
         :override: updates the metric's state using the passed siamese batch output.
         :param output: the output of the engine's process function, using the siamese format: 3-tuple with the
         first pair elements' embeddings, the second pair elements' embeddings, and the targets.
-        :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
         """
         embeddings_0, embeddings_1, target = output
         batch_size = self._batch_size(target)

@@ -28,13 +28,13 @@ def create_triplet_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     :type: torch.nn.Module
     :param device: (optional) (default: None) device type specification.
     :type: str
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
     :type: bool
-    :param prepare_batch: (optional) batch preparation logic. Takes a triplet batch, the device and the `non_blocking`
+    :param prepare_batch: (optional) batch preparation logic. Takes a batch, the device and the `non_blocking`
     option and returns the triplet tensors: anchors, positives and negatives.
     :type: Callable[[List[List[torch.Tensor]], str, bool], Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]
     :param output_transform: (optional) function that receives the result of a triplet network trainer engine (the
-    anchor, positive and negative embeddings, and the loss module) and returns value to be assigned to engine's
+    anchor, positive and negative embeddings, and the loss module) and returns value to be assigned to the engine's
     `state.output` after each iteration, typically the loss value.
     :type: Callable[[torch.Tensor, torch.Tensor, torch.Tensor, torch.nn.Module], float]
     :return: a trainer engine with the update function
@@ -66,16 +66,16 @@ def create_triplet_evaluator(model, metrics=None, device=None, non_blocking=Fals
     :type: torch.nn.Module
     :param metrics: map of metric names to Metrics.
     :type: Dict[str, ignite.metrics.Metric]]
-    :param device: device type specification. Applies to both model and batches (optional) (default: None).
+    :param device: (optional) (default: None) device type specification. Applies to both model and batches.
     :type: str
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
     :type: bool
-    :param prepare_batch: batch preparation logic. Takes a triplet batch, the device and the `non_blocking` option
-    and returns the triplet tensors: anchors, positives and negatives (optional).
+    :param prepare_batch: (optional) batch preparation logic. Takes a triplet batch, the device and the `non_blocking`
+    option and returns the triplet tensors: anchors, positives and negatives.
     :type: Callable[[List[List[torch.Tensor]], str, bool], Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]
     :param output_transform: (optional) function that receives the result of a triplet network evaluator engine (the
-    anchor, positive and negative embeddings) and returns the value to be assigned to engine's `state.output` after each
-    iteration, which must fit that expected by the metrics, typically all three embedding tensors.
+    anchor, positive and negative embeddings) and returns the value to be assigned to the engine's `state.output` after
+    each iteration, which must fit that expected by the metrics, typically all three embedding tensors.
     :type: Callable[[torch.Tensor, torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]
     :return: an evaluator engine with supervised inference function.
     :type: ignite.engine.Engine

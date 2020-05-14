@@ -46,9 +46,9 @@ def prepare_batch(batch, device=None, non_blocking=False):
     two parameters of each sample.
     :param batch: data to be sent to device.
     :type: List[torch.Tensor]
-    :param device: device type specification (optional) (default: None).
+    :param device: (optional) (default: None) device type specification.
     :type: str
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
     :type: bool
     :return: 2-tuple with batch elements and labels.
     :type: Tuple[torch.Tensor, torch.Tensor]
@@ -65,9 +65,9 @@ def prepare_batch_graph(batch, classes_dataframe, device=None, non_blocking=Fals
     :type: List[torch.Tensor]
     :param classes_dataframe: dataframe containing class names and their word vectors.
     :type: pandas.Dataframe
-    :param device: device type specification (optional) (default: None).
+    :param device: (optional) (default: None) device type specification.
     :type: str
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
     :type: bool
     :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`
     will be used.
@@ -87,9 +87,9 @@ def prepare_batch_siamese(batch, device=None, non_blocking=False):
     implementing the `SiameseMixin`.
     :param batch: data to be sent to device.
     :type: Tuple[List[torch.Tensor], List[torch.Tensor]]
-    :param device: device type specification (optional) (default: None).
+    :param device: (optional) (default: None) device type specification.
     :type: str
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
     :type: bool
     :return: 3-tuple with batches of siamese pairs and their target label.
     :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
@@ -105,12 +105,12 @@ def prepare_batch_multimodal(batch, device=None, non_blocking=False):
     `MultimodalDataset` subclass.
     :param batch: data to be sent to device.
     :type: List[List[torch.Tensor]]
-    :param device: device type specification (optional) (default: None).
+    :param device: (optional) (default: None) device type specification.
     :type: str
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
     :type: bool
     :return: tuple of length `n_modes` with multimodal batches.
-    :type: List[torch.Tensor]
+    :type: List[List[torch.Tensor]]
     """
     return [prepare_batch(images, device, non_blocking) for images in batch]
 
@@ -121,13 +121,13 @@ def prepare_batch_multimodal_siamese(batch, device=None, non_blocking=False):
     `MultimodalEntitySiameseDataset` subclass.
     :param batch: data to be sent to device.
     :type: Tuple[List[List[torch.Tensor]], List[List[torch.Tensor]]]
-    :param device: device type specification (optional) (default: None).
+    :param device: (optional) (default: None) device type specification.
     :type: str
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
     :type: bool
     :return: 3-tuple with multimodal batches for the siamese pairs and their siamese target tensor, which contains a
     `0` if a pair is similar (has the same class) or `1` otherwise.
-    :type: List[torch.Tensor]
+    :type: Tuple[List[List[torch.Tensor]], List[List[torch.Tensor]], torch.Tensor]
     """
     entities_0, entities_1 = batch
     assert torch.equal(entities_0[0][1], entities_0[1][1]) and torch.equal(entities_1[0][1], entities_1[1][1])

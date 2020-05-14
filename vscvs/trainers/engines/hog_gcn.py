@@ -26,15 +26,17 @@ def create_hog_gcn_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     :type: torch.optim.Optimizer
     :param loss_fn: the triplet loss
     :type: torch.nn.Module
-    :param device: device type specification (optional) (default: None).
+    :param device: (optional) (default: None) device type specification.
     :type: str
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
     :type: bool
-    :param prepare_batch: image batch preparation logic
-    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>>
-    :param output_transform: function that receives the result of the network trainer engine and returns value to
-    be assigned to engine's `state.output` after each iteration.
-    :type: Callable<args: `x`, `y`, `y_pred`, `loss`, ret: object>> (optional)
+    :param prepare_batch: (optional) batch preparation logic. Takes a batch, the device and the `non_blocking`
+    option and returns the batch elements and labels.
+    :type: Callable[[List[torch.Tensor]], str, bool], Tuple[torch.Tensor, torch.Tensor]]
+    :param output_transform: (optional) function that receives the result of a typical network trainer engine (the
+    input elements, labels, network outputs and the loss module) and returns value to be assigned to the engine's
+    `state.output` after each iteration, typically the loss value.
+    :type: Callable[[torch.Tensor, torch.Tensor, torch.Tensor, torch.nn.Module], float]
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
     """
@@ -65,15 +67,17 @@ def create_hog_gcn_evaluator(model, metrics=None, device=None, non_blocking=Fals
     :type: torch.nn.Module
     :param metrics: map of metric names to Metrics.
     :type: dict[str, ignite.metrics.Metric]
-    :param device: device type specification. Applies to both model and batches (optional) (default: None).
+    :param device: (optional) (default: None) device type specification. Applies to both model and batches.
     :type: str
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+    :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
     :type: bool
-    :param prepare_batch: image batch preparation logic
-    :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch_geometric.data.Data, torch.Tensor>>
-    :param output_transform: function that receives the result of the network trainer engine and returns value to
-    be assigned to engine's `state.output` after each iteration, which must fit that expected by the metrics.
-    :type: Callable<args: `x`, `y`, `y_pred` , ret: tuple<torch.Tensor, torch.Tensor>> (optional)
+    :param prepare_batch: (optional) batch preparation logic. Takes a batch, the device and the `non_blocking`
+    option and returns the batch elements and labels.
+    :type: Callable[[List[torch.Tensor]], str, bool], Tuple[torch.Tensor, torch.Tensor]]
+    :param output_transform: (optional) function that receives the result of the network evaluator engine (the input
+    elements, labels and network outputs) and returns value to be assigned to the engine's `state.output` after each
+    iteration, which must fit that expected by the metrics, typically the network output followed by the labels.
+    :type: Callable[[torch.Tensor, torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor]]
     :return: an evaluator engine with supervised inference function.
     :type: ignite.engine.Engine
     """

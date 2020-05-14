@@ -92,9 +92,9 @@ class HOGGCN(torch.nn.Module):
         two parameters of each sample.
         :param batch: data to be sent to device.
         :type: list
-        :param device: device type specification (optional) (default: None).
+        :param device: (optional) (default: None) device type specification.
         :type: str
-        :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+        :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.
         :type: bool
         """
         return prepare_batch_graph(batch, self.classes_dataframe, device, non_blocking, self.processes)

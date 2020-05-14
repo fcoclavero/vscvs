@@ -338,7 +338,7 @@ def create_multimodal_gan_evaluator(
 
 
 def create_multimodal_gan_siamese_evaluator(
-        generator, discriminator, metrics=None, device=None, non_blocking=False, prepare_batch=_prepare_batch,
+        generator, discriminator, metrics=None, device=None, non_blocking=False, prepare_batch=prepare_batch_siamese,
         output_transform=output_transform_evaluator_siamese,prepare_batch_variables=prepare_multimodal_batch_variables):
     """
     Factory function for creating an evaluator for a multimodal GAN with a contrastive loss term.

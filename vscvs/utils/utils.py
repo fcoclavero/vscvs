@@ -120,7 +120,7 @@ def get_subdirectories(path):
     :param path: the path who's child directories are to be returned
     :type: str
     :return: the paths of the child directories, relative to the given path
-    :type: list<str>
+    :type: List[str]
     """
     return next(os.walk(path))[1]
 
@@ -218,8 +218,8 @@ def str_to_bin_array(number, array_length=None):
     :type: int
     :param array_length: (optional) the length of the binary array to be created.
     :type: int
-    :return: the binary array representation of `number`
-    :type: list<int either 0 or 1>
+    :return: the binary array representation of `number`.
+    :type: List[int]
     """
     bin_str = '{0:b}'.format(number)
     bin_str = bin_str.zfill(array_length) if array_length else bin_str

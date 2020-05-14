@@ -20,9 +20,9 @@ class ResNextBase(nn.Module):
     def __init__(self, pretrained=False, progress=True, **kwargs):
         """
         :param pretrained: if True, uses a model pre-trained on ImageNet.
-        :type: boolean
+        :type: bool
         :param progress: if True, displays a progress bar of the download to stderr
-        :type: boolean
+        :type: bool
         :param kwargs: additional `resnext50_32x4d` keyword arguments
         :type: dict
         """

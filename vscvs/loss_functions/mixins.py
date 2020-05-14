@@ -29,8 +29,9 @@ class ReductionMixinMeta(type):
         Dictionary containing all the supported reductions and the reduction function that will be applied on the
         output tensor of a loss function containing the loss for each batch element. Implemented as a property to allow
         child mixins to extend the choices easily.
-        :return: the dictionary of reduction choices
-        :type: dict<str: Callable>
+        :return: the dictionary of reduction choices. The reduction functions take a tensor of batch losses and return
+        their reduction, which can be either a float or another tensor.
+        :type: Dict[str, Callable[[torch.Tensor], Union[float, torch.Tensor]]]
         """
         return cls._reductions
 
@@ -39,7 +40,7 @@ class ReductionMixinMeta(type):
         """
         List of the available reductions. These are the valid values for the `reduction` parameter in the constructor.
         :return: a list of the valid reductions.
-        :type: list<str>
+        :type: List[str]
         """
         return list(cls.reductions.keys())
 

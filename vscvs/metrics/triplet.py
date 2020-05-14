@@ -51,8 +51,8 @@ class AccuracyTriplets(Metric):
         """
         :override: updates the metric's state using the passed triplet batch output.
         :param output: the output of the engine's process function, using the triplet format: 3-tuple with the
-        triplet elements' embeddings.
-        :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+        triplet elements' embeddings: anchor, positive and negative.
+        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
         :raises ValueError: when loss function cannot be computed
         """
         anchor_embeddings, positive_embeddings, negative_embeddings = output
@@ -78,8 +78,8 @@ class LossTriplets(Loss):
         """
         :override: updates the metric's state using the passed triplet batch output.
         :param output: the output of the engine's process function, using the triplet format: 3-tuple with the
-        triplet elements' embeddings.
-        :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+        triplet elements' embeddings: anchor, positive and negative.
+        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
         :raises ValueError: when loss function cannot be computed
         """
         if len(output) == 3:
@@ -108,8 +108,8 @@ class AverageDistancesTriplets(AbstractAverageDistances):
         """
         :override: updates the metric's state using the passed triplet batch output.
         :param output: the output of the engine's process function, using the triplet format: 3-tuple with triplet
-        elements' embeddings.
-        :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor>
+        elements' embeddings: anchor, positive and negative.
+        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
         """
         anchor_embeddings, positive_embeddings, negative_embeddings = output
         batch_size = self._batch_size(anchor_embeddings)

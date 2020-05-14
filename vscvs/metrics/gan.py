@@ -23,10 +23,10 @@ class AbstractLossGAN(Metric, ABC):
         """
         :param args: Metric arguments
         :type: tuple
-        :param loss_fn: callable taking a GAN output and returns the average losses over all observations in the batch.
-        :type: Callable<args: ``, `positive_embeddings`, `negative_embeddings`, ret: tuple<float>>
-        :param batch_size: callable taking a target tensor returns the first dimension size (usually the batch size).
-        :type: Callable<args: 'tensor', ret: int>
+        :param loss_fn: callable that takes a GAN output and returns the average losses over all batch elements.
+        :type: Callable[[Tuple], float]
+        :param batch_size: callable that takes a target tensor and returns the first dimension size (`batch_size`).
+        :type: Callable[[torch.Tensor] int]
         :param kwargs: Metric keyword arguments
         :type: dict
         """
@@ -61,9 +61,9 @@ class LossMultimodalGAN(AbstractLossGAN):
     def update(self, output):
         """
         :override: updates the metric's state using the passed GAN batch output.
-        :param output: the output of the engine's process function, using the GAN format, which contains the element
-        embeddings in the first element by default.
-        :type: tuple<torch.Tensor, ...>
+        :param output: the output of the engine's process function, using the GAN format, which by default is a tuple
+        containing embeddings, mode_predictions, mode_labels, generator_labels, classes
+        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
         :raises ValueError: when loss function cannot be computed
         """
         if len(output) == 5:
@@ -93,10 +93,10 @@ class AverageDistancesMultimodalSiamesePairs(AverageDistancesSiamesePairs):
     def update(self, output):
         """
         :override: updates the metric's state using a multimodal siamese GAN batch output.
-        :param output: the output of the engine's process function, using the siamese format: 6-tuple with the
-        first pair elements' embeddings, the second pair elements' embeddings, the siamese targets, mode predictions,
-        mode labels, and generator labels.
-        :type: tuple<torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor>
+        :param output: the output of the engine's process function, using the multimodal siamese format: 6-tuple with
+        the first pair elements' embeddings, the second pair elements' embeddings, the siamese targets, mode
+        predictions, mode labels, and generator labels.
+        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
         """
         embeddings_0, embeddings_1, siamese_target, *_ = output
         super().update(embeddings_0, embeddings_1, siamese_target,)

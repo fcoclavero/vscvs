@@ -25,16 +25,16 @@ def create_siamese_trainer(model, optimizer, loss_fn, device=None, non_blocking=
     :param optimizer: the optimizer to be used for the siamese network
     :type: torch.optim.Optimizer
     :param loss_fn: contrastive loss function
-    :type: torch.nn loss function
-    :param device: device type specification
-    :type: str of torch.device (optional) (default: None)
+    :type: torch.nn.Module
+    :param device: device type specification (optional) (default: None).
+    :type: str
     :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
+    :type: bool
     :param prepare_batch: batch preparation logic
     :type: Callable<args: `batch`,`device`,`non_blocking`, ret: tuple<torch.Tensor,torch.Tensor,torch.Tensor>>
     (optional)
     :param output_transform: function that receives the result of a siamese network trainer engine and returns value to
-    be assigned to engine's state.output after each iteration.
+    be assigned to engine's `state.output` after each iteration.
     :type: Callable<args: `embeddings_0`, `embeddings_1`, `target`, `loss`, ret: object>> (optional)
     :return: a trainer engine with the update function
     :type: ignite.engine.Engine
@@ -63,15 +63,15 @@ def create_siamese_evaluator(model, metrics=None, device=None, non_blocking=Fals
     :param model: the model to train.
     :type: torch.nn.Module
     :param metrics: map of metric names to Metrics.
-    :type: dict<str:<ignite.metrics.Metric>>
-    :param device: device type specification. Applies to both model and batches.
-    :type: str of torch.device (optional) (default: None)
-    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously
-    :type: bool (optional)
+    :type: Dict[str, ignite.metrics.Metric]]
+    :param device: device type specification. Applies to both model and batches (optional) (default: None).
+    :type: str
+    :param non_blocking: if True and the copy is between CPU and GPU, the copy may run asynchronously (optional).
+    :type: bool
     :param prepare_batch: batch preparation logic
     :type: Callable<args: `batch`, `device`, `non_blocking`, ret: tuple<torch.Tensor, torch.Tensor>> (optional)
     :param output_transform: function that receives the result of a siamese network evaluator engine and returns the
-    value to be assigned to engine's state.output after each iteration, which must fit that expected by the metrics.
+    value to be assigned to engine's `state.output` after each iteration, which must fit that expected by the metrics.
     :type: Callable<args:`embeddings_0`, `embeddings_1`, `target`, ret: tuple<torch.Tensor, torch.Tensor, torch.Tensor>>
     (optional)
     :return: an evaluator engine with supervised inference function.

@@ -43,7 +43,7 @@ class GANOptimizerMixin:
         """
         :override: return the optimizers for the two adversarial models.
         :return: the optimizers for the generator and discriminator model modules.
-        :type: tuple<torch.optim.Optimizer, torch.optim.Optimizer>
+        :type: Tuple[torch.optim.Optimizer, torch.optim.Optimizer]
         """
         return self._optimizer(self.generator.parameters()), self._optimizer(self.discriminator.parameters())
 
@@ -70,7 +70,7 @@ class AdaBoundOptimizerMixin(OptimizerMixin):
         :type: float
         :param amsbound: whether to use the AMSGrad variant of this algorithm from the paper [Adaptive Gradient Methods
         with Dynamic Bound of Learning Rate]( https://openreview.net/forum?id=Bkg3g2R9FX)
-        :type: boolean
+        :type: bool
         :param kwargs: keyword arguments for additional mixins
         :type: dict
         """
@@ -104,7 +104,7 @@ class AdamOptimizerMixin(OptimizerMixin):
         :type: float
         :param amsgrad: whether to use the AMSGrad variant of this algorithm from the paper [On the Convergence of
         Adam and Beyond](https://openreview.net/forum?id=ryQu7f-RZ)
-        :type: boolean
+        :type: bool
         :param kwargs: keyword arguments for additional mixins
         :type: dict
         """
@@ -147,7 +147,7 @@ class RMSpropOptimizerMixin(OptimizerMixin):
         :param momentum: momentum factor.
         :type: float
         :param centered: whether to compute the centered RMSProp (gradient normalized by an estimation of its variance).
-        :type: boolean
+        :type: bool
         :param kwargs: keyword arguments for additional mixins
         :type: dict
         """

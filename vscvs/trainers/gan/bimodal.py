@@ -30,7 +30,7 @@ class AbstractBiModalGANTrainer(AbstractGANTrainer, ABC):
         :type: tuple
         :param mode_embedding_networks: the embedding networks for each mode. They will be used as generators for the
         generative adversarial formulation.
-        :type: list<torch.nn.Module>
+        :type: List[torch.nn.Module]
         :param loss_weight: manual rescaling weight given to the loss of each batch element. If given, has to be a
         Tensor of size `batch_size`.
         :type: torch.Tensor
@@ -89,8 +89,8 @@ class AbstractBiModalGANSiameseTrainer(AbstractBiModalGANTrainer, ABC):
         loss = LossMultimodalGAN(self.loss)
         return create_multimodal_gan_siamese_evaluator(
             *self.model, device=self.device, prepare_batch_variables=prepare_bimodal_batch_variables, metrics={
-                'average_positive_distance': average_distances[0], 'average_negative_distance': average_distances[1],
-                'generator_loss': loss[0], 'discriminator_loss': loss[1]})
+                'Average Distance/positive': average_distances[0], 'Average Distance/negative': average_distances[1],
+                'Loss/generator': loss[0], 'Loss/discriminator': loss[1]})
 
     @overrides
     def _create_trainer_engine(self):

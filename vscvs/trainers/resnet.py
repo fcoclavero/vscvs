@@ -29,9 +29,9 @@ class AbstractResNetTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
         :param args: Trainer arguments
         :type: tuple
         :param out_features: number of output features. If `None`, defaults to 1000.
-        :type: int or None
+        :type: int
         :param pretrained: if True, uses a model pre-trained on ImageNet.
-        :type: boolean
+        :type: bool
         :param kwargs: Trainer keyword arguments
         :type: dict
         """
@@ -57,13 +57,13 @@ class AbstractResNetTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     @staticmethod
     @overrides
     def _score_function(engine):
-        validation_loss = engine.state.metrics['loss']
+        validation_loss = engine.state.metrics['Loss']
         return -validation_loss
 
     @overrides
     def _create_evaluator_engine(self):
         return create_supervised_evaluator(
-            self.model, metrics={'accuracy': Accuracy(), 'loss': Loss(self.loss)}, device=self.device)
+            self.model, metrics={'Accuracy': Accuracy(), 'Loss': Loss(self.loss)}, device=self.device)
 
     @overrides
     def _create_trainer_engine(self):

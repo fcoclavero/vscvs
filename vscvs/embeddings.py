@@ -88,9 +88,9 @@ def get_top_k(query_embedding, queried_embeddings, k, distance):
     :type: int
     :param distance: which distance function to be used for nearest neighbor computation. Either 'cosine' or 'pairwise'
     :type: str, either 'cosine' or 'pairwise'
-    :return: the closest k embeddings in the `embeddings` tensor to the `query_embedding`. A tuple with a list of their
-    distances and indices are returned (respectively).
-    :type: tuple<torch.Tensor of shape [k], torch.Tensor of shape [k]>
+    :return: the closest k embeddings in the `embeddings` tensor to the `query_embedding`. A 2-tuple with shape `[k]`
+    tensor with their distances and indices are returned (respectively).
+    :type: Tuple[torch.Tensor, torch.Tensor]
     """
     p_dist = PairwiseDistance(p=2) if distance == 'pairwise' else CosineSimilarity()
     distances = p_dist(queried_embeddings, query_embedding)
@@ -200,7 +200,7 @@ def class_recall(queried_dataset, top_indices, query_image_class):
     :type: torch.utils.data.Dataset
     :param top_indices: a list with the indices, in the `queried_dataset`, of the most similar images to the
     query image.
-    :type: list<int>
+    :type: List[int]
     :param query_image_class: the class index (not name) of the query image.
     :type: int
     :return: the class recall, which corresponds to the percentage of the retrieved results (the given most similar
@@ -231,7 +231,7 @@ def average_class_recall_parallel(query_dataset, queried_dataset, query_embeddin
     :param n_gpu: number of available GPUs. If zero, the CPU will be used.
     :type: int
     :param processes: number of parallel workers to use. If `None`, then `os.cpu_count()` will be used.
-    :type: int or None
+    :type: int
     """
     device = get_device(n_gpu)
     query_embeddings, queried_embeddings = query_embeddings.to(device), queried_embeddings.to(device)

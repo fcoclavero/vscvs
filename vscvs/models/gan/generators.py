@@ -20,7 +20,7 @@ class MultimodalEncoder(nn.Module):
     def __init__(self, *mode_embedding_networks):
         """
         :param mode_embedding_networks: the embedding networks for each mode.
-        :type: list<torch.nn.Module>
+        :type: List[torch.nn.Module]
         """
         super().__init__()
         self.mode_embedding_networks = nn.ModuleList(mode_embedding_networks)
@@ -30,11 +30,12 @@ class MultimodalEncoder(nn.Module):
         """
         Perform a forward pass on the network which computes the embeddings for each mode by performing a forward pass
         on every embedding network with the corresponding input.
-        :param mode_inputs: list with the input for each of the mode embedding networks. The inputs of each mode must be
-        provided in the same mode order as the mode embedding networks were declared.
-        :type: list<torch.Tensor> with tensors of sizes compatible with each corresponding mode embedding network.
+        :param mode_inputs: list with the input for each of the mode embedding networks. The inputs tensors of each mode
+        must be provided in the same mode order as the mode embedding networks were declared, and must be have sizes
+        compatible with each corresponding mode embedding network.
+        :type: List[torch.Tensor]
         :return: the embeddings for every input
-        :type: list<torch.Tensor>
+        :type: List[torch.Tensor]
         """
         return [embedding_network(i) for embedding_network, i in zip(self.mode_embedding_networks, mode_inputs)]
 
@@ -57,11 +58,12 @@ class MultimodalEncoderShared(nn.Module):
         """
         Perform a forward pass on the network which computes the embeddings for each mode by performing a forward pass
         on every embedding network with the corresponding input.
-        :param mode_inputs: list with the input for each of the mode embedding networks. The inputs of each mode must be
-        provided in the same mode order as the mode embedding networks were declared.
-        :type: list<torch.Tensor> with tensors of sizes compatible with each corresponding mode embedding network.
+        :param mode_inputs: list with the input for each of the mode embedding networks. The inputs tensors of each mode
+        must be provided in the same mode order as the mode embedding networks were declared, and must be have sizes
+        compatible with each corresponding mode embedding network.
+        :type: List[torch.Tensor]
         :return: the embeddings for every input
-        :type: list<torch.Tensor>
+        :type: List[torch.Tensor]
         """
         return [self.embedding_network(i) for i in mode_inputs]
 
@@ -79,7 +81,7 @@ class MultimodalEncoderCombined(nn.Module):
         :param individual_embedding_networks: the embedding networks for each individual modes. They receive the input
         in the format of each node and produce an output embedding compatible with the input of the shared embedding
         network.
-        :type: list<torch.nn.Module>
+        :type: List[torch.nn.Module]
         """
         super().__init__()
         self.individual_embedding_network = MultimodalEncoder(*individual_embedding_networks)
@@ -89,10 +91,11 @@ class MultimodalEncoderCombined(nn.Module):
         """
         Perform a forward pass on the network which computes the embeddings for each mode by performing a forward pass
         on every embedding network with the corresponding input.
-        :param mode_inputs: list with the input for each of the mode embedding networks. The inputs of each mode must be
-        provided in the same mode order as the mode embedding networks were declared.
-        :type: list<torch.Tensor> with tensors of sizes compatible with each corresponding mode embedding network.
+        :param mode_inputs: list with the input for each of the mode embedding networks. The inputs tensors of each mode
+        must be provided in the same mode order as the mode embedding networks were declared, and must be have sizes
+        compatible with each corresponding mode embedding network.
+        :type: List[torch.Tensor]
         :return: the embeddings for every input
-        :type: list<torch.Tensor>
+        :type: :type: List[torch.Tensor]
         """
         return self.shared_embedding_network(self.individual_embedding_network(*mode_inputs))

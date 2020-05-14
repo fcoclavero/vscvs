@@ -13,6 +13,7 @@ import yaml
 
 from datetime import datetime
 
+from .tensorboard import tensorboard
 from vscvs.utils import get_checkpoint_directory, CHECKPOINT_NAME_FORMAT
 
 
@@ -20,6 +21,9 @@ from vscvs.utils import get_checkpoint_directory, CHECKPOINT_NAME_FORMAT
 def show():
     """ Image visualization. """
     pass
+
+
+show.add_command(tensorboard)
 
 
 @show.command()

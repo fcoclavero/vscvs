@@ -77,6 +77,19 @@ def get_checkpoint_directory(model_name, tag=None, date=datetime.now()):
     return os.path.join(ROOT_DIR, 'data', 'checkpoints', model_name, tag or '', date.strftime(CHECKPOINT_NAME_FORMAT))
 
 
+def get_image_directory(image_folder_name, tag=None):
+    """
+    Get the path where tensorboard images should be stored.
+    :param image_folder_name: the name of the image
+    :type: str
+    :param tag: optional tags organizing images.
+    :type: str
+    :return: the image path
+    :type: str
+    """
+    return os.path.join(ROOT_DIR, 'data', 'logs', 'images', image_folder_name, tag or '')
+
+
 def get_log_directory(model_name, tag=None, date=datetime.now()):
     """
     Get the path where model checkpoints should be stored.

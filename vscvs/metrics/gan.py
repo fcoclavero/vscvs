@@ -99,4 +99,4 @@ class AverageDistancesMultimodalSiamesePairs(AverageDistancesSiamesePairs):
         :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
         """
         embeddings_0, embeddings_1, siamese_target, *_ = output
-        super().update(embeddings_0, embeddings_1, siamese_target,)
+        super().update((embeddings_0, embeddings_1, siamese_target))

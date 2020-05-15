@@ -93,9 +93,9 @@ def get_image_directory(image_folder_name, tag=None):
 def get_log_directory(model_name, tag=None, date=datetime.now()):
     """
     Get the path where model checkpoints should be stored.
-    :param model_name: the name of the model
+    :param model_name: the name of the model.
     :type: str
-    :param tag: optional tag for model checkpoint and tensorboard logs
+    :param tag: optional tag for model checkpoint and tensorboard logs.
     :type: str
     :param date: the date string of the model checkpoint. Defaults to the current date.
     :type: str
@@ -108,9 +108,9 @@ def get_log_directory(model_name, tag=None, date=datetime.now()):
 def get_out_features_from_model(model):
     """
     Return the number of features from the last layer of a PyTorch model.
-    :param model: the model
+    :param model: the model.
     :type: torch.nn.Module
-    :return: the number of features of the last layer of `model`
+    :return: the number of features of the last layer of `model`.
     :type: int
     """
     return get_out_features_from_state_dict(model.state_dict())
@@ -119,9 +119,9 @@ def get_out_features_from_model(model):
 def get_out_features_from_state_dict(state_dict):
     """
     Return the number of features from the last layer of a state_dict.
-    :param state_dict: the state_dict of a PyTorch model
+    :param state_dict: the state_dict of a PyTorch model.
     :type: OrderedDict
-    :return: the number of features of the last layer of `state_dict`
+    :return: the number of features of the last layer of `state_dict`.
     :type: int
     """
     return next(reversed(state_dict.values())).shape[0] # OrderedDict guarantees last elem. in values list is last layer
@@ -130,9 +130,9 @@ def get_out_features_from_state_dict(state_dict):
 def get_subdirectories(path):
     """
     Get a list of all the child directories of the given path.
-    :param path: the path who's child directories are to be returned
+    :param path: the path who's child directories are to be returned.
     :type: str
-    :return: the paths of the child directories, relative to the given path
+    :return: the paths of the child directories, relative to the given path.
     :type: List[str]
     """
     return next(os.walk(path))[1]
@@ -204,8 +204,8 @@ def load_yaml(file_path):
 
 def recreate_directory(directory_path):
     """
-    Delete and recreate the directory at the given path to ensure an empty dir
-    :param directory_path: the path to the directory to be recreated
+    Delete and recreate the directory at the given path to ensure an empty directory.
+    :param directory_path: the path to the directory to be recreated.
     :type: str
     """
     shutil.rmtree(directory_path, ignore_errors=True)
@@ -215,9 +215,9 @@ def recreate_directory(directory_path):
 def remove_last_layer(model):
     """
     Remove the last layer from a PyTorch model. This is useful for creating image embeddings from a classifier network.
-    :param model: the PyTorch model to be modified
+    :param model: the PyTorch model to be modified.
     :type: torch.nn.module
-    :return: the modified network, without the last layer
+    :return: the modified network, without the last layer.
     :type: torch.nn.module
     """
     return torch.nn.Sequential(*(list(model.children())[:-1]))
@@ -227,7 +227,7 @@ def str_to_bin_array(number, array_length=None):
     """
     Creates a binary array for the given number. If a length is specified, then the returned array will have the same
     add leading zeros to match `array_length`.
-    :param number: the number to be represented as a binary array
+    :param number: the number to be represented as a binary array.
     :type: int
     :param array_length: (optional) the length of the binary array to be created.
     :type: int

@@ -46,19 +46,12 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     """
     device = get_device(n_gpu)
     model = model.eval().to(device)
-    # Load data
     dataset = get_dataset(dataset_name)
-    # Create the data_loader
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=workers)
-    # Delete and recreate the embedding directory to ensure we are working with an empty dir
-    embedding_directory = os.path.join('data', 'embeddings', embeddings_name)
-    recreate_directory(embedding_directory)
-    for i, data in tqdm(enumerate(data_loader, 0), total=len(data_loader), desc='Embedding data'):  # iterate batches
-        inputs, _ = data
-        inputs = inputs.to(device)
-        pickle.dump( # we pickle per file, as joining batches online results in massive RAM requirements
-            model(inputs).to('cpu'),  # embeddings are sent to CPU before pickling, as a GPU might not be available
-            open(os.path.join(embedding_directory, '{}.pickle'.format(i)), 'wb')) # when they are loaded
+    pickle_path = os.path.join('data', 'embeddings', '{}.pickle'.format(embeddings_name))
+    embedding_list = [model(data[0].to(device)).to('cpu') # model output sent to 'cpu' to prevent gpu memory overflow
+                      for data in tqdm(data_loader, total=len(data_loader), desc='Embedding data')]
+    pickle.dump(torch.cat(embedding_list), open(pickle_path, 'wb'))
 
 
 def load_embedding_pickles(embeddings_name):

@@ -31,7 +31,7 @@ def embeddings(embeddings_name, tags):
     writer = SummaryWriter(get_embedding_directory(embeddings_name, tags))
     writer.add_embedding(embeddings_tensor) # TODO: add metadata
     writer.close()
-    click.echo('Image added to Tensorboard: {}'.format(embeddings_name))
+    click.echo('Embeddings added to Tensorboard: {}'.format(embeddings_name))
 
 
 @tensorboard.command()

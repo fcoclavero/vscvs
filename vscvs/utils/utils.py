@@ -43,9 +43,9 @@ def camel_to_snake_case_dict_keys(dictionary):
 def get_device(n_gpu):
     """
     Returns the name of the PyTorch device to be used, based on the number of available gpus.
-    :param n_gpu: number of GPUs available. Use 0 for CPU mode
+    :param n_gpu: number of GPUs available. Use 0 for CPU mode.
     :type: int
-    :return: the name of the device to be used by PyTorch
+    :return: the name of the device to be used by PyTorch.
     :type: str
     """
     return torch.device('cuda:0' if (torch.cuda.is_available() and n_gpu > 0) else 'cpu')
@@ -67,7 +67,7 @@ def get_checkpoint_directory(model_name, tag=None, date=datetime.now()):
     Get the path where model checkpoints should be stored.
     :param model_name: the name of the model
     :type: str
-    :param tag: optional tag for model checkpoint and tensorboard logs
+    :param tag: optional tag for model checkpoint and tensorboard logs.
     :type: str
     :param date: the date string of the model checkpoint. Defaults to the current date.
     :type: str
@@ -77,17 +77,30 @@ def get_checkpoint_directory(model_name, tag=None, date=datetime.now()):
     return os.path.join(ROOT_DIR, 'data', 'checkpoints', model_name, tag or '', date.strftime(CHECKPOINT_NAME_FORMAT))
 
 
-def get_image_directory(image_folder_name, tag=None):
+def get_embedding_directory(embedding_folder_name, tags=None):
     """
-    Get the path where tensorboard images should be stored.
-    :param image_folder_name: the name of the image
+    Get the path where tensorboard embeddings should be stored.
+    :param embedding_folder_name: the name of the folder which will contain the embeddings.
     :type: str
-    :param tag: optional tags organizing images.
-    :type: str
+    :param tags: optional tags organizing embeddings.
+    :type: List[str]
     :return: the image path
     :type: str
     """
-    return os.path.join(ROOT_DIR, 'data', 'logs', 'images', image_folder_name, tag or '')
+    return os.path.join(ROOT_DIR, 'data', 'logs', 'embeddings', embedding_folder_name, *tags or '')
+
+
+def get_image_directory(image_folder_name, tags=None):
+    """
+    Get the path where tensorboard images should be stored.
+    :param image_folder_name: the name of the folder which will contain the images.
+    :type: str
+    :param tags: optional tags organizing images.
+    :type: List[str]
+    :return: the image path
+    :type: str
+    """
+    return os.path.join(ROOT_DIR, 'data', 'logs', 'images', image_folder_name, *tags or '')
 
 
 def get_log_directory(model_name, tag=None, date=datetime.now()):

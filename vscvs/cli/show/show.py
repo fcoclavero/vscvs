@@ -62,10 +62,9 @@ def sample_batch(dataset_name, batch_size, workers):
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be visualized.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
-@click.option('--embedding-directory-name', prompt='Embedding directory',
-              help='Static directory where embeddings will be saved.')
+@click.option('--embeddings-name', prompt='Embedding directory', help='Static directory where embeddings are saved.')
 @click.option('--load-projection', prompt='Load projection', help='Try to load pickled TSNE projections?', is_flag=True)
-def embedding_tsne(dataset_name, embedding_directory_name, load_projection):
-    click.echo('Display projection of the {} embeddings'.format(embedding_directory_name))
+def embedding_tsne(dataset_name, embeddings_name, load_projection):
+    click.echo('Display projection of the {} embeddings'.format(embeddings_name))
     from vscvs.visualization import plot_embedding_tsne
-    plot_embedding_tsne(dataset_name, embedding_directory_name, load_projection)
+    plot_embedding_tsne(dataset_name, embeddings_name, load_projection)

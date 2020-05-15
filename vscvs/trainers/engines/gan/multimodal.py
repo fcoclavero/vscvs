@@ -382,7 +382,6 @@ def create_multimodal_gan_siamese_evaluator(
             elements_0, elements_1, siamese_target = prepare_batch(batch, device=device, non_blocking=non_blocking)
             classes_0, mode_labels_0, generator_labels_0 = prepare_batch_variables(elements_0, device)
             classes_1, mode_labels_1, generator_labels_1 = prepare_batch_variables(elements_1, device)
-            generator.zero_grad()
             embedding_list_0 = generator(*[sub_batch[0] for sub_batch in elements_0])
             embedding_list_1 = generator(*[sub_batch[0] for sub_batch in elements_1])
             embeddings = torch.cat([*embedding_list_0, *embedding_list_1])

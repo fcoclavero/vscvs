@@ -18,6 +18,7 @@ from torch.nn import PairwiseDistance, CosineSimilarity
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from settings import ROOT_DIR
 from vscvs.datasets import get_dataset
 from vscvs.utils import get_device, recreate_directory
 from vscvs.decorators import log_time, torch_no_grad
@@ -69,7 +70,7 @@ def load_embedding_pickles(embeddings_name):
     contain pickled tensor objects with image embeddings.
     :type: torch.Tensor
     """
-    embedding_directory = os.path.join('data', 'embeddings', embeddings_name)
+    embedding_directory = os.path.join(ROOT_DIR, 'data', 'embeddings', embeddings_name)
     return torch.cat([
         pickle.load(open(os.path.join(embedding_directory, f), 'rb')) for f in
         tqdm(sorted(os.listdir(embedding_directory), key=len), desc='Loading {} embeddings'.format(embeddings_name))

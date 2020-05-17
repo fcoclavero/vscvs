@@ -19,8 +19,7 @@ from tqdm import tqdm
 
 from settings import CHECKPOINT_NAME_FORMAT
 from vscvs.datasets import get_dataset
-from vscvs.utils import get_device, get_checkpoint_directory, get_log_directory
-from vscvs.utils import dataset_split_successive
+from vscvs.utils import dataset_split_successive, get_checkpoint_directory, get_device, get_log_directory
 
 
 class AbstractTrainer(ABC):

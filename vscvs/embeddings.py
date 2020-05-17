@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 from settings import ROOT_DIR
 from vscvs.datasets import get_dataset
-from vscvs.utils import get_device, recreate_directory
+from vscvs.utils import get_device
 from vscvs.decorators import log_time, torch_no_grad
 from vscvs.visualization import plot_image_retrieval
 

@@ -14,7 +14,7 @@ import yaml
 from datetime import datetime
 
 from .tensorboard import tensorboard
-from vscvs.utils import get_checkpoint_directory, CHECKPOINT_NAME_FORMAT
+from vscvs.utils import CHECKPOINT_NAME_FORMAT, get_checkpoint_directory
 
 
 @click.group()

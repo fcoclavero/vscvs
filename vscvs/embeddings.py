@@ -7,7 +7,6 @@ __status__ = 'Prototype'
 
 
 import os
-import pickle
 import torch
 
 from functools import reduce
@@ -47,10 +46,9 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     model = model.eval().to(device)
     dataset = get_dataset(dataset_name)
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=workers)
-    pickle_path = get_path('embeddings', '{}.pickle'.format(embeddings_name))
     embedding_list = [model(data[0].to(device)).to('cpu') # model output sent to 'cpu' to prevent gpu memory overflow
                       for data in tqdm(data_loader, total=len(data_loader), desc='Embedding data')]
-    pickle.dump(torch.cat(embedding_list), open(pickle_path, 'wb'))
+    torch.save(torch.cat(embedding_list), open(get_path('embeddings', '{}.pt'.format(embeddings_name)), 'wb'))
 
 
 def load_embedding_pickles(embeddings_name):
@@ -58,15 +56,11 @@ def load_embedding_pickles(embeddings_name):
     Loads an embedding directory composed of pickled Tensors with image embeddings for a batch.
     :param embeddings_name: the name of the pickle directory where the embeddings are saved.
     :type: str
-    :return: a single Pytorch tensor with all the embeddings found in the provided embedding directory. The later must
+    :return: a Pytorch tensor with all the embeddings found in the provided embedding directory. The later must
     contain pickled tensor objects with image embeddings.
     :type: torch.Tensor
     """
-    embedding_directory = get_path('embeddings', embeddings_name)
-    return torch.cat([
-        pickle.load(open(os.path.join(embedding_directory, f), 'rb')) for f in
-        tqdm(sorted(os.listdir(embedding_directory), key=len), desc='Loading {} embeddings'.format(embeddings_name))
-        if 'tsne' not in f ]) # skip possible projection pickle in the embedding directory
+    torch.load(open(get_path('embeddings', '{}.pt'.format(embeddings_name)), 'rb'))
 
 
 def get_top_k(query_embedding, queried_embeddings, k, distance):

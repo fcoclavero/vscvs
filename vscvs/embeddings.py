@@ -18,10 +18,9 @@ from torch.nn import PairwiseDistance, CosineSimilarity
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from settings import ROOT_DIR
 from vscvs.datasets import get_dataset
-from vscvs.utils import get_device
 from vscvs.decorators import log_time, torch_no_grad
+from vscvs.utils import get_device, get_path
 from vscvs.visualization import plot_image_retrieval
 
 
@@ -48,7 +47,7 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     model = model.eval().to(device)
     dataset = get_dataset(dataset_name)
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=workers)
-    pickle_path = os.path.join('data', 'embeddings', '{}.pickle'.format(embeddings_name))
+    pickle_path = get_path('embeddings', '{}.pickle'.format(embeddings_name))
     embedding_list = [model(data[0].to(device)).to('cpu') # model output sent to 'cpu' to prevent gpu memory overflow
                       for data in tqdm(data_loader, total=len(data_loader), desc='Embedding data')]
     pickle.dump(torch.cat(embedding_list), open(pickle_path, 'wb'))
@@ -63,7 +62,7 @@ def load_embedding_pickles(embeddings_name):
     contain pickled tensor objects with image embeddings.
     :type: torch.Tensor
     """
-    embedding_directory = os.path.join(ROOT_DIR, 'data', 'embeddings', embeddings_name)
+    embedding_directory = get_path('embeddings', embeddings_name)
     return torch.cat([
         pickle.load(open(os.path.join(embedding_directory, f), 'rb')) for f in
         tqdm(sorted(os.listdir(embedding_directory), key=len), desc='Loading {} embeddings'.format(embeddings_name))

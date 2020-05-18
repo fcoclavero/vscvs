@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 from settings import CHECKPOINT_NAME_FORMAT
 from vscvs.datasets import get_dataset
-from vscvs.utils import dataset_split_successive, get_checkpoint_directory, get_device, get_log_directory
+from vscvs.utils import dataset_split_successive, get_checkpoint_path, get_device, get_log_directory
 
 
 class AbstractTrainer(ABC):
@@ -27,50 +27,50 @@ class AbstractTrainer(ABC):
     Abstract class with the boilerplate code needed to define and run an Ignite trainer Engine.
     """
     def __init__(self, *args, batch_size=0, dataset_name=None, drop_last=False, epochs=1, n_gpu=0, parameter_dict=None,
-                 resume_date=None, resume_checkpoint=None, tag=None, train_validation_split=.8, workers=6, **kwargs):
+                 resume_date=None, resume_checkpoint=None, tags=None, train_validation_split=.8, workers=6, **kwargs):
         """
-        :param args: mixin arguments
+        :param args: mixin arguments.
         :type: tuple
-        :param batch_size: batch size during training
+        :param batch_size: batch size during training.
         :type: int
-        :param dataset_name: the name of the Dataset to be used for training
+        :param dataset_name: the name of the Dataset to be used for training.
         :type: str
         :param drop_last: whether to drop the last batch if it is not the same size as `batch_size`.
         :type: bool
-        :param epochs: the number of epochs used for training
+        :param epochs: the number of epochs used for training.
         :type: int
-        :param n_gpu: number of GPUs available. Use 0 for CPU mode
+        :param n_gpu: number of GPUs available. Use 0 for CPU mode.
         :type: int
         :param parameter_dict: dictionary with important training parameters for logging.
         :type: dict
-        :param resume_date: date of the trainer state to be resumed. Dates must have this format: `%y-%m-%dT%H-%M`
+        :param resume_date: date of the trainer state to be resumed. Dates must have this format: `%y-%m-%dT%H-%M`.
         :type: str
         :param resume_checkpoint: name of the model checkpoint to be loaded.
         :type: str
-        :param tag: optional tag for model checkpoint and tensorboard logs
-        :type: int
+        :param tags: optional tags for model checkpoint and tensorboard logs organization.
+        :type: List[int]
         :param train_validation_split: proportion of the training set that will be used for actual
         training. The remaining data will be used as the validation set.
         :type: float
-        :param workers: number of workers for data_loader
+        :param workers: number of workers for data_loader.
         :type: int
-        :param kwargs: mixin keyword arguments
+        :param kwargs: mixin keyword arguments.
         :type: dict
         """
         date = datetime.now()
         self.batch_size = batch_size
-        self.checkpoint_directory = get_checkpoint_directory(self.trainer_id, tag=tag, date=date)
+        self.checkpoint_directory = get_checkpoint_path(self.trainer_id, *tags, date=date)
         self.dataset = get_dataset(dataset_name)
         self.dataset_name = dataset_name
         self.device = get_device(n_gpu)
         self.epochs = epochs
-        self.log_directory = get_log_directory(self.trainer_id, tag=tag, date=date)
+        self.log_directory = get_log_directory(self.trainer_id, *tags, date=date)
         self.model = self.initial_model
         self.parameter_dict = parameter_dict
         self.resume_date = datetime.strptime(resume_date, CHECKPOINT_NAME_FORMAT) if resume_date else resume_date
         self.resume_checkpoint = resume_checkpoint
         self.start_epoch = 1
-        self.tag = tag
+        self.tags = tags
         self._load_checkpoint()
         self.epoch = self.start_epoch
         self.step = 0
@@ -235,7 +235,7 @@ class AbstractTrainer(ABC):
             'resume_checkpoint': self.resume_checkpoint,
             'start_epoch': self.start_epoch,
             'epochs': self.epochs,
-            'tag': self.tag
+            'tags': self.tags
         }
 
     """ Event handler methods. """
@@ -379,7 +379,7 @@ class AbstractTrainer(ABC):
         if self.resume_date:
             try:
                 previous_checkpoint_directory = \
-                    get_checkpoint_directory(self.trainer_id, tag=self.tag, date=self.resume_date)
+                    get_checkpoint_path(self.trainer_id, *self.tags, date=self.resume_date)
             except FileNotFoundError:
                 raise FileNotFoundError('Checkpoint {} not found.'.format(self.resume_date))
             self._load_model_checkpoint(previous_checkpoint_directory)

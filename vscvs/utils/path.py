@@ -14,71 +14,46 @@ from datetime import datetime
 from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
 
 
-def get_cache_directory(cache_filename):
+def get_path(*paths):
     """
-    Get the path where a cache file should be stored.
-    :param cache_filename: the name of the cache file.
-    :type: str
-    :return: the model checkpoint path.
+    Get the path of a file or directory by joining the given path components. Project files will be stored under the
+    `data` subdirectory of the projects `ROOT_DIR`, which is set as an environment variable.
+    :param paths: path components.
+    :type: List[str]
+    :return: the actual path.
     :type: str
     """
-    return os.path.join(ROOT_DIR, 'data', 'cache', cache_filename)
+    return os.path.join(ROOT_DIR, 'data', *paths or '')
 
 
-def get_checkpoint_directory(model_name, tag=None, date=datetime.now()):
+def get_checkpoint_path(model_name, *tags, date=datetime.now()):
     """
     Get the path where model checkpoints should be stored.
     :param model_name: the name of the model
     :type: str
-    :param tag: optional tag for model checkpoint and tensorboard logs.
-    :type: str
+    :param tags: optional tags for model checkpoint and tensorboard logs.
+    :type: List[str]
     :param date: the date string of the model checkpoint. Defaults to the current date.
     :type: str
     :return: the model checkpoint path
     :type: str
     """
-    return os.path.join(ROOT_DIR, 'data', 'checkpoints', model_name, tag or '', date.strftime(CHECKPOINT_NAME_FORMAT))
+    return get_path('checkpoints', model_name, *tags, date.strftime(CHECKPOINT_NAME_FORMAT))
 
 
-def get_embedding_directory(embedding_folder_name, tags=None):
-    """
-    Get the path where tensorboard embeddings should be stored.
-    :param embedding_folder_name: the name of the folder which will contain the embeddings.
-    :type: str
-    :param tags: optional tags organizing embeddings.
-    :type: List[str]
-    :return: the image path
-    :type: str
-    """
-    return os.path.join(ROOT_DIR, 'data', 'logs', 'embeddings', embedding_folder_name, *tags or '')
-
-
-def get_image_directory(image_folder_name, tags=None):
-    """
-    Get the path where tensorboard images should be stored.
-    :param image_folder_name: the name of the folder which will contain the images.
-    :type: str
-    :param tags: optional tags organizing images.
-    :type: List[str]
-    :return: the image path
-    :type: str
-    """
-    return os.path.join(ROOT_DIR, 'data', 'logs', 'images', image_folder_name, *tags or '')
-
-
-def get_log_directory(model_name, tag=None, date=datetime.now()):
+def get_log_directory(model_name, *tags, date=datetime.now()):
     """
     Get the path where model checkpoints should be stored.
     :param model_name: the name of the model.
     :type: str
-    :param tag: optional tag for model checkpoint and tensorboard logs.
-    :type: str
+    :param tags: optional tags for model checkpoint and tensorboard logs.
+    :type: List[str]
     :param date: the date string of the model checkpoint. Defaults to the current date.
     :type: str
     :return: the model checkpoint path
     :type: str
     """
-    return os.path.join(ROOT_DIR, 'data', 'logs', model_name, tag or '', date.strftime(CHECKPOINT_NAME_FORMAT))
+    return get_path('tensorboard', model_name, *tags, date.strftime(CHECKPOINT_NAME_FORMAT))
 
 
 def get_subdirectories(path):

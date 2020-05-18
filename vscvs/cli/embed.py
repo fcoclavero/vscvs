@@ -44,12 +44,12 @@ def hog(dataset_name, embeddings_name, batch_size, workers, n_gpu, in_channels, 
 @pass_context_to_kwargs
 @click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
 @click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint to be loaded.')
-@click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
+@click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
 def cnn(dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
     """ Create image embeddings with the CNN model. """
     click.echo('CNN embeddings for {} dataset'.format(dataset_name))
     from vscvs.models import CNN
-    model = load_classification_model_from_checkpoint(CNN, checkpoint, date, tag)
+    model = load_classification_model_from_checkpoint(CNN, checkpoint, date, *tag)
     model = remove_last_layer(model)
     create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
@@ -58,12 +58,12 @@ def cnn(dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpo
 @pass_context_to_kwargs
 @click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
 @click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint to be loaded.')
-@click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
+@click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
 def resnet(dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
     """ Create image embeddings with the ResNet model. """
     click.echo('ResNet embeddings for {} dataset'.format(dataset_name))
     from vscvs.models import ResNet
-    model = load_classification_model_from_checkpoint(ResNet, checkpoint, date, tag)
+    model = load_classification_model_from_checkpoint(ResNet, checkpoint, date, *tag)
     create_embeddings(model.base, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
 
@@ -71,10 +71,10 @@ def resnet(dataset_name, embeddings_name, batch_size, workers, n_gpu, date, chec
 @pass_context_to_kwargs
 @click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
 @click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint to be loaded.')
-@click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
+@click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
 def resnext(dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
     """ Create image embeddings with the ResNext model. """
     from vscvs.models import ResNext
     click.echo('ResNext embeddings for {} dataset'.format(dataset_name))
-    model = load_classification_model_from_checkpoint(ResNext, checkpoint, date, tag)
+    model = load_classification_model_from_checkpoint(ResNext, checkpoint, date, *tag)
     create_embeddings(model.base, dataset_name, embeddings_name, batch_size, workers, n_gpu)

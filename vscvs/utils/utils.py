@@ -14,7 +14,7 @@ import yaml
 from datetime import datetime
 from torch import nn as nn
 
-from .path import get_checkpoint_directory
+from .path import get_checkpoint_path
 from settings import CHECKPOINT_NAME_FORMAT
 
 
@@ -103,7 +103,7 @@ def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2,
         nn.init.constant_(model.bias.data, batch_norm_bias)
 
 
-def load_classification_model_from_checkpoint(model, checkpoint_name, date_string, tag):
+def load_classification_model_from_checkpoint(model, checkpoint_name, date_string, *tags):
     """
     Load a classification model from its state dictionary.
     :param model: the model to be loaded.
@@ -112,13 +112,13 @@ def load_classification_model_from_checkpoint(model, checkpoint_name, date_strin
     :type: str
     :param date_string: the checkpoint date in string format.
     :type: str
-    :param tag: the checkpoint tag, or subdirectory.
-    :type: str
+    :param tags: the checkpoint tags (subdirectories).
+    :type: List[str]
     :return: the mode, loaded with the state dictionary at the specified checkpoint.
     :type: torch.nn.Module
     """
     date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
-    checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
+    checkpoint_directory = get_checkpoint_path('ResNext', *tags, date=date)
     state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint_name)))
     out_features = get_out_features_from_state_dict(state_dict)
     model = model(out_features=out_features)

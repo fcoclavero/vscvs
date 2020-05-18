@@ -14,7 +14,7 @@ import yaml
 from datetime import datetime
 
 from .tensorboard import tensorboard
-from vscvs.utils import CHECKPOINT_NAME_FORMAT, get_checkpoint_directory
+from vscvs.utils import CHECKPOINT_NAME_FORMAT, get_checkpoint_path
 
 
 @click.group()
@@ -28,12 +28,12 @@ show.add_command(tensorboard)
 
 @show.command()
 @click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
-@click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
+@click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
 def checkpoint(date, tag):
     """ Show the contents of the specified trainer checkpoint. """
     date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
     click.echo('Show the {} checkpoint'.format(date))
-    checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
+    checkpoint_directory = get_checkpoint_path('ResNext', *tag, date=date)
     trainer_checkpoint = torch.load(os.path.join(checkpoint_directory, 'trainer.pth'))
     print(yaml.dump(trainer_checkpoint, allow_unicode=True, default_flow_style=False)) # yaml dump for pretty printing
 

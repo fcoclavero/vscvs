@@ -28,8 +28,8 @@ from vscvs.visualization import plot_image_retrieval
 @torch_no_grad
 def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu):
     """
-    Creates embedding vectors for each element in the given DataSet by batches, and saves each batch as a pickle
-    file in the given directory name (which will be a subdirectory of the data directory).
+    Creates embedding vectors for each element in the given DataSet, and saves a single Pytorch tensor of shape
+    `len(dataset), embeddings_size` with all the embeddings in a file with the given name.
     :param model: name of the model to be used for embedding the DataSet.
     :type: torch.nn.Module
     :param dataset_name: name of the registered dataset which will be embedded.

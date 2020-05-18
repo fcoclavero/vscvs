@@ -34,7 +34,7 @@ def checkpoint(date, tag):
     date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
     click.echo('Show the {} checkpoint'.format(date))
     checkpoint_directory = get_checkpoint_path('ResNext', *tag, date=date)
-    trainer_checkpoint = torch.load(os.path.join(checkpoint_directory, 'trainer.pth'))
+    trainer_checkpoint = torch.load(os.path.join(checkpoint_directory, 'trainer.pt'))
     print(yaml.dump(trainer_checkpoint, allow_unicode=True, default_flow_style=False)) # yaml dump for pretty printing
 
 

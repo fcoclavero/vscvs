@@ -119,7 +119,7 @@ def load_classification_model_from_checkpoint(model, checkpoint_name, date_strin
     """
     date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
     checkpoint_directory = get_checkpoint_path('ResNext', *tags, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint_name)))
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pt'.format(checkpoint_name)))
     out_features = get_out_features_from_state_dict(state_dict)
     model = model(out_features=out_features)
     model.load_state_dict(state_dict)

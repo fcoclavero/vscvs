@@ -88,7 +88,7 @@ class AbstractGANTrainer(GANOptimizerMixin, AbstractTrainer, ABC):
         :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        state_dicts = torch.load(os.path.join(previous_checkpoint_directory, '{}.pth'.format(self.resume_checkpoint)))
+        state_dicts = torch.load(os.path.join(previous_checkpoint_directory, '{}.pt'.format(self.resume_checkpoint)))
         self.generator.load_state_dict(state_dicts['generator'])
         self.discriminator.load_state_dict(state_dicts['discriminator'])
 

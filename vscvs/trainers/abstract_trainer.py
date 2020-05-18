@@ -307,7 +307,7 @@ class AbstractTrainer(ABC):
         """
         Create the serialized checkpoint dictionary for the current trainer state, and save it.
         """
-        torch.save(self.trainer_checkpoint, os.path.join(self.checkpoint_directory, 'trainer.pth'))
+        torch.save(self.trainer_checkpoint, os.path.join(self.checkpoint_directory, 'trainer.pt'))
 
     """ Methods. """
 
@@ -392,7 +392,7 @@ class AbstractTrainer(ABC):
         :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        state_dict = torch.load(os.path.join(previous_checkpoint_directory, '{}.pth'.format(self.resume_checkpoint)))
+        state_dict = torch.load(os.path.join(previous_checkpoint_directory, '{}.pt'.format(self.resume_checkpoint)))
         self.model.load_state_dict(state_dict)
 
     def _load_trainer_checkpoint(self, previous_checkpoint_directory):
@@ -401,7 +401,7 @@ class AbstractTrainer(ABC):
         :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        previous_trainer_checkpoint = torch.load(os.path.join(previous_checkpoint_directory, 'trainer.pth'))
+        previous_trainer_checkpoint = torch.load(os.path.join(previous_checkpoint_directory, 'trainer.pt'))
         self.start_epoch = previous_trainer_checkpoint['start_epoch'] + previous_trainer_checkpoint['epochs']
 
     def run(self):

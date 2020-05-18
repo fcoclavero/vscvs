@@ -58,6 +58,6 @@ def cnn(query_image_file_path, query_dataset_name, queried_dataset_name, queried
         k, n_gpu, checkpoint, epoch):
     """ Image retrieval for the CNN model. """
     checkpoint_directory = get_path('checkpoints', 'cnn', checkpoint) # Load the model checkpoint
-    net = torch.load(os.path.join(checkpoint_directory, '_net_{}.pth'.format(epoch)))
+    net = torch.load(os.path.join(checkpoint_directory, '_net_{}.pt'.format(epoch)))
     retrieve_top_k(net.embedding_network, query_image_file_path, query_dataset_name, queried_dataset_name,
                    queried_embeddings_name, k, n_gpu)

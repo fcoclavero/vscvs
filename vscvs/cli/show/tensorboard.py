@@ -12,7 +12,7 @@ import os
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms
 
-from vscvs.embeddings import load_embedding_pickles
+from vscvs.embeddings import load_embeddings
 from vscvs.utils import get_path
 
 
@@ -27,7 +27,7 @@ def tensorboard():
 @click.option('-t', '--tag', help='Optional tags for organizing embeddings.', multiple=True)
 def embeddings(embeddings_name, tags):
     """ Add the embeddings in the given path to Tensorboard. """
-    embeddings_tensor = load_embedding_pickles(embeddings_name)
+    embeddings_tensor = load_embeddings(embeddings_name)
     writer = SummaryWriter(get_path('tensorboard', 'embeddings', *tags, embeddings_name))
     writer.add_embedding(embeddings_tensor) # TODO: add metadata
     writer.close()

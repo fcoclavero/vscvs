@@ -13,7 +13,7 @@ from torch.utils.data import Subset
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from vscvs.datasets import get_dataset
 from vscvs.utils import random_simple_split
-from vscvs.embeddings import average_class_recall, average_class_recall_parallel, load_embedding_pickles
+from vscvs.embeddings import average_class_recall, average_class_recall_parallel, load_embeddings
 
 
 @click.group()
@@ -44,7 +44,7 @@ def same_class(dataset_name, embeddings_name, test_split, k, distance, n_gpu):
     """ Image recall of same class elements. """
     click.echo('Calculating class recall@{} for {} embeddings'.format(k, embeddings_name))
     dataset = get_dataset(dataset_name)
-    embeddings = load_embedding_pickles(embeddings_name)
+    embeddings = load_embeddings(embeddings_name)
     query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(embeddings, test_split)
     query_dataset, queried_dataset = Subset(dataset, query_indices), Subset(dataset, queried_indices)
     average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu)
@@ -86,7 +86,7 @@ def same_class(query_dataset_name, queried_dataset_name, query_embeddings_name, 
     click.echo('Calculating cross modal class recall@{} for the {} and {} embeddings'.format(
         k, query_embeddings_name, queried_embeddings_name))
     query_dataset, queried_dataset = get_dataset(query_dataset_name), get_dataset(queried_dataset_name)
-    query_embeddings = load_embedding_pickles(query_embeddings_name)
-    queried_embeddings = load_embedding_pickles(queried_embeddings_name)
+    query_embeddings = load_embeddings(query_embeddings_name)
+    queried_embeddings = load_embeddings(queried_embeddings_name)
     average_class_recall_parallel(
         query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu, processes)

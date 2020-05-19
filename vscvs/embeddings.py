@@ -51,7 +51,7 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     torch.save(torch.cat(embedding_list), open(get_path('embeddings', '{}.pt'.format(embeddings_name)), 'wb'))
 
 
-def load_embedding_pickles(embeddings_name):
+def load_embeddings(embeddings_name):
     """
     Loads an embedding directory composed of pickled Tensors with image embeddings for a batch.
     :param embeddings_name: the name of the pickle directory where the embeddings are saved.
@@ -133,7 +133,7 @@ def retrieve_top_k(model, query_image_filename, query_dataset_name, queried_data
     query_dataset = get_dataset(query_dataset_name)
     queried_dataset = get_dataset(queried_dataset_name)
     # Load embeddings from pickle directory
-    queried_embeddings = load_embedding_pickles(queried_embeddings_name).to(device)
+    queried_embeddings = load_embeddings(queried_embeddings_name).to(device)
     # Get the query image and create the embedding for it
     image, image_class = query_dataset[query_image_filename]
     # Send elements to the specified device

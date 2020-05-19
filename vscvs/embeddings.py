@@ -6,7 +6,6 @@ __status__ = 'Prototype'
 """ Utilities for handling image embeddings. """
 
 
-import os
 import torch
 
 from functools import reduce
@@ -202,7 +201,10 @@ def class_recall(queried_dataset, top_indices, query_image_class):
 def average_class_recall_parallel(query_dataset, queried_dataset, query_embeddings, queried_embeddings,
                                   k, distance='cosine', n_gpu=0, processes=None):
     """
-    Parallel
+    Query the embeddings for a dataset with the given image. The image is embedded with the given model. Pairwise
+    distances to the query image are computed for each embedding in the dataset, so the embeddings created by `model`
+    must have the same length as the ones in the embedding directory. The `k` most similar images are displayed.
+    Computed in parallel.
     :param query_dataset: the dataset to which the query image belongs.
     :type: torch.utils.data.Dataset
     :param queried_dataset: the dataset to be queried. It must have the exact same classes as the query dataset.

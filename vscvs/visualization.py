@@ -20,8 +20,8 @@ from sklearn.manifold import TSNE
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from settings import ROOT_DIR
 from vscvs.datasets import get_dataset
+from vscvs.utils import get_path
 
 
 def display_sample_batch(dataset_name, batch_size, workers):
@@ -110,10 +110,10 @@ def plot_embedding_tsne(dataset_name, embeddings_name, load_projection=False):
     :param load_projection: load projections from pickles.
     :type: bool
     """
-    from vscvs.embeddings import load_embedding_pickles # import here to avoid circular import
+    from vscvs.embeddings import load_embeddings # import here to avoid circular import
     dataset = get_dataset(dataset_name)
-    embeddings = load_embedding_pickles(embeddings_name).to('cpu')
-    projection_pickle_dir = os.path.join(ROOT_DIR, 'data', 'embeddings', embeddings_name)
+    embeddings = load_embeddings(embeddings_name).to('cpu')
+    projection_pickle_dir = get_path('embeddings', embeddings_name)
     if load_projection:
         click.echo('Loading existing 2D projection from pickle.')
         projection = pickle.load(open(os.path.join(projection_pickle_dir, 'tsne.pickle'), 'rb'))

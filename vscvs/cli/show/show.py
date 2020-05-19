@@ -14,7 +14,7 @@ import yaml
 from datetime import datetime
 
 from .tensorboard import tensorboard
-from vscvs.utils import get_checkpoint_directory, CHECKPOINT_NAME_FORMAT
+from vscvs.utils import CHECKPOINT_NAME_FORMAT, get_checkpoint_path
 
 
 @click.group()
@@ -28,13 +28,13 @@ show.add_command(tensorboard)
 
 @show.command()
 @click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
-@click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
+@click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
 def checkpoint(date, tag):
     """ Show the contents of the specified trainer checkpoint. """
     date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
     click.echo('Show the {} checkpoint'.format(date))
-    checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
-    trainer_checkpoint = torch.load(os.path.join(checkpoint_directory, 'trainer.pth'))
+    checkpoint_directory = get_checkpoint_path('ResNext', *tag, date=date)
+    trainer_checkpoint = torch.load(os.path.join(checkpoint_directory, 'trainer.pt'))
     print(yaml.dump(trainer_checkpoint, allow_unicode=True, default_flow_style=False)) # yaml dump for pretty printing
 
 
@@ -62,10 +62,9 @@ def sample_batch(dataset_name, batch_size, workers):
 @click.option(
     '--dataset-name', prompt='Dataset name', help='The name of the dataset to be visualized.',
     type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
-@click.option('--embedding-directory-name', prompt='Embedding directory',
-              help='Static directory where embeddings will be saved.')
+@click.option('--embeddings-name', prompt='Embedding directory', help='Static directory where embeddings are saved.')
 @click.option('--load-projection', prompt='Load projection', help='Try to load pickled TSNE projections?', is_flag=True)
-def embedding_tsne(dataset_name, embedding_directory_name, load_projection):
-    click.echo('Display projection of the {} embeddings'.format(embedding_directory_name))
+def embedding_tsne(dataset_name, embeddings_name, load_projection):
+    click.echo('Display projection of the {} embeddings'.format(embeddings_name))
     from vscvs.visualization import plot_embedding_tsne
-    plot_embedding_tsne(dataset_name, embedding_directory_name, load_projection)
+    plot_embedding_tsne(dataset_name, embeddings_name, load_projection)

@@ -7,7 +7,6 @@ __status__ = 'Prototype'
 
 
 import os
-import pickle
 import torch
 
 from functools import reduce
@@ -18,10 +17,9 @@ from torch.nn import PairwiseDistance, CosineSimilarity
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from settings import ROOT_DIR
 from vscvs.datasets import get_dataset
-from vscvs.utils import get_device, recreate_directory
 from vscvs.decorators import log_time, torch_no_grad
+from vscvs.utils import get_device, get_path
 from vscvs.visualization import plot_image_retrieval
 
 
@@ -29,8 +27,8 @@ from vscvs.visualization import plot_image_retrieval
 @torch_no_grad
 def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu):
     """
-    Creates embedding vectors for each element in the given DataSet by batches, and saves each batch as a pickle
-    file in the given directory name (which will be a subdirectory of the data directory).
+    Creates embedding vectors for each element in the given DataSet, and saves a single Pytorch tensor of shape
+    `len(dataset), embeddings_size` with all the embeddings in a file with the given name.
     :param model: name of the model to be used for embedding the DataSet.
     :type: torch.nn.Module
     :param dataset_name: name of the registered dataset which will be embedded.
@@ -46,35 +44,23 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     """
     device = get_device(n_gpu)
     model = model.eval().to(device)
-    # Load data
     dataset = get_dataset(dataset_name)
-    # Create the data_loader
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=workers)
-    # Delete and recreate the embedding directory to ensure we are working with an empty dir
-    embedding_directory = os.path.join('data', 'embeddings', embeddings_name)
-    recreate_directory(embedding_directory)
-    for i, data in tqdm(enumerate(data_loader, 0), total=len(data_loader), desc='Embedding data'):  # iterate batches
-        inputs, _ = data
-        inputs = inputs.to(device)
-        pickle.dump( # we pickle per file, as joining batches online results in massive RAM requirements
-            model(inputs).to('cpu'),  # embeddings are sent to CPU before pickling, as a GPU might not be available
-            open(os.path.join(embedding_directory, '{}.pickle'.format(i)), 'wb')) # when they are loaded
+    embedding_list = [model(data[0].to(device)).to('cpu') # model output sent to 'cpu' to prevent gpu memory overflow
+                      for data in tqdm(data_loader, total=len(data_loader), desc='Embedding data')]
+    torch.save(torch.cat(embedding_list), open(get_path('embeddings', '{}.pt'.format(embeddings_name)), 'wb'))
 
 
-def load_embedding_pickles(embeddings_name):
+def load_embeddings(embeddings_name):
     """
     Loads an embedding directory composed of pickled Tensors with image embeddings for a batch.
     :param embeddings_name: the name of the pickle directory where the embeddings are saved.
     :type: str
-    :return: a single Pytorch tensor with all the embeddings found in the provided embedding directory. The later must
+    :return: a Pytorch tensor with all the embeddings found in the provided embedding directory. The later must
     contain pickled tensor objects with image embeddings.
     :type: torch.Tensor
     """
-    embedding_directory = os.path.join(ROOT_DIR, 'data', 'embeddings', embeddings_name)
-    return torch.cat([
-        pickle.load(open(os.path.join(embedding_directory, f), 'rb')) for f in
-        tqdm(sorted(os.listdir(embedding_directory), key=len), desc='Loading {} embeddings'.format(embeddings_name))
-        if 'tsne' not in f ]) # skip possible projection pickle in the embedding directory
+    torch.load(open(get_path('embeddings', '{}.pt'.format(embeddings_name)), 'rb'))
 
 
 def get_top_k(query_embedding, queried_embeddings, k, distance):
@@ -147,7 +133,7 @@ def retrieve_top_k(model, query_image_filename, query_dataset_name, queried_data
     query_dataset = get_dataset(query_dataset_name)
     queried_dataset = get_dataset(queried_dataset_name)
     # Load embeddings from pickle directory
-    queried_embeddings = load_embedding_pickles(queried_embeddings_name).to(device)
+    queried_embeddings = load_embeddings(queried_embeddings_name).to(device)
     # Get the query image and create the embedding for it
     image, image_class = query_dataset[query_image_filename]
     # Send elements to the specified device

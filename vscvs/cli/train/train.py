@@ -105,11 +105,11 @@ def hog_gcn(*args, **kwargs):
 @click.option('--epochs', prompt='Number of epochs', help='The number of training epochs.', type=int)
 @click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
 @click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
-@click.option('--tag', help='Optional tag for model checkpoint and tensorboard logs.')
+@click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
 @pass_kwargs_to_context
-def train(*_, **__):
+def train(context, *_, **__):
     """ Model training. """
-    pass
+    context.obj['tags'] = context.obj.pop('tag')
 
 
 """ Add trainer commands to each optimizer trainer group, then add the optimizer groups to the global `train` group. """

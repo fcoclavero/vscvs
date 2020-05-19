@@ -21,7 +21,7 @@ from torchvision.datasets import DatasetFolder
 from tqdm import tqdm
 from typing import Callable, Dict, List, Tuple
 
-from vscvs.utils import get_cache_directory, str_to_bin_array
+from vscvs.utils import get_path, str_to_bin_array
 
 
 """ Type hinting utility mixin classes. """
@@ -253,7 +253,7 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         :return: the file path of the cache file.
         :type: str
         """
-        return get_cache_directory(self.cache_filename)
+        return get_path('cache', self.cache_filename)
 
     @property
     def cache_filename(self):

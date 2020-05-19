@@ -10,9 +10,9 @@ import click
 import os
 import torch
 
-from settings import ROOT_DIR
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from vscvs.embeddings import retrieve_top_k
+from vscvs.utils import get_path
 
 
 @click.group()
@@ -57,7 +57,7 @@ def hog(query_image_file_path, query_dataset_name, queried_dataset_name, queried
 def cnn(query_image_file_path, query_dataset_name, queried_dataset_name, queried_embeddings_name,
         k, n_gpu, checkpoint, epoch):
     """ Image retrieval for the CNN model. """
-    checkpoint_directory = os.path.join(ROOT_DIR, 'data', 'checkpoints', 'cnn', checkpoint) # Load the model checkpoint
-    net = torch.load(os.path.join(checkpoint_directory, '_net_{}.pth'.format(epoch)))
+    checkpoint_directory = get_path('checkpoints', 'cnn', checkpoint) # Load the model checkpoint
+    net = torch.load(os.path.join(checkpoint_directory, '_net_{}.pt'.format(epoch)))
     retrieve_top_k(net.embedding_network, query_image_file_path, query_dataset_name, queried_dataset_name,
                    queried_embeddings_name, k, n_gpu)

@@ -117,7 +117,7 @@ venv.bak/
 data/cache/*
 data/pickles/*
 data/embeddings/*
-data/logs/*
+data/tensorboard/*
 data/checkpoints/*
 data/Cora
 

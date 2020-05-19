@@ -8,14 +8,14 @@ __status__ = 'Prototype'
 
 import os
 import re
-import shutil
 import torch
 import yaml
 
 from datetime import datetime
 from torch import nn as nn
 
-from settings import CHECKPOINT_NAME_FORMAT, ROOT_DIR
+from .path import get_checkpoint_path
+from settings import CHECKPOINT_NAME_FORMAT
 
 
 def camel_to_snake_case(camel_cased_string):
@@ -43,66 +43,12 @@ def camel_to_snake_case_dict_keys(dictionary):
 def get_device(n_gpu):
     """
     Returns the name of the PyTorch device to be used, based on the number of available gpus.
-    :param n_gpu: number of GPUs available. Use 0 for CPU mode
+    :param n_gpu: number of GPUs available. Use 0 for CPU mode.
     :type: int
-    :return: the name of the device to be used by PyTorch
+    :return: the name of the device to be used by PyTorch.
     :type: str
     """
     return torch.device('cuda:0' if (torch.cuda.is_available() and n_gpu > 0) else 'cpu')
-
-
-def get_cache_directory(cache_filename):
-    """
-    Get the path where a cache file should be stored.
-    :param cache_filename: the name of the cache file.
-    :type: str
-    :return: the model checkpoint path.
-    :type: str
-    """
-    return os.path.join(ROOT_DIR, 'data', 'cache', cache_filename)
-
-
-def get_checkpoint_directory(model_name, tag=None, date=datetime.now()):
-    """
-    Get the path where model checkpoints should be stored.
-    :param model_name: the name of the model
-    :type: str
-    :param tag: optional tag for model checkpoint and tensorboard logs
-    :type: str
-    :param date: the date string of the model checkpoint. Defaults to the current date.
-    :type: str
-    :return: the model checkpoint path
-    :type: str
-    """
-    return os.path.join(ROOT_DIR, 'data', 'checkpoints', model_name, tag or '', date.strftime(CHECKPOINT_NAME_FORMAT))
-
-
-def get_image_directory(image_folder_name, tag=None):
-    """
-    Get the path where tensorboard images should be stored.
-    :param image_folder_name: the name of the image
-    :type: str
-    :param tag: optional tags organizing images.
-    :type: str
-    :return: the image path
-    :type: str
-    """
-    return os.path.join(ROOT_DIR, 'data', 'logs', 'images', image_folder_name, tag or '')
-
-
-def get_log_directory(model_name, tag=None, date=datetime.now()):
-    """
-    Get the path where model checkpoints should be stored.
-    :param model_name: the name of the model.
-    :type: str
-    :param tag: optional tag for model checkpoint and tensorboard logs.
-    :type: str
-    :param date: the date string of the model checkpoint. Defaults to the current date.
-    :type: str
-    :return: the model checkpoint path
-    :type: str
-    """
-    return os.path.join(ROOT_DIR, 'data', 'logs', model_name, tag or '', date.strftime(CHECKPOINT_NAME_FORMAT))
 
 
 def get_out_features_from_model(model):
@@ -125,17 +71,6 @@ def get_out_features_from_state_dict(state_dict):
     :type: int
     """
     return next(reversed(state_dict.values())).shape[0] # OrderedDict guarantees last elem. in values list is last layer
-
-
-def get_subdirectories(path):
-    """
-    Get a list of all the child directories of the given path.
-    :param path: the path who's child directories are to be returned.
-    :type: str
-    :return: the paths of the child directories, relative to the given path.
-    :type: List[str]
-    """
-    return next(os.walk(path))[1]
 
 
 def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2,
@@ -168,7 +103,7 @@ def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2,
         nn.init.constant_(model.bias.data, batch_norm_bias)
 
 
-def load_classification_model_from_checkpoint(model, checkpoint_name, date_string, tag):
+def load_classification_model_from_checkpoint(model, checkpoint_name, date_string, *tags):
     """
     Load a classification model from its state dictionary.
     :param model: the model to be loaded.
@@ -177,14 +112,14 @@ def load_classification_model_from_checkpoint(model, checkpoint_name, date_strin
     :type: str
     :param date_string: the checkpoint date in string format.
     :type: str
-    :param tag: the checkpoint tag, or subdirectory.
-    :type: str
+    :param tags: the checkpoint tags (subdirectories).
+    :type: List[str]
     :return: the mode, loaded with the state dictionary at the specified checkpoint.
     :type: torch.nn.Module
     """
     date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
-    checkpoint_directory = get_checkpoint_directory('ResNext', tag=tag, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pth'.format(checkpoint_name)))
+    checkpoint_directory = get_checkpoint_path('ResNext', *tags, date=date)
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pt'.format(checkpoint_name)))
     out_features = get_out_features_from_state_dict(state_dict)
     model = model(out_features=out_features)
     model.load_state_dict(state_dict)
@@ -200,16 +135,6 @@ def load_yaml(file_path):
     :type: dict
     """
     return yaml.load(open(file_path, 'r'), Loader=yaml.Loader)
-
-
-def recreate_directory(directory_path):
-    """
-    Delete and recreate the directory at the given path to ensure an empty directory.
-    :param directory_path: the path to the directory to be recreated.
-    :type: str
-    """
-    shutil.rmtree(directory_path, ignore_errors=True)
-    os.makedirs(directory_path)
 
 
 def remove_last_layer(model):

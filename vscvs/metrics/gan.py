@@ -68,7 +68,7 @@ class LossMultimodalGAN(AbstractLossGAN):
         :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
         :raises ValueError: when loss function cannot be computed
         """
-        if len(output) == 5:
+        if len(output) == 4:
             kwargs = {}
             _, mode_predictions, mode_labels, generator_labels = output
         else:

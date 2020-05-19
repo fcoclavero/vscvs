@@ -60,7 +60,7 @@ def load_embeddings(embeddings_name):
     contain pickled tensor objects with image embeddings.
     :type: torch.Tensor
     """
-    torch.load(open(get_path('embeddings', '{}.pt'.format(embeddings_name)), 'rb'))
+    return torch.load(open(get_path('embeddings', '{}.pt'.format(embeddings_name)), 'rb'))
 
 
 def get_top_k(query_embedding, queried_embeddings, k, distance):

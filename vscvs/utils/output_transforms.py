@@ -58,7 +58,7 @@ def output_transform_multimodal_gan_evaluator(embeddings, mode_predictions, mode
     by metrics, which by default in a multimodal GAN is the element embeddings, mode predictions, labels, and classes.
     :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
     """
-    return embeddings, mode_predictions, mode_labels, generator_labels, classes
+    return embeddings, mode_predictions, mode_labels, generator_labels
 
 
 def output_transform_multimodal_gan_trainer(_embeddings, _mode_predictions, _mode_labels, _generator_labels, _classes,

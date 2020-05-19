@@ -64,15 +64,15 @@ class LossMultimodalGAN(AbstractLossGAN):
         """
         :override: updates the metric's state using the passed GAN batch output.
         :param output: the output of the engine's process function, using the GAN format, which by default is a tuple
-        containing embeddings, mode_predictions, mode_labels, generator_labels, classes
-        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
+        containing embeddings, mode_predictions, mode_labels, and generator_labels
+        :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
         :raises ValueError: when loss function cannot be computed
         """
         if len(output) == 5:
             kwargs = {}
-            _, mode_predictions, mode_labels, generator_labels, _ = output
+            _, mode_predictions, mode_labels, generator_labels = output
         else:
-            _, mode_predictions, mode_labels, generator_labels, _, kwargs = output
+            _, mode_predictions, mode_labels, generator_labels, kwargs = output
 
         generator_loss = self._loss_fn(mode_predictions, generator_labels, **kwargs)
         discriminator_loss = self._loss_fn(mode_predictions, mode_labels, **kwargs)
@@ -96,7 +96,7 @@ class LossMultimodalSiamesePairs(LossMultimodalGAN):
         """
         :override: updates the metric's state using a multimodal siamese GAN batch output.
         :param output: the output of the engine's process function, using the multimodal siamese format: 6-tuple with
-        the first pair elements' embeddings, the second pair elements' embeddings, the siamese targets, mode
+        the first pair elements' embeddings, the second pair elements' embeddings, the siamese target, mode
         predictions, mode labels, and generator labels.
         :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
         """

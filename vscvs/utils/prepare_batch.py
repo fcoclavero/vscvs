@@ -20,7 +20,7 @@ def batch_clique_graph(batch, classes_dataframe, processes=None):
     graph connects all batch elements with each other (clique graph) and graph vertex weights correspond to word
     vector distances of class labels. Assumes data and labels are the first two parameters of each sample.
     :param batch: data to be sent to device.
-    :type: list
+    :type: List
     :param classes_dataframe: dataframe containing class names and their word vectors.
     :type: pandas.Dataframe
     :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then `os.cpu_count()`

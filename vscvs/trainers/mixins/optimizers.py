@@ -19,11 +19,11 @@ class OptimizerMixin:
     def __init__(self, *args, learning_rate=.01, **kwargs):
         """
         :param args: arguments for additional mixins
-        :type: tuple
+        :type: Tuple
         :param learning_rate: learning rate for optimizers
         :type: float
         :param kwargs: keyword arguments for additional mixins
-        :type: dict
+        :type: Dict
         """
         self.learning_rate = learning_rate
         super().__init__(*args, **kwargs)
@@ -59,7 +59,7 @@ class AdaBoundOptimizerMixin(OptimizerMixin):
         :param args: arguments for additional mixins
         :param betas: coefficients used for computing running averages of gradient and its square
         :type: Tuple<float, float>
-        :type: tuple
+        :type: Tuple
         :param final_learning_rate: final (SGD) learning rate.
         :type: float
         :param gamma: convergence speed of the bound functions.
@@ -72,7 +72,7 @@ class AdaBoundOptimizerMixin(OptimizerMixin):
         with Dynamic Bound of Learning Rate]( https://openreview.net/forum?id=Bkg3g2R9FX)
         :type: bool
         :param kwargs: keyword arguments for additional mixins
-        :type: dict
+        :type: Dict
         """
         self.betas = betas
         self.final_learning_rate = final_learning_rate
@@ -95,7 +95,7 @@ class AdamOptimizerMixin(OptimizerMixin):
     def __init__(self, *args, betas=(.9, .999), epsilon=1e-08, weight_decay=0, amsgrad=False, **kwargs):
         """
         :param args: arguments for additional mixins
-        :type: tuple
+        :type: Tuple
         :param betas: coefficients used for computing running averages of gradient and its square
         :type: Tuple<float, float>
         :param epsilon: term added to the denominator to improve numerical stability
@@ -106,7 +106,7 @@ class AdamOptimizerMixin(OptimizerMixin):
         Adam and Beyond](https://openreview.net/forum?id=ryQu7f-RZ)
         :type: bool
         :param kwargs: keyword arguments for additional mixins
-        :type: dict
+        :type: Dict
         """
         self.betas = betas
         self.epsilon = epsilon
@@ -137,7 +137,7 @@ class RMSpropOptimizerMixin(OptimizerMixin):
     def __init__(self, *args, alpha=.99, epsilon=1e-08, weight_decay=0, momentum=0, centered=False, **kwargs):
         """
         :param args: arguments for additional mixins
-        :type: tuple
+        :type: Tuple
         :param alpha: the smoothing constant.
         :type: float
         :param epsilon: term added to the denominator to improve numerical stability
@@ -149,7 +149,7 @@ class RMSpropOptimizerMixin(OptimizerMixin):
         :param centered: whether to compute the centered RMSProp (gradient normalized by an estimation of its variance).
         :type: bool
         :param kwargs: keyword arguments for additional mixins
-        :type: dict
+        :type: Dict
         """
         self.alpha = alpha
         self.epsilon = epsilon
@@ -171,11 +171,11 @@ class SGDOptimizerMixin(OptimizerMixin):
     def __init__(self, *args, momentum=.8, **kwargs):
         """
         :param args: arguments for additional mixins
-        :type: tuple
+        :type: Tuple
         :param momentum: momentum parameter for SGD optimizer
         :type: float
         :param kwargs: keyword arguments for additional mixins
-        :type: dict
+        :type: Dict
         """
         self.momentum = momentum
         super().__init__(*args, **kwargs)

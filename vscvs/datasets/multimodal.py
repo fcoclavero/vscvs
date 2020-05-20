@@ -26,9 +26,9 @@ class MultimodalDataset(Dataset):
         requested index in this dataset.
         :type: torch.utils.data.Dataset
         :param args: additional arguments.
-        :type: list
+        :type: List
         :param kwargs: additional keyword arguments.
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, **kwargs)
         self.base_dataset = base_dataset
@@ -44,9 +44,9 @@ class MultimodalDatasetFolder(MultimodalDataset):
     def __init__(self, *args, **kwargs):
         """
         :param args: base class arguments.
-        :type: list
+        :type: List
         :param kwargs: base class keyword arguments.
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, **kwargs)
         self.classes = self.base_dataset.classes
@@ -92,9 +92,9 @@ class SiameseDataset(SiameseMixin, MultimodalDatasetFolder):
         class elements.
         :type: torch.utils.data.Dataset + vscvs.datasets.mixins.ClassIndicesMixin
         :param args: super class arguments
-        :type: list
+        :type: List
         :param kwargs: super class keyword arguments.
-        :type: dict
+        :type: Dict
         """
         super().__init__(base_dataset, *args, **kwargs)
         self.paired_dataset = paired_dataset
@@ -134,9 +134,9 @@ class TripletDataset(TripletMixin, MultimodalDatasetFolder):
         class elements.
         :type: torch.utils.data.Dataset + vscvs.datasets.mixins.ClassIndicesMixin
         :param args: super class arguments
-        :type: list
+        :type: List
         :param kwargs: super class keyword arguments.
-        :type: dict
+        :type: Dict
         """
         super().__init__(base_dataset, *args, **kwargs)
         self.paired_dataset = paired_dataset

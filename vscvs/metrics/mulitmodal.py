@@ -20,11 +20,11 @@ class AbstractAverageDistances(Metric, ABC):
     def __init__(self, *args, batch_size=lambda x: len(x), **kwargs):
         """
         :param args: Metric arguments
-        :type: tuple
+        :type: Tuple
         :param batch_size: callable taking a target tensor returns the first dimension size (usually the batch size).
         :type: Callable[[torch.Tensor], int]
         :param kwargs: Metric keyword arguments
-        :type: dict
+        :type: Dict
         """
         self._batch_size = batch_size
         self._sum_positive_distances = 0

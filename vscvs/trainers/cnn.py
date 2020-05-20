@@ -27,11 +27,11 @@ class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     def __init__(self, *args, out_features=125, **kwargs):
         """
         :param args: Trainer arguments
-        :type: tuple
+        :type: Tuple
         :param out_features: number of output features. If `None`, defaults to 1000.
         :type: int
         :param kwargs: Trainer keyword arguments
-        :type: dict
+        :type: Dict
         """
         self.out_features = out_features
         super().__init__(*args, **kwargs)
@@ -73,12 +73,12 @@ def train_cnn(*args, optimizer_mixin=None, **kwargs):
     """
     Train a classification Convolutional Neural Network for image classes.
     :param args: CNNTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: CNNTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class CNNTrainer(optimizer_mixin, AbstractCNNTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm

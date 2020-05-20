@@ -27,7 +27,7 @@ class AbstractBiModalGANTrainer(AbstractGANTrainer, ABC):
     def __init__(self, *args, mode_embedding_networks=None, loss_weight=None, **kwargs):
         """
         :param args: AbstractGANTrainer arguments
-        :type: tuple
+        :type: Tuple
         :param mode_embedding_networks: the embedding networks for each mode. They will be used as generators for the
         generative adversarial formulation.
         :type: List[torch.nn.Module]
@@ -35,7 +35,7 @@ class AbstractBiModalGANTrainer(AbstractGANTrainer, ABC):
         Tensor of size `batch_size`.
         :type: torch.Tensor
         :param kwargs: AbstractGANTrainer keyword arguments
-        :type: dict
+        :type: Dict
         """
         self.loss_weight = loss_weight
         super().__init__(*args, generator_network=MultimodalEncoder(*mode_embedding_networks), **kwargs)
@@ -66,13 +66,13 @@ class AbstractBiModalGANSiameseTrainer(AbstractBiModalGANTrainer, ABC):
     def __init__(self, *args, margin=.2, **kwargs):
         """
         :param args: AbstractBiModalGANTrainer arguments
-        :type: tuple
+        :type: Tuple
         :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the
         embeddings of two examples as dissimilar. Dissimilar image pairs will be pushed apart unless their distance
         is already greater than the margin. Similar sketch–image pairs will be pulled together in the feature space.
         :type: float
         :param kwargs: AbstractBiModalGANTrainer keyword arguments
-        :type: dict
+        :type: Dict
         """
         self.margin = margin
         super().__init__(*args, **kwargs)
@@ -103,12 +103,12 @@ def train_gan_bimodal(*args, optimizer_mixin=None, **kwargs):
     """
     Train a bimodal GAN.
     :param args: BiModalGANTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: BiModalGANTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class BiModalGANTrainer(optimizer_mixin, AbstractBiModalGANTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
@@ -124,12 +124,12 @@ def train_gan_bimodal_siamese(*args, optimizer_mixin=None, **kwargs):
     """
     Train a bimodal GAN.
     :param args: BiModalGANSiameseTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: BiModalGANSiameseTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class BiModalGANSiameseTrainer(optimizer_mixin, AbstractBiModalGANSiameseTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm

@@ -91,7 +91,7 @@ class HOGGCN(torch.nn.Module):
         Prepare batch for training: pass to a device with options. Assumes data and labels are the first
         two parameters of each sample.
         :param batch: data to be sent to device.
-        :type: list
+        :type: List
         :param device: (optional) (default: None) device type specification.
         :type: str
         :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.

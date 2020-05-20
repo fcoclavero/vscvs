@@ -66,7 +66,7 @@ def create_hog_gcn_evaluator(model, metrics=None, device=None, non_blocking=Fals
     :param model: the model to train.
     :type: torch.nn.Module
     :param metrics: map of metric names to Metrics.
-    :type: dict[str, ignite.metrics.Metric]
+    :type: Dict[str, ignite.metrics.Metric]
     :param device: (optional) (default: None) device type specification. Applies to both model and batches.
     :type: str
     :param non_blocking: (optional) if True and the copy is between CPU and GPU, the copy may run asynchronously.

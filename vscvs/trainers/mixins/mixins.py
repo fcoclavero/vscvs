@@ -21,12 +21,12 @@ class EarlyStoppingMixin(ABC):
     def __init__(self, *args, early_stopping_patience=5, **kwargs):
         """
         :param args: arguments for additional mixin
-        :type: tuple
+        :type: Tuple
         :param early_stopping_patience: number of epochs to wait if there are no improvements to stop the training.
         If `None`, no early stopping will be applied.
         :type: int
         :param kwargs: keyword arguments for additional mixin
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, **kwargs)
         self.early_stopping_patience = early_stopping_patience

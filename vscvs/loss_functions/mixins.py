@@ -13,9 +13,9 @@ class ReductionMixinMeta(type):
     def __init__(cls, *args, **kwargs):
         """
         :param args: default metaclass constructor arguments.
-        :type: list
+        :type: List
         :param kwargs: default metaclass constructor keyword arguments.
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, **kwargs)
         cls._reductions = {
@@ -53,12 +53,12 @@ class ReductionMixin(metaclass=ReductionMixinMeta):
     def __init__(self, *args, reduction='mean', **kwargs):
         """
         :param args: mixin arguments
-        :type: list
+        :type: List
         :param reduction: specifies the reduction to apply on the output. Must correspond to a key in the
         `reduction_choices` property.
         :type: str
         :param kwargs: mixin keyword arguments
-        :type: dict
+        :type: Dict
         :raises ValueError: if `reduction` is not one of the valid choices
         """
         self.reduction = reduction

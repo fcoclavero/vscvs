@@ -78,9 +78,9 @@ class BinaryEncodingMixin:
         Initialize de base Dataset class and compute the length (in digits) of the binary form of the largest index in
         the dataset. This is used to determine a standard binary encoding length for all indices.
         :param args: super class arguments.
-        :type: list
+        :type: List
         :param kwargs: super class keyword arguments.
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, **kwargs)
         self.max_binary_digits = len(str_to_bin_array(len(self.targets)))
@@ -108,9 +108,9 @@ class ClassIndicesMixin(DatasetFolderMixin):
     def __init__(self, *args, **kwargs):
         """
         :param args: base Dataset class arguments
-        :type: list
+        :type: List
         :param kwargs: base Dataset class keyword arguments
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, **kwargs)
         self.class_element_indices_dict = defaultdict(list)  # if new key used, it will be instanced with an empty list
@@ -141,9 +141,9 @@ class FileNameIndexedMixin(ImageFolderMixin):
         Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indices
         as values for efficient retrieval after initialization.
         :param args: super class arguments.
-        :type: list
+        :type: List
         :param kwargs: super class keyword arguments.
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, **kwargs)
         self._imgs_dict = {self._get_image_name(i): i for i in range(len(self.imgs))}
@@ -201,9 +201,9 @@ class FilePathIndexedMixin(ImageFolderMixin):
         Initialize de base Dataset class and create a image index dictionary with file paths as keys and dataset indices
         as values for efficient retrieval after initialization.
         :param args: super class arguments.
-        :type: list
+        :type: List
         :param kwargs: super class keyword arguments.
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, **kwargs)
         self._imgs_dict = {tup[0]: i for i, tup in enumerate(self.imgs)}
@@ -291,7 +291,7 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         Get the filename of the given element.
         :param element: a `DatasetFolder` element tuple. Assumes the standard tuple format, with the file path in the
         first tuple index.
-        :type: tuple
+        :type: Tuple
         :return: the file name of the element tuple
         :type: str
         """
@@ -332,9 +332,9 @@ class OneHotEncodingMixin:
         """
         Initialize de base Dataset class and create a tensor with all one hot encodings.
         :param args: super class arguments.
-        :type: list
+        :type: List
         :param kwargs: super class keyword arguments.
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, **kwargs)
         self.encodings = torch.eye(len(self.targets))
@@ -360,11 +360,11 @@ class SiameseMixin(DatasetFolderMixin, ABC):
     def __init__(self, *args, positive_pair_proportion=.5, **kwargs):
         """
         :param args: super class arguments.
-        :type: list
+        :type: List
         :param positive_pair_proportion: proportion of pairs that will be positive (same class).
         :type: float
         :param kwargs: super class keyword arguments.
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, **kwargs)
         self.target_probabilities = [positive_pair_proportion, 1 - positive_pair_proportion] # siamese target value prob
@@ -375,7 +375,7 @@ class SiameseMixin(DatasetFolderMixin, ABC):
         :param first_item_class_index: the index of the first siamese pair element's class.
         :type: int
         :return: an item tuple
-        :type: tuple
+        :type: Tuple
         """
         target = choice([0, 1], p=self.target_probabilities) # if `target==0` ...
         negative_classes = self._negative_classes(first_item_class_index)
@@ -414,7 +414,7 @@ class SiameseMixin(DatasetFolderMixin, ABC):
         :type: int
         :return: a 2-tuple with the item corresponding to `index`, along with another random item, randomly positive or
         negative, according to `target_probabilities`.
-        :type: tuple
+        :type: Tuple
         """
         item = super(SiameseMixin, self).__getitem__(index)
         item_class_index = self.targets[index]
@@ -440,7 +440,7 @@ class TripletMixin(DatasetFolderMixin):
         :param anchor_class_index: the class index of the triplet anchor.
         :type: int
         :return: a negative item tuple.
-        :type: tuple
+        :type: Tuple
         """
         return self._get_random_triplet_item(choice(self._negative_classes(anchor_class_index)))
 
@@ -450,7 +450,7 @@ class TripletMixin(DatasetFolderMixin):
         :param anchor_class_index: the class index of the triplet anchor.
         :type: int
         :return: an item tuple.
-        :type: tuple
+        :type: Tuple
         """
         return self._get_random_triplet_item(anchor_class_index)
 
@@ -463,7 +463,7 @@ class TripletMixin(DatasetFolderMixin):
         :param class_index: the class index.
         :type: int
         :return: a positive item tuple.
-        :type: tuple
+        :type: Tuple
         """
         pass
 
@@ -486,7 +486,7 @@ class TripletMixin(DatasetFolderMixin):
         :param index: an item's index.
         :type: int
         :return: a 3-tuple with the anchor, positive and negative.
-        :type: tuple
+        :type: Tuple
         """
         anchor = super(TripletMixin, self).__getitem__(index)
         anchor_class_index = self.targets[index]

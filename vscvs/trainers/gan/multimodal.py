@@ -25,12 +25,12 @@ class AbstractMultiModalGANTrainer(AbstractGANTrainer, ABC):
     def __init__(self, *args, mode_embedding_networks=None, **kwargs):
         """
         :param args: AbstractGANTrainer arguments
-        :type: tuple
+        :type: Tuple
         :param mode_embedding_networks: the embedding networks for each mode. They will be used as generators for the
         generative adversarial formulation.
         :type: List[torch.nn.Module]
         :param kwargs: AbstractGANTrainer keyword arguments
-        :type: dict
+        :type: Dict
         """
         super().__init__(*args, generator_network=MultimodalEncoder(*mode_embedding_networks), **kwargs)
 
@@ -55,12 +55,12 @@ def train_gan_multimodal(*args, optimizer_mixin=None, **kwargs):
     """
     Train a multimodal GAN.
     :param args: MultiModalGANTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: MultiModalGANTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class MultiModalGANTrainer(optimizer_mixin, AbstractMultiModalGANTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm

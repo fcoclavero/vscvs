@@ -30,7 +30,7 @@ class AbstractTrainer(ABC):
                  resume_date=None, resume_checkpoint=None, tags=None, train_validation_split=.8, workers=6, **kwargs):
         """
         :param args: mixin arguments.
-        :type: tuple
+        :type: Tuple
         :param batch_size: batch size during training.
         :type: int
         :param dataset_name: the name of the Dataset to be used for training.
@@ -42,7 +42,7 @@ class AbstractTrainer(ABC):
         :param n_gpu: number of GPUs available. Use 0 for CPU mode.
         :type: int
         :param parameter_dict: dictionary with important training parameters for logging.
-        :type: dict
+        :type: Dict
         :param resume_date: date of the trainer state to be resumed. Dates must have this format: `%y-%m-%dT%H-%M`.
         :type: str
         :param resume_checkpoint: name of the model checkpoint to be loaded.
@@ -55,7 +55,7 @@ class AbstractTrainer(ABC):
         :param workers: number of workers for data_loader.
         :type: int
         :param kwargs: mixin keyword arguments.
-        :type: dict
+        :type: Dict
         """
         date = datetime.now()
         self.batch_size = batch_size
@@ -187,7 +187,7 @@ class AbstractTrainer(ABC):
         Merges a list of samples to form a mini-batch of Tensor(s). Used when using batched loading from a
         map-style dataset.
         :return: the collate function
-        :type: callable
+        :type: Callable
         """
         return None
 
@@ -224,7 +224,7 @@ class AbstractTrainer(ABC):
         Getter for the serialized checkpoint dictionary, which contains the values of the trainer's fields that should
         be saved in a trainer checkpoint.
         :return: a checkpoint dictionary
-        :type: dict
+        :type: Dict
         """
         return {
             'average_epoch_duration': self.timer.value(),

@@ -24,8 +24,18 @@ def create():
 def classes(dataset_name, distance, tsne_dimension):
     """ Create a class name word vector dataframe for a dataset. """
     click.echo('Creating a new classes dataframe for the {} dataset'.format(dataset_name))
-    from vscvs.preprocessing import create_classes_data_frame # import here to avoid loading word vectors on every command
-    create_classes_data_frame(dataset_name, distance, tsne_dimension)
+    from vscvs.preprocessing import create_classes_data_frame
+    create_classes_data_frame(dataset_name, distance, tsne_dimension)\
+
+
+@create.command()
+@click.option('--dataset-name', prompt='Dataset name', help='Name of the dataset for metadata creation.',
+              type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
+def metadata_tsv(dataset_name):
+    """ Create a class name word vector dataframe for a dataset. """
+    click.echo('Creating {}.tsv for the Tensorboard embeddings projector.'.format(dataset_name))
+    from vscvs.embeddings import create_metadata_tsv
+    create_metadata_tsv(dataset_name)
 
 
 @create.command()

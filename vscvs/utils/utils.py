@@ -33,9 +33,9 @@ def camel_to_snake_case_dict_keys(dictionary):
     """
     Convert the format of the given dictionary keys from CamelCase to snake_case.
     :param dictionary: the dictionary with keys in CamelCase format.
-    :type: dict
+    :type: Dict
     :return: the same dictionary, but with its keys formatted in snake_case.
-    :type: dict
+    :type: Dict
     """
     return {camel_to_snake_case(key) : value for key, value in dictionary.items()}
 
@@ -132,7 +132,7 @@ def load_yaml(file_path):
     :param file_path: the absolute or relative path to the yaml file.
     :type: str
     :return: the contents of the yaml file, as a Python dictionary.
-    :type: dict
+    :type: Dict
     """
     return yaml.load(open(file_path, 'r'), Loader=yaml.Loader)
 

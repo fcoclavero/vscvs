@@ -6,6 +6,7 @@ __status__ = 'Prototype'
 """ Utilities for handling image embeddings. """
 
 
+import csv
 import torch
 
 from functools import reduce
@@ -48,6 +49,22 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     embedding_list = [model(data[0].to(device)).to('cpu') # model output sent to 'cpu' to prevent gpu memory overflow
                       for data in tqdm(data_loader, total=len(data_loader), desc='Embedding data')]
     torch.save(torch.cat(embedding_list), open(get_path('embeddings', '{}.pt'.format(embeddings_name)), 'wb'))
+
+
+@log_time
+def create_metadata_tsv(dataset_name):
+    """
+    Creates a metadata TSV file that can be used with any embeddings of the given dataset to be displayed in the
+    Tensorboard embedding projector.
+    :param dataset_name: name of the registered DatasetFolder which will be embedded.
+    :type: str
+    """
+    dataset = get_dataset(dataset_name)
+    with open(get_path('embeddings', '{}.tsv'.format(dataset_name)), 'w') as f:
+        writer = csv.DictWriter(f, ['class_idx', 'class', 'path'], delimiter='\t')
+        writer.writeheader()
+        writer.writerows([{'class_idx': idx, 'class': dataset.classes[idx], 'path': path}
+                          for path, idx in tqdm(dataset.samples, desc='Creating tsv')])
 
 
 def load_embeddings(embeddings_name):

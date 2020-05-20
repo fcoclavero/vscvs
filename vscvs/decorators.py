@@ -27,9 +27,9 @@ def deprecated(func):
         """
         Wrapped function to be returned by the decorator.
         :param args: original function arguments
-        :type: tuple
+        :type: Tuple
         :param kwargs: original function keyword arguments
-        :type: dict
+        :type: Dict
         :return: original function evaluation
         """
         warnings.simplefilter('always', DeprecationWarning)  # turn off filter
@@ -53,9 +53,9 @@ def kwargs_parameter_dict(func):
         """
         Wrapped function to be returned by the decorator.
         :param args: original function arguments
-        :type: tuple
+        :type: Tuple
         :param kwargs: original function keyword arguments
-        :type: dict
+        :type: Dict
         :return: original function evaluation
         """
         return func(*args, parameter_dict=kwargs, **kwargs)
@@ -75,9 +75,9 @@ def log_time(func):
         """
         Wrapped function to be returned by the decorator.
         :param args: original function arguments
-        :type: tuple
+        :type: Tuple
         :param kwargs: original function keyword arguments
-        :type: dict
+        :type: Dict
         :return: original function evaluation
         """
         start = datetime.now()
@@ -100,9 +100,9 @@ def threaded(func):
         """
         Wrapped function to be returned by the decorator.
         :param args: original function arguments
-        :type: tuple
+        :type: Tuple
         :param kwargs: original function keyword arguments
-        :type: dict
+        :type: Dict
         :return: original function evaluation
         """
         t = Thread(target=func, args=args, kwargs=kwargs)
@@ -127,9 +127,9 @@ def torch_no_grad(func):
         """
         Wrapped function to be returned by the decorator.
         :param args: original function arguments
-        :type: tuple
+        :type: Tuple
         :param kwargs: original function keyword arguments
-        :type: dict
+        :type: Dict
         :return: original function evaluation
         """
         with torch.no_grad():
@@ -150,9 +150,9 @@ def parametrized(decorator):
         """
         Define and return the decorated decorator, which can receive arguments and keyword arguments.
         :param args: arguments to be received by the decorator
-        :type: tuple
+        :type: Tuple
         :param kwargs: keyword arguments to be received by the decorator
-        :type: dict
+        :type: Dict
         :return: decorated function evaluation
         """
         def decorator_wrapper(func):
@@ -174,11 +174,11 @@ def handle_exception_decorator(func, callback):
     Method decorator that tries to execute the given function, and handles any exception by setting the
     object's status.
     :param func: the function to be decorated
-    :type: callable
+    :type: Callable
     :param callback: function to execute on exception. Receives the instance and the error.
-    :type: callable
+    :type: Callable
     :return: the decorated function
-    :type: callable
+    :type: Callable
     """
     @functools.wraps(func)
     def wrapper(instance, *args, **kwargs):

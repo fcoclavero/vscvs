@@ -64,7 +64,7 @@ def images_by_class(dataset):
     :param dataset: the torch dataset from which the dictionary will be generated
     :type: torch.utils.data.Dataset
     :return: a dictionary with `dataset` classes as keys and a list of `dataset` indices as values
-    :type: dict
+    :type: Dict
     """
     images_dict = defaultdict(list)  # if a new key used, it will be initialized with an empty list by default
     for image_index, image_class in enumerate(dataset.targets):  # `dataset.target` contains the class of each image

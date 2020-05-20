@@ -26,14 +26,14 @@ class AbstractClassificationGCNTrainer(AbstractTrainer, ABC):
     def __init__(self, *args, dataset_name=None, processes=None, **kwargs):
         """
         :param args: Trainer arguments
-        :type: tuple
+        :type: Tuple
         :param dataset_name: the name of the Dataset to be used for training
         :type: str
         :param processes: number of parallel workers to be used for creating batch graphs. If `None`, then
         `os.cpu_count()` will be used.
         :type: int
         :param kwargs: Trainer keyword arguments
-        :type: dict
+        :type: Dict
         """
         self.dataset_name = dataset_name
         self.processes = processes
@@ -73,12 +73,12 @@ def train_classification_gcn(*args, optimizer_mixin=None, **kwargs):
     """
     Train a ClassificationGCN image classifier.
     :param args: ClassificationGCNTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: ClassificationGCNTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class ClassificationGCNTrainer(optimizer_mixin, AbstractClassificationGCNTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm

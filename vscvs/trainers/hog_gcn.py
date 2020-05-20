@@ -29,7 +29,7 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
                  processes=None, **kwargs):
         """
         :param args: Trainer arguments
-        :type: tuple
+        :type: Tuple
         :param dataset_name: the name of the Dataset to be used for training
         :type: str
         :param in_channels: the number of channels for inputs.
@@ -48,7 +48,7 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
         `os.cpu_count()` will be used.
         :type: int
         :param kwargs: Trainer keyword arguments
-        :type: dict
+        :type: Dict
         """
         self.dataset_name = dataset_name
         self.in_channels = in_channels
@@ -93,12 +93,12 @@ def train_hog_gcn(*args, optimizer_mixin=None, **kwargs):
     """
     Train a HOGGCN image classifier.
     :param args: HOGGCNTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: HOGGCNTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class HOGGCNTrainer(optimizer_mixin, AbstractHOGGCNTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm

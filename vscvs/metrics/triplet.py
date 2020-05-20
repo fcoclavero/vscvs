@@ -24,9 +24,9 @@ class AccuracyTriplets(Metric):
     def __init__(self, *args, **kwargs):
         """
         :param args: Metric arguments
-        :type: tuple
+        :type: Tuple
         :param kwargs: Metric keyword arguments
-        :type: dict
+        :type: Dict
         """
         self._num_correct = 0
         self._num_examples = 0

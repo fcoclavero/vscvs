@@ -24,7 +24,7 @@ class ResNetBase(nn.Module):
         :param progress: if True, displays a progress bar of the download to stderr
         :type: bool
         :param kwargs: additional `resnet50` keyword arguments
-        :type: dict
+        :type: Dict
         """
         super().__init__()
         self.base = resnet50(pretrained=pretrained, progress=progress, **kwargs)

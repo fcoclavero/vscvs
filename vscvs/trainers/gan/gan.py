@@ -26,7 +26,7 @@ class AbstractGANTrainer(GANOptimizerMixin, AbstractTrainer, ABC):
     def __init__(self, *args, discriminator_network=None, generator_network=None, loss_reduction='mean', **kwargs):
         """
         :param args: Trainer arguments
-        :type: tuple
+        :type: Tuple
         :param discriminator_network: the discriminator model that classifies generator outputs.
         :type: torch.nn.Module
         :param generator_network: the generator model.
@@ -34,7 +34,7 @@ class AbstractGANTrainer(GANOptimizerMixin, AbstractTrainer, ABC):
         :param loss_reduction: reduction to apply to batch element loss values to obtain the loss for the whole batch.
         :type: str
         :param kwargs: Trainer keyword arguments
-        :type: dict
+        :type: Dict
         """
         self.discriminator = discriminator_network
         self.generator = generator_network

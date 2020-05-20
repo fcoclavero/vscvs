@@ -24,7 +24,7 @@ class ResNextBase(nn.Module):
         :param progress: if True, displays a progress bar of the download to stderr
         :type: bool
         :param kwargs: additional `resnext50_32x4d` keyword arguments
-        :type: dict
+        :type: Dict
         """
         super().__init__()
         self.base = resnext50_32x4d(pretrained=pretrained, progress=progress, **kwargs)

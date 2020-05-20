@@ -26,7 +26,7 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
                  margin=.2, **kwargs):
         """
         :param args: Trainer arguments
-        :type: tuple
+        :type: Tuple
         :param anchor_network: the model to be used for computing anchor image embeddings.
         :type: torch.nn.Module
         :param positive_negative_network: the model to be used for computing image embeddings for the positive
@@ -39,7 +39,7 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
         distance from the anchor element to the negative, and the distance from the anchor to the negative.
         :type: float
         :param kwargs: Trainer keyword arguments
-        :type: dict
+        :type: Dict
         """
         self.anchor_network = anchor_network
         self.positive_negative_network = positive_negative_network
@@ -79,12 +79,12 @@ def train_triplet_cnn(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Triplet CNN architecture.
     :param args: TripletTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: TripletTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
@@ -98,12 +98,12 @@ def train_triplet_resnet(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Triplet ResNet architecture.
     :param args: TripletTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: TripletTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
@@ -117,12 +117,12 @@ def train_triplet_resnext(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Triplet ResNext architecture.
     :param args: TripletTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: TripletTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm

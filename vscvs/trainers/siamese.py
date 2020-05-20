@@ -26,7 +26,7 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
                  margin=.2, **kwargs):
         """
         :param args: Trainer arguments
-        :type: tuple
+        :type: Tuple
         :param embedding_network_1: the model to be used for the first branch of the siamese architecture.
         :type: torch.nn.Module
         :param embedding_network_2: the model to be used for the second branch of the siamese architecture.
@@ -39,7 +39,7 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
         is already greater than the margin. Similar sketch–image pairs will be pulled together in the feature space.
         :type: float
         :param kwargs: Trainer keyword arguments
-        :type: dict
+        :type: Dict
         """
         self.embedding_network_1 = embedding_network_1
         self.embedding_network_2 = embedding_network_2
@@ -79,12 +79,12 @@ def train_siamese_cnn(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Siamese CNN architecture.
     :param args: SiameseTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: SiameseTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
@@ -98,12 +98,12 @@ def train_siamese_resnet(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Siamese ResNet architecture.
     :param args: SiameseTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: SiameseTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
@@ -117,12 +117,12 @@ def train_siamese_resnext(*args, optimizer_mixin=None, **kwargs):
     """
     Train a Siamese ResNext architecture.
     :param args: SiameseTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: SiameseTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm

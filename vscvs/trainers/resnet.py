@@ -27,13 +27,13 @@ class AbstractResNetTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     def __init__(self, *args, out_features=125, pretrained=False, **kwargs):
         """
         :param args: Trainer arguments
-        :type: tuple
+        :type: Tuple
         :param out_features: number of output features. If `None`, defaults to 1000.
         :type: int
         :param pretrained: if True, uses a model pre-trained on ImageNet.
         :type: bool
         :param kwargs: Trainer keyword arguments
-        :type: dict
+        :type: Dict
         """
         self.out_features = out_features
         self.pretrained = pretrained
@@ -76,12 +76,12 @@ def train_resnet(*args, optimizer_mixin=None, **kwargs):
     """
     Train a ResNet image classifier.
     :param args: ResNetTrainer arguments
-    :type: tuple
+    :type: Tuple
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
     :param kwargs: ResNetTrainer keyword arguments
-    :type: dict
+    :type: Dict
     """
     class ResNetTrainer(optimizer_mixin, AbstractResNetTrainer):
         _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm

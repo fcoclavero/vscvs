@@ -51,9 +51,9 @@ class AbstractLossGAN(Metric, ABC):
         self._num_examples = 0
 
 
-class AbstractLossMultimodalGAN(AbstractLossGAN):
+class AbstractLossMultimodalGAN(AbstractLossGAN, ABC):
     """
-    Adds the metric `update` method for an average loss metric for a multimodal GAN.
+    Abstract metric that adds the metric `update` method for an average loss metric for a multimodal GAN.
     """
     _generator_loss_fn: torch.nn.Module
     _discriminator_loss_fn: torch.nn.Module
@@ -86,7 +86,7 @@ class AbstractLossMultimodalGAN(AbstractLossGAN):
         self._num_examples += batch_size
 
 
-class LossBimodalGAN(AbstractLossMultimodalGAN, ABC):
+class LossBimodalGAN(AbstractLossMultimodalGAN):
     """
     Computes the average loss for a bimodal GAN.
     """
@@ -103,7 +103,7 @@ class LossBimodalGAN(AbstractLossMultimodalGAN, ABC):
         self._generator_loss_fn, self._discriminator_loss_fn = loss_fn
 
 
-class LossMultimodalGAN(AbstractLossMultimodalGAN, ABC):
+class LossMultimodalGAN(AbstractLossMultimodalGAN):
     """
     Computes the average loss for a multimodal GAN.
     """
@@ -120,9 +120,10 @@ class LossMultimodalGAN(AbstractLossMultimodalGAN, ABC):
         self._generator_loss_fn = self._discriminator_loss_fn = loss_fn
 
 
-class LossMultimodalSiamesePairs(LossMultimodalGAN):
+class AbstractLossMultimodalSiamesePairs(AbstractLossMultimodalGAN, ABC):
     """
-    Computes the loss for positive and negative pairs in a multimodal siamese network.
+    Abstract metric that modifies the metric `update` method for an average loss metric for positive and negative pairs
+    in a multimodal siamese network.
     """
     @reinit__is_reduced
     @overrides
@@ -136,6 +137,20 @@ class LossMultimodalSiamesePairs(LossMultimodalGAN):
         """
         embeddings_0, embeddings_1, siamese_target, *args = output
         super().update((torch.cat([embeddings_1, embeddings_0]), *args))
+
+
+class LossBimodalSiamesePairs(AbstractLossMultimodalSiamesePairs, LossBimodalGAN):
+    """
+    Computes the loss for positive and negative pairs in a multimodal siamese network.
+    """
+    pass
+
+
+class LossMultimodalSiamesePairs(AbstractLossMultimodalSiamesePairs, LossMultimodalGAN):
+    """
+    Computes the average loss for a multimodal GAN.
+    """
+    pass
 
 
 class AverageDistancesMultimodalSiamesePairs(AverageDistancesSiamesePairs):

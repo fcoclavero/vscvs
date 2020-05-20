@@ -15,7 +15,7 @@ from .gan import AbstractGANTrainer
 from ..engines.gan import create_multimodal_gan_evaluator, create_multimodal_gan_trainer, \
     create_multimodal_gan_siamese_evaluator, create_multimodal_gan_siamese_trainer, prepare_bimodal_batch_variables
 from vscvs.loss_functions import ContrastiveLoss
-from vscvs.metrics import AverageDistancesMultimodalSiamesePairs, LossMultimodalGAN, LossMultimodalSiamesePairs
+from vscvs.metrics import AverageDistancesMultimodalSiamesePairs, LossMultimodalGAN, LossBimodalSiamesePairs
 from vscvs.models import ResNextNormalized, InterModalDiscriminator, MultimodalEncoder
 from vscvs.decorators import kwargs_parameter_dict
 
@@ -86,7 +86,7 @@ class AbstractBiModalGANSiameseTrainer(AbstractBiModalGANTrainer, ABC):
     @overrides
     def _create_evaluator_engine(self):
         average_distances = AverageDistancesMultimodalSiamesePairs()
-        loss = LossMultimodalSiamesePairs(self.loss)
+        loss = LossBimodalSiamesePairs(self.loss)
         return create_multimodal_gan_siamese_evaluator(
             *self.model, device=self.device, prepare_batch_variables=prepare_bimodal_batch_variables, metrics={
                 'Average Distance/positive': average_distances[0], 'Average Distance/negative': average_distances[1],

@@ -239,7 +239,7 @@ def average_class_recall_parallel(query_dataset, queried_dataset, query_embeddin
     :param processes: number of parallel workers to use. If `None`, then `os.cpu_count()` will be used.
     :type: int
     """
-    set_start_method('spawn')
+    set_start_method('spawn', force=True)
     device = get_device(n_gpu)
     query_embeddings, queried_embeddings = query_embeddings.to(device), queried_embeddings.to(device)
     with Pool(processes=processes) as pool:

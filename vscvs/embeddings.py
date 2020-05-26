@@ -12,7 +12,7 @@ import torch
 from functools import reduce
 from itertools import repeat
 from statistics import mean
-from torch.multiprocessing import Pool
+from torch.multiprocessing import Pool, set_start_method
 from torch.nn import PairwiseDistance, CosineSimilarity
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -239,6 +239,7 @@ def average_class_recall_parallel(query_dataset, queried_dataset, query_embeddin
     :param processes: number of parallel workers to use. If `None`, then `os.cpu_count()` will be used.
     :type: int
     """
+    set_start_method('spawn')
     device = get_device(n_gpu)
     query_embeddings, queried_embeddings = query_embeddings.to(device), queried_embeddings.to(device)
     with Pool(processes=processes) as pool:

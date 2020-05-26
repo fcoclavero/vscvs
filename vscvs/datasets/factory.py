@@ -79,6 +79,10 @@ DATASETS = {
         lambda *args, **kwargs: MultimodalEntitySiameseDataset(
             Sketchy('sketchy-photos', *args, **kwargs),
             Sketchy('sketchy-sketches', *args, **kwargs)),
+    'sketchy-test-multimodal-siamese':
+        lambda *args, **kwargs: MultimodalEntitySiameseDataset(
+            Sketchy('sketchy-test-photos-multimodal', *args, **kwargs),
+            Sketchy('sketchy-test-sketches-multimodal', *args, **kwargs)),
 }
 
 

@@ -50,13 +50,36 @@ class AbstractLossGAN(Metric, ABC):
         self._sum_discriminator_loss = 0
         self._num_examples = 0
 
+    def update_metric_state(self, generator_loss, discriminator_loss, batch_size):
+        """
+        Utility method used to update the metrics internal state based on the computed generator and discriminator loss.
+        :param generator_loss: the value of the generator loss for the engine output passed to the `update` function.
+        :type: float
+        :param discriminator_loss: the value of the discriminator loss for the output passed to the `update` function.
+        :type: float
+        :param batch_size: the batch size of the output passed to the `update` function.
+        :type: int
+        """
+        self._sum_generator_loss += generator_loss * batch_size
+        self._sum_discriminator_loss += discriminator_loss * batch_size
+        self._num_examples += batch_size
 
-class AbstractLossMultimodalGAN(AbstractLossGAN, ABC):
+
+class LossMultimodalGAN(AbstractLossGAN):
     """
-    Abstract metric that adds the metric `update` method for an average loss metric for a multimodal GAN.
+    Computes the average loss for a multimodal GAN.
     """
-    _generator_loss_fn: torch.nn.Module
-    _discriminator_loss_fn: torch.nn.Module
+    def __init__(self, loss_fn, *args, **kwargs):
+        """
+        :param loss_fn: callable that takes a multimodal GAN output and returns the average losses over batch elements.
+        :type: Callable[[Tuple], float]
+        :param args: `AbstractLossGAN` arguments.
+        :type: List
+        :param kwargs: `AbstractLossGAN` keyword arguments.
+        :type: Dict
+        """
+        super().__init__(*args, **kwargs)
+        self.generator_loss_fn = self.discriminator_loss_fn = loss_fn
 
     @reinit__is_reduced
     @overrides
@@ -74,57 +97,33 @@ class AbstractLossMultimodalGAN(AbstractLossGAN, ABC):
         else:
             _, mode_predictions, mode_labels, generator_labels, kwargs = output
 
-        generator_loss = self._generator_loss_fn(mode_predictions, generator_labels, **kwargs)
-        discriminator_loss = self._discriminator_loss_fn(mode_predictions, mode_labels, **kwargs)
-
-        if len(generator_loss.shape) != 0 or len(discriminator_loss.shape) != 0:
-            raise ValueError('loss_fn did not return the average loss.')
-
+        generator_loss = self.generator_loss_fn(mode_predictions, generator_labels, **kwargs).item()
+        discriminator_loss = self.discriminator_loss_fn(mode_predictions, mode_labels, **kwargs).item()
         batch_size = self._batch_size(mode_predictions)
-        self._sum_generator_loss += generator_loss.item() * batch_size
-        self._sum_discriminator_loss += discriminator_loss.item() * batch_size
-        self._num_examples += batch_size
+        self.update_metric_state(generator_loss, discriminator_loss, batch_size)
 
 
-class LossBimodalGAN(AbstractLossMultimodalGAN):
+class LossBimodalSiamesePairs(AbstractLossGAN, ABC):
     """
-    Computes the average loss for a bimodal GAN.
+    Computes the loss for positive and negative pairs in a bimodal siamese network.
     """
     def __init__(self, loss_fn, *args, **kwargs):
         """
-        :param loss_fn: callable that takes a bimodal GAN output and returns the average losses over all batch elements.
-        :type: Callable[[Tuple], float]
-        :param args: `AbstractLossMultimodalGAN` arguments.
+        :param loss_fn: 2-tuple of loss functions, the first corresponding to the bimodal loss and the second to the
+        siamese contrastive loss. The bimodal loss function is a callable that takes a bimodal GAN output and returns
+        the reduced mode classification loss over batch elements. The siamese loss function is a callable that takes
+        two batches of embeddings (where elements with the same index correspond to siamese pairs) and the siamese
+        target tensor (which indicates whether the pair at each index is positive - same class - or negative) and
+        returns the reduced contrastive loss over batch elements.
+        :type: Tuple[Callable[[Tuple], float], Callable[[Tuple], float]]
+        :param args: `AbstractLossGAN` arguments.
         :type: List
-        :param kwargs: `AbstractLossMultimodalGAN` keyword arguments.
+        :param kwargs: `AbstractLossGAN` keyword arguments.
         :type: Dict
         """
         super().__init__(*args, **kwargs)
-        self._generator_loss_fn, self._discriminator_loss_fn = loss_fn
+        self.bimodal_loss_fn, self._contrastive_loss_fn = loss_fn
 
-
-class LossMultimodalGAN(AbstractLossMultimodalGAN):
-    """
-    Computes the average loss for a multimodal GAN.
-    """
-    def __init__(self, loss_fn, *args, **kwargs):
-        """
-        :param loss_fn: callable that takes a multimodal GAN output and returns the average losses over batch elements.
-        :type: Callable[[Tuple], float]
-        :param args: `AbstractLossMultimodalGAN` arguments.
-        :type: List
-        :param kwargs: `AbstractLossMultimodalGAN` keyword arguments.
-        :type: Dict
-        """
-        super().__init__(*args, **kwargs)
-        self._generator_loss_fn = self._discriminator_loss_fn = loss_fn
-
-
-class AbstractLossMultimodalSiamesePairs(AbstractLossMultimodalGAN, ABC):
-    """
-    Abstract metric that modifies the metric `update` method for an average loss metric for positive and negative pairs
-    in a multimodal siamese network.
-    """
     @reinit__is_reduced
     @overrides
     def update(self, output):
@@ -135,22 +134,12 @@ class AbstractLossMultimodalSiamesePairs(AbstractLossMultimodalGAN, ABC):
         predictions, mode labels, and generator labels.
         :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
         """
-        embeddings_0, embeddings_1, siamese_target, *args = output
-        super().update((torch.cat([embeddings_1, embeddings_0]), *args))
-
-
-class LossBimodalSiamesePairs(AbstractLossMultimodalSiamesePairs, LossBimodalGAN):
-    """
-    Computes the loss for positive and negative pairs in a multimodal siamese network.
-    """
-    pass
-
-
-class LossMultimodalSiamesePairs(AbstractLossMultimodalSiamesePairs, LossMultimodalGAN):
-    """
-    Computes the average loss for a multimodal GAN.
-    """
-    pass
+        embeddings_0, embeddings_1, siamese_target, mode_predictions, mode_labels, generator_labels = output
+        generator_loss = self.bimodal_loss_fn(mode_predictions, generator_labels).item() + \
+                         self._contrastive_loss_fn(embeddings_0, embeddings_1, siamese_target).item()
+        discriminator_loss = self.bimodal_loss_fn(mode_predictions, mode_labels).item()
+        batch_size = self._batch_size(mode_predictions)
+        self.update_metric_state(generator_loss, discriminator_loss, batch_size)
 
 
 class AverageDistancesMultimodalSiamesePairs(AverageDistancesSiamesePairs):

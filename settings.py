@@ -37,13 +37,25 @@ DATA_SOURCES = {
     },
     'sketchy-test-photos': {
         'root': os.path.join(DATA_DIR, 'sketchy_test'),
-        'images': os.path.join(DATA_DIR, 'sketchy_test', 'photo'), # 1250
+        'images': os.path.join(DATA_DIR, 'sketchy_test_multimodal', 'photo'), # 1250
+        'dimensions': (256, 256),
+        'language': 'en'
+    },
+    'sketchy-test-photos-multimodal': {
+        'root': os.path.join(DATA_DIR, 'sketchy_test_multimodal'),
+        'images': os.path.join(DATA_DIR, 'sketchy_test_multimodal', 'photo'), # 1250
         'dimensions': (256, 256),
         'language': 'en'
     },
     'sketchy-test-sketches': {
         'root': os.path.join(DATA_DIR, 'sketchy_test'),
-        'images': os.path.join(DATA_DIR, 'sketchy_test', 'sketch'), # 1250
+        'images': os.path.join(DATA_DIR, 'sketchy_test_multimodal', 'sketch'), # 1250
+        'dimensions': (256, 256),
+        'language': 'en'
+    },
+    'sketchy-test-sketches-multimodal': {
+        'root': os.path.join(DATA_DIR, 'sketchy_test_multimodal'),
+        'images': os.path.join(DATA_DIR, 'sketchy_test_multimodal', 'sketch'), # 1250
         'dimensions': (256, 256),
         'language': 'en'
     },

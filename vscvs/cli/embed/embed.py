@@ -8,6 +8,7 @@ __status__ = 'Prototype'
 
 import click
 
+from .siamese import siamese
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from vscvs.embeddings import create_embeddings
 from vscvs.utils import load_classification_model_from_checkpoint, remove_last_layer
@@ -24,6 +25,9 @@ from vscvs.utils import load_classification_model_from_checkpoint, remove_last_l
 def embed(*_, **__):
     """ Image embedding creation. """
     pass
+
+
+embed.add_command(siamese)
 
 
 @embed.command()

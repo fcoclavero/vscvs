@@ -27,13 +27,14 @@ show.add_command(tensorboard)
 
 
 @show.command()
+@click.option('--name', prompt='Checkpoint name', help='Name of the checkpoint directory.')
 @click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
 @click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
-def checkpoint(date, tag):
+def checkpoint(name, date, tag):
     """ Show the contents of the specified trainer checkpoint. """
     date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
     click.echo('Show the {} checkpoint'.format(date))
-    checkpoint_directory = get_checkpoint_path('ResNext', *tag, date=date)
+    checkpoint_directory = get_checkpoint_path(name, *tag, date=date)
     trainer_checkpoint = torch.load(os.path.join(checkpoint_directory, 'trainer.pt'))
     print(yaml.dump(trainer_checkpoint, allow_unicode=True, default_flow_style=False)) # yaml dump for pretty printing
 

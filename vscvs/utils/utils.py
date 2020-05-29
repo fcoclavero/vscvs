@@ -104,11 +104,13 @@ def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2,
         nn.init.constant_(model.bias.data, batch_norm_bias)
 
 
-def load_classification_model_from_checkpoint(model, checkpoint_name, date_string, *tags):
+def load_classification_model_from_checkpoint(model, state_dict_file, checkpoint_name, date_string, *tags):
     """
     Load a classification model from its state dictionary.
     :param model: the model to be loaded.
     :type: torch.nn.Module
+    :param state_dict_file: the name of the state_dict file.
+    :type: str
     :param checkpoint_name: the name of the checkpoint directory.
     :type: str
     :param date_string: the checkpoint date in string format.
@@ -119,8 +121,8 @@ def load_classification_model_from_checkpoint(model, checkpoint_name, date_strin
     :type: torch.nn.Module
     """
     date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
-    checkpoint_directory = get_checkpoint_path('ResNext', *tags, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pt'.format(checkpoint_name)))
+    checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pt'.format(state_dict_file)))
     out_features = get_out_features_from_state_dict(state_dict)
     model = model(out_features=out_features)
     model.load_state_dict(state_dict)

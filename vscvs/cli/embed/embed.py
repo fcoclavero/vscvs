@@ -8,6 +8,7 @@ __status__ = 'Prototype'
 
 import click
 
+from .siamese import siamese
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from vscvs.embeddings import create_embeddings
 from vscvs.utils import load_classification_model_from_checkpoint, remove_last_layer
@@ -26,6 +27,9 @@ def embed(*_, **__):
     pass
 
 
+embed.add_command(siamese)
+
+
 @embed.command()
 @pass_context_to_kwargs
 @click.option('--in-channels', prompt='In channels', help='Number of image color channels.', default=3)
@@ -42,39 +46,42 @@ def hog(dataset_name, embeddings_name, batch_size, workers, n_gpu, in_channels, 
 
 @embed.command()
 @pass_context_to_kwargs
+@click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint directory.')
 @click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
-@click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint to be loaded.')
+@click.option('--state-dict', prompt='State dict', help='The state_dict file to be loaded.')
 @click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
-def cnn(dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
+def cnn(dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint, date, state_dict, tag):
     """ Create image embeddings with the CNN model. """
     click.echo('CNN embeddings for {} dataset'.format(dataset_name))
     from vscvs.models import CNN
-    model = load_classification_model_from_checkpoint(CNN, checkpoint, date, *tag)
+    model = load_classification_model_from_checkpoint(CNN, state_dict, checkpoint, date, *tag)
     model = remove_last_layer(model)
     create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
 
 @embed.command()
 @pass_context_to_kwargs
+@click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint directory.')
 @click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
-@click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint to be loaded.')
+@click.option('--state-dict', prompt='State dict', help='The state_dict file to be loaded.')
 @click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
-def resnet(dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
+def resnet(dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint, date, state_dict, tag):
     """ Create image embeddings with the ResNet model. """
     click.echo('ResNet embeddings for {} dataset'.format(dataset_name))
     from vscvs.models import ResNet
-    model = load_classification_model_from_checkpoint(ResNet, checkpoint, date, *tag)
+    model = load_classification_model_from_checkpoint(ResNet, state_dict, checkpoint, date, *tag)
     create_embeddings(model.base, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
 
 @embed.command()
 @pass_context_to_kwargs
+@click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint directory.')
 @click.option('--date', prompt='Checkpoint date', help='Checkpoint date (corresponds to the directory name.')
-@click.option('--checkpoint', prompt='Checkpoint name', help='Name of the checkpoint to be loaded.')
+@click.option('--state-dict', prompt='State dict', help='The state_dict file to be loaded.')
 @click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
-def resnext(dataset_name, embeddings_name, batch_size, workers, n_gpu, date, checkpoint, tag):
+def resnext(dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint, date, state_dict, tag):
     """ Create image embeddings with the ResNext model. """
     from vscvs.models import ResNext
     click.echo('ResNext embeddings for {} dataset'.format(dataset_name))
-    model = load_classification_model_from_checkpoint(ResNext, checkpoint, date, *tag)
+    model = load_classification_model_from_checkpoint(ResNext, state_dict, checkpoint, date, *tag)
     create_embeddings(model.base, dataset_name, embeddings_name, batch_size, workers, n_gpu)

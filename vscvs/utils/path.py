@@ -26,10 +26,10 @@ def get_path(*paths):
     return os.path.join(ROOT_DIR, 'data', *paths or '')
 
 
-def get_checkpoint_path(model_name, *tags, date=datetime.now()):
+def get_checkpoint_path(checkpoint_name, *tags, date=datetime.now()):
     """
     Get the path where model checkpoints should be stored.
-    :param model_name: the name of the model
+    :param checkpoint_name: the name of the model
     :type: str
     :param tags: optional tags for model checkpoint and tensorboard logs.
     :type: List[str]
@@ -38,7 +38,7 @@ def get_checkpoint_path(model_name, *tags, date=datetime.now()):
     :return: the model checkpoint path
     :type: str
     """
-    return get_path('checkpoints', model_name, *tags, date.strftime(CHECKPOINT_NAME_FORMAT))
+    return get_path('checkpoints', checkpoint_name, *tags, date.strftime(CHECKPOINT_NAME_FORMAT))
 
 
 def get_log_directory(model_name, *tags, date=datetime.now()):

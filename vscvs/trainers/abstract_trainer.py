@@ -316,7 +316,7 @@ class AbstractTrainer(ABC):
         Add event handlers for saving model checkpoints.
         """
         self.trainer_engine.add_event_handler(
-            Events.EPOCH_COMPLETED, self.checkpoint_saver_best,{'checkpoint': self.model})
+            Events.EPOCH_COMPLETED, self.checkpoint_saver_best, {'checkpoint': self.model})
         self.trainer_engine.add_event_handler(
             Events.EPOCH_COMPLETED, self.checkpoint_saver_periodic, {'checkpoint': self.model})
 

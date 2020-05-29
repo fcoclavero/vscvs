@@ -11,8 +11,10 @@ import re
 import torch
 import yaml
 
+from collections import OrderedDict
 from datetime import datetime
 from torch import nn as nn
+from torch.utils.data import DataLoader
 
 from .path import get_checkpoint_path
 from settings import CHECKPOINT_NAME_FORMAT
@@ -103,11 +105,13 @@ def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2,
         nn.init.constant_(model.bias.data, batch_norm_bias)
 
 
-def load_classification_model_from_checkpoint(model, checkpoint_name, date_string, *tags):
+def load_classification_model_from_checkpoint(model, state_dict_file, checkpoint_name, date_string, *tags):
     """
-    Load a classification model from its state dictionary.
+    Load a classification model from its state dictionary file.
     :param model: the model to be loaded.
     :type: torch.nn.Module
+    :param state_dict_file: the name of the state_dict file.
+    :type: str
     :param checkpoint_name: the name of the checkpoint directory.
     :type: str
     :param date_string: the checkpoint date in string format.
@@ -118,10 +122,42 @@ def load_classification_model_from_checkpoint(model, checkpoint_name, date_strin
     :type: torch.nn.Module
     """
     date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
-    checkpoint_directory = get_checkpoint_path('ResNext', *tags, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pt'.format(checkpoint_name)))
+    checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pt'.format(state_dict_file)))
     out_features = get_out_features_from_state_dict(state_dict)
     model = model(out_features=out_features)
+    model.load_state_dict(state_dict)
+    return model
+
+
+def load_siamese_model_from_checkpoint(model_0, model_1, state_dict_file, checkpoint_name, date_string, *tags):
+    """
+    Load a siamese model from its state dictionary file.
+    :param model_0: the model of the first siamese branch.
+    :type: torch.nn.Module
+    :param model_1: the model of the second siamese branch.
+    :type: torch.nn.Module
+    :param state_dict_file: the name of the state_dict file.
+    :type: str
+    :param checkpoint_name: the name of the checkpoint directory.
+    :type: str
+    :param date_string: the checkpoint date in string format.
+    :type: str
+    :param tags: the checkpoint tags (subdirectories).
+    :type: List[str]
+    :return: the mode, loaded with the state dictionary at the specified checkpoint.
+    :type: torch.nn.Module
+    """
+    from vscvs.models import SiameseNetwork
+    date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
+    checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
+    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pt'.format(state_dict_file)))
+    state_dict_0 = OrderedDict({key: value for key, value in state_dict.items() if 'embedding_network_0' in key})
+    state_dict_1 = OrderedDict({key: value for key, value in state_dict.items() if 'embedding_network_1' in key})
+    out_features_0 = get_out_features_from_state_dict(state_dict_0)
+    out_features_1 = get_out_features_from_state_dict(state_dict_1)
+    model = SiameseNetwork(embedding_network_0=model_0(out_features=out_features_0),
+                           embedding_network_1=model_1(out_features=out_features_1))
     model.load_state_dict(state_dict)
     return model
 
@@ -146,6 +182,27 @@ def remove_last_layer(model):
     :type: torch.nn.module
     """
     return torch.nn.Sequential(*(list(model.children())[:-1]))
+
+
+def sprite_tensor(dataset_name, size=(64, 64)):
+    """
+    Create an image tensor that can be used to create a Tensorboard embedding projector sprite image for the dataset
+    corresponding to `dataset_name`. This image tensor must have a shape of `(N, C, H, W)` where `N` is the length of
+    the dataset, `C` is the number of color channels, and `H` and `W` are the height and width dimensions for the
+    sprite components. Dataset elements must be reduced in size in order to fit in memory when using Tensorboard.
+    :param dataset_name: the name of the dataset from which the sprite tensor will be created.
+    :type: str
+    :param size: the dimension of the resulting sprite image components. If `size` is a sequence like `(h, w)`, the
+    output size will be matched to this. If size is an int, the smaller edge of the image will be matched to this
+    number. i.e, if `height > width`, then image will be rescaled to `(size * height / width, size)`.
+    :type: int
+    :return: the sprite image tensor, with the dimensions specified above.
+    :type: torch.Tensor
+    """
+    from vscvs.datasets import get_dataset
+    dataset = get_dataset(dataset_name, normalize=False, size=size)
+    data_loader = DataLoader(dataset, batch_size=len(dataset), shuffle=False)
+    return next(iter(data_loader))[0]
 
 
 def str_to_bin_array(number, array_length=None):

@@ -10,7 +10,8 @@ container: fcoclavero/vscvs
 #jobEnv:
 #  DATA_DIR: /storage/data
 #  EMBEDDINGS_DIR: /storage/data/embeddings
-machineType: P4000 # K80 # C3
+#machineType: G6
+machineType: P4000
 #module: false
 #name: null
 #nodeAttrs: null

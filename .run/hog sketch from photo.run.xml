@@ -12,7 +12,7 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
     <option name="PARAMETERS" value="retrieve --query-image-filename C:\Users\Chopan\Documents\Data\sketchy\photo\tx_000000000000\airplane\n02691156_573.jpg --query-dataset-name sketchy-photos --queried-dataset-name sketchy-sketches --queried-embeddings-name hog-sketches --k 16 --n-gpu 1 hog --in-channels 3 --cell-size 24 --bins 9 --signed-gradients False" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

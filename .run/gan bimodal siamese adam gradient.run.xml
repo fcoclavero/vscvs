@@ -12,7 +12,7 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
     <option name="PARAMETERS" value="gradient --name train-bimodal-siamese-gan train --train-validation-split 0.85 --batch-size 10 --epochs 100 --workers 16 --n-gpu 1 adam --learning-rate 0.01 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000001 --weight-decay 0.001 --amsgrad True gan --dataset-name sketchy multimodal --loss-reduction mean bimodal siamese --margin 0.2" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

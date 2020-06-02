@@ -10,7 +10,7 @@ import click
 
 from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from vscvs.embeddings import create_embeddings
-from vscvs.utils import load_siamese_model_from_checkpoint, remove_last_layer
+from vscvs.utils import load_siamese_model_from_checkpoint
 
 
 @click.group()

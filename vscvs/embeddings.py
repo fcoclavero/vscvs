@@ -46,9 +46,9 @@ def create_embeddings(model, dataset_name, embeddings_name, batch_size, workers,
     model = model.eval().to(device)
     dataset = get_dataset(dataset_name)
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=workers)
-    embedding_list = [model(data[0].to(device)).to('cpu') # model output sent to 'cpu' to prevent gpu memory overflow
+    embedding_list = [model(data[0].to(device)) # model output sent to 'cpu' to prevent gpu memory overflow
                       for data in tqdm(data_loader, total=len(data_loader), desc='Embedding data')]
-    torch.save(torch.cat(embedding_list), open(get_path('embeddings', '{}.pt'.format(embeddings_name)), 'wb'))
+    torch.save(torch.cat(embedding_list).to('cpu'), open(get_path('embeddings', '{}.pt'.format(embeddings_name)), 'wb'))
 
 
 @log_time

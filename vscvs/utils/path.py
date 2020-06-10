@@ -28,10 +28,10 @@ def get_path(*paths):
 
 def get_checkpoint_path(checkpoint_name, *tags, date=datetime.now()):
     """
-    Get the path where model checkpoints should be stored.
+    Get the path where trainer model checkpoints should be stored.
     :param checkpoint_name: the name of the model
     :type: str
-    :param tags: optional tags for model checkpoint and tensorboard logs.
+    :param tags: optional tags for organizing checkpoints.
     :type: List[str]
     :param date: the date string of the model checkpoint. Defaults to the current date.
     :type: str
@@ -43,10 +43,10 @@ def get_checkpoint_path(checkpoint_name, *tags, date=datetime.now()):
 
 def get_log_directory(model_name, *tags, date=datetime.now()):
     """
-    Get the path where model checkpoints should be stored.
+    Get the path where trainer tensorboard logs should be stored.
     :param model_name: the name of the model.
     :type: str
-    :param tags: optional tags for model checkpoint and tensorboard logs.
+    :param tags: optional tags for organizing tensorboard logs.
     :type: List[str]
     :param date: the date string of the model checkpoint. Defaults to the current date.
     :type: str

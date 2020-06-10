@@ -13,7 +13,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
-    <option name="PARAMETERS" value="train --train-validation-split 0.9 --batch-size 256 --epochs 2 --workers 6 --n-gpu 0 adam --learning-rate 0.0001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000008 --weight-decay 0 --amsgrad False hog-gcn --dataset-name sketchy-sketches --in-channels 3 --cell-size 16 --bins 9 --signed-gradients False --processes 4" />
+    <option name="PARAMETERS" value="train --train-validation-split 0.9 --batch-size 256 --epochs 20 --workers 6 --n-gpu 1 adam --learning-rate 0.0001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000008 --weight-decay 0 --amsgrad False hog-gcn --dataset-name sketchy-sketches --in-channels 3 --cell-size 16 --bins 9 --signed-gradients False --processes 6" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

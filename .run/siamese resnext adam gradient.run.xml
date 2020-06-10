@@ -13,7 +13,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
-    <option name="PARAMETERS" value="gradient --name train-siamese-resnext train --train-validation-split 0.9 --batch-size 16 --epochs 30 --workers 16 --n-gpu 1 adam --learning-rate 0.01 --beta-1 0.9 --beta-2 0.999 --epsilon 0.0000001 --weight-decay 0.0 --amsgrad False siamese --dataset-name sketchy --loss-reduction sum --margin 0.4 resnext" />
+    <option name="PARAMETERS" value="gradient --name train-siamese-resnext-margin-08-amsgrad train --train-validation-split 0.9 --batch-size 16 --epochs 120 --workers 16 --n-gpu 1 adam --learning-rate 0.00001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.00001 --weight-decay 0.0 --amsgrad True siamese --dataset-name sketchy --loss-reduction sum --margin 0.8 resnext" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

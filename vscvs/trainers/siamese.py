@@ -22,14 +22,14 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a siamese architecture.
     """
-    def __init__(self, *args, embedding_network_1=None, embedding_network_2=None, loss_reduction='mean',
+    def __init__(self, *args, embedding_network_0=None, embedding_network_1=None, loss_reduction='mean',
                  margin=.2, **kwargs):
         """
         :param args: Trainer arguments
         :type: Tuple
-        :param embedding_network_1: the model to be used for the first branch of the siamese architecture.
+        :param embedding_network_0: the model to be used for the first branch of the siamese architecture.
         :type: torch.nn.Module
-        :param embedding_network_2: the model to be used for the second branch of the siamese architecture.
+        :param embedding_network_1: the model to be used for the second branch of the siamese architecture.
         :type: torch.nn.Module
         :param loss_reduction: reduction to apply to batch element loss values to obtain the loss for the whole batch.
         Must correspond to a valid reduction for the `ContrastiveLoss`.
@@ -41,8 +41,8 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
         :param kwargs: Trainer keyword arguments
         :type: Dict
         """
-        self.embedding_network_1 = embedding_network_1
-        self.embedding_network_2 = embedding_network_2
+        self.embedding_network_1 = embedding_network_0
+        self.embedding_network_2 = embedding_network_1
         self.loss_reduction = loss_reduction
         self.margin = margin
         super().__init__(*args, **kwargs)
@@ -76,11 +76,16 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
 
 
 @kwargs_parameter_dict
-def train_siamese_cnn(*args, optimizer_mixin=None, **kwargs):
+def train_siamese_cnn(*args, embedding_network_0=CNNNormalized(out_features=250),
+                      embedding_network_1=CNNNormalized(out_features=250), optimizer_mixin=None, **kwargs):
     """
     Train a Siamese CNN architecture.
     :param args: SiameseTrainer arguments
     :type: Tuple
+    :param embedding_network_0: the model to be used for the first branch of the siamese architecture.
+    :type: torch.nn.Module
+    :param embedding_network_1: the model to be used for the second branch of the siamese architecture.
+    :type: torch.nn.Module
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
@@ -89,17 +94,21 @@ def train_siamese_cnn(*args, optimizer_mixin=None, **kwargs):
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
-    trainer = SiameseTrainer(*args, embedding_network_1=CNNNormalized(out_features=250),  # photos
-                             embedding_network_2=CNNNormalized(out_features=250), **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_0, embedding_network_1, **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_siamese_resnet(*args, optimizer_mixin=None, **kwargs):
+def train_siamese_resnet(*args, embedding_network_0=ResNetNormalized(out_features=250, pretrained=True),
+                         embedding_network_1=ResNetNormalized(out_features=250), optimizer_mixin=None, **kwargs):
     """
     Train a Siamese ResNet architecture.
     :param args: SiameseTrainer arguments
     :type: Tuple
+    :param embedding_network_0: the model to be used for the first branch of the siamese architecture.
+    :type: torch.nn.Module
+    :param embedding_network_1: the model to be used for the second branch of the siamese architecture.
+    :type: torch.nn.Module
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
@@ -108,17 +117,21 @@ def train_siamese_resnet(*args, optimizer_mixin=None, **kwargs):
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
-    trainer = SiameseTrainer(*args, embedding_network_1=ResNetNormalized(out_features=250, pretrained=True),  # photos
-                             embedding_network_2=ResNetNormalized(out_features=250), **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_0, embedding_network_1, **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_siamese_resnext(*args, optimizer_mixin=None, **kwargs):
+def train_siamese_resnext(*args, embedding_network_0=ResNextNormalized(out_features=250, pretrained=True),
+                          embedding_network_1=ResNextNormalized(out_features=250), optimizer_mixin=None, **kwargs):
     """
     Train a Siamese ResNext architecture.
     :param args: SiameseTrainer arguments
     :type: Tuple
+    :param embedding_network_0: the model to be used for the first branch of the siamese architecture.
+    :type: torch.nn.Module
+    :param embedding_network_1: the model to be used for the second branch of the siamese architecture.
+    :type: torch.nn.Module
     :param optimizer_mixin: Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s
     `optimizer` property with a specific optimizer.
     :type: vscvs.trainers.mixins.OptimizerMixin
@@ -127,6 +140,5 @@ def train_siamese_resnext(*args, optimizer_mixin=None, **kwargs):
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
-    trainer = SiameseTrainer(*args, embedding_network_1=ResNextNormalized(out_features=250, pretrained=True),  # photos
-                             embedding_network_2=ResNextNormalized(out_features=250), **kwargs)
+    trainer = SiameseTrainer(*args, embedding_network_0, embedding_network_1, **kwargs)
     trainer.run()

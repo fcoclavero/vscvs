@@ -81,6 +81,6 @@ def train_cnn(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class CNNTrainer(optimizer_mixin, AbstractCNNTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = CNNTrainer(*args, **kwargs)
     trainer.run()

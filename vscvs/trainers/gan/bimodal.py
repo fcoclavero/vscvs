@@ -111,7 +111,7 @@ def train_gan_bimodal(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class BiModalGANTrainer(optimizer_mixin, AbstractBiModalGANTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = BiModalGANTrainer(*args, discriminator_network=InterModalDiscriminator(input_dimension=250),
                                 mode_embedding_networks=[ResNextNormalized(out_features=250, pretrained=True),
                                                          ResNextNormalized(out_features=250, pretrained=True)],
@@ -132,7 +132,7 @@ def train_gan_bimodal_siamese(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class BiModalGANSiameseTrainer(optimizer_mixin, AbstractBiModalGANSiameseTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = BiModalGANSiameseTrainer(*args, discriminator_network=InterModalDiscriminator(input_dimension=250),
                                        mode_embedding_networks=[ResNextNormalized(out_features=250, pretrained=True),
                                                                 ResNextNormalized(out_features=250, pretrained=True)],

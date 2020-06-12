@@ -101,6 +101,6 @@ def train_hog_gcn(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class HOGGCNTrainer(optimizer_mixin, AbstractHOGGCNTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = HOGGCNTrainer(*args, **kwargs)
     trainer.run()

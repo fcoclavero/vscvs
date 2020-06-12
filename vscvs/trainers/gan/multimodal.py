@@ -63,7 +63,7 @@ def train_gan_multimodal(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class MultiModalGANTrainer(optimizer_mixin, AbstractMultiModalGANTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = MultiModalGANTrainer(*args, discriminator_network=InterModalDiscriminatorSoftmax(input_dimension=250),
                                    mode_embedding_networks=[ResNextNormalized(out_features=250, pretrained=True),
                                                             ResNextNormalized(out_features=250, pretrained=True)],

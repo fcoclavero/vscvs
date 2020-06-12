@@ -87,7 +87,7 @@ def train_triplet_cnn(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = TripletTrainer(*args, anchor_network=CNNNormalized(out_features=250),
                              positive_negative_network=CNNNormalized(out_features=250), **kwargs)
     trainer.run()
@@ -106,7 +106,7 @@ def train_triplet_resnet(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = TripletTrainer(*args, anchor_network=ResNetNormalized(out_features=250, pretrained=True),
                              positive_negative_network=ResNetNormalized(out_features=250), **kwargs)
     trainer.run()
@@ -125,7 +125,7 @@ def train_triplet_resnext(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = TripletTrainer(*args, anchor_network=ResNextNormalized(out_features=250, pretrained=True),
                              positive_negative_network=ResNextNormalized(out_features=250), **kwargs)
     trainer.run()

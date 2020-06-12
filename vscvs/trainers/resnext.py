@@ -87,6 +87,6 @@ def train_resnext(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class ResNextTrainer(optimizer_mixin, AbstractResNextTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = ResNextTrainer(*args, **kwargs)
     trainer.run()

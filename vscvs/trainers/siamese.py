@@ -32,7 +32,7 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
         :param embedding_network_2: the model to be used for the second branch of the siamese architecture.
         :type: torch.nn.Module
         :param loss_reduction: reduction to apply to batch element loss values to obtain the loss for the whole batch.
-`       Must correspond to a valid reduction for the `ContrastiveLoss`.
+        Must correspond to a valid reduction for the `ContrastiveLoss`.
         :type: str
         :param margin: parameter for the contrastive loss, defining the acceptable threshold for considering the
         embeddings of two examples as dissimilar. Dissimilar image pairs will be pushed apart unless their distance
@@ -88,7 +88,7 @@ def train_siamese_cnn(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = SiameseTrainer(*args, embedding_network_1=CNNNormalized(out_features=250),  # photos
                              embedding_network_2=CNNNormalized(out_features=250), **kwargs)
     trainer.run()
@@ -107,8 +107,8 @@ def train_siamese_resnet(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
-    trainer = SiameseTrainer(*args, embedding_network_1=ResNetNormalized(out_features=250, pretrained=True), # photos
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+    trainer = SiameseTrainer(*args, embedding_network_1=ResNetNormalized(out_features=250, pretrained=True),  # photos
                              embedding_network_2=ResNetNormalized(out_features=250), **kwargs)
     trainer.run()
 
@@ -126,7 +126,7 @@ def train_siamese_resnext(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = SiameseTrainer(*args, embedding_network_1=ResNextNormalized(out_features=250, pretrained=True),  # photos
                              embedding_network_2=ResNextNormalized(out_features=250), **kwargs)
     trainer.run()

@@ -81,6 +81,6 @@ def train_classification_gcn(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class ClassificationGCNTrainer(optimizer_mixin, AbstractClassificationGCNTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = ClassificationGCNTrainer(*args, **kwargs)
     trainer.run()

@@ -22,7 +22,7 @@ from vscvs.decorators import kwargs_parameter_dict
 class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
     """
     Abstract Trainer for an image label classifier using a GCN over batch clique graphs where nodes correspond to batch
-    images, node feature vectors correspond to batch image HOG descriptors, and vertex weights corresponds to image\
+    images, node feature vectors correspond to batch image HOG descriptors, and vertex weights corresponds to image
     label word vector distances.
     """
     def __init__(self, *args, dataset_name=None, in_channels=3, cell_size=8, bins=9, signed_gradients=False,
@@ -101,6 +101,6 @@ def train_hog_gcn(*args, optimizer_mixin=None, **kwargs):
     :type: Dict
     """
     class HOGGCNTrainer(optimizer_mixin, AbstractHOGGCNTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
     trainer = HOGGCNTrainer(*args, **kwargs)
     trainer.run()

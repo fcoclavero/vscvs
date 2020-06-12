@@ -15,10 +15,11 @@ from overrides import overrides
 from torch_geometric.nn import GCNConv
 
 from vscvs.models.hog import HOG
+from vscvs.models.mixins import SoftmaxMixin
 from vscvs.utils import prepare_batch_graph
 
 
-class GCNClassification(torch.nn.Module):
+class GCNBase(torch.nn.Module):
     """
     GCN node classifier.
     """
@@ -32,8 +33,8 @@ class GCNClassification(torch.nn.Module):
         :type: int
         """
         super().__init__()
-        self.conv1 = GCNConv(in_channels, in_channels)
-        self.conv2 = GCNConv(in_channels, num_classes)
+        self.convolution_0 = GCNConv(in_channels, in_channels)
+        self.convolution_1 = GCNConv(in_channels, num_classes)
 
     @overrides
     def forward(self, batch_graph):
@@ -45,11 +46,14 @@ class GCNClassification(torch.nn.Module):
         :type: torch.Tensor with shape <batch_size, num_classes>
         """
         x, edge_index, edge_weight = batch_graph.x, batch_graph.edge_index, batch_graph.edge_attr
-        x = self.conv1(x, edge_index, edge_weight)
+        x = self.convolution_0(x, edge_index, edge_weight)
         x = F.relu(x)
         x = F.dropout(x, training=self.training)
-        x = self.conv2(x, edge_index, edge_weight)
-        return F.softmax(x, dim=1)
+        return self.convolution_1(x, edge_index, edge_weight)
+
+
+class GCNClassification(SoftmaxMixin, GCNBase):
+    pass
 
 
 class HOGGCN(torch.nn.Module):

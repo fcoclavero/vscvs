@@ -72,7 +72,7 @@ class NormalizedMixin(OutFeaturesMixin):
 class SigmoidMixin(OutFeaturesMixin):
     """
     Modifies the base model by adding a fully connected layer the same size as the number of possible classes, as well
-    as a log-softmax activation function after the output of extended model.
+    as a sigmoid activation function after the output of extended model.
     The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
     `out_features` parameter used in the `OutFeaturesMixin` constructor.
     """
@@ -82,13 +82,8 @@ class SigmoidMixin(OutFeaturesMixin):
         return x
 
 
-class SoftmaxMixin(OutFeaturesMixin):
-    """
-    Modifies the base model by adding a fully connected layer the same size as the number of possible classes, as well
-    as a softmax activation function after the output of extended model.
-    The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
-    `out_features` parameter used in the `OutFeaturesMixin` constructor.
-    """
+class SoftmaxMixin(ModuleMixin):
+    """ Modifies the base model by adding a softmax activation function after the output of extended model. """
     def forward(self, x):
         x = super().forward(x)
         x = F.softmax(x, dim=-1)

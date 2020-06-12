@@ -52,6 +52,6 @@ class InterModalDiscriminatorSigmoid(SigmoidMixin, InterModalDiscriminatorBase):
         return super().forward(x).view(-1)
 
 
-class InterModalDiscriminatorSoftmax(SoftmaxMixin, InterModalDiscriminatorBase):
+class InterModalDiscriminatorSoftmax(SoftmaxMixin, OutFeaturesMixin, InterModalDiscriminatorBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, out_features=2, **kwargs)

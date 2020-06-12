@@ -46,7 +46,7 @@ class ResNextSigmoid(SigmoidMixin, ResNextBase):
     pass
 
 
-class ResNextSoftmax(SoftmaxMixin, ResNextBase):
+class ResNextSoftmax(SoftmaxMixin, OutFeaturesMixin, ResNextBase):
     pass
 
 

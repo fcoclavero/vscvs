@@ -46,7 +46,7 @@ class ResNetSigmoid(SigmoidMixin, ResNetBase):
     pass
 
 
-class ResNetSoftmax(SoftmaxMixin, ResNetBase):
+class ResNetSoftmax(SoftmaxMixin, OutFeaturesMixin, ResNetBase):
     pass
 
 

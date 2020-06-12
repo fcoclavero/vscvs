@@ -64,7 +64,7 @@ class CNNSigmoid(SigmoidMixin, CNNBase):
     pass
 
 
-class CNNSoftmax(SoftmaxMixin, CNNBase):
+class CNNSoftmax(SoftmaxMixin, OutFeaturesMixin, CNNBase):
     pass
 
 

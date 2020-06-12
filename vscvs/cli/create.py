@@ -20,7 +20,8 @@ def create():
 
 @create.command()
 @click.option('--dataset-name', prompt='Dataset name', help='Name of the dataset for which classes must be created.',
-              type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
+              type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches',
+                                 'sketchy-test-photos-multimodal', 'sketchy-test-sketches-multimodal']))
 @click.option('--distance', prompt='Distance', type=click.Choice(['cosine', 'pairwise']),
               help='The distance measure to be used for pre-computing class document vector distances.')
 @click.option('--tsne-dimension', default=2, help='The target dimensionality for the lower dimension projection.')
@@ -28,7 +29,7 @@ def classes(dataset_name, distance, tsne_dimension):
     """ Create a class name word vector dataframe for a dataset. """
     click.echo('Creating a new classes dataframe for the {} dataset'.format(dataset_name))
     from vscvs.preprocessing import create_classes_data_frame
-    create_classes_data_frame(dataset_name, distance, tsne_dimension)\
+    create_classes_data_frame(dataset_name, distance, tsne_dimension)
 
 
 @create.command()

@@ -7,17 +7,21 @@ __status__ = "Prototype"
 
 
 from abc import ABC
-from ignite.engine import create_supervised_trainer, create_supervised_evaluator
-from ignite.metrics import Accuracy, Loss
+from typing import Callable
+
+from ignite.engine import create_supervised_evaluator
+from ignite.engine import create_supervised_trainer
+from ignite.metrics import Accuracy
+from ignite.metrics import Loss
 from overrides import overrides
 from torch.nn import CrossEntropyLoss
-from typing import Callable
+
+from vscvs.decorators import kwargs_parameter_dict
+from vscvs.models import CNNLogSoftmax
+from vscvs.utils import prepare_batch
 
 from .abstract_trainer import AbstractTrainer
 from .mixins import EarlyStoppingMixin
-from vscvs.models import CNNLogSoftmax
-from vscvs.utils import prepare_batch
-from vscvs.decorators import kwargs_parameter_dict
 
 
 class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):

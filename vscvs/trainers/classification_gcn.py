@@ -7,16 +7,22 @@ __status__ = "Prototype"
 
 
 from abc import ABC
-from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy
-from overrides import overrides
-from torch.nn import CrossEntropyLoss
 from typing import Callable
 
-from .abstract_trainer import AbstractTrainer
-from .engines.classification_gcn import create_classification_gcn_evaluator, create_classification_gcn_trainer
+from ignite.metrics import Accuracy
+from ignite.metrics import Loss
+from ignite.metrics import Recall
+from ignite.metrics import TopKCategoricalAccuracy
+from overrides import overrides
+from torch.nn import CrossEntropyLoss
+
 from vscvs.datasets import get_dataset
-from vscvs.models import GCNClassification
 from vscvs.decorators import kwargs_parameter_dict
+from vscvs.models import GCNClassification
+
+from .abstract_trainer import AbstractTrainer
+from .engines.classification_gcn import create_classification_gcn_evaluator
+from .engines.classification_gcn import create_classification_gcn_trainer
 
 
 class AbstractClassificationGCNTrainer(AbstractTrainer, ABC):

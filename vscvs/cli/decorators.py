@@ -1,13 +1,14 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Decorators for the click CLI. """
 
 
-import click
 import functools
+
+import click
 
 
 def pass_kwargs_to_context(func):
@@ -21,11 +22,13 @@ def pass_kwargs_to_context(func):
     :return: the decorated function, which passes all kwargs to the click context and passes it on
     :type: function
     """
+
     @click.pass_context
     def wrapper(context, *args, **kwargs):
         """ Extend the context dict with the provided kwargs. """
         context.obj = {**context.obj, **kwargs} if context.obj else kwargs
         return context.invoke(func, context, *args, **kwargs)
+
     return functools.update_wrapper(wrapper, func)
 
 
@@ -38,9 +41,11 @@ def pass_context_to_kwargs(func):
     :return: the decorated function, which passes all kwargs in the click context to the invocation kwargs
     :type: function
     """
-    @click.pass_context # needed to receive the context
+
+    @click.pass_context  # needed to receive the context
     def wrapper(context, *args, **kwargs):
         """ Extend kwargs with the context dict parameters. """
         kwargs = {**context.obj, **kwargs} if context.obj else kwargs
         return context.invoke(func, *args, **kwargs)
+
     return functools.update_wrapper(wrapper, func)

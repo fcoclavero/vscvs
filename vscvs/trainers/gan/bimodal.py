@@ -7,22 +7,26 @@ __status__ = "Prototype"
 
 
 from abc import ABC
-from overrides import overrides
-from torch.nn import BCEWithLogitsLoss
 from typing import Callable
 
-from .gan import AbstractGANTrainer
-from ..engines.gan import (
-    create_multimodal_gan_evaluator,
-    create_multimodal_gan_trainer,
-    create_multimodal_gan_siamese_evaluator,
-    create_multimodal_gan_siamese_trainer,
-    prepare_bimodal_batch_variables,
-)
-from vscvs.loss_functions import ContrastiveLoss
-from vscvs.metrics import AverageDistancesMultimodalSiamesePairs, LossMultimodalGAN, LossBimodalSiamesePairs
-from vscvs.models import ResNextNormalized, InterModalDiscriminator, MultimodalEncoder
+from overrides import overrides
+from torch.nn import BCEWithLogitsLoss
+
 from vscvs.decorators import kwargs_parameter_dict
+from vscvs.loss_functions import ContrastiveLoss
+from vscvs.metrics import AverageDistancesMultimodalSiamesePairs
+from vscvs.metrics import LossBimodalSiamesePairs
+from vscvs.metrics import LossMultimodalGAN
+from vscvs.models import InterModalDiscriminator
+from vscvs.models import MultimodalEncoder
+from vscvs.models import ResNextNormalized
+
+from ..engines.gan import create_multimodal_gan_evaluator
+from ..engines.gan import create_multimodal_gan_siamese_evaluator
+from ..engines.gan import create_multimodal_gan_siamese_trainer
+from ..engines.gan import create_multimodal_gan_trainer
+from ..engines.gan import prepare_bimodal_batch_variables
+from .gan import AbstractGANTrainer
 
 
 class AbstractBiModalGANTrainer(AbstractGANTrainer, ABC):

@@ -28,7 +28,7 @@ lines_between_types = 1
 multi_line_output = 3
 use_parentheses = true
 not_skip = "__init__.py"
-skip_glob = ["*/setup.py"]
+skip_glob = "*/setup.py"
 filter_files = true
 
 
@@ -75,7 +75,7 @@ callbacks = ["cb_", "_cb"]
 
 [tool.pylint.format]
 max-line-length = 120
-ignore-long-lines = "^\s*(# )?<?https?://\S+>?$"
+ignore-long-lines = "^\\s*(# )?<?https?://\\S+>?$"
 single-line-if-stmt = false
 no-space-check= ["trailing-comma", "dict-separator"]
 max-module-lines=2000

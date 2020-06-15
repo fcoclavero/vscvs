@@ -11,12 +11,12 @@ import torch
 from ignite.engine import Engine
 
 from vscvs.trainers.engines import attach_metrics
-from vscvs.utils import output_transform_multimodal_gan_evaluator as output_transform_evaluator, \
-    output_transform_multimodal_gan_siamese_evaluator as output_transform_evaluator_siamese, \
-    output_transform_multimodal_gan_trainer as output_transform_trainer, \
-    output_transform_multimodal_gan_siamese_trainer as output_transform_trainer_siamese, \
-    prepare_batch_multimodal as _prepare_batch, \
-    prepare_batch_multimodal_siamese as prepare_batch_siamese
+from vscvs.utils import output_transform_multimodal_gan_evaluator as output_transform_evaluator
+from vscvs.utils import output_transform_multimodal_gan_siamese_evaluator as output_transform_evaluator_siamese
+from vscvs.utils import output_transform_multimodal_gan_siamese_trainer as output_transform_trainer_siamese
+from vscvs.utils import output_transform_multimodal_gan_trainer as output_transform_trainer
+from vscvs.utils import prepare_batch_multimodal as _prepare_batch
+from vscvs.utils import prepare_batch_multimodal_siamese as prepare_batch_siamese
 
 
 def combine_batches(*batches):

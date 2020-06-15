@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Custom Ignite metrics for triplet networks. """
@@ -9,8 +9,10 @@ __status__ = 'Prototype'
 import torch
 
 from ignite.exceptions import NotComputableError
-from ignite.metrics import Loss, Metric
-from ignite.metrics.metric import sync_all_reduce, reinit__is_reduced
+from ignite.metrics import Loss
+from ignite.metrics import Metric
+from ignite.metrics.metric import reinit__is_reduced
+from ignite.metrics.metric import sync_all_reduce
 from overrides import overrides
 
 from .mulitmodal import AbstractAverageDistances
@@ -21,6 +23,7 @@ class AccuracyTriplets(Metric):
     Computes the average accuracy for a triplet network, defined as the proportion of triplets in which the positive
     embedding is closer to the anchor than the negative embedding (this is the desired behaviour).
     """
+
     def __init__(self, *args, **kwargs):
         """
         :param args: Metric arguments
@@ -32,11 +35,11 @@ class AccuracyTriplets(Metric):
         self._num_examples = 0
         super().__init__(*args, **kwargs)
 
-    @sync_all_reduce('_num_correct', '_num_examples')
+    @sync_all_reduce("_num_correct", "_num_examples")
     @overrides
     def compute(self):
         if self._num_examples == 0:
-            raise NotComputableError('Accuracy must have at least one example before it can be computed.')
+            raise NotComputableError("Accuracy must have at least one example before it can be computed.")
         return self._num_correct / self._num_examples
 
     @reinit__is_reduced
@@ -72,6 +75,7 @@ class LossTriplets(Loss):
     """
     Computes the average loss for a triplet network.
     """
+
     @reinit__is_reduced
     @overrides
     def update(self, output):
@@ -91,7 +95,7 @@ class LossTriplets(Loss):
         average_loss = self._loss_fn(anchor_embeddings, positive_embeddings, negative_embeddings, **kwargs)
 
         if len(average_loss.shape) != 0:
-            raise ValueError('loss_fn did not return the average loss.')
+            raise ValueError("loss_fn did not return the average loss.")
 
         batch_size = self._batch_size(anchor_embeddings)
         self._sum += average_loss.item() * batch_size
@@ -102,6 +106,7 @@ class AverageDistancesTriplets(AbstractAverageDistances):
     """
     Computes the average distances from the anchor to the positive and negative elements of each triplet.
     """
+
     @reinit__is_reduced
     @overrides
     def update(self, output):
@@ -113,9 +118,11 @@ class AverageDistancesTriplets(AbstractAverageDistances):
         """
         anchor_embeddings, positive_embeddings, negative_embeddings = output
         batch_size = self._batch_size(anchor_embeddings)
-        self._sum_positive_distances = \
+        self._sum_positive_distances = (
             torch.nn.functional.pairwise_distance(anchor_embeddings, positive_embeddings).pow(2).sum()
-        self._sum_negative_distances = \
+        )
+        self._sum_negative_distances = (
             torch.nn.functional.pairwise_distance(anchor_embeddings, negative_embeddings).pow(2).sum()
+        )
         self._num_examples_negative += batch_size
         self._num_examples_positive += batch_size

@@ -7,15 +7,23 @@ __status__ = "Prototype"
 
 
 from abc import ABC
-from overrides import overrides
 from typing import Callable
 
-from .abstract_trainer import AbstractTrainer
-from .engines.triplet import create_triplet_evaluator, create_triplet_trainer
-from vscvs.loss_functions import TripletLoss
-from vscvs.metrics import AccuracyTriplets, AverageDistancesTriplets, LossTriplets
-from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, TripletSharedPositiveNegative
+from overrides import overrides
+
 from vscvs.decorators import kwargs_parameter_dict
+from vscvs.loss_functions import TripletLoss
+from vscvs.metrics import AccuracyTriplets
+from vscvs.metrics import AverageDistancesTriplets
+from vscvs.metrics import LossTriplets
+from vscvs.models import CNNNormalized
+from vscvs.models import ResNetNormalized
+from vscvs.models import ResNextNormalized
+from vscvs.models import TripletSharedPositiveNegative
+
+from .abstract_trainer import AbstractTrainer
+from .engines.triplet import create_triplet_evaluator
+from .engines.triplet import create_triplet_trainer
 
 
 class AbstractTripletTrainer(AbstractTrainer, ABC):

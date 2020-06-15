@@ -7,15 +7,23 @@ __status__ = "Prototype"
 
 
 from abc import ABC
-from overrides import overrides
 from typing import Callable
 
-from .abstract_trainer import AbstractTrainer
-from .engines.siamese import create_siamese_evaluator, create_siamese_trainer
-from vscvs.loss_functions import ContrastiveLoss
-from vscvs.metrics import AccuracySiamesePairs, AverageDistancesSiamesePairs, LossSiamesePairs
-from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, SiameseNetwork
+from overrides import overrides
+
 from vscvs.decorators import kwargs_parameter_dict
+from vscvs.loss_functions import ContrastiveLoss
+from vscvs.metrics import AccuracySiamesePairs
+from vscvs.metrics import AverageDistancesSiamesePairs
+from vscvs.metrics import LossSiamesePairs
+from vscvs.models import CNNNormalized
+from vscvs.models import ResNetNormalized
+from vscvs.models import ResNextNormalized
+from vscvs.models import SiameseNetwork
+
+from .abstract_trainer import AbstractTrainer
+from .engines.siamese import create_siamese_evaluator
+from .engines.siamese import create_siamese_trainer
 
 
 class AbstractSiameseTrainer(AbstractTrainer, ABC):

@@ -1,16 +1,17 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Batch preparation functions. """
 
 
+from itertools import repeat
+
 import torch
 
-from itertools import repeat
-from torch.multiprocessing import Pool
 from ignite.utils import convert_tensor
+from torch.multiprocessing import Pool
 from torch_geometric.data import Data
 
 
@@ -30,13 +31,17 @@ def batch_clique_graph(batch, classes_dataframe, processes=None):
     :type: torch_geometric.data.Data
     """
     x, y, *_ = batch  # unpack extra parameters into `_`
-    edge_index = torch.stack([ # create the binary adjacency matrix for the clique graph
-        torch.arange(x.shape[0]).repeat_interleave(x.shape[0]), # each index repeated num_edges times
-        torch.arange(x.shape[0]).repeat(x.shape[0])]) # the index range repeated num_edges times
-    with Pool(processes=processes) as pool: # create edge weights from the word vector distances
+    edge_index = torch.stack(
+        [  # create the binary adjacency matrix for the clique graph
+            torch.arange(x.shape[0]).repeat_interleave(x.shape[0]),  # each index repeated num_edges times
+            torch.arange(x.shape[0]).repeat(x.shape[0]),
+        ]
+    )  # the index range repeated num_edges times
+    with Pool(processes=processes) as pool:  # create edge weights from the word vector distances
         edge_classes = torch.stack([y.repeat_interleave(y.shape[0]), y.repeat(y.shape[0])]).t().contiguous()
-        edge_attr = torch.stack(pool.starmap(
-            wordvector_distance, zip(edge_classes, repeat(torch.tensor(classes_dataframe['distances'])))))
+        edge_attr = torch.stack(
+            pool.starmap(wordvector_distance, zip(edge_classes, repeat(torch.tensor(classes_dataframe["distances"]))))
+        )
     return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y)
 
 
@@ -53,7 +58,7 @@ def prepare_batch(batch, device=None, non_blocking=False):
     :return: 2-tuple with batch elements and labels.
     :type: Tuple[torch.Tensor, torch.Tensor]
     """
-    x, y, *_ = batch # unpack extra parameters into `_`
+    x, y, *_ = batch  # unpack extra parameters into `_`
     return tuple(convert_tensor(element, device=device, non_blocking=non_blocking) for element in [x, y])
 
 
@@ -76,8 +81,7 @@ def prepare_batch_graph(batch, classes_dataframe, device=None, non_blocking=Fals
     :type: torch_geometric.data.Data
     """
     graph = batch_clique_graph(batch, classes_dataframe, processes)
-    graph.apply(
-        lambda attr: convert_tensor(attr.float(), device=device, non_blocking=non_blocking), 'x', 'edge_attr')
+    graph.apply(lambda attr: convert_tensor(attr.float(), device=device, non_blocking=non_blocking), "x", "edge_attr")
     return graph
 
 
@@ -132,9 +136,11 @@ def prepare_batch_multimodal_siamese(batch, device=None, non_blocking=False):
     entities_0, entities_1 = batch
     assert torch.equal(entities_0[0][1], entities_0[1][1]) and torch.equal(entities_1[0][1], entities_1[1][1])
     target = siamese_target(entities_0, entities_1, lambda x: x[0][1])
-    return prepare_batch_multimodal(entities_0, device, non_blocking),\
-           prepare_batch_multimodal(entities_1, device, non_blocking), \
-           convert_tensor(target, device=device, non_blocking=non_blocking)
+    return (
+        prepare_batch_multimodal(entities_0, device, non_blocking),
+        prepare_batch_multimodal(entities_1, device, non_blocking),
+        convert_tensor(target, device=device, non_blocking=non_blocking),
+    )
 
 
 def siamese_target(elements_0, elements_1, get_classes=lambda x: x[1]):
@@ -155,7 +161,7 @@ def siamese_target(elements_0, elements_1, get_classes=lambda x: x[1]):
     :type: torch.Tensor with shape `batch_size`
     """
     # noinspection PyUnresolvedReferences
-    return (get_classes(elements_0) != get_classes(elements_1)).int() # `torch.Tensor` type is inferred
+    return (get_classes(elements_0) != get_classes(elements_1)).int()  # `torch.Tensor` type is inferred
 
 
 def wordvector_distance(indices, class_wordvector_distances):

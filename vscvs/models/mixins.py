@@ -1,15 +1,18 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Mixin for adapting a convolutional model for classification. """
 
 
+from typing import Callable
+
 import torch.nn.functional as F
 
-from torch import nn, sigmoid, Tensor
-from typing import Callable
+from torch import Tensor
+from torch import nn
+from torch import sigmoid
 
 from vscvs.utils import get_out_features_from_model
 
@@ -19,6 +22,7 @@ class ModuleMixin:
     Utility class that type hints `Module` methods that will be available to the mixins in this package via a `super()`
     call, as they are meant to be used in multiple inheritance with `torch.nn.Module`.
     """
+
     forward: Callable[[Tensor], Tensor]
 
 
@@ -28,6 +32,7 @@ class OutFeaturesMixin(ModuleMixin):
     The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
     `out_features` parameter.
     """
+
     def __init__(self, *args, out_features=None, **kwargs):
         """
         Initialize model.
@@ -50,6 +55,7 @@ class NormalizedMixin(OutFeaturesMixin):
     The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
     `out_features` parameter used in the `OutFeaturesMixin` constructor.
     """
+
     def __init__(self, *args, p=2, dim=1, eps=1e-12, **kwargs):
         """
         Initialize model.
@@ -76,6 +82,7 @@ class SigmoidMixin(OutFeaturesMixin):
     The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
     `out_features` parameter used in the `OutFeaturesMixin` constructor.
     """
+
     def forward(self, x):
         x = super().forward(x)
         x = sigmoid(x)
@@ -89,6 +96,7 @@ class SoftmaxMixin(OutFeaturesMixin):
     The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
     `out_features` parameter used in the `OutFeaturesMixin` constructor.
     """
+
     def forward(self, x):
         x = super().forward(x)
         x = F.softmax(x, dim=-1)
@@ -102,6 +110,7 @@ class LogSoftmaxMixin(OutFeaturesMixin):
     The mixin must be inherited before the `torch.nn.Module` to be extended in order to remove the additional
     `out_features` parameter used in the `OutFeaturesMixin` constructor.
     """
+
     def forward(self, x):
         x = super().forward(x)
         x = F.log_softmax(x, dim=-1)

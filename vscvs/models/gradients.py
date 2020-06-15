@@ -1,15 +1,16 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Modules with image processing convolutions with fixed kernels, such as the Sobel filter. """
 
 
+from abc import abstractmethod
+
 import torch
 import torch.nn.functional as F
 
-from abc import abstractmethod
 from overrides import overrides
 
 from vscvs.decorators import torch_no_grad
@@ -19,6 +20,7 @@ class AbstractKernelConvolution(torch.nn.Module):
     """
     Abstract module for creating convolutions with user defined kernels.
     """
+
     def __init__(self, in_channels=3, stride=1, padding=1, dilation=1):
         """
         :param in_channels: the number of channels for inputs.
@@ -38,7 +40,9 @@ class AbstractKernelConvolution(torch.nn.Module):
         self.stride = stride
         self.padding = padding
         self.dilation = dilation
-        self.register_buffer('weight', self.kernel) # register buffer that should not to be considered a model parameter
+        self.register_buffer(
+            "weight", self.kernel
+        )  # register buffer that should not to be considered a model parameter
 
     @property
     def kernel(self):
@@ -59,7 +63,7 @@ class AbstractKernelConvolution(torch.nn.Module):
 
     def to(self, *args, **kwargs):
         """ Override of `to` method to send the weight buffer to the new device. """
-        self.register_buffer('weight', self.kernel.to(*args, **kwargs))
+        self.register_buffer("weight", self.kernel.to(*args, **kwargs))
         return super().to(*args, **kwargs)
 
 
@@ -67,6 +71,7 @@ class Abstract2DKernelConvolution(AbstractKernelConvolution):
     """
     Abstract module for performing 2D kernel convolutions over all input channels.
     """
+
     @property
     @abstractmethod
     def kernel_2d(self):
@@ -79,7 +84,7 @@ class Abstract2DKernelConvolution(AbstractKernelConvolution):
 
     @property
     def kernel(self):
-        kernel = torch.stack([self.kernel_2d for _ in range(self.in_channels)]) # repeat kernel for each input channel
+        kernel = torch.stack([self.kernel_2d for _ in range(self.in_channels)])  # repeat kernel for each input channel
         return kernel.unsqueeze(0)  # we must add and additional dimension to handle multiple inputs
 
 
@@ -90,6 +95,7 @@ class SobelX(Abstract2DKernelConvolution):
     the same 2D kernel over all of them. Sobel kernel size 1.
     Reference: https://en.wikipedia.org/wiki/Sobel_operator
     """
+
     @property
     @overrides
     def kernel_2d(self):
@@ -103,6 +109,7 @@ class SobelY(Abstract2DKernelConvolution):
     the same 2D kernel over all of them. Sobel kernel size 1.
     Reference: https://en.wikipedia.org/wiki/Sobel_operator
     """
+
     @property
     @overrides
     def kernel_2d(self):
@@ -116,7 +123,8 @@ class Laplacian(Abstract2DKernelConvolution):
     the same 2D kernel over all of them. Kernel size 1.
     Reference: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_gradients/py_gradients.html
     """
+
     @property
     @overrides
     def kernel_2d(self):
-        return  torch.tensor([[0, 1, 0], [1, 4, 1], [0, 1, 0]], dtype=torch.float)
+        return torch.tensor([[0, 1, 0], [1, 4, 1], [0, 1, 0]], dtype=torch.float)

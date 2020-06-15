@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ General utilities. All functions are imported in the `utils.__init__.py` for ease of access. """
@@ -8,16 +8,19 @@ __status__ = 'Prototype'
 
 import os
 import re
-import torch
-import yaml
 
 from collections import OrderedDict
 from datetime import datetime
+
+import torch
+import yaml
+
 from torch import nn as nn
 from torch.utils.data import DataLoader
 
-from .path import get_checkpoint_path
 from settings import CHECKPOINT_NAME_FORMAT
+
+from .path import get_checkpoint_path
 
 
 def camel_to_snake_case(camel_cased_string):
@@ -28,7 +31,7 @@ def camel_to_snake_case(camel_cased_string):
     :return: the same string, but in snake_case format.
     :type: str
     """
-    return re.sub(r'(?<!^)(?=[A-Z])', '_', camel_cased_string).lower()
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", camel_cased_string).lower()
 
 
 def camel_to_snake_case_dict_keys(dictionary):
@@ -39,7 +42,7 @@ def camel_to_snake_case_dict_keys(dictionary):
     :return: the same dictionary, but with its keys formatted in snake_case.
     :type: Dict
     """
-    return {camel_to_snake_case(key) : value for key, value in dictionary.items()}
+    return {camel_to_snake_case(key): value for key, value in dictionary.items()}
 
 
 def get_device(n_gpu):
@@ -50,7 +53,7 @@ def get_device(n_gpu):
     :return: the name of the device to be used by PyTorch.
     :type: str
     """
-    return torch.device('cuda:0' if (torch.cuda.is_available() and n_gpu > 0) else 'cpu')
+    return torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
 
 
 def get_out_features_from_model(model):
@@ -72,11 +75,14 @@ def get_out_features_from_state_dict(state_dict):
     :return: the number of features of the last layer of `state_dict`.
     :type: int
     """
-    return next(reversed(state_dict.values())).shape[0] # OrderedDict guarantees last elem. in values list is last layer
+    return next(reversed(state_dict.values())).shape[
+        0
+    ]  # OrderedDict guarantees last elem. in values list is last layer
 
 
-def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2,
-                       batch_norm_std=1.0, batch_norm_bias=0.0):
+def initialize_weights(
+    model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2, batch_norm_std=1.0, batch_norm_bias=0.0
+):
     """
     Custom weights initialization.
     The function takes an initialized model as input and re-initializes all convolutional,
@@ -98,9 +104,9 @@ def initialize_weights(model, conv_mean=0.2, conv_std=0.0, batch_norm_mean=0.2,
     :return: None
     """
     classname = model.__class__.__name__
-    if classname.find('Conv') != -1:
+    if classname.find("Conv") != -1:
         nn.init.normal_(model.weight.data, conv_mean, conv_std)
-    elif classname.find('BatchNorm') != -1:
+    elif classname.find("BatchNorm") != -1:
         nn.init.normal_(model.weight.data, batch_norm_mean, batch_norm_std)
         nn.init.constant_(model.bias.data, batch_norm_bias)
 
@@ -123,7 +129,7 @@ def load_classification_model_from_checkpoint(model, state_dict_file, checkpoint
     """
     date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
     checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pt'.format(state_dict_file)))
+    state_dict = torch.load(os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)))
     out_features = get_out_features_from_state_dict(state_dict)
     model = model(out_features=out_features)
     model.load_state_dict(state_dict)
@@ -149,15 +155,18 @@ def load_siamese_model_from_checkpoint(model_0, model_1, state_dict_file, checkp
     :type: torch.nn.Module
     """
     from vscvs.models import SiameseNetwork
+
     date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
     checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, '{}.pt'.format(state_dict_file)))
-    state_dict_0 = OrderedDict({key: value for key, value in state_dict.items() if 'embedding_network_0' in key})
-    state_dict_1 = OrderedDict({key: value for key, value in state_dict.items() if 'embedding_network_1' in key})
+    state_dict = torch.load(os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)))
+    state_dict_0 = OrderedDict({key: value for key, value in state_dict.items() if "embedding_network_0" in key})
+    state_dict_1 = OrderedDict({key: value for key, value in state_dict.items() if "embedding_network_1" in key})
     out_features_0 = get_out_features_from_state_dict(state_dict_0)
     out_features_1 = get_out_features_from_state_dict(state_dict_1)
-    model = SiameseNetwork(embedding_network_0=model_0(out_features=out_features_0),
-                           embedding_network_1=model_1(out_features=out_features_1))
+    model = SiameseNetwork(
+        embedding_network_0=model_0(out_features=out_features_0),
+        embedding_network_1=model_1(out_features=out_features_1),
+    )
     model.load_state_dict(state_dict)
     return model
 
@@ -170,7 +179,7 @@ def load_yaml(file_path):
     :return: the contents of the yaml file, as a Python dictionary.
     :type: Dict
     """
-    return yaml.load(open(file_path, 'r'), Loader=yaml.Loader)
+    return yaml.load(open(file_path, "r"), Loader=yaml.Loader)
 
 
 def remove_last_layer(model):
@@ -200,6 +209,7 @@ def sprite_tensor(dataset_name, size=(64, 64)):
     :type: torch.Tensor
     """
     from vscvs.datasets import get_dataset
+
     dataset = get_dataset(dataset_name, normalize=False, size=size)
     data_loader = DataLoader(dataset, batch_size=len(dataset), shuffle=False)
     return next(iter(data_loader))[0]
@@ -216,6 +226,6 @@ def str_to_bin_array(number, array_length=None):
     :return: the binary array representation of `number`.
     :type: List[int]
     """
-    bin_str = '{0:b}'.format(number)
+    bin_str = "{0:b}".format(number)
     bin_str = bin_str.zfill(array_length) if array_length else bin_str
     return list(map(int, bin_str))

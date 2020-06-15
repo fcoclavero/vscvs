@@ -1,13 +1,16 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Mixins with the code needed to add different functionality to Trainers. """
 
 
-from abc import ABC, abstractmethod
-from ignite.engine import Engine, Events
+from abc import ABC
+from abc import abstractmethod
+
+from ignite.engine import Engine
+from ignite.engine import Events
 from ignite.handlers import EarlyStopping
 
 
@@ -15,6 +18,7 @@ class EarlyStoppingMixin(ABC):
     """
     Mixin class for adding early stopping to a Trainer.
     """
+
     evaluator_engine: Engine
     trainer_engine: Engine
 
@@ -42,8 +46,9 @@ class EarlyStoppingMixin(ABC):
         :return: the early stopping handler
         :type: from ignite.handlers.EarlyStopping
         """
-        return EarlyStopping(patience=self.early_stopping_patience, score_function=self._score_function,
-                             trainer=self.trainer_engine)
+        return EarlyStopping(
+            patience=self.early_stopping_patience, score_function=self._score_function, trainer=self.trainer_engine
+        )
 
     @staticmethod
     @abstractmethod

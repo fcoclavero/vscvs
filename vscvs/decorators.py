@@ -1,17 +1,18 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ General decorators. """
 
 
 import functools
-import torch
 import warnings
 
 from datetime import datetime
 from threading import Thread
+
+import torch
 
 
 def deprecated(func):
@@ -22,6 +23,7 @@ def deprecated(func):
     :return: the decorated function, which emits a warning when used
     :type: function
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         """
@@ -32,10 +34,11 @@ def deprecated(func):
         :type: Dict
         :return: original function evaluation
         """
-        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
+        warnings.simplefilter("always", DeprecationWarning)  # turn off filter
         warnings.warn("Deprecated function {} invoked".format(func.__name__), category=DeprecationWarning, stacklevel=2)
-        warnings.simplefilter('default', DeprecationWarning)  # reset filter
+        warnings.simplefilter("default", DeprecationWarning)  # reset filter
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -48,6 +51,7 @@ def kwargs_parameter_dict(func):
     original keyword arguments.
     :type: function
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         """
@@ -59,6 +63,7 @@ def kwargs_parameter_dict(func):
         :return: original function evaluation
         """
         return func(*args, parameter_dict=kwargs, **kwargs)
+
     return wrapper
 
 
@@ -70,6 +75,7 @@ def log_time(func):
     :return: the decorated function, which now prints its execution time.
     :type: function
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         """
@@ -82,8 +88,9 @@ def log_time(func):
         """
         start = datetime.now()
         ret = func(*args, **kwargs)
-        print('Executed {} in {} s.'.format(func.__name__, datetime.now() - start))
+        print("Executed {} in {} s.".format(func.__name__, datetime.now() - start))
         return ret
+
     return wrapper
 
 
@@ -95,6 +102,7 @@ def threaded(func):
     :return: the decorated function, which evaluates in a new Python thread
     :type: function
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         """
@@ -108,6 +116,7 @@ def threaded(func):
         t = Thread(target=func, args=args, kwargs=kwargs)
         t.daemon = True
         t.start()
+
     return wrapper
 
 
@@ -122,6 +131,7 @@ def torch_no_grad(func):
     :return: the decorated function, which evaluates in a context with disabled gradient calculations.
     :type: function
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         """
@@ -134,6 +144,7 @@ def torch_no_grad(func):
         """
         with torch.no_grad():
             return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -145,6 +156,7 @@ def parametrized(decorator):
     :return: a decorator which can receive arguments and keyword arguments
     :type: function
     """
+
     @functools.wraps(decorator)
     def wrapper(*args, **kwargs):
         """
@@ -155,6 +167,7 @@ def parametrized(decorator):
         :type: Dict
         :return: decorated function evaluation
         """
+
         def decorator_wrapper(func):
             """
             Evaluate the original decorator, which receives the function to be decorated along with the specified
@@ -164,7 +177,9 @@ def parametrized(decorator):
             :return: the evaluation of the parametrized decorator
             """
             return decorator(func, *args, **kwargs)
+
         return decorator_wrapper
+
     return wrapper
 
 
@@ -180,10 +195,12 @@ def handle_exception_decorator(func, callback):
     :return: the decorated function
     :type: Callable
     """
+
     @functools.wraps(func)
     def wrapper(instance, *args, **kwargs):
         try:
             return func(instance, *args, **kwargs)
         except Exception as e:
             callback(instance, func, e, *args, **kwargs)
+
     return wrapper

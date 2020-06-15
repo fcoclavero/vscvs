@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Ignite trainer engine (training logic) for multimodal GAN architecture. """
@@ -28,8 +28,10 @@ def combine_batches(*batches):
     in `batches`.
     :type: List[torch.Tensor]
     """
-    return tuple((torch.cat([batch[i][0] for batch in batches]), torch.cat([batch[i][1] for batch in batches]))
-                 for i in range(len(batches[0])))
+    return tuple(
+        (torch.cat([batch[i][0] for batch in batches]), torch.cat([batch[i][1] for batch in batches]))
+        for i in range(len(batches[0]))
+    )
 
 
 def prepare_multimodal_batch_variables(batch, device):
@@ -52,7 +54,7 @@ def prepare_multimodal_batch_variables(batch, device):
     classes = batch[0][1]  # any mode should have the same class idx
     mode_labels = torch.cat([t.expand(batch_size, n_modes) for t in torch.diag(torch.ones(n_modes))]).to(device)
     # noinspection PyTypeChecker
-    generator_labels = (1 - mode_labels.float()) / (n_modes - 1) # type is automatically inferred
+    generator_labels = (1 - mode_labels.float()) / (n_modes - 1)  # type is automatically inferred
     return classes, mode_labels, generator_labels
 
 
@@ -74,7 +76,7 @@ def prepare_bimodal_batch_variables(batch, device):
     classes = batch[0][1]  # any mode should have the same class idx
     mode_labels = torch.cat((torch.zeros(batch_size), torch.ones(batch_size))).to(device)
     # noinspection PyTypeChecker
-    generator_labels = (1 - mode_labels) # type is automatically inferred
+    generator_labels = 1 - mode_labels  # type is automatically inferred
     return classes, mode_labels, generator_labels
 
 
@@ -106,9 +108,17 @@ def prepare_bimodal_siamese_tensors(embedding_list_0, embedding_list_1, siamese_
 
 
 def create_multimodal_gan_trainer(
-        generator, discriminator, generator_optimizer, discriminator_optimizer, loss_fn, device=None,
-        non_blocking=False, prepare_batch=_prepare_batch, prepare_batch_variables=prepare_multimodal_batch_variables,
-        output_transform=output_transform_trainer):
+    generator,
+    discriminator,
+    generator_optimizer,
+    discriminator_optimizer,
+    loss_fn,
+    device=None,
+    non_blocking=False,
+    prepare_batch=_prepare_batch,
+    prepare_batch_variables=prepare_multimodal_batch_variables,
+    output_transform=output_transform_trainer,
+):
     """
     Factory function for creating an ignite trainer Engine for a multimodal GAN.
     NOTES:
@@ -163,7 +173,7 @@ def create_multimodal_gan_trainer(
         # (0) Prepare batch and labels, and make a forward pass through the models.
         ###########################
 
-        batch =  prepare_batch(batch, device=device, non_blocking=non_blocking)
+        batch = prepare_batch(batch, device=device, non_blocking=non_blocking)
         classes, mode_labels, generator_labels = prepare_batch_variables(batch, device)
 
         ############################
@@ -188,15 +198,25 @@ def create_multimodal_gan_trainer(
         discriminator_optimizer.step()
 
         return output_transform(
-            embeddings, mode_predictions, mode_labels, generator_labels, classes, generator_loss, discriminator_loss)
+            embeddings, mode_predictions, mode_labels, generator_labels, classes, generator_loss, discriminator_loss
+        )
 
     return Engine(_update)
 
 
 def create_multimodal_gan_siamese_trainer(
-        generator, discriminator, generator_optimizer, discriminator_optimizer, mode_loss_fn,
-        siamese_loss_fn, device=None, non_blocking=False, prepare_batch=prepare_batch_siamese,
-        prepare_batch_variables=prepare_multimodal_batch_variables, output_transform=output_transform_trainer_siamese):
+    generator,
+    discriminator,
+    generator_optimizer,
+    discriminator_optimizer,
+    mode_loss_fn,
+    siamese_loss_fn,
+    device=None,
+    non_blocking=False,
+    prepare_batch=prepare_batch_siamese,
+    prepare_batch_variables=prepare_multimodal_batch_variables,
+    output_transform=output_transform_trainer_siamese,
+):
     """
     Factory function for creating an ignite trainer Engine for a multimodal GAN with a contrastive loss term.
     This engine is pretty much the same as the [normal multimodal GAN engine](create_multimodal_gan_trainer), but
@@ -253,19 +273,21 @@ def create_multimodal_gan_siamese_trainer(
         ###########################
 
         generator.zero_grad()
-        embedding_list_0 = generator(*[sub_batch[0] for sub_batch in elements_0]) # forward pass same mode sub-batches
+        embedding_list_0 = generator(*[sub_batch[0] for sub_batch in elements_0])  # forward pass same mode sub-batches
         embedding_list_1 = generator(*[sub_batch[0] for sub_batch in elements_1])
-        embeddings = torch.cat([*embedding_list_0, *embedding_list_1]) # create a single discriminator batch to allow..
+        embeddings = torch.cat([*embedding_list_0, *embedding_list_1])  # create a single discriminator batch to allow..
         # noinspection PyTypeChecker
-        generator_labels = torch.cat([generator_labels_0, generator_labels_1]) # ..us to do a single forward pass
+        generator_labels = torch.cat([generator_labels_0, generator_labels_1])  # ..us to do a single forward pass
         mode_labels = torch.cat([mode_labels_0, mode_labels_1])
 
         siamese_pair_0, siamese_pair_1, siamese_target = prepare_bimodal_siamese_tensors(
-            embedding_list_0, embedding_list_1, siamese_target)
+            embedding_list_0, embedding_list_1, siamese_target
+        )
 
         # Optimize network
-        generator_loss = mode_loss_fn(discriminator(embeddings), generator_labels) + \
-                         siamese_loss_fn(siamese_pair_0, siamese_pair_1, siamese_target)
+        generator_loss = mode_loss_fn(discriminator(embeddings), generator_labels) + siamese_loss_fn(
+            siamese_pair_0, siamese_pair_1, siamese_target
+        )
         generator_loss.backward()
         generator_optimizer.step()
 
@@ -279,15 +301,30 @@ def create_multimodal_gan_siamese_trainer(
         discriminator_loss.backward()
         discriminator_optimizer.step()
 
-        return output_transform(siamese_pair_0, siamese_pair_1, siamese_target, mode_predictions, mode_labels,
-                                generator_labels, generator_loss, discriminator_loss)
+        return output_transform(
+            siamese_pair_0,
+            siamese_pair_1,
+            siamese_target,
+            mode_predictions,
+            mode_labels,
+            generator_labels,
+            generator_loss,
+            discriminator_loss,
+        )
 
     return Engine(_update)
 
 
 def create_multimodal_gan_evaluator(
-        generator, discriminator, metrics=None, device=None, non_blocking=False, prepare_batch=_prepare_batch,
-        output_transform=output_transform_evaluator, prepare_batch_variables=prepare_multimodal_batch_variables):
+    generator,
+    discriminator,
+    metrics=None,
+    device=None,
+    non_blocking=False,
+    prepare_batch=_prepare_batch,
+    output_transform=output_transform_evaluator,
+    prepare_batch_variables=prepare_multimodal_batch_variables,
+):
     """
     Factory function for creating an evaluator for GAN models.
     NOTE: `engine.state.output` for this engine is defined by `output_transform` parameter and is
@@ -327,19 +364,29 @@ def create_multimodal_gan_evaluator(
         with torch.no_grad():
             batch = prepare_batch(batch, device=device, non_blocking=non_blocking)
             classes, mode_labels, generator_labels = prepare_batch_variables(batch, device)
-            embedding_list = generator(*[sub_batch[0] for sub_batch in batch]) # forward pass with same mode sub-batches
+            embedding_list = generator(
+                *[sub_batch[0] for sub_batch in batch]
+            )  # forward pass with same mode sub-batches
             embeddings = torch.cat(embedding_list)  # create a single discriminator batch from sub-batch list
             mode_predictions = discriminator(embeddings)
             return output_transform(embeddings, mode_predictions, mode_labels, generator_labels, classes)
 
     engine = Engine(_inference)
-    if metrics: attach_metrics(engine, metrics)
+    if metrics:
+        attach_metrics(engine, metrics)
     return engine
 
 
 def create_multimodal_gan_siamese_evaluator(
-        generator, discriminator, metrics=None, device=None, non_blocking=False, prepare_batch=prepare_batch_siamese,
-        output_transform=output_transform_evaluator_siamese,prepare_batch_variables=prepare_multimodal_batch_variables):
+    generator,
+    discriminator,
+    metrics=None,
+    device=None,
+    non_blocking=False,
+    prepare_batch=prepare_batch_siamese,
+    output_transform=output_transform_evaluator_siamese,
+    prepare_batch_variables=prepare_multimodal_batch_variables,
+):
     """
     Factory function for creating an evaluator for a multimodal GAN with a contrastive loss term.
     This engine is pretty much the same as the [normal multimodal GAN engine](create_multimodal_gan_evaluator), but
@@ -389,11 +436,14 @@ def create_multimodal_gan_siamese_evaluator(
             generator_labels = torch.cat([generator_labels_0, generator_labels_1])
             mode_labels = torch.cat([mode_labels_0, mode_labels_1])
             siamese_pair_0, siamese_pair_1, siamese_target = prepare_bimodal_siamese_tensors(
-                embedding_list_0, embedding_list_1, siamese_target)
+                embedding_list_0, embedding_list_1, siamese_target
+            )
             mode_predictions = discriminator(embeddings.detach())
             return output_transform(
-                siamese_pair_0, siamese_pair_1, siamese_target, mode_predictions, mode_labels, generator_labels)
+                siamese_pair_0, siamese_pair_1, siamese_target, mode_predictions, mode_labels, generator_labels
+            )
 
     engine = Engine(_inference)
-    if metrics: attach_metrics(engine, metrics)
+    if metrics:
+        attach_metrics(engine, metrics)
     return engine

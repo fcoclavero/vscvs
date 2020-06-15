@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Ignite trainer for a siamese network. """
@@ -22,8 +22,10 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a siamese architecture.
     """
-    def __init__(self, *args, embedding_network_0=None, embedding_network_1=None, loss_reduction='mean',
-                 margin=.2, **kwargs):
+
+    def __init__(
+        self, *args, embedding_network_0=None, embedding_network_1=None, loss_reduction="mean", margin=0.2, **kwargs
+    ):
         """
         :param args: Trainer arguments
         :type: Tuple
@@ -60,15 +62,22 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
     @property
     @overrides
     def trainer_id(self):
-        return 'Siamese{}'.format(self.embedding_network_1.__class__.__name__)
+        return "Siamese{}".format(self.embedding_network_1.__class__.__name__)
 
     @overrides
     def _create_evaluator_engine(self):
         average_distances = AverageDistancesSiamesePairs()
-        return create_siamese_evaluator(self.model, device=self.device, metrics={
-            'Accuracy': AccuracySiamesePairs(), 'Average Distance/ratio': average_distances[0] / average_distances[1],
-            'Average Distance/positive': average_distances[0], 'Average Distance/negative': average_distances[1],
-            'Loss': LossSiamesePairs(self.loss)})
+        return create_siamese_evaluator(
+            self.model,
+            device=self.device,
+            metrics={
+                "Accuracy": AccuracySiamesePairs(),
+                "Average Distance/ratio": average_distances[0] / average_distances[1],
+                "Average Distance/positive": average_distances[0],
+                "Average Distance/negative": average_distances[1],
+                "Loss": LossSiamesePairs(self.loss),
+            },
+        )
 
     @overrides
     def _create_trainer_engine(self):
@@ -76,8 +85,13 @@ class AbstractSiameseTrainer(AbstractTrainer, ABC):
 
 
 @kwargs_parameter_dict
-def train_siamese_cnn(*args, embedding_network_0=CNNNormalized(out_features=250),
-                      embedding_network_1=CNNNormalized(out_features=250), optimizer_mixin=None, **kwargs):
+def train_siamese_cnn(
+    *args,
+    embedding_network_0=CNNNormalized(out_features=250),
+    embedding_network_1=CNNNormalized(out_features=250),
+    optimizer_mixin=None,
+    **kwargs
+):
     """
     Train a Siamese CNN architecture.
     :param args: SiameseTrainer arguments
@@ -92,15 +106,22 @@ def train_siamese_cnn(*args, embedding_network_0=CNNNormalized(out_features=250)
     :param kwargs: SiameseTrainer keyword arguments
     :type: Dict
     """
+
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+
     trainer = SiameseTrainer(*args, embedding_network_0, embedding_network_1, **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_siamese_resnet(*args, embedding_network_0=ResNetNormalized(out_features=250, pretrained=True),
-                         embedding_network_1=ResNetNormalized(out_features=250), optimizer_mixin=None, **kwargs):
+def train_siamese_resnet(
+    *args,
+    embedding_network_0=ResNetNormalized(out_features=250, pretrained=True),
+    embedding_network_1=ResNetNormalized(out_features=250),
+    optimizer_mixin=None,
+    **kwargs
+):
     """
     Train a Siamese ResNet architecture.
     :param args: SiameseTrainer arguments
@@ -115,15 +136,22 @@ def train_siamese_resnet(*args, embedding_network_0=ResNetNormalized(out_feature
     :param kwargs: SiameseTrainer keyword arguments
     :type: Dict
     """
+
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+
     trainer = SiameseTrainer(*args, embedding_network_0, embedding_network_1, **kwargs)
     trainer.run()
 
 
 @kwargs_parameter_dict
-def train_siamese_resnext(*args, embedding_network_0=ResNextNormalized(out_features=250, pretrained=True),
-                          embedding_network_1=ResNextNormalized(out_features=250), optimizer_mixin=None, **kwargs):
+def train_siamese_resnext(
+    *args,
+    embedding_network_0=ResNextNormalized(out_features=250, pretrained=True),
+    embedding_network_1=ResNextNormalized(out_features=250),
+    optimizer_mixin=None,
+    **kwargs
+):
     """
     Train a Siamese ResNext architecture.
     :param args: SiameseTrainer arguments
@@ -138,7 +166,9 @@ def train_siamese_resnext(*args, embedding_network_0=ResNextNormalized(out_featu
     :param kwargs: SiameseTrainer keyword arguments
     :type: Dict
     """
+
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+
     trainer = SiameseTrainer(*args, embedding_network_0, embedding_network_1, **kwargs)
     trainer.run()

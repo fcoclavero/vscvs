@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Ignite trainers for a CNN classification networks. """
@@ -24,6 +24,7 @@ class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a CNN model.
     """
+
     def __init__(self, *args, out_features=125, **kwargs):
         """
         :param args: Trainer arguments
@@ -49,23 +50,25 @@ class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     @staticmethod
     @overrides
     def _score_function(engine):
-        validation_loss = engine.state.metrics['Loss']
+        validation_loss = engine.state.metrics["Loss"]
         return -validation_loss
 
     @property
     @overrides
     def trainer_id(self):
-        return 'CNN'
+        return "CNN"
 
     @overrides
     def _create_evaluator_engine(self):
         return create_supervised_evaluator(
-            self.model, metrics={'Accuracy': Accuracy(), 'Loss': Loss(self.loss)}, device=self.device)
+            self.model, metrics={"Accuracy": Accuracy(), "Loss": Loss(self.loss)}, device=self.device
+        )
 
     @overrides
     def _create_trainer_engine(self):
         return create_supervised_trainer(
-            self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
+            self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch
+        )
 
 
 @kwargs_parameter_dict
@@ -80,7 +83,9 @@ def train_cnn(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: CNNTrainer keyword arguments
     :type: Dict
     """
+
     class CNNTrainer(optimizer_mixin, AbstractCNNTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+
     trainer = CNNTrainer(*args, **kwargs)
     trainer.run()

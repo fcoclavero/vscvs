@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Ignite trainer for a GCN image label classifier, using HOG feature vectors for images. """
@@ -25,8 +25,18 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
     images, node feature vectors correspond to batch image HOG descriptors, and vertex weights corresponds to image\
     label word vector distances.
     """
-    def __init__(self, *args, dataset_name=None, in_channels=3, cell_size=8, bins=9, signed_gradients=False,
-                 processes=None, **kwargs):
+
+    def __init__(
+        self,
+        *args,
+        dataset_name=None,
+        in_channels=3,
+        cell_size=8,
+        bins=9,
+        signed_gradients=False,
+        processes=None,
+        **kwargs
+    ):
         """
         :param args: Trainer arguments
         :type: Tuple
@@ -63,8 +73,15 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
     def initial_model(self):
         dataset = get_dataset(self.dataset_name)
         image_dimension = dataset[0][0].shape[1]
-        return HOGGCN(self.dataset.classes_dataframe, image_dimension, self.in_channels, self.cell_size, self.bins,
-                      self.signed_gradients, self.processes)
+        return HOGGCN(
+            self.dataset.classes_dataframe,
+            image_dimension,
+            self.in_channels,
+            self.cell_size,
+            self.bins,
+            self.signed_gradients,
+            self.processes,
+        )
 
     @property
     @overrides
@@ -74,14 +91,20 @@ class AbstractHOGGCNTrainer(AbstractTrainer, ABC):
     @property
     @overrides
     def trainer_id(self):
-        return 'HOGGCN'
+        return "HOGGCN"
 
     @overrides
     def _create_evaluator_engine(self):
         return create_hog_gcn_evaluator(
-            self.model, device=self.device, metrics={
-                'Accuracy': Accuracy(), 'Loss': Loss(self.loss), 'Recall': Recall(average=True),
-                'Top K Categorical Accuracy': TopKCategoricalAccuracy(k=10)})
+            self.model,
+            device=self.device,
+            metrics={
+                "Accuracy": Accuracy(),
+                "Loss": Loss(self.loss),
+                "Recall": Recall(average=True),
+                "Top K Categorical Accuracy": TopKCategoricalAccuracy(k=10),
+            },
+        )
 
     @overrides
     def _create_trainer_engine(self):
@@ -100,7 +123,9 @@ def train_hog_gcn(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: HOGGCNTrainer keyword arguments
     :type: Dict
     """
+
     class HOGGCNTrainer(optimizer_mixin, AbstractHOGGCNTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+
     trainer = HOGGCNTrainer(*args, **kwargs)
     trainer.run()

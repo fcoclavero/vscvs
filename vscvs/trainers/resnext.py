@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Ignite trainers for ResNext classification networks. """
@@ -24,6 +24,7 @@ class AbstractResNextTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a ResNext model.
     """
+
     def __init__(self, *args, out_features=125, pretrained=False, **kwargs):
         """
         :param args: Trainer arguments
@@ -52,26 +53,33 @@ class AbstractResNextTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     @property
     @overrides
     def trainer_id(self):
-        return 'ResNext'
+        return "ResNext"
 
     @staticmethod
     @overrides
     def _score_function(engine):
-        precision = engine.state.metrics['Precision']
+        precision = engine.state.metrics["Precision"]
         return precision
 
     @overrides
     def _create_evaluator_engine(self):
         return create_supervised_evaluator(
-            self.model, device=self.device,
-            metrics={'Accuracy': Accuracy(), 'Loss': Loss(self.loss), 'Recall': Recall(average=True),
-                     'Top K Categorical Accuracy': TopKCategoricalAccuracy(k=10),
-                     'Precision': Precision(average=True)})
+            self.model,
+            device=self.device,
+            metrics={
+                "Accuracy": Accuracy(),
+                "Loss": Loss(self.loss),
+                "Recall": Recall(average=True),
+                "Top K Categorical Accuracy": TopKCategoricalAccuracy(k=10),
+                "Precision": Precision(average=True),
+            },
+        )
 
     @overrides
     def _create_trainer_engine(self):
         return create_supervised_trainer(
-            self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
+            self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch
+        )
 
 
 @kwargs_parameter_dict
@@ -86,7 +94,9 @@ def train_resnext(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: ResNextTrainer keyword arguments
     :type: Dict
     """
+
     class ResNextTrainer(optimizer_mixin, AbstractResNextTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+
     trainer = ResNextTrainer(*args, **kwargs)
     trainer.run()

@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Ignite trainer for a Multimodal GAN architecture. """
@@ -22,6 +22,7 @@ class AbstractMultiModalGANTrainer(AbstractGANTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a multi-modal GAN architecture.
     """
+
     def __init__(self, *args, mode_embedding_networks=None, **kwargs):
         """
         :param args: AbstractGANTrainer arguments
@@ -42,8 +43,9 @@ class AbstractMultiModalGANTrainer(AbstractGANTrainer, ABC):
     @overrides
     def _create_evaluator_engine(self):
         loss = LossMultimodalGAN(self.loss)
-        return create_multimodal_gan_evaluator(*self.model, device=self.device,
-                                               metrics={'Loss/generator': loss[0], 'Loss/discriminator': loss[1]})
+        return create_multimodal_gan_evaluator(
+            *self.model, device=self.device, metrics={"Loss/generator": loss[0], "Loss/discriminator": loss[1]}
+        )
 
     @overrides
     def _create_trainer_engine(self):
@@ -62,10 +64,17 @@ def train_gan_multimodal(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: MultiModalGANTrainer keyword arguments
     :type: Dict
     """
+
     class MultiModalGANTrainer(optimizer_mixin, AbstractMultiModalGANTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
-    trainer = MultiModalGANTrainer(*args, discriminator_network=InterModalDiscriminatorSoftmax(input_dimension=250),
-                                   mode_embedding_networks=[ResNextNormalized(out_features=250, pretrained=True),
-                                                            ResNextNormalized(out_features=250, pretrained=True)],
-                                   **kwargs)
+
+    trainer = MultiModalGANTrainer(
+        *args,
+        discriminator_network=InterModalDiscriminatorSoftmax(input_dimension=250),
+        mode_embedding_networks=[
+            ResNextNormalized(out_features=250, pretrained=True),
+            ResNextNormalized(out_features=250, pretrained=True),
+        ],
+        **kwargs
+    )
     trainer.run()

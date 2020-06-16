@@ -11,8 +11,9 @@ import os
 from datetime import datetime
 
 import click
-import torch
 import yaml
+
+import torch
 
 from vscvs.utils import CHECKPOINT_NAME_FORMAT
 from vscvs.utils import get_checkpoint_path
@@ -31,7 +32,7 @@ show.add_command(tensorboard)
 
 @show.command()
 @click.option("--name", prompt="Checkpoint name", help="Name of the checkpoint directory.")
-@click.option("--date", prompt="Checkpoint date", help="Checkpoint date (corresponds to the directory name.")
+@click.option("--date", prompt="Checkpoint date", help="Checkpoint date (corresponds to the directory name).")
 @click.option("-t", "--tag", help="Optional tag for model checkpoint and tensorboard logs.", multiple=True)
 def checkpoint(name, date, tag):
     """ Show the contents of the specified trainer checkpoint. """
@@ -77,7 +78,7 @@ def sample_batch(dataset_name, batch_size, workers):
 @click.option("--embeddings-name", prompt="Embedding directory", help="Static directory where embeddings are saved.")
 @click.option("--load-projection", prompt="Load projection", help="Try to load pickled TSNE projections?", is_flag=True)
 def embedding_tsne(dataset_name, embeddings_name, load_projection):
-    click.echo("Display projection of the {} embeddings".format(embeddings_name))
     from vscvs.visualization import plot_embedding_tsne
 
+    click.echo("Display projection of the {} embeddings".format(embeddings_name))
     plot_embedding_tsne(dataset_name, embeddings_name, load_projection)

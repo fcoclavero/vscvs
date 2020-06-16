@@ -45,9 +45,9 @@ embed.add_command(siamese)
 @click.option("--signed-gradients", prompt="Signed gradients", help="Use signed gradients?", default=False)
 def hog(dataset_name, embeddings_name, batch_size, workers, n_gpu, in_channels, cell_size, bins, signed_gradients):
     """ Create image embeddings with the HOG model. """
-    click.echo("HOG embeddings for {} dataset".format(dataset_name))
     from vscvs.models import HOG
 
+    click.echo("HOG embeddings for {} dataset".format(dataset_name))
     model = HOG(in_channels, cell_size, bins, signed_gradients)
     create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
@@ -55,14 +55,14 @@ def hog(dataset_name, embeddings_name, batch_size, workers, n_gpu, in_channels, 
 @embed.command()
 @pass_context_to_kwargs
 @click.option("--checkpoint", prompt="Checkpoint name", help="Name of the checkpoint directory.")
-@click.option("--date", prompt="Checkpoint date", help="Checkpoint date (corresponds to the directory name.")
+@click.option("--date", prompt="Checkpoint date", help="Checkpoint date (corresponds to the directory name).")
 @click.option("--state-dict", prompt="State dict", help="The state_dict file to be loaded.")
 @click.option("-t", "--tag", help="Optional tag for model checkpoint and tensorboard logs.", multiple=True)
 def cnn(dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint, date, state_dict, tag):
     """ Create image embeddings with the CNN model. """
-    click.echo("CNN embeddings for {} dataset".format(dataset_name))
     from vscvs.models import CNN
 
+    click.echo("CNN embeddings for {} dataset".format(dataset_name))
     model = load_classification_model_from_checkpoint(CNN, state_dict, checkpoint, date, *tag)
     model = remove_last_layer(model)
     create_embeddings(model, dataset_name, embeddings_name, batch_size, workers, n_gpu)
@@ -71,14 +71,14 @@ def cnn(dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint, d
 @embed.command()
 @pass_context_to_kwargs
 @click.option("--checkpoint", prompt="Checkpoint name", help="Name of the checkpoint directory.")
-@click.option("--date", prompt="Checkpoint date", help="Checkpoint date (corresponds to the directory name.")
+@click.option("--date", prompt="Checkpoint date", help="Checkpoint date (corresponds to the directory name).")
 @click.option("--state-dict", prompt="State dict", help="The state_dict file to be loaded.")
 @click.option("-t", "--tag", help="Optional tag for model checkpoint and tensorboard logs.", multiple=True)
 def resnet(dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint, date, state_dict, tag):
     """ Create image embeddings with the ResNet model. """
-    click.echo("ResNet embeddings for {} dataset".format(dataset_name))
     from vscvs.models import ResNet
 
+    click.echo("ResNet embeddings for {} dataset".format(dataset_name))
     model = load_classification_model_from_checkpoint(ResNet, state_dict, checkpoint, date, *tag)
     create_embeddings(model.base, dataset_name, embeddings_name, batch_size, workers, n_gpu)
 
@@ -86,7 +86,7 @@ def resnet(dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint
 @embed.command()
 @pass_context_to_kwargs
 @click.option("--checkpoint", prompt="Checkpoint name", help="Name of the checkpoint directory.")
-@click.option("--date", prompt="Checkpoint date", help="Checkpoint date (corresponds to the directory name.")
+@click.option("--date", prompt="Checkpoint date", help="Checkpoint date (corresponds to the directory name).")
 @click.option("--state-dict", prompt="State dict", help="The state_dict file to be loaded.")
 @click.option("-t", "--tag", help="Optional tag for model checkpoint and tensorboard logs.", multiple=True)
 def resnext(dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint, date, state_dict, tag):

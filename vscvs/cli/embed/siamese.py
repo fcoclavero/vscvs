@@ -31,7 +31,7 @@ def siamese(context, *_, **__):
 @siamese.command()
 @pass_context_to_kwargs
 @click.option("--checkpoint", prompt="Checkpoint name", help="Name of the checkpoint directory.")
-@click.option("--date", prompt="Checkpoint date", help="Checkpoint date (corresponds to the directory name.")
+@click.option("--date", prompt="Checkpoint date", help="Checkpoint date (corresponds to the directory name).")
 @click.option("--state-dict", prompt="State dict", help="The state_dict file to be loaded.")
 @click.option("-t", "--tag", help="Optional tag for model checkpoint and tensorboard logs.", multiple=True)
 def resnext(branch, dataset_name, embeddings_name, batch_size, workers, n_gpu, checkpoint, date, state_dict, tag):

@@ -35,9 +35,9 @@ def create():
 @click.option("--tsne-dimension", default=2, help="The target dimensionality for the lower dimension projection.")
 def classes(dataset_name, distance, tsne_dimension):
     """ Create a class name word vector dataframe for a dataset. """
-    click.echo("Creating a new classes dataframe for the {} dataset".format(dataset_name))
     from vscvs.preprocessing import create_classes_data_frame
 
+    click.echo("Creating a new classes dataframe for the {} dataset".format(dataset_name))
     create_classes_data_frame(dataset_name, distance, tsne_dimension)
 
 
@@ -50,9 +50,9 @@ def classes(dataset_name, distance, tsne_dimension):
 )
 def metadata_tsv(dataset_name):
     """ Create a class name word vector dataframe for a dataset. """
-    click.echo("Creating {}.tsv for the Tensorboard embeddings projector.".format(dataset_name))
     from vscvs.embeddings import create_metadata_tsv
 
+    click.echo("Creating {}.tsv for the Tensorboard embeddings projector.".format(dataset_name))
     create_metadata_tsv(dataset_name)
 
 
@@ -61,9 +61,9 @@ def metadata_tsv(dataset_name):
 @click.option("--dimension", prompt="Sample dimensionality", help="The dimension of sample vectors.", type=int)
 def sample_vectors(n, dimension):
     """ Create a sample vectors dataset. """
-    click.echo("Creating sample vectors.")
     from vscvs.preprocessing import create_sample_vectors
 
+    click.echo("Creating sample vectors.")
     create_sample_vectors(n, dimension)
 
 

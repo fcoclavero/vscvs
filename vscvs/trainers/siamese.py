@@ -178,5 +178,7 @@ def train_siamese_resnext(
     class SiameseTrainer(optimizer_mixin, AbstractSiameseTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
 
-    trainer = SiameseTrainer(*args, embedding_network_0, embedding_network_1, **kwargs)
+    trainer = SiameseTrainer(
+        *args, embedding_network_0=embedding_network_0, embedding_network_1=embedding_network_1, **kwargs
+    )
     trainer.run()

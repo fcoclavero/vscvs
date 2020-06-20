@@ -11,6 +11,7 @@ import click
 from vscvs.cli.decorators import pass_context_to_kwargs
 from vscvs.cli.decorators import pass_kwargs_to_context
 from vscvs.loss_functions import ReductionMixin
+from vscvs.utils import load_classification_model_from_checkpoint
 
 
 @click.group()
@@ -33,7 +34,84 @@ def siamese(context, *_, **__):
     context.obj["dataset_name"] = context.obj["dataset_name"] + "-siamese"
 
 
-@siamese.command()
+@click.group()
+@click.option(
+    "--first-branch-checkpoint",
+    prompt="First branch checkpoint name",
+    help="Name of the checkpoint directory for the first branch.",
+)
+@click.option(
+    "--first-branch-date",
+    prompt="First branch checkpoint date",
+    help="Checkpoint date (corresponds to the directory name) for the first branch.",
+)
+@click.option(
+    "--first-branch-state-dict",
+    prompt="First branch state dict",
+    help="The state_dict file to be loaded for the first branch.",
+)
+@click.option(
+    "-tf",
+    "--first-branch-tag",
+    help="Optional tag for first branch model checkpoint and tensorboard logs.",
+    multiple=True,
+)
+@click.option(
+    "--second-branch-checkpoint",
+    prompt="Second branch checkpoint name",
+    help="Name of the checkpoint directory for the second branch.",
+)
+@click.option(
+    "--second-branch-date",
+    prompt="Second branch checkpoint date",
+    help="Checkpoint date (corresponds to the directory name) for the second branch.",
+)
+@click.option(
+    "--second-branch-state-dict",
+    prompt="Second branch state dict",
+    help="The state_dict file to be loaded for the second branch.",
+)
+@click.option(
+    "-ts",
+    "--second-branch-tag",
+    help="Optional tag for second branch model checkpoint and tensorboard logs.",
+    multiple=True,
+)
+@pass_kwargs_to_context
+def pretrained(
+    context,
+    first_branch_checkpoint,
+    first_branch_date,
+    first_branch_state_dict,
+    first_branch_tag,
+    second_branch_checkpoint,
+    second_branch_date,
+    second_branch_state_dict,
+    second_branch_tag,
+    *_,
+    **__
+):
+    from vscvs.models import ResNext
+
+    if first_branch_checkpoint and first_branch_date and first_branch_state_dict:
+        context.obj.pop("first_branch_checkpoint")
+        context.obj.pop("first_branch_date")
+        context.obj.pop("first_branch_state_dict")
+        context.obj.pop("first_branch_tag")
+        context.obj["embedding_network_0"] = load_classification_model_from_checkpoint(
+            ResNext, first_branch_state_dict, first_branch_checkpoint, first_branch_date, *first_branch_tag
+        )
+    if second_branch_checkpoint and second_branch_date and second_branch_state_dict:
+        context.obj.pop("second_branch_checkpoint")
+        context.obj.pop("second_branch_date")
+        context.obj.pop("second_branch_state_dict")
+        context.obj.pop("second_branch_tag")
+        context.obj["embedding_network_1"] = load_classification_model_from_checkpoint(
+            ResNext, second_branch_state_dict, second_branch_checkpoint, second_branch_date, *second_branch_tag
+        )
+
+
+@click.command()
 @pass_context_to_kwargs
 def cnn(*args, **kwargs):
     """ Train a siamese CNN model. """
@@ -43,7 +121,7 @@ def cnn(*args, **kwargs):
     train_siamese_cnn(*args, **kwargs)
 
 
-@siamese.command()
+@click.command()
 @pass_context_to_kwargs
 def resnet(*args, **kwargs):
     """ Train a siamese ResNet model. """
@@ -53,7 +131,7 @@ def resnet(*args, **kwargs):
     train_siamese_resnet(*args, **kwargs)
 
 
-@siamese.command()
+@click.command()
 @pass_context_to_kwargs
 def resnext(*args, **kwargs):
     """ Train a siamese ResNext model. """
@@ -61,3 +139,11 @@ def resnext(*args, **kwargs):
 
     click.echo("siamese resnext - {} dataset".format(kwargs["dataset_name"]))
     train_siamese_resnext(*args, **kwargs)
+
+
+for command in [cnn, resnet, resnext]:
+    pretrained.add_command(command)
+    siamese.add_command(command)
+
+
+siamese.add_command(pretrained)

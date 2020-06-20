@@ -23,7 +23,7 @@
       </ENTRIES>
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
-    <option name="PARAMETERS" value="train --train-validation-split 0.9 --batch-size 4 --epochs 1 --workers 6 --n-gpu 1 adam --learning-rate 0.0001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000001 --weight-decay 0.0005 --amsgrad True siamese --dataset-name sketchy --loss-reduction sum --margin 0.2 pretrained --first-branch-checkpoint ResNext --first-branch-date 20-06-16T03-44 --first-branch-state-dict net_best_checkpoint_6525 --first-branch-tag photos --second-branch-checkpoint ResNext --second-branch-date 20-06-16T03-46 --second-branch-state-dict net_best_checkpoint_55719 --second-branch-tag sketches_pretrained resnext" />
+    <option name="PARAMETERS" value="train --train-validation-split 0.9 --batch-size 4 --epochs 1 --workers 16 --n-gpu 0 adam --learning-rate 0.0001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000001 --weight-decay 0.0005 --amsgrad True siamese --dataset-name sketchy --loss-reduction sum --margin 0.2 pretrained --first-branch-checkpoint ResNext --first-branch-date 20-06-16T03-44 --first-branch-state-dict net_best_checkpoint_6525 --first-branch-tag photos --second-branch-checkpoint ResNext --second-branch-date 20-06-16T03-46 --second-branch-state-dict net_best_checkpoint_55719 --second-branch-tag sketches-pretrained resnext" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

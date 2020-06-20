@@ -1,15 +1,17 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Utility functions for handling data. """
 
 
 import random
-import torch
 
 from collections import defaultdict
+
+import torch
+
 from torch.utils.data import Subset
 
 from vscvs.decorators import deprecated
@@ -72,7 +74,7 @@ def images_by_class(dataset):
     return images_dict
 
 
-def random_simple_split(data, split_proportion=.8):
+def random_simple_split(data, split_proportion=0.8):
     """
     Splits incoming data into two sets, randomly and with no overlapping. Returns the two resulting data objects along
     with two arrays containing the original indices of each element.
@@ -84,14 +86,14 @@ def random_simple_split(data, split_proportion=.8):
     :return: the two resulting datasets and the original index lists
     :type: SupportsIndex, SupportsIndex, List[int], List[int]
     """
-    assert 0. < split_proportion < 1.
-    indices = list(range(len(data))) # all indices in data
+    assert 0.0 < split_proportion < 1.0
+    indices = list(range(len(data)))  # all indices in data
     random.shuffle(indices)
     split_index = int(len(data) * split_proportion)
     return data[indices[:split_index]], data[indices[split_index:]], indices[:split_index], indices[split_index:]
 
 
-def simple_split(data, split_proportion=.8):
+def simple_split(data, split_proportion=0.8):
     """
     Splits incoming data into two sets, simply slicing on the index corresponding to the given proportion.
     :param data: the dataset to be split
@@ -102,12 +104,12 @@ def simple_split(data, split_proportion=.8):
     :return: the two resulting datasets
     :type: tup<indexed obj, indexed obj>
     """
-    assert 0. < split_proportion < 1.
+    assert 0.0 < split_proportion < 1.0
     split_index = int(len(data) * split_proportion)
     return data[:split_index], data[split_index:]
 
 
-def split(data, split_proportion=.8):
+def split(data, split_proportion=0.8):
     """
     Splits incoming data into two sets, one for training and one for tests. Non-overlapping.
     :param data: the dataset to be split
@@ -118,6 +120,6 @@ def split(data, split_proportion=.8):
     :return: the two resulting datasets
     :type: indexed object
     """
-    assert 0. < split_proportion < 1.
+    assert 0.0 < split_proportion < 1.0
     test_index = int(len(data) * split_proportion)
     return Subset(data, range(test_index)), Subset(data, range(test_index, len(data)))

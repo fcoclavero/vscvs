@@ -1,18 +1,19 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Utilities for displaying images. """
 
 
-import click
-import pickle
 import os
-import torch
+import pickle
+
+import click
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly.graph_objs as go
+import torch
 import torchvision.utils as vutils
 
 from plotly.offline import plot
@@ -34,9 +35,11 @@ def display_sample_batch(dataset_name, batch_size, workers):
     :param workers: number of data loader workers.
     :type: int
     """
-    dataset = get_dataset(dataset_name) # load data
-    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=workers) # create the data_loader
-    plot_image_batch(next(iter(data_loader))) # plot the batch
+    dataset = get_dataset(dataset_name)  # load data
+    data_loader = DataLoader(
+        dataset, batch_size=batch_size, shuffle=True, num_workers=workers
+    )  # create the data_loader
+    plot_image_batch(next(iter(data_loader)))  # plot the batch
 
 
 def plot_image_retrieval(query_image, query_image_class, query_dataset, queried_dataset, top_distances, top_indices):
@@ -59,14 +62,14 @@ def plot_image_retrieval(query_image, query_image_class, query_dataset, queried_
     aux = [queried_dataset[j] for j in top_indices]
     image_tensors = torch.stack([tup[0] for tup in aux])
     image_classes = [tup[1] for tup in aux]
-    print('query image class = {}'.format(query_dataset.classes[query_image_class]))
-    print('distances = {}'.format(top_distances))
-    print('classes = {}'.format([queried_dataset.classes[class_name] for class_name in image_classes]))
+    print("query image class = {}".format(query_dataset.classes[query_image_class]))
+    print("distances = {}".format(top_distances))
+    print("classes = {}".format([queried_dataset.classes[class_name] for class_name in image_classes]))
     plot_image_batch([query_image, query_image_class])
     plot_image_batch([image_tensors, image_classes])
 
 
-def plot_image(image, figsize=(8, 8), title=''):
+def plot_image(image, figsize=(8, 8), title=""):
     """
     Display a pyplot figure showing a random batch form the specified dataset.
     :param image: a PyTorch formatted image with its tensors in the first element.
@@ -77,13 +80,13 @@ def plot_image(image, figsize=(8, 8), title=''):
     :type: str
     """
     plt.figure(figsize=figsize)
-    plt.axis('off')
+    plt.axis("off")
     plt.title(title)
     plt.imshow(image[0].cpu())
     plt.show()
 
 
-def plot_image_batch(batch, figsize=(8, 8), title=''):
+def plot_image_batch(batch, figsize=(8, 8), title=""):
     """
     Display a pyplot figure showing a random batch form the specified dataset.
     :param batch: a PyTorch formatted image batch with image tensors in the first element.
@@ -94,7 +97,7 @@ def plot_image_batch(batch, figsize=(8, 8), title=''):
     :type: str
     """
     plt.figure(figsize=figsize)
-    plt.axis('off')
+    plt.axis("off")
     plt.title(title)
     plt.imshow(np.transpose(vutils.make_grid(batch[0][:64], padding=2, normalize=True).cpu(), (1, 2, 0)))
     plt.show()
@@ -110,28 +113,27 @@ def plot_embedding_tsne(dataset_name, embeddings_name, load_projection=False):
     :param load_projection: load projections from pickles.
     :type: bool
     """
-    from vscvs.embeddings import load_embeddings # import here to avoid circular import
+    from vscvs.embeddings import load_embeddings  # import here to avoid circular import
+
     dataset = get_dataset(dataset_name)
-    embeddings = load_embeddings(embeddings_name).to('cpu')
-    projection_pickle_dir = get_path('embeddings', embeddings_name)
+    embeddings = load_embeddings(embeddings_name).to("cpu")
+    projection_pickle_dir = get_path("embeddings", embeddings_name)
     if load_projection:
-        click.echo('Loading existing 2D projection from pickle.')
-        projection = pickle.load(open(os.path.join(projection_pickle_dir, 'tsne.pickle'), 'rb'))
-        dataset_class_names = pickle.load(open(os.path.join(projection_pickle_dir, 'tsne_class_names.pickle'), 'rb'))
+        click.echo("Loading existing 2D projection from pickle.")
+        projection = pickle.load(open(os.path.join(projection_pickle_dir, "tsne.pickle"), "rb"))
+        dataset_class_names = pickle.load(open(os.path.join(projection_pickle_dir, "tsne_class_names.pickle"), "rb"))
     else:
-        click.echo('Creating 2D projection of the embeddings using TSNE')
+        click.echo("Creating 2D projection of the embeddings using TSNE")
         projection = TSNE(n_components=2).fit_transform(embeddings)
-        dataset_class_names = [dataset.classes[tup[1]] for tup in tqdm(dataset, desc='Retrieving image class names')]
-        pickle.dump(projection, open(os.path.join(projection_pickle_dir, 'tsne.pickle'), 'wb'))
-        pickle.dump(dataset_class_names, open(os.path.join(projection_pickle_dir, 'tsne_class_names.pickle'), 'wb'))
-    trace = go.Scattergl( # plot the resulting projection using plotly
+        dataset_class_names = [dataset.classes[tup[1]] for tup in tqdm(dataset, desc="Retrieving image class names")]
+        pickle.dump(projection, open(os.path.join(projection_pickle_dir, "tsne.pickle"), "wb"))
+        pickle.dump(dataset_class_names, open(os.path.join(projection_pickle_dir, "tsne_class_names.pickle"), "wb"))
+    trace = go.Scattergl(  # plot the resulting projection using plotly
         x=projection[:, 0],
         y=projection[:, 1],
         text=dataset_class_names,
-        mode='markers',
-        marker=dict(
-            size=16,
-            color=np.random.randn(len(projection)),
-            colorscale='Viridis'))
+        mode="markers",
+        marker=dict(size=16, color=np.random.randn(len(projection)), colorscale="Viridis"),
+    )
     data = [trace]
     plot(data)

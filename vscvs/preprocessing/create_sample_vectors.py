@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Function for creating a dataset with random vectors, for testing purposes. """
@@ -8,6 +8,7 @@ __status__ = 'Prototype'
 
 import pickle
 import random
+
 import pandas as pd
 
 from settings import DATA_SOURCES
@@ -22,11 +23,11 @@ def create_sample_vectors(n, dimension):
     :param dimension: the dimensionality for the sample vectors
     :type: int
     """
-    data = pd.DataFrame(columns=['class', 'vector'])
-    data['class'] = [random.randint(0, 1) for _ in range(n)]
-    data['vector'] = data['class'].apply(lambda c: [c + random.uniform(0, 1) for _ in range(dimension)])
-    pickle.dump(data, open(DATA_SOURCES['sample_vectors']['pickle']), 'wb') # save binary labeled data to the data dir
-    data['class'] = data['class'].apply(lambda c: [1 - c, c]) # create one-hot encoded labels from the binary labels
-    pickle.dump(data, open(DATA_SOURCES['sample_vectors_one-hot']['pickle'], 'wb')) # save to the data dir
-    DATA_SOURCES['sample_vectors']['dimensions'] = (n, dimension) # Update dimensions
-    DATA_SOURCES['sample_vectors_one-hot']['dimensions'] = (n, dimension)
+    data = pd.DataFrame(columns=["class", "vector"])
+    data["class"] = [random.randint(0, 1) for _ in range(n)]
+    data["vector"] = data["class"].apply(lambda c: [c + random.uniform(0, 1) for _ in range(dimension)])
+    pickle.dump(data, open(DATA_SOURCES["sample_vectors"]["pickle"]), "wb")  # save binary labeled data to the data dir
+    data["class"] = data["class"].apply(lambda c: [1 - c, c])  # create one-hot encoded labels from the binary labels
+    pickle.dump(data, open(DATA_SOURCES["sample_vectors_one-hot"]["pickle"], "wb"))  # save to the data dir
+    DATA_SOURCES["sample_vectors"]["dimensions"] = (n, dimension)  # Update dimensions
+    DATA_SOURCES["sample_vectors_one-hot"]["dimensions"] = (n, dimension)

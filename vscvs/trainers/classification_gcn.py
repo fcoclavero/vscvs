@@ -1,28 +1,35 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Ignite trainer for a GCN image label classifier, using binary or one-hot encodings as image feature vectors. """
 
 
 from abc import ABC
-from ignite.metrics import Accuracy, Loss, Recall, TopKCategoricalAccuracy
-from overrides import overrides
-from torch.nn import CrossEntropyLoss
 from typing import Callable
 
-from .abstract_trainer import AbstractTrainer
-from .engines.classification_gcn import create_classification_gcn_evaluator, create_classification_gcn_trainer
+from ignite.metrics import Accuracy
+from ignite.metrics import Loss
+from ignite.metrics import Recall
+from ignite.metrics import TopKCategoricalAccuracy
+from overrides import overrides
+from torch.nn import CrossEntropyLoss
+
 from vscvs.datasets import get_dataset
-from vscvs.models import GCNClassification
 from vscvs.decorators import kwargs_parameter_dict
+from vscvs.models import GCNClassification
+
+from .abstract_trainer import AbstractTrainer
+from .engines.classification_gcn import create_classification_gcn_evaluator
+from .engines.classification_gcn import create_classification_gcn_trainer
 
 
 class AbstractClassificationGCNTrainer(AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a classification GCN.
     """
+
     def __init__(self, *args, dataset_name=None, processes=None, **kwargs):
         """
         :param args: Trainer arguments
@@ -53,19 +60,33 @@ class AbstractClassificationGCNTrainer(AbstractTrainer, ABC):
     @property
     @overrides
     def trainer_id(self):
-        return 'ClassificationGCN'
+        return "ClassificationGCN"
 
     @overrides
     def _create_evaluator_engine(self):
         return create_classification_gcn_evaluator(
-            self.model, self.dataset.classes_dataframe, device=self.device, processes=self.processes, metrics={
-                'Accuracy': Accuracy(), 'Loss': Loss(self.loss),
-                'Recall': Recall(average=True), 'Top K Categorical Accuracy': TopKCategoricalAccuracy(k=10)})
+            self.model,
+            self.dataset.classes_dataframe,
+            device=self.device,
+            processes=self.processes,
+            metrics={
+                "Accuracy": Accuracy(),
+                "Loss": Loss(self.loss),
+                "Recall": Recall(average=True),
+                "Top K Categorical Accuracy": TopKCategoricalAccuracy(k=10),
+            },
+        )
 
     @overrides
     def _create_trainer_engine(self):
-        return create_classification_gcn_trainer(self.model, self.optimizer, self.loss, self.dataset.classes_dataframe,
-                                                 device=self.device, processes=self.processes)
+        return create_classification_gcn_trainer(
+            self.model,
+            self.optimizer,
+            self.loss,
+            self.dataset.classes_dataframe,
+            device=self.device,
+            processes=self.processes,
+        )
 
 
 @kwargs_parameter_dict
@@ -80,7 +101,9 @@ def train_classification_gcn(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: ClassificationGCNTrainer keyword arguments
     :type: Dict
     """
+
     class ClassificationGCNTrainer(optimizer_mixin, AbstractClassificationGCNTrainer):
-        _optimizer: Callable # type hinting: `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+        _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+
     trainer = ClassificationGCNTrainer(*args, **kwargs)
     trainer.run()

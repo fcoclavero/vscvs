@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="resnext adam gradient" type="PythonConfigurationType" factoryName="Python" folderName="train">
+  <configuration default="false" name="resnext adam gradient photos" type="PythonConfigurationType" factoryName="Python" folderName="train">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -12,8 +12,18 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+    <EXTENSION ID="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" />
+      </ENTRIES>
+    </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
-    <option name="PARAMETERS" value="gradient --name train-resnext-adam train --train-validation-split 0.9 --batch-size 12 --epochs 1 --workers 12 --n-gpu 1 --tag test adam --learning-rate 0.0001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000008 --weight-decay 0 --amsgrad False resnext --pretrained True --dataset-name sketchy-test-photos --early-stopping-patience 5" />
+    <option name="PARAMETERS" value="gradient --name train-resnext-adam-photos train --train-validation-split 0.9 --batch-size 50 --epochs 200 --workers 16 --n-gpu 1 --tag photos adam --learning-rate 0.001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000008 --weight-decay 0 --amsgrad True resnext --pretrained True --dataset-name sketchy-photos --early-stopping-patience 10" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

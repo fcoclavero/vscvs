@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Simple convolutional neural networks implemented from scratch. """
@@ -11,20 +11,25 @@ import torch.nn.functional as F
 
 from overrides import overrides
 
-from vscvs.models.mixins import NormalizedMixin, SigmoidMixin, SoftmaxMixin, LogSoftmaxMixin, OutFeaturesMixin
+from vscvs.models.mixins import LogSoftmaxMixin
+from vscvs.models.mixins import NormalizedMixin
+from vscvs.models.mixins import OutFeaturesMixin
+from vscvs.models.mixins import SigmoidMixin
+from vscvs.models.mixins import SoftmaxMixin
 
 
 class CNNBase(nn.Module):
     """
     Base model for a simple convolutional neural network.
     """
+
     def __init__(self):
-        super().__init__() # 256x256x3
-        self.convolution_0 = nn.Conv2d(3, 6, 5) # 252x252x6
-        self.convolution_1 = nn.Conv2d(6, 16, 5) # 122x122x16
-        self.convolution_2 = nn.Conv2d(16, 20, 4) # 58x58x20
-        self.fully_connected_0 = nn.Linear(20 * 29 * 29, 15000) # 15000
-        self.fully_connected_1 = nn.Linear(15000, 1000) # 1000
+        super().__init__()  # 256x256x3
+        self.convolution_0 = nn.Conv2d(3, 6, 5)  # 252x252x6
+        self.convolution_1 = nn.Conv2d(6, 16, 5)  # 122x122x16
+        self.convolution_2 = nn.Conv2d(16, 20, 4)  # 58x58x20
+        self.fully_connected_0 = nn.Linear(20 * 29 * 29, 15000)  # 15000
+        self.fully_connected_1 = nn.Linear(15000, 1000)  # 1000
 
     @overrides
     def forward(self, x):

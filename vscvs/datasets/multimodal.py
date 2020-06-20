@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Datasets for managing multimodal data loading. """
@@ -10,7 +10,10 @@ from numpy.random import choice
 from overrides import overrides
 from torch.utils.data import Dataset
 
-from .mixins import SiameseMixin, SiameseSingleDatasetMixin, TripletMixin, MultimodalEntityMixin
+from .mixins import MultimodalEntityMixin
+from .mixins import SiameseMixin
+from .mixins import SiameseSingleDatasetMixin
+from .mixins import TripletMixin
 
 
 class MultimodalDataset(Dataset):
@@ -19,6 +22,7 @@ class MultimodalDataset(Dataset):
     length of the multimodal Dataset corresponds to that of the base dataset, and the first item in the tuples returned
     on `__getitem__` corresponds to item with the requested index in the base dataset.
     """
+
     def __init__(self, base_dataset, *args, **kwargs):
         """
         :param base_dataset: base of the multimodal Dataset. It's length of the multimodal Dataset corresponds to this
@@ -41,6 +45,7 @@ class MultimodalDatasetFolder(MultimodalDataset):
     """
     MultimodalDataset subclass to be used with DatasetFolders.
     """
+
     def __init__(self, *args, **kwargs):
         """
         :param args: base class arguments.
@@ -59,6 +64,7 @@ class MultimodalEntityDataset(MultimodalEntityMixin, MultimodalDataset):
     """
     MultimodalEntity dataset.
     """
+
     pass
 
 
@@ -66,6 +72,7 @@ class MultimodalEntityDatasetFolder(MultimodalEntityMixin, MultimodalDatasetFold
     """
     MultimodalEntityDataset for DatasetFolder datasets.
     """
+
     pass
 
 
@@ -73,6 +80,7 @@ class MultimodalEntitySiameseDataset(SiameseSingleDatasetMixin, MultimodalEntity
     """
     MultimodalEntityDataset subclass to load multimodal siamese pairs.
     """
+
     pass
 
 
@@ -83,6 +91,7 @@ class SiameseDataset(SiameseMixin, MultimodalDatasetFolder):
     pairs returned on `__getitem__` corresponds to item with the requested index in the base dataset (plus a random
     item from the second dataset).
     """
+
     def __init__(self, base_dataset, paired_dataset, *args, **kwargs):
         """
         :param base_dataset: base dataset for the `MultimodalDatasetFolder` constructor arguments.
@@ -125,6 +134,7 @@ class TripletDataset(TripletMixin, MultimodalDatasetFolder):
     triplet anchor). Other two random items from the second dataset are drawn, one with the same class as the anchor
     (the positive) and one of a different random class (the negative).
     """
+
     def __init__(self, base_dataset, paired_dataset, *args, **kwargs):
         """
         :param base_dataset: base dataset for the `MultimodalDatasetFolder` constructor arguments.

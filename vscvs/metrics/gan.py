@@ -1,17 +1,19 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Custom Ignite metrics for GANs. """
 
 
+from abc import ABC
+
 import torch
 
-from abc import ABC
 from ignite.exceptions import NotComputableError
 from ignite.metrics import Metric
-from ignite.metrics.metric import sync_all_reduce, reinit__is_reduced
+from ignite.metrics.metric import reinit__is_reduced
+from ignite.metrics.metric import sync_all_reduce
 from overrides import overrides
 
 from .siamese import AverageDistancesSiamesePairs
@@ -21,6 +23,7 @@ class AbstractLossGAN(Metric, ABC):
     """
     Computes the average loss for a GAN.
     """
+
     def __init__(self, *args, batch_size=lambda x: len(x), **kwargs):
         """
         :param args: `Metric` arguments.
@@ -36,11 +39,11 @@ class AbstractLossGAN(Metric, ABC):
         self._num_examples = 0
         super().__init__(*args, **kwargs)
 
-    @sync_all_reduce('_sum_generator_loss', '_sum_discriminator_loss', '_num_examples')
+    @sync_all_reduce("_sum_generator_loss", "_sum_discriminator_loss", "_num_examples")
     @overrides
     def compute(self):
         if self._num_examples == 0:
-            raise NotComputableError('Loss must have at least one example before it can be computed.')
+            raise NotComputableError("Loss must have at least one example before it can be computed.")
         return self._sum_generator_loss / self._num_examples, self._sum_discriminator_loss / self._num_examples
 
     @reinit__is_reduced
@@ -69,6 +72,7 @@ class LossMultimodalGAN(AbstractLossGAN):
     """
     Computes the average loss for a multimodal GAN.
     """
+
     def __init__(self, loss_fn, *args, **kwargs):
         """
         :param loss_fn: callable that takes a multimodal GAN output and returns the average losses over batch elements.
@@ -107,6 +111,7 @@ class LossBimodalSiamesePairs(AbstractLossGAN, ABC):
     """
     Computes the loss for positive and negative pairs in a bimodal siamese network.
     """
+
     def __init__(self, loss_fn, *args, **kwargs):
         """
         :param loss_fn: 2-tuple of loss functions, the first corresponding to the bimodal loss and the second to the
@@ -135,8 +140,10 @@ class LossBimodalSiamesePairs(AbstractLossGAN, ABC):
         :type: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
         """
         embeddings_0, embeddings_1, siamese_target, mode_predictions, mode_labels, generator_labels = output
-        generator_loss = self.bimodal_loss_fn(mode_predictions, generator_labels).item() + \
-                         self._contrastive_loss_fn(embeddings_0, embeddings_1, siamese_target).item()
+        generator_loss = (
+            self.bimodal_loss_fn(mode_predictions, generator_labels).item()
+            + self._contrastive_loss_fn(embeddings_0, embeddings_1, siamese_target).item()
+        )
         discriminator_loss = self.bimodal_loss_fn(mode_predictions, mode_labels).item()
         batch_size = self._batch_size(mode_predictions)
         self.update_metric_state(generator_loss, discriminator_loss, batch_size)
@@ -146,6 +153,7 @@ class AverageDistancesMultimodalSiamesePairs(AverageDistancesSiamesePairs):
     """
     Computes the average distances for positive and negative pairs in a multimodal siamese network.
     """
+
     @reinit__is_reduced
     @overrides
     def update(self, output):

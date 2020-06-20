@@ -1,33 +1,57 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Abstract class with the basic boilerplate code needed to define and run Ignite engines. """
 
 
 import os
-import torch
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from datetime import datetime
-from ignite.engine import Events
-from ignite.handlers import ModelCheckpoint, TerminateOnNan, Timer
-from torch.utils.tensorboard import SummaryWriter
-from torch.utils.data import DataLoader
+
 from tqdm import tqdm
 
+import torch
+
+from ignite.engine import Events
+from ignite.handlers import ModelCheckpoint
+from ignite.handlers import TerminateOnNan
+from ignite.handlers import Timer
 from settings import CHECKPOINT_NAME_FORMAT
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from vscvs.datasets import get_dataset
-from vscvs.utils import dataset_split_successive, get_checkpoint_path, get_device, get_log_directory
+from vscvs.utils import dataset_split_successive
+from vscvs.utils import get_checkpoint_path
+from vscvs.utils import get_device
+from vscvs.utils import get_log_directory
+from vscvs.utils import get_map_location
 
 
 class AbstractTrainer(ABC):
     """
     Abstract class with the boilerplate code needed to define and run an Ignite trainer Engine.
     """
-    def __init__(self, *args, batch_size=0, dataset_name=None, drop_last=False, epochs=1, n_gpu=0, parameter_dict=None,
-                 resume_date=None, resume_checkpoint=None, tags=None, train_validation_split=.8, workers=6, **kwargs):
+
+    def __init__(
+        self,
+        *args,
+        batch_size=0,
+        dataset_name=None,
+        drop_last=False,
+        epochs=1,
+        n_gpu=0,
+        parameter_dict=None,
+        resume_date=None,
+        resume_checkpoint=None,
+        tags=None,
+        train_validation_split=0.8,
+        workers=6,
+        **kwargs
+    ):
         """
         :param args: mixin arguments.
         :type: Tuple
@@ -74,8 +98,9 @@ class AbstractTrainer(ABC):
         self._load_checkpoint()
         self.epoch = self.start_epoch
         self.step = 0
-        self.train_loader, self.validation_loader = \
-            self._create_data_loaders(train_validation_split, batch_size, workers, drop_last)
+        self.train_loader, self.validation_loader = self._create_data_loaders(
+            train_validation_split, batch_size, workers, drop_last
+        )
         self.trainer_engine = self._create_trainer_engine()
         self.evaluator_engine = self._create_evaluator_engine()
         self.timer = self._create_timer()
@@ -158,8 +183,12 @@ class AbstractTrainer(ABC):
         :return: the trainer progressbar.
         :type: tqdm.tqdm
         """
-        return tqdm(initial=0, leave=False, total=len(self.train_loader),
-                    desc=self.progressbar_description.format(self.epoch, self.last_epoch, 0.0))
+        return tqdm(
+            initial=0,
+            leave=False,
+            total=len(self.train_loader),
+            desc=self.progressbar_description.format(self.epoch, self.last_epoch, 0.0),
+        )
 
     @property
     def checkpoint_saver_best(self):
@@ -168,8 +197,14 @@ class AbstractTrainer(ABC):
         :return: the best performing checkpoint saver
         :type: ModelCheckpoint
         """
-        return ModelCheckpoint(self.checkpoint_directory, filename_prefix='net_best', n_saved=5, atomic=True,
-                               create_dir=True, require_empty=False)
+        return ModelCheckpoint(
+            self.checkpoint_directory,
+            filename_prefix="net_best",
+            n_saved=5,
+            atomic=True,
+            create_dir=True,
+            require_empty=False,
+        )
 
     @property
     def checkpoint_saver_periodic(self):
@@ -178,8 +213,14 @@ class AbstractTrainer(ABC):
         :return: the periodic checkpoint saver
         :type: ModelCheckpoint
         """
-        return ModelCheckpoint(self.checkpoint_directory, filename_prefix='net_periodic', n_saved=3, atomic=True,
-                               create_dir=True, require_empty=False)
+        return ModelCheckpoint(
+            self.checkpoint_directory,
+            filename_prefix="net_periodic",
+            n_saved=3,
+            atomic=True,
+            create_dir=True,
+            require_empty=False,
+        )
 
     @property
     def collate_function(self):
@@ -216,7 +257,7 @@ class AbstractTrainer(ABC):
         :return: the progressbar description string
         :type: str
         """
-        return 'TRAINING epoch {}/{} => loss: {:.5f}'
+        return "TRAINING epoch {}/{} => loss: {:.5f}"
 
     @property
     def trainer_checkpoint(self):
@@ -227,15 +268,15 @@ class AbstractTrainer(ABC):
         :type: Dict
         """
         return {
-            'average_epoch_duration': self.timer.value(),
-            'batch_size': self.batch_size,
-            'dataset_name': self.dataset_name,
-            'parameters': self.parameter_dict,
-            'resume_date': self.resume_date,
-            'resume_checkpoint': self.resume_checkpoint,
-            'start_epoch': self.start_epoch,
-            'epochs': self.epochs,
-            'tags': self.tags
+            "average_epoch_duration": self.timer.value(),
+            "batch_size": self.batch_size,
+            "dataset_name": self.dataset_name,
+            "parameters": self.parameter_dict,
+            "resume_date": self.resume_date,
+            "resume_checkpoint": self.resume_checkpoint,
+            "start_epoch": self.start_epoch,
+            "epochs": self.epochs,
+            "tags": self.tags,
         }
 
     """ Event handler methods. """
@@ -253,7 +294,7 @@ class AbstractTrainer(ABC):
         :param trainer: the ignite trainer engine this event was bound to.
         :type: ignite.engine.Engine
         """
-        self.writer.add_scalar('Trainer Output', trainer.state.output, self.step)
+        self.writer.add_scalar("Trainer Output", trainer.state.output, self.step)
         self.progressbar.desc = self.progressbar_description.format(self.epoch, self.last_epoch, trainer.state.output)
 
     def _event_log_training_results(self, _):
@@ -262,10 +303,10 @@ class AbstractTrainer(ABC):
         """
         self.evaluator_engine.run(self.train_loader)
         metrics = self.evaluator_engine.state.metrics
-        print('\nTraining results - epoch: {}/{}'.format(self.epoch, self.last_epoch))
+        print("\nTraining results - epoch: {}/{}".format(self.epoch, self.last_epoch))
         for key, value in metrics.items():
-            self.writer.add_scalar('{}/training'.format(key), value, self.step)
-            print('{}: {:.6f}'.format(key, value))
+            self.writer.add_scalar("{}/training".format(key), value, self.step)
+            print("{}: {:.6f}".format(key, value))
 
     def _event_log_validation_results(self, _):
         """
@@ -273,10 +314,10 @@ class AbstractTrainer(ABC):
         """
         self.evaluator_engine.run(self.validation_loader)
         metrics = self.evaluator_engine.state.metrics
-        print('\nValidation results - epoch: {}/{}'.format(self.epoch, self.last_epoch))
+        print("\nValidation results - epoch: {}/{}".format(self.epoch, self.last_epoch))
         for key, value in metrics.items():
-            self.writer.add_scalar('{}/validation'.format(key), value, self.step)
-            print('{}: {:.6f}'.format(key, value))
+            self.writer.add_scalar("{}/validation".format(key), value, self.step)
+            print("{}: {:.6f}".format(key, value))
 
     def _event_reset_progressbar(self, _):
         """
@@ -307,7 +348,7 @@ class AbstractTrainer(ABC):
         """
         Create the serialized checkpoint dictionary for the current trainer state, and save it.
         """
-        torch.save(self.trainer_checkpoint, os.path.join(self.checkpoint_directory, 'trainer.pt'))
+        torch.save(self.trainer_checkpoint, os.path.join(self.checkpoint_directory, "trainer.pt"))
 
     """ Methods. """
 
@@ -316,9 +357,11 @@ class AbstractTrainer(ABC):
         Add event handlers for saving model checkpoints.
         """
         self.trainer_engine.add_event_handler(
-            Events.EPOCH_COMPLETED, self.checkpoint_saver_best, {'checkpoint': self.model})
+            Events.EPOCH_COMPLETED, self.checkpoint_saver_best, {"checkpoint": self.model}
+        )
         self.trainer_engine.add_event_handler(
-            Events.EPOCH_COMPLETED, self.checkpoint_saver_periodic, {'checkpoint': self.model})
+            Events.EPOCH_COMPLETED, self.checkpoint_saver_periodic, {"checkpoint": self.model}
+        )
 
     def _add_event_handlers(self):
         """
@@ -353,12 +396,22 @@ class AbstractTrainer(ABC):
         :type: torch.utils.data.DataLoader
         """
         # noinspection PyTypeChecker
-        loaders = [DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=workers, drop_last=drop_last,
-                              collate_fn=self.collate_function) # `collate_fn` parameter handles `None` vaLue
-                   for subset in dataset_split_successive(self.dataset, train_validation_split)]
+        loaders = [
+            DataLoader(
+                subset,
+                batch_size=batch_size,
+                shuffle=True,
+                num_workers=workers,
+                drop_last=drop_last,
+                collate_fn=self.collate_function,
+            )  # `collate_fn` parameter handles `None` vaLue
+            for subset in dataset_split_successive(self.dataset, train_validation_split)
+        ]
         if not len(loaders[-1]):
-            raise ValueError('Empty validation loader. This might be caused by having `drop_last=True` and \
-                             a resulting validation set smaller than `batch_size`.')
+            raise ValueError(
+                "Empty validation loader. This might be caused by having `drop_last=True` and \
+                             a resulting validation set smaller than `batch_size`."
+            )
         return loaders
 
     def _create_timer(self):
@@ -368,8 +421,13 @@ class AbstractTrainer(ABC):
         :type: ignite.handlers.Timer
         """
         timer = Timer(average=True)
-        timer.attach(self.trainer_engine, start=Events.EPOCH_STARTED, resume=Events.ITERATION_STARTED,
-                     pause=Events.ITERATION_COMPLETED, step=Events.ITERATION_COMPLETED)
+        timer.attach(
+            self.trainer_engine,
+            start=Events.EPOCH_STARTED,
+            resume=Events.ITERATION_STARTED,
+            pause=Events.ITERATION_COMPLETED,
+            step=Events.ITERATION_COMPLETED,
+        )
         return timer
 
     def _load_checkpoint(self):
@@ -378,13 +436,12 @@ class AbstractTrainer(ABC):
         """
         if self.resume_date:
             try:
-                previous_checkpoint_directory = \
-                    get_checkpoint_path(self.trainer_id, *self.tags, date=self.resume_date)
+                previous_checkpoint_directory = get_checkpoint_path(self.trainer_id, *self.tags, date=self.resume_date)
             except FileNotFoundError:
-                raise FileNotFoundError('Checkpoint {} not found.'.format(self.resume_date))
+                raise FileNotFoundError("Checkpoint {} not found.".format(self.resume_date))
             self._load_model_checkpoint(previous_checkpoint_directory)
             self._load_trainer_checkpoint(previous_checkpoint_directory)
-            tqdm.write('Successfully loaded the {} checkpoint.'.format(self.resume_date))
+            tqdm.write("Successfully loaded the {} checkpoint.".format(self.resume_date))
 
     def _load_model_checkpoint(self, previous_checkpoint_directory):
         """
@@ -392,7 +449,10 @@ class AbstractTrainer(ABC):
         :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        state_dict = torch.load(os.path.join(previous_checkpoint_directory, '{}.pt'.format(self.resume_checkpoint)))
+        state_dict = torch.load(
+            os.path.join(previous_checkpoint_directory, "{}.pt".format(self.resume_checkpoint)),
+            map_location=get_map_location(),
+        )
         self.model.load_state_dict(state_dict)
 
     def _load_trainer_checkpoint(self, previous_checkpoint_directory):
@@ -401,11 +461,13 @@ class AbstractTrainer(ABC):
         :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        previous_trainer_checkpoint = torch.load(os.path.join(previous_checkpoint_directory, 'trainer.pt'))
-        self.start_epoch = previous_trainer_checkpoint['start_epoch'] + previous_trainer_checkpoint['epochs']
+        previous_trainer_checkpoint = torch.load(
+            os.path.join(previous_checkpoint_directory, "trainer.pt"), map_location=get_map_location()
+        )
+        self.start_epoch = previous_trainer_checkpoint["start_epoch"] + previous_trainer_checkpoint["epochs"]
 
     def run(self):
         """
         Run the trainer.
         """
-        self.trainer_engine.run(self.train_loader, max_epochs=self.epochs )
+        self.trainer_engine.run(self.train_loader, max_epochs=self.epochs)

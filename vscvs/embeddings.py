@@ -12,18 +12,19 @@ from functools import reduce
 from itertools import repeat
 from statistics import mean
 
+from tqdm import tqdm
+
 import torch
 
 from torch.multiprocessing import Pool
 from torch.nn import CosineSimilarity
 from torch.nn import PairwiseDistance
 from torch.utils.data import DataLoader
-from tqdm import tqdm
-
 from vscvs.datasets import get_dataset
 from vscvs.decorators import log_time
 from vscvs.decorators import torch_no_grad
 from vscvs.utils import get_device
+from vscvs.utils import get_map_location
 from vscvs.utils import get_path
 from vscvs.visualization import plot_image_retrieval
 
@@ -87,7 +88,9 @@ def load_embeddings(embeddings_name):
     contain pickled tensor objects with image embeddings.
     :type: torch.Tensor
     """
-    return torch.load(open(get_path("embeddings", "{}.pt".format(embeddings_name)), "rb"))
+    return torch.load(
+        open(get_path("embeddings", "{}.pt".format(embeddings_name)), "rb"), map_location=get_map_location()
+    )
 
 
 def get_top_k(query_embedding, queried_embeddings, k, distance):

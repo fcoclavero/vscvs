@@ -12,13 +12,13 @@ import re
 from collections import OrderedDict
 from datetime import datetime
 
-import torch
 import yaml
 
-from torch import nn as nn
-from torch.utils.data import DataLoader
+import torch
 
 from settings import CHECKPOINT_NAME_FORMAT
+from torch import nn as nn
+from torch.utils.data import DataLoader
 
 from .path import get_checkpoint_path
 
@@ -54,6 +54,16 @@ def get_device(n_gpu):
     :type: str
     """
     return torch.device("cuda:0" if (torch.cuda.is_available() and n_gpu > 0) else "cpu")
+
+
+def get_map_location():
+    """
+    Returns a `torch.device` object or string containing a device tag that can be provided to
+    the PyTorch serialization functions, based on cuda availability.
+    :return: a map location consistent with the run environment.
+    :type: Union[torch.device, str]
+    """
+    return "cpu" if not torch.cuda.is_available() else lambda storage, loc: storage.cuda()
 
 
 def get_out_features_from_model(model):
@@ -129,7 +139,9 @@ def load_classification_model_from_checkpoint(model, state_dict_file, checkpoint
     """
     date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
     checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)))
+    state_dict = torch.load(
+        os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)), map_location=get_map_location()
+    )
     out_features = get_out_features_from_state_dict(state_dict)
     model = model(out_features=out_features)
     model.load_state_dict(state_dict)
@@ -158,7 +170,9 @@ def load_siamese_model_from_checkpoint(model_0, model_1, state_dict_file, checkp
 
     date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
     checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
-    state_dict = torch.load(os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)))
+    state_dict = torch.load(
+        os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)), map_location=get_map_location()
+    )
     state_dict_0 = OrderedDict({key: value for key, value in state_dict.items() if "embedding_network_0" in key})
     state_dict_1 = OrderedDict({key: value for key, value in state_dict.items() if "embedding_network_1" in key})
     out_features_0 = get_out_features_from_state_dict(state_dict_0)

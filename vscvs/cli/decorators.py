@@ -18,9 +18,9 @@ def pass_kwargs_to_context(func):
     group can be created and decorated with this decorator, enabling the shared parameters to be received by the click
     group and then be passed on to the different commands.
     :param func: the function to be decorated
-    :type: function
+    :type: Callable
     :return: the decorated function, which passes all kwargs to the click context and passes it on
-    :type: function
+    :type: Callable
     """
 
     @click.pass_context
@@ -37,9 +37,9 @@ def pass_context_to_kwargs(func):
     Decorator for `click` CLIs that puts all the kwargs in the click context in the decorated function's invocation
     kwargs. This can be a more elegant way to receive the context in some cases.
     :param func: the function to be decorated
-    :type: function
+    :type: Callable
     :return: the decorated function, which passes all kwargs in the click context to the invocation kwargs
-    :type: function
+    :type: Callable
     """
 
     @click.pass_context  # needed to receive the context

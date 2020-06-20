@@ -19,9 +19,9 @@ def deprecated(func):
     """
     Decorator that can be used to mark functions as deprecated, emitting a warning when the function is used.
     :param func: the function to be decorated
-    :type: function
+    :type: Callable
     :return: the decorated function, which emits a warning when used
-    :type: function
+    :type: Callable
     """
 
     @functools.wraps(func)
@@ -46,10 +46,10 @@ def kwargs_parameter_dict(func):
     """
     Decorator that passes all received `kwargs` as a keyword dictionary parameter.
     :param func: the function to be decorated
-    :type: function
+    :type: Callable
     :return: the decorated function, which now has a new dictionary parameter called `parameter_dict` with all the
     original keyword arguments.
-    :type: function
+    :type: Callable
     """
 
     @functools.wraps(func)
@@ -71,9 +71,9 @@ def log_time(func):
     """
     Decorator for logging the execution time of a function.
     :param func: the function to be decorated
-    :type: function
+    :type: Callable
     :return: the decorated function, which now prints its execution time.
-    :type: function
+    :type: Callable
     """
 
     @functools.wraps(func)
@@ -98,9 +98,9 @@ def threaded(func):
     """
     Decorator that runs the decorated function asynchronously by throwing a new Python thread upon function call.
     :param func: the function to be decorated
-    :type: function
+    :type: Callable
     :return: the decorated function, which evaluates in a new Python thread
-    :type: function
+    :type: Callable
     """
 
     @functools.wraps(func)
@@ -127,9 +127,9 @@ def torch_no_grad(func):
     It will reduce memory consumption for computations that would otherwise have requires_grad=True. In this mode, the
     result of every computation will have `requires_grad=False`, even when the inputs have `requires_grad=True`.
     :param func: the function to be decorated
-    :type: function
+    :type: Callable
     :return: the decorated function, which evaluates in a context with disabled gradient calculations.
-    :type: function
+    :type: Callable
     """
 
     @functools.wraps(func)
@@ -152,9 +152,9 @@ def parametrized(decorator):
     """
     Meta-decorator that adds parametrization support to other decorators.
     :param decorator: the decorator to be modified with parameter support
-    :type: function
+    :type: Callable
     :return: a decorator which can receive arguments and keyword arguments
-    :type: function
+    :type: Callable
     """
 
     @functools.wraps(decorator)
@@ -173,7 +173,7 @@ def parametrized(decorator):
             Evaluate the original decorator, which receives the function to be decorated along with the specified
             arguments and keyword arguments.
             :param func: the function to be decorated by the original decorator
-            :type: function
+            :type: Callable
             :return: the evaluation of the parametrized decorator
             """
             return decorator(func, *args, **kwargs)

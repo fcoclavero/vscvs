@@ -10,14 +10,15 @@ import os
 
 from abc import ABC
 
+from tqdm import tqdm
+
 import torch
 
 from ignite.engine import Events
 from overrides import overrides
-from tqdm import tqdm
-
 from vscvs.trainers.abstract_trainer import AbstractTrainer
 from vscvs.trainers.mixins import GANOptimizerMixin
+from vscvs.utils import get_map_location
 from vscvs.utils import initialize_weights
 
 
@@ -97,7 +98,10 @@ class AbstractGANTrainer(GANOptimizerMixin, AbstractTrainer, ABC):
         :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        state_dicts = torch.load(os.path.join(previous_checkpoint_directory, "{}.pt".format(self.resume_checkpoint)))
+        state_dicts = torch.load(
+            os.path.join(previous_checkpoint_directory, "{}.pt".format(self.resume_checkpoint)),
+            map_location=get_map_location(),
+        )
         self.generator.load_state_dict(state_dicts["generator"])
         self.discriminator.load_state_dict(state_dicts["discriminator"])
 

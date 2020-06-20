@@ -12,22 +12,23 @@ from abc import ABC
 from abc import abstractmethod
 from datetime import datetime
 
+from tqdm import tqdm
+
 import torch
 
 from ignite.engine import Events
 from ignite.handlers import ModelCheckpoint
 from ignite.handlers import TerminateOnNan
 from ignite.handlers import Timer
+from settings import CHECKPOINT_NAME_FORMAT
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from tqdm import tqdm
-
-from settings import CHECKPOINT_NAME_FORMAT
 from vscvs.datasets import get_dataset
 from vscvs.utils import dataset_split_successive
 from vscvs.utils import get_checkpoint_path
 from vscvs.utils import get_device
 from vscvs.utils import get_log_directory
+from vscvs.utils import get_map_location
 
 
 class AbstractTrainer(ABC):
@@ -448,7 +449,10 @@ class AbstractTrainer(ABC):
         :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        state_dict = torch.load(os.path.join(previous_checkpoint_directory, "{}.pt".format(self.resume_checkpoint)))
+        state_dict = torch.load(
+            os.path.join(previous_checkpoint_directory, "{}.pt".format(self.resume_checkpoint)),
+            map_location=get_map_location(),
+        )
         self.model.load_state_dict(state_dict)
 
     def _load_trainer_checkpoint(self, previous_checkpoint_directory):
@@ -457,7 +461,9 @@ class AbstractTrainer(ABC):
         :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        previous_trainer_checkpoint = torch.load(os.path.join(previous_checkpoint_directory, "trainer.pt"))
+        previous_trainer_checkpoint = torch.load(
+            os.path.join(previous_checkpoint_directory, "trainer.pt"), map_location=get_map_location()
+        )
         self.start_epoch = previous_trainer_checkpoint["start_epoch"] + previous_trainer_checkpoint["epochs"]
 
     def run(self):

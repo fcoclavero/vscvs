@@ -17,6 +17,7 @@ import torch
 
 from vscvs.utils import CHECKPOINT_NAME_FORMAT
 from vscvs.utils import get_checkpoint_path
+from vscvs.utils import get_map_location
 
 from .tensorboard import tensorboard
 
@@ -39,7 +40,7 @@ def checkpoint(name, date, tag):
     date = datetime.strptime(date, CHECKPOINT_NAME_FORMAT)
     click.echo("Show the {} checkpoint".format(date))
     checkpoint_directory = get_checkpoint_path(name, *tag, date=date)
-    trainer_checkpoint = torch.load(os.path.join(checkpoint_directory, "trainer.pt"))
+    trainer_checkpoint = torch.load(os.path.join(checkpoint_directory, "trainer.pt"), map_location=get_map_location())
     print(yaml.dump(trainer_checkpoint, allow_unicode=True, default_flow_style=False))  # yaml dump for pretty printing
 
 

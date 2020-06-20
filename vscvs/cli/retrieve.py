@@ -9,11 +9,13 @@ __status__ = "Prototype"
 import os
 
 import click
+
 import torch
 
 from vscvs.cli.decorators import pass_context_to_kwargs
 from vscvs.cli.decorators import pass_kwargs_to_context
 from vscvs.embeddings import retrieve_top_k
+from vscvs.utils import get_map_location
 from vscvs.utils import get_path
 
 
@@ -87,7 +89,7 @@ def cnn(
 ):
     """ Image retrieval for the CNN model. """
     checkpoint_directory = get_path("checkpoints", "cnn", checkpoint)  # Load the model checkpoint
-    net = torch.load(os.path.join(checkpoint_directory, "_net_{}.pt".format(epoch)))
+    net = torch.load(os.path.join(checkpoint_directory, "_net_{}.pt".format(epoch)), map_location=get_map_location())
     retrieve_top_k(
         net.embedding_network,
         query_image_file_path,

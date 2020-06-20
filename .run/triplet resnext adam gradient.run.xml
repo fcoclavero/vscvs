@@ -12,6 +12,16 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+    <EXTENSION ID="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" />
+      </ENTRIES>
+    </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
     <option name="PARAMETERS" value="gradient --name train-triplet-resnext train --train-validation-split 0.85 --batch-size 12 --epochs 1 --workers 16 --n-gpu 1 adam --learning-rate 0.01 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000001 --weight-decay 0.001 --amsgrad True triplet --dataset-name sketchy --loss-reduction sum --margin 0.2 resnext" />
     <option name="SHOW_COMMAND_LINE" value="false" />

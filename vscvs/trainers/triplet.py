@@ -1,29 +1,39 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Ignite trainer for a Triplet Network architecture. """
 
 
 from abc import ABC
-from overrides import overrides
 from typing import Callable
 
-from .abstract_trainer import AbstractTrainer
-from .engines.triplet import create_triplet_evaluator, create_triplet_trainer
-from vscvs.loss_functions import TripletLoss
-from vscvs.metrics import AccuracyTriplets, AverageDistancesTriplets, LossTriplets
-from vscvs.models import CNNNormalized, ResNetNormalized, ResNextNormalized, TripletSharedPositiveNegative
+from overrides import overrides
+
 from vscvs.decorators import kwargs_parameter_dict
+from vscvs.loss_functions import TripletLoss
+from vscvs.metrics import AccuracyTriplets
+from vscvs.metrics import AverageDistancesTriplets
+from vscvs.metrics import LossTriplets
+from vscvs.models import CNNNormalized
+from vscvs.models import ResNetNormalized
+from vscvs.models import ResNextNormalized
+from vscvs.models import TripletSharedPositiveNegative
+
+from .abstract_trainer import AbstractTrainer
+from .engines.triplet import create_triplet_evaluator
+from .engines.triplet import create_triplet_trainer
 
 
 class AbstractTripletTrainer(AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a triplet architecture.
     """
-    def __init__(self, *args, anchor_network=None, positive_negative_network=None, loss_reduction='mean',
-                 margin=.2, **kwargs):
+
+    def __init__(
+        self, *args, anchor_network=None, positive_negative_network=None, loss_reduction="mean", margin=0.2, **kwargs
+    ):
         """
         :param args: Trainer arguments
         :type: Tuple
@@ -60,14 +70,21 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
     @property
     @overrides
     def trainer_id(self):
-        return 'Triplet{}'.format(self.anchor_network.__class__.__name__)
+        return "Triplet{}".format(self.anchor_network.__class__.__name__)
 
     @overrides
     def _create_evaluator_engine(self):
         average_distances = AverageDistancesTriplets()
-        return create_triplet_evaluator(self.model, device=self.device, metrics={
-            'Accuracy': AccuracyTriplets(), 'Average Distance/positive': average_distances[0],
-            'Average Distance/negative': average_distances[1], 'Loss': LossTriplets(self.loss)})
+        return create_triplet_evaluator(
+            self.model,
+            device=self.device,
+            metrics={
+                "Accuracy": AccuracyTriplets(),
+                "Average Distance/positive": average_distances[0],
+                "Average Distance/negative": average_distances[1],
+                "Loss": LossTriplets(self.loss),
+            },
+        )
 
     @overrides
     def _create_trainer_engine(self):
@@ -86,10 +103,16 @@ def train_triplet_cnn(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: TripletTrainer keyword arguments
     :type: Dict
     """
+
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
-    trainer = TripletTrainer(*args, anchor_network=CNNNormalized(out_features=250),
-                             positive_negative_network=CNNNormalized(out_features=250), **kwargs)
+
+    trainer = TripletTrainer(
+        *args,
+        anchor_network=CNNNormalized(out_features=250),
+        positive_negative_network=CNNNormalized(out_features=250),
+        **kwargs
+    )
     trainer.run()
 
 
@@ -105,10 +128,16 @@ def train_triplet_resnet(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: TripletTrainer keyword arguments
     :type: Dict
     """
+
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
-    trainer = TripletTrainer(*args, anchor_network=ResNetNormalized(out_features=250, pretrained=True),
-                             positive_negative_network=ResNetNormalized(out_features=250), **kwargs)
+
+    trainer = TripletTrainer(
+        *args,
+        anchor_network=ResNetNormalized(out_features=250, pretrained=True),
+        positive_negative_network=ResNetNormalized(out_features=250),
+        **kwargs
+    )
     trainer.run()
 
 
@@ -124,8 +153,14 @@ def train_triplet_resnext(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: TripletTrainer keyword arguments
     :type: Dict
     """
+
     class TripletTrainer(optimizer_mixin, AbstractTripletTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
-    trainer = TripletTrainer(*args, anchor_network=ResNextNormalized(out_features=250, pretrained=True),
-                             positive_negative_network=ResNextNormalized(out_features=250), **kwargs)
+
+    trainer = TripletTrainer(
+        *args,
+        anchor_network=ResNextNormalized(out_features=250, pretrained=True),
+        positive_negative_network=ResNextNormalized(out_features=250),
+        **kwargs
+    )
     trainer.run()

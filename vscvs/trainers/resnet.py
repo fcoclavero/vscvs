@@ -1,29 +1,34 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Ignite trainers for ResNet classification networks. """
 
 
 from abc import ABC
-from ignite.engine import create_supervised_trainer, create_supervised_evaluator
-from ignite.metrics import Accuracy, Loss
+from typing import Callable
+
+from ignite.engine import create_supervised_evaluator
+from ignite.engine import create_supervised_trainer
+from ignite.metrics import Accuracy
+from ignite.metrics import Loss
 from overrides import overrides
 from torch.nn import CrossEntropyLoss
-from typing import Callable
+
+from vscvs.decorators import kwargs_parameter_dict
+from vscvs.models import ResNetLogSoftmax
+from vscvs.utils import prepare_batch
 
 from .abstract_trainer import AbstractTrainer
 from .mixins import EarlyStoppingMixin
-from vscvs.models import ResNetLogSoftmax
-from vscvs.utils import prepare_batch
-from vscvs.decorators import kwargs_parameter_dict
 
 
 class AbstractResNetTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a ResNet model.
     """
+
     def __init__(self, *args, out_features=125, pretrained=False, **kwargs):
         """
         :param args: Trainer arguments
@@ -52,23 +57,25 @@ class AbstractResNetTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     @property
     @overrides
     def trainer_id(self):
-        return 'ResNet'
+        return "ResNet"
 
     @staticmethod
     @overrides
     def _score_function(engine):
-        validation_loss = engine.state.metrics['Loss']
+        validation_loss = engine.state.metrics["Loss"]
         return -validation_loss
 
     @overrides
     def _create_evaluator_engine(self):
         return create_supervised_evaluator(
-            self.model, metrics={'Accuracy': Accuracy(), 'Loss': Loss(self.loss)}, device=self.device)
+            self.model, metrics={"Accuracy": Accuracy(), "Loss": Loss(self.loss)}, device=self.device
+        )
 
     @overrides
     def _create_trainer_engine(self):
         return create_supervised_trainer(
-            self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch)
+            self.model, self.optimizer, self.loss, device=self.device, prepare_batch=prepare_batch
+        )
 
 
 @kwargs_parameter_dict
@@ -83,7 +90,9 @@ def train_resnet(*args, optimizer_mixin=None, **kwargs):
     :param kwargs: ResNetTrainer keyword arguments
     :type: Dict
     """
+
     class ResNetTrainer(optimizer_mixin, AbstractResNetTrainer):
         _optimizer: Callable  # type hinting `_optimizer` defined in `optimizer_mixin`, but is not recognized by PyCharm
+
     trainer = ResNetTrainer(*args, **kwargs)
     trainer.run()

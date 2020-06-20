@@ -1,15 +1,17 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 import math
+
 import torch
 
 from overrides import overrides
 
-from vscvs.models.gradients import SobelX, SobelY
 from vscvs.decorators import torch_no_grad
+from vscvs.models.gradients import SobelX
+from vscvs.models.gradients import SobelY
 
 
 class HOG(torch.nn.Module):
@@ -55,28 +57,28 @@ class HOG(torch.nn.Module):
         """
         return int(self.bins * (in_dimension / self.cell_size) ** 2)
 
-    @torch_no_grad # we won't need gradients for operations, so we use this option for better performance
+    @torch_no_grad  # we won't need gradients for operations, so we use this option for better performance
     @overrides
     def forward(self, x):
         n_inputs, _, input_height, input_width = x.shape
         # First, we need to compute the gradients along both axes.
         gx, gy = self.sobel_x(x), self.sobel_y(x)
-        grad_magnitudes, grad_angles = torch.sqrt(gx**2 + gy**2), torch.atan2(gx, gy)
+        grad_magnitudes, grad_angles = torch.sqrt(gx ** 2 + gy ** 2), torch.atan2(gx, gy)
         # If signed angles are used, we phase shift by pi to get only positive numbers
         grad_angles = grad_angles + math.pi if self.signed_gradients else grad_angles.abs()
         # Gradient angle linear interpolation. First we divide angles by the maximum angle. This gives us the angle
-        grad_angle_interpolation = grad_angles / self.angle_range # as a fraction [0, 1] of the maximum.
+        grad_angle_interpolation = grad_angles / self.angle_range  # as a fraction [0, 1] of the maximum.
         # We then multiply by 1 - bins and take the floor, giving us an int that corresponds to the angle
-        grad_bins = (grad_angle_interpolation * (self.bins-  1)).floor().long() # bin the pixel belongs to.
+        grad_bins = (grad_angle_interpolation * (self.bins - 1)).floor().long()  # bin the pixel belongs to.
         # Now we need the histogram for every pixel block. First, we create tensor with a vector for each pixel,
         # containing its gradient magnitude in the index of the pixel's gradient orientation bin.
         out = torch.zeros((n_inputs, self.bins, input_height, input_width), dtype=torch.float, device=x.device)
-        out.scatter_(1, grad_bins, grad_magnitudes) # the scatter function places the mag in the corresponding index
+        out.scatter_(1, grad_bins, grad_magnitudes)  # the scatter function places the mag in the corresponding index
         # Now we use an average pool with `cell_size` kernel, which gives us the normalized sum of the pixel vectors
         # above, giving us a single vector for each cell with the normalized histogram of orientations.
-        hog = self.cell_pooling(out) * self.cell_size**2
+        hog = self.cell_pooling(out) * self.cell_size ** 2
         # Now we flatten to return the actual feature vector
-        return hog.flatten(start_dim=1) # start_dim=1 to return the hog vector of every image in a batch
+        return hog.flatten(start_dim=1)  # start_dim=1 to return the hog vector of every image in a batch
 
     @overrides
     def to(self, *args, **kwargs):

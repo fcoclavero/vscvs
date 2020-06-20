@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Path handler. """
@@ -11,7 +11,8 @@ import shutil
 
 from datetime import datetime
 
-from settings import ROOT_DIR, CHECKPOINT_NAME_FORMAT
+from settings import CHECKPOINT_NAME_FORMAT
+from settings import ROOT_DIR
 
 
 def get_path(*paths):
@@ -23,7 +24,7 @@ def get_path(*paths):
     :return: the actual path.
     :type: str
     """
-    return os.path.join(ROOT_DIR, 'data', *paths or '')
+    return os.path.join(ROOT_DIR, "data", *paths or "")
 
 
 def get_checkpoint_path(checkpoint_name, *tags, date=datetime.now()):
@@ -38,7 +39,7 @@ def get_checkpoint_path(checkpoint_name, *tags, date=datetime.now()):
     :return: the model checkpoint path
     :type: str
     """
-    return get_path('checkpoints', checkpoint_name, *tags, date.strftime(CHECKPOINT_NAME_FORMAT))
+    return get_path("checkpoints", checkpoint_name, *tags, date.strftime(CHECKPOINT_NAME_FORMAT))
 
 
 def get_log_directory(model_name, *tags, date=datetime.now()):
@@ -53,7 +54,7 @@ def get_log_directory(model_name, *tags, date=datetime.now()):
     :return: the model checkpoint path
     :type: str
     """
-    return get_path('tensorboard', model_name, *tags, date.strftime(CHECKPOINT_NAME_FORMAT))
+    return get_path("tensorboard", model_name, *tags, date.strftime(CHECKPOINT_NAME_FORMAT))
 
 
 def get_subdirectories(path):

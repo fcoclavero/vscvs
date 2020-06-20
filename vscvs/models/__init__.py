@@ -1,7 +1,11 @@
 from .convolutional import *
 from .gan import *
-from .gcn import GCNClassification, HOGGCN
-from .gradients import SobelX, SobelY, Laplacian
+from .gcn import HOGGCN
+from .gcn import GCNClassification
+from .gradients import Laplacian
+from .gradients import SobelX
+from .gradients import SobelY
 from .hog import HOG
-from .siamese import SiameseNetwork, SiameseNetworkShared
+from .siamese import SiameseNetwork
+from .siamese import SiameseNetworkShared
 from .triplet import *

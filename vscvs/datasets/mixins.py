@@ -1,27 +1,34 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Mixins for adding additional features to DataSet objects. """
 
 
 import os
-import re
 import pickle
+import re
+
+from abc import ABC
+from abc import abstractmethod
+from collections import defaultdict
+from typing import Callable
+from typing import Dict
+from typing import List
+from typing import Tuple
+
 import torch
 
-from abc import ABC, abstractmethod
-from collections import defaultdict
 from multipledispatch import dispatch
 from numpy.random import choice
 from overrides import overrides
 from torch.utils.data import Dataset
 from torchvision.datasets import DatasetFolder
 from tqdm import tqdm
-from typing import Callable, Dict, List, Tuple
 
-from vscvs.utils import get_path, str_to_bin_array
+from vscvs.utils import get_path
+from vscvs.utils import str_to_bin_array
 
 
 """ Type hinting utility mixin classes. """
@@ -32,9 +39,10 @@ class DatasetMixin:
     Utility class that type hints `Dataset` methods that will be available to the mixins that inherit this class, as
     they are meant to be used in multiple inheritance with `torch.utils.data.Dataset`.
     """
-    __add__: Callable[[Dataset], Dataset] # concatenates dataset parameter
-    __getitem__: Callable[[int], tuple] # get the item tuple for the given index
-    __len__: int # number of data points in the dataset'
+
+    __add__: Callable[[Dataset], Dataset]  # concatenates dataset parameter
+    __getitem__: Callable[[int], tuple]  # get the item tuple for the given index
+    __len__: int  # number of data points in the dataset'
 
 
 class DatasetFolderMixin(DatasetMixin):
@@ -42,10 +50,11 @@ class DatasetFolderMixin(DatasetMixin):
     Utility class that type hints `DatasetFolder` methods that will be available to the mixins that inherit this class,
     as they are meant to be used in multiple inheritance with `torchvision.datasets.DatasetFolder`.
     """
-    classes: List[str] # list of class names
-    class_to_idx: Dict[str, int] # dictionary from class_name to class_index
-    samples: List[Tuple[str, int]] # list of (sample_path, class_index) tuples
-    targets: List[int] # list of class_index values for each sample
+
+    classes: List[str]  # list of class names
+    class_to_idx: Dict[str, int]  # dictionary from class_name to class_index
+    samples: List[Tuple[str, int]]  # list of (sample_path, class_index) tuples
+    targets: List[int]  # list of class_index values for each sample
 
 
 class ImageFolderMixin(DatasetFolderMixin):
@@ -53,7 +62,8 @@ class ImageFolderMixin(DatasetFolderMixin):
     Utility class that type hints `ImageFolder` methods that will be available to the mixins that inherit this class, as
     they are meant to be used in multiple inheritance with `torchvision.datasets.ImageFolder`.
     """
-    imgs: List[Tuple[str, int]] # list of (image_path, class_index) tuples
+
+    imgs: List[Tuple[str, int]]  # list of (image_path, class_index) tuples
 
 
 class MultimodalDatasetMixin:
@@ -61,6 +71,7 @@ class MultimodalDatasetMixin:
     Utility class that type hints `MultimodalDataset` methods that will be available to the mixins that inherit this
     class, as they are meant to be used in multiple inheritance with `vscvs.datasets.multimodal.MultimodalDataset`.
     """
+
     base_dataset: DatasetFolder
 
 
@@ -71,6 +82,7 @@ class BinaryEncodingMixin:
     """
     Mixin class for adding unique binary encoding descriptors for each element in the dataset.
     """
+
     targets: List[int]
 
     def __init__(self, *args, **kwargs):
@@ -105,6 +117,7 @@ class ClassIndicesMixin(DatasetFolderMixin):
     DatasetFolder mixin that creates a dictionary with dataset classes as keys and the corresponding dataset element
     indices as values. These can the be accessed via the `get_class_element_indices` method.
     """
+
     def __init__(self, *args, **kwargs):
         """
         :param args: base Dataset class arguments
@@ -136,6 +149,7 @@ class FileNameIndexedMixin(ImageFolderMixin):
         1. [Python dispatch](https://docs.python.org/3/library/functools.html#functools.singledispatch)
         2. [multiple-dispatch module](https://multiple-dispatch.readthedocs.io/en/latest/index.html)
     """
+
     def __init__(self, *args, **kwargs):
         """
         Initialize de base Dataset class and create a image index dictionary with file names as keys and dataset indices
@@ -158,7 +172,7 @@ class FileNameIndexedMixin(ImageFolderMixin):
         """
         file_path = self.imgs[index][0]
         filename = os.path.split(file_path)[-1]
-        return filename.split('.')[0]  # remove file extension
+        return filename.split(".")[0]  # remove file extension
 
     def filter_image_indices(self, pattern):
         """
@@ -168,9 +182,11 @@ class FileNameIndexedMixin(ImageFolderMixin):
         :return: a list of images that match the pattern.
         :type: List[Tuple]
         """
-        return [ # create a list of indices
-            i for i, path_class in enumerate(self.imgs) # return index
-            if re.match(pattern, os.path.split(path_class[0])[-1])] # if last part of path matches regex
+        return [  # create a list of indices
+            i
+            for i, path_class in enumerate(self.imgs)  # return index
+            if re.match(pattern, os.path.split(path_class[0])[-1])
+        ]  # if last part of path matches regex
 
     @dispatch((int, torch.Tensor))  # single argument, either <int> or <Tensor>
     def __getitem__(self, index):
@@ -196,6 +212,7 @@ class FilePathIndexedMixin(ImageFolderMixin):
         1. [Python dispatch](https://docs.python.org/3/library/functools.html#functools.singledispatch)
         2. [multiple-dispatch module](https://multiple-dispatch.readthedocs.io/en/latest/index.html)
     """
+
     def __init__(self, *args, **kwargs):
         """
         Initialize de base Dataset class and create a image index dictionary with file paths as keys and dataset indices
@@ -235,6 +252,7 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
     NOTE: we assume that the same entity in a different mode will be contained in a file with a name that contains the
     name of the entity in the base dataset.
     """
+
     def __init__(self, base_dataset, *paired_datasets):
         """
         :param base_dataset: `MultimodalDataset` base dataset.
@@ -253,7 +271,7 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         :return: the file path of the cache file.
         :type: str
         """
-        return get_path('cache', self.cache_filename)
+        return get_path("cache", self.cache_filename)
 
     @property
     def cache_filename(self):
@@ -262,7 +280,7 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         :return: the filename string.
         :type: str
         """
-        return '{}.pickle'.format('-'.join([dataset.__class__.__name__ for dataset in [self, *self.paired_datasets]]))
+        return "{}.pickle".format("-".join([dataset.__class__.__name__ for dataset in [self, *self.paired_datasets]]))
 
     @property
     def _create_entity_indices(self):
@@ -275,14 +293,15 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         :return: the entity indices object for the database.
         :type: List[Dict[int, List[int]]]
         """
-        entity_indices = [] # contains a list for each base_dataset sample
-        desc = 'Creating entity indices.'
+        entity_indices = []  # contains a list for each base_dataset sample
+        desc = "Creating entity indices."
         for i, base_sample in tqdm(enumerate(self.base_dataset.samples), desc=desc, total=len(self.base_dataset)):
-            entity_indices.append([]) # contains a list for each paired_dataset
+            entity_indices.append([])  # contains a list for each paired_dataset
             pattern = self._get_filename(base_sample)
             for j, paired_dataset in enumerate(self.paired_datasets):
-                entity_indices[i].append( # add list with all pattern matches in paired_datasets[j]
-                    [k for k, sample in enumerate(paired_dataset.samples) if re.search(pattern, sample[0])])
+                entity_indices[i].append(  # add list with all pattern matches in paired_datasets[j]
+                    [k for k, sample in enumerate(paired_dataset.samples) if re.search(pattern, sample[0])]
+                )
         return entity_indices
 
     @staticmethod
@@ -297,7 +316,7 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         """
         file_path = element[0]
         filename = os.path.split(file_path)[-1]
-        return filename.split('.')[0] # remove file extension
+        return filename.split(".")[0]  # remove file extension
 
     def _entity_indices(self):
         """
@@ -307,10 +326,10 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         :type: List[Dict[int, List[int]]]
         """
         try:
-            entity_indices = pickle.load(open(self.cache_file_path, 'rb'))
+            entity_indices = pickle.load(open(self.cache_file_path, "rb"))
         except FileNotFoundError:
             entity_indices = self._create_entity_indices
-            pickle.dump(entity_indices, open(self.cache_file_path, 'wb'))
+            pickle.dump(entity_indices, open(self.cache_file_path, "wb"))
         return entity_indices
 
     def __getitem__(self, index):
@@ -318,14 +337,17 @@ class MultimodalEntityMixin(MultimodalDatasetMixin, ABC):
         Override: return the item at `index` in the base dataset, along with a random instance of the same element in
         each of the modes defined by the different paired datasets.
         """
-        return (self.base_dataset[index],
-                *[dataset[choice(self.entity_indexes[index][i])] for i, dataset in enumerate(self.paired_datasets)])
+        return (
+            self.base_dataset[index],
+            *[dataset[choice(self.entity_indexes[index][i])] for i, dataset in enumerate(self.paired_datasets)],
+        )
 
 
 class OneHotEncodingMixin:
     """
     Mixin class for adding unique one-hot encoding descriptors for each element in the dataset.
     """
+
     targets: List[int]
 
     def __init__(self, *args, **kwargs):
@@ -357,7 +379,8 @@ class SiameseMixin(DatasetFolderMixin, ABC):
     """
     Mixin class for loading random pairs on `__getitem__` for any `DatasetFolder` dataset.
     """
-    def __init__(self, *args, positive_pair_proportion=.5, **kwargs):
+
+    def __init__(self, *args, positive_pair_proportion=0.5, **kwargs):
         """
         :param args: super class arguments.
         :type: List
@@ -367,7 +390,10 @@ class SiameseMixin(DatasetFolderMixin, ABC):
         :type: Dict
         """
         super().__init__(*args, **kwargs)
-        self.target_probabilities = [positive_pair_proportion, 1 - positive_pair_proportion] # siamese target value prob
+        self.target_probabilities = [
+            positive_pair_proportion,
+            1 - positive_pair_proportion,
+        ]  # siamese target value prob
 
     def _get_pair(self, first_item_class_index):
         """
@@ -377,9 +403,9 @@ class SiameseMixin(DatasetFolderMixin, ABC):
         :return: an item tuple
         :type: Tuple
         """
-        target = choice([0, 1], p=self.target_probabilities) # if `target==0` ...
+        target = choice([0, 1], p=self.target_probabilities)  # if `target==0` ...
         negative_classes = self._negative_classes(first_item_class_index)
-        paired_item_cls = choice(negative_classes) if target else first_item_class_index # ... generate a positive pair
+        paired_item_cls = choice(negative_classes) if target else first_item_class_index  # ... generate a positive pair
         return self._get_random_paired_item(paired_item_cls)
 
     @abstractmethod
@@ -425,6 +451,7 @@ class SiameseSingleDatasetMixin(ClassIndicesMixin, SiameseMixin):
     """
     SiameseMixin for use on a single Dataset instance.
     """
+
     @overrides
     def _get_random_paired_item(self, class_index):
         return super(SiameseMixin, self).__getitem__(choice(self.get_class_element_indices(class_index)))
@@ -434,6 +461,7 @@ class TripletMixin(DatasetFolderMixin):
     """
     Mixin class for loading online triplets on `__getitem__` for any `DatasetFolder` dataset.
     """
+
     def _get_random_negative(self, anchor_class_index):
         """
         Get a random negative triplet element of a random class for an anchor belonging to the specified class index.
@@ -497,6 +525,7 @@ class TripletSingleDatasetMixin(ClassIndicesMixin, TripletMixin):
     """
     TripletMixin for use on a single Dataset instance.
     """
+
     @overrides
     def _get_random_triplet_item(self, class_index):
         return super(TripletMixin, self).__getitem__(choice(self.get_class_element_indices(class_index)))

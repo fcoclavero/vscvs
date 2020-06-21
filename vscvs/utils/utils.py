@@ -139,9 +139,14 @@ def load_classification_model_from_checkpoint(model, state_dict_file, checkpoint
     """
     date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
     checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
-    state_dict = torch.load(
-        os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)), map_location=get_map_location()
-    )
+    try:
+        state_dict = torch.load(
+            os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)), map_location=get_map_location()
+        )
+    except FileNotFoundError:
+        state_dict = torch.load(
+            os.path.join(checkpoint_directory, "{}.pts".format(state_dict_file)), map_location=get_map_location()
+        )
     out_features = get_out_features_from_state_dict(state_dict)
     model = model(out_features=out_features)
     model.load_state_dict(state_dict)

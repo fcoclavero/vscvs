@@ -1,22 +1,27 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Trainer class decorators with the implementation of common features, such as common optimizers. """
 
 
+from typing import Callable
+
 from adabound import AdaBound
 from torch.nn import Module
-from torch.optim import Adam, AdamW, RMSprop, SGD
-from typing import Callable
+from torch.optim import SGD
+from torch.optim import Adam
+from torch.optim import AdamW
+from torch.optim import RMSprop
 
 
 class OptimizerMixin:
     """
     Base class for optimizers.
     """
-    def __init__(self, *args, learning_rate=.01, **kwargs):
+
+    def __init__(self, *args, learning_rate=0.01, **kwargs):
         """
         :param args: arguments for additional mixins
         :type: Tuple
@@ -34,6 +39,7 @@ class GANOptimizerMixin:
     Base class for the optimizers of a GAN Trainer. These Trainers require two optimizers, one for the generator and
     another for the discriminator. This Mixin is meant to be used with a normal OptimizerMixin.
     """
+
     _optimizer: Callable
     discriminator: Module
     generator: Module
@@ -53,8 +59,18 @@ class AdaBoundOptimizerMixin(OptimizerMixin):
     Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with an
     [AdaBound](https://github.com/Luolc/AdaBound) optimizer.
     """
-    def __init__(self, *args, betas=(.9, .999), final_learning_rate=.1, gamma=1e-3, epsilon=1e-08, weight_decay=0,
-                 amsbound=False, **kwargs):
+
+    def __init__(
+        self,
+        *args,
+        betas=(0.9, 0.999),
+        final_learning_rate=0.1,
+        gamma=1e-3,
+        epsilon=1e-08,
+        weight_decay=0,
+        amsbound=False,
+        **kwargs
+    ):
         """
         :param args: arguments for additional mixins
         :param betas: coefficients used for computing running averages of gradient and its square
@@ -83,8 +99,16 @@ class AdaBoundOptimizerMixin(OptimizerMixin):
         super().__init__(*args, **kwargs)
 
     def _optimizer(self, parameters):
-        return AdaBound(parameters, lr=self.learning_rate, betas=self.betas, final_lr=self.final_learning_rate,
-                        gamma=self.gamma, eps=self.epsilon, weight_decay=self.weight_decay, amsbound=self.amsbound)
+        return AdaBound(
+            parameters,
+            lr=self.learning_rate,
+            betas=self.betas,
+            final_lr=self.final_learning_rate,
+            gamma=self.gamma,
+            eps=self.epsilon,
+            weight_decay=self.weight_decay,
+            amsbound=self.amsbound,
+        )
 
 
 class AdamOptimizerMixin(OptimizerMixin):
@@ -92,7 +116,8 @@ class AdamOptimizerMixin(OptimizerMixin):
     Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with an
     [Adam](https://pytorch.org/docs/stable/optim.html#torch.optim.Adam) optimizer.
     """
-    def __init__(self, *args, betas=(.9, .999), epsilon=1e-08, weight_decay=0, amsgrad=False, **kwargs):
+
+    def __init__(self, *args, betas=(0.9, 0.999), epsilon=1e-08, weight_decay=0, amsgrad=False, **kwargs):
         """
         :param args: arguments for additional mixins
         :type: Tuple
@@ -115,8 +140,14 @@ class AdamOptimizerMixin(OptimizerMixin):
         super().__init__(*args, **kwargs)
 
     def _optimizer(self, parameters):
-        return Adam(parameters, lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
-                    weight_decay=self.weight_decay, amsgrad=self.amsgrad)
+        return Adam(
+            parameters,
+            lr=self.learning_rate,
+            betas=self.betas,
+            eps=self.epsilon,
+            weight_decay=self.weight_decay,
+            amsgrad=self.amsgrad,
+        )
 
 
 class AdamWOptimizerMixin(AdamOptimizerMixin):
@@ -124,9 +155,16 @@ class AdamWOptimizerMixin(AdamOptimizerMixin):
     Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with an
     [AdamW](https://pytorch.org/docs/stable/optim.html#torch.optim.AdamW) optimizer.
     """
+
     def _optimizer(self, parameters):
-        return AdamW(parameters, lr=self.learning_rate, betas=self.betas, eps=self.epsilon,
-                     weight_decay=self.weight_decay, amsgrad=self.amsgrad)
+        return AdamW(
+            parameters,
+            lr=self.learning_rate,
+            betas=self.betas,
+            eps=self.epsilon,
+            weight_decay=self.weight_decay,
+            amsgrad=self.amsgrad,
+        )
 
 
 class RMSpropOptimizerMixin(OptimizerMixin):
@@ -134,7 +172,8 @@ class RMSpropOptimizerMixin(OptimizerMixin):
     Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with an
     [RMSprop](https://pytorch.org/docs/stable/optim.html#torch.optim.RMSprop) optimizer.
     """
-    def __init__(self, *args, alpha=.99, epsilon=1e-08, weight_decay=0, momentum=0, centered=False, **kwargs):
+
+    def __init__(self, *args, alpha=0.99, epsilon=1e-08, weight_decay=0, momentum=0, centered=False, **kwargs):
         """
         :param args: arguments for additional mixins
         :type: Tuple
@@ -159,8 +198,15 @@ class RMSpropOptimizerMixin(OptimizerMixin):
         super().__init__(*args, **kwargs)
 
     def _optimizer(self, parameters):
-        return RMSprop(parameters, lr=self.learning_rate, alpha=self.alpha, eps=self.epsilon,
-                       weight_decay=self.weight_decay, momentum=self.momentum, centered=self.centered)
+        return RMSprop(
+            parameters,
+            lr=self.learning_rate,
+            alpha=self.alpha,
+            eps=self.epsilon,
+            weight_decay=self.weight_decay,
+            momentum=self.momentum,
+            centered=self.centered,
+        )
 
 
 class SGDOptimizerMixin(OptimizerMixin):
@@ -168,7 +214,8 @@ class SGDOptimizerMixin(OptimizerMixin):
     Trainer mixin for creating Trainer classes that override the `AbstractTrainer`'s `optimizer` property with a
     [Stochastic Gradient Descent (SGD)](https://pytorch.org/docs/stable/optim.html#torch.optim.SGD) optimizer.
     """
-    def __init__(self, *args, momentum=.8, **kwargs):
+
+    def __init__(self, *args, momentum=0.8, **kwargs):
         """
         :param args: arguments for additional mixins
         :type: Tuple

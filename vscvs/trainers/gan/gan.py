@@ -1,21 +1,24 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Ignite trainer for a GAN architectures. """
 
 
 import os
-import torch
 
 from abc import ABC
-from ignite.engine import Events
-from overrides import overrides
+
 from tqdm import tqdm
 
+import torch
+
+from ignite.engine import Events
+from overrides import overrides
 from vscvs.trainers.abstract_trainer import AbstractTrainer
 from vscvs.trainers.mixins import GANOptimizerMixin
+from vscvs.utils import get_map_location
 from vscvs.utils import initialize_weights
 
 
@@ -23,7 +26,8 @@ class AbstractGANTrainer(GANOptimizerMixin, AbstractTrainer, ABC):
     """
     Abstract class for creating Trainer classes with the common options needed for a GAN architecture.
     """
-    def __init__(self, *args, discriminator_network=None, generator_network=None, loss_reduction='mean', **kwargs):
+
+    def __init__(self, *args, discriminator_network=None, generator_network=None, loss_reduction="mean", **kwargs):
         """
         :param args: Trainer arguments
         :type: Tuple
@@ -56,19 +60,25 @@ class AbstractGANTrainer(GANOptimizerMixin, AbstractTrainer, ABC):
         :return: the progressbar description string
         :type: str
         """
-        return 'TRAINING epoch {}/{} => generator loss: {:.5f} discriminator loss: {:.5f}'
+        return "TRAINING epoch {}/{} => generator loss: {:.5f} discriminator loss: {:.5f}"
 
     @property
     @overrides
     def trainer_id(self):
-        return 'GAN{}{}'.format(self.generator.__class__.__name__, self.discriminator.__class__.__name__)
+        return "GAN{}{}".format(self.generator.__class__.__name__, self.discriminator.__class__.__name__)
 
     @overrides
     def _add_model_checkpoint_savers(self):
-        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self.checkpoint_saver_best, {
-            'generator': self.generator, 'discriminator': self.discriminator})
-        self.trainer_engine.add_event_handler(Events.EPOCH_COMPLETED, self.checkpoint_saver_periodic, {
-            'generator': self.generator, 'discriminator': self.discriminator})
+        self.trainer_engine.add_event_handler(
+            Events.EPOCH_COMPLETED,
+            self.checkpoint_saver_best,
+            {"generator": self.generator, "discriminator": self.discriminator},
+        )
+        self.trainer_engine.add_event_handler(
+            Events.EPOCH_COMPLETED,
+            self.checkpoint_saver_periodic,
+            {"generator": self.generator, "discriminator": self.discriminator},
+        )
 
     @overrides
     def _event_log_training_output(self, trainer):
@@ -77,8 +87,8 @@ class AbstractGANTrainer(GANOptimizerMixin, AbstractTrainer, ABC):
         :param trainer: the ignite trainer engine this event was bound to.
         :type: ignite.engine.Engine
         """
-        self.writer.add_scalar('Trainer Output/generator', trainer.state.output[0], self.step)
-        self.writer.add_scalar('Trainer Output/discriminator', trainer.state.output[1], self.step)
+        self.writer.add_scalar("Trainer Output/generator", trainer.state.output[0], self.step)
+        self.writer.add_scalar("Trainer Output/discriminator", trainer.state.output[1], self.step)
         self.progressbar.desc = self.progressbar_description.format(self.epoch, self.last_epoch, *trainer.state.output)
 
     @overrides
@@ -88,9 +98,12 @@ class AbstractGANTrainer(GANOptimizerMixin, AbstractTrainer, ABC):
         :param previous_checkpoint_directory: directory containing the checkpoint to me loaded.
         :type: str
         """
-        state_dicts = torch.load(os.path.join(previous_checkpoint_directory, '{}.pt'.format(self.resume_checkpoint)))
-        self.generator.load_state_dict(state_dicts['generator'])
-        self.discriminator.load_state_dict(state_dicts['discriminator'])
+        state_dicts = torch.load(
+            os.path.join(previous_checkpoint_directory, "{}.pt".format(self.resume_checkpoint)),
+            map_location=get_map_location(),
+        )
+        self.generator.load_state_dict(state_dicts["generator"])
+        self.discriminator.load_state_dict(state_dicts["discriminator"])
 
     @property
     @overrides
@@ -100,5 +113,9 @@ class AbstractGANTrainer(GANOptimizerMixin, AbstractTrainer, ABC):
         :return: the trainer progressbar.
         :type: tqdm.tqdm
         """
-        return tqdm(initial=0, leave=False, total=len(self.train_loader),
-                    desc=self.progressbar_description.format(self.epoch, self.last_epoch, 0.0, 0.0))
+        return tqdm(
+            initial=0,
+            leave=False,
+            total=len(self.train_loader),
+            desc=self.progressbar_description.format(self.epoch, self.last_epoch, 0.0, 0.0),
+        )

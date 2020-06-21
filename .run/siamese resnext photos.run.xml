@@ -12,8 +12,18 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+    <EXTENSION ID="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" />
+      </ENTRIES>
+    </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
-    <option name="PARAMETERS" value="embed --dataset-name sketchy-photos --embeddings-name siamese-resnext-photos --batch-size 128 --workers 6 --n-gpu 1 siamese --branch 0 resnext --checkpoint SiameseResNextNormalized --date 20-04-07T20-41 --state-dict net_best_train_7040" />
+    <option name="PARAMETERS" value="embed --dataset-name sketchy-photos --embeddings-name siamese-resnext-photos-margin-08 --batch-size 128 --workers 12 --n-gpu 1 siamese --branch 0 resnext --checkpoint SiameseResNextNormalized --date 20-06-05T02-31 --state-dict net_best_checkpoint_63360" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

@@ -1,13 +1,12 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Graph convolutional network PyTorch modules. """
 
 
 import torch
-
 import torch.nn.functional as F
 
 from overrides import overrides
@@ -23,6 +22,7 @@ class GCNBase(torch.nn.Module):
     """
     GCN node classifier.
     """
+
     def __init__(self, num_classes, in_channels):
         """
         :param num_classes: number of possible node classes. The module output will be a vector with a length of
@@ -61,8 +61,17 @@ class HOGGCN(torch.nn.Module):
     Image classifier that extracts HOG feature vectors for each image, and classifies using a GCN over clique graphs
     constructed from each batch, where edge weights correspond to class label word vector distances.
     """
-    def __init__(self, classes_dataframe, in_dimension=256, in_channels=3, cell_size=8, bins=9, signed_gradients=False,
-                 processes=None):
+
+    def __init__(
+        self,
+        classes_dataframe,
+        in_dimension=256,
+        in_channels=3,
+        cell_size=8,
+        bins=9,
+        signed_gradients=False,
+        processes=None,
+    ):
         """
         :param classes_dataframe: dataframe containing all possible class names and their word vectors
         :type: pandas.Dataframe
@@ -114,4 +123,4 @@ class HOGGCN(torch.nn.Module):
         """
         x, y, *_ = image_batch  # unpack extra parameters into `_`
         embeddings = self.hog(x)
-        return self.classification_gcn(self._batch_graph( (embeddings, y) ))
+        return self.classification_gcn(self._batch_graph((embeddings, y)))

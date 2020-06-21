@@ -1,3 +1,9 @@
-from .gan import AverageDistancesMultimodalSiamesePairs, LossMultimodalGAN, LossBimodalSiamesePairs
-from .siamese import AccuracySiamesePairs, LossSiamesePairs, AverageDistancesSiamesePairs
-from .triplet import AccuracyTriplets, LossTriplets, AverageDistancesTriplets
+from .gan import AverageDistancesMultimodalSiamesePairs
+from .gan import LossBimodalSiamesePairs
+from .gan import LossMultimodalGAN
+from .siamese import AccuracySiamesePairs
+from .siamese import AverageDistancesSiamesePairs
+from .siamese import LossSiamesePairs
+from .triplet import AccuracyTriplets
+from .triplet import AverageDistancesTriplets
+from .triplet import LossTriplets

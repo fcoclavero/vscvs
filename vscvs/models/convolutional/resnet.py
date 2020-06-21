@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Adaptation of torchvision ResNet models to fit the different datasets. """
@@ -10,13 +10,18 @@ from overrides import overrides
 from torch import nn
 from torchvision.models import resnet50
 
-from vscvs.models.mixins import NormalizedMixin, SigmoidMixin, SoftmaxMixin, LogSoftmaxMixin, OutFeaturesMixin
+from vscvs.models.mixins import LogSoftmaxMixin
+from vscvs.models.mixins import NormalizedMixin
+from vscvs.models.mixins import OutFeaturesMixin
+from vscvs.models.mixins import SigmoidMixin
+from vscvs.models.mixins import SoftmaxMixin
 
 
 class ResNetBase(nn.Module):
     """
     ResNet model wrapper for easy swapping between ResNet models.
     """
+
     def __init__(self, pretrained=False, progress=True, **kwargs):
         """
         :param pretrained: if True, uses a model pre-trained on ImageNet.

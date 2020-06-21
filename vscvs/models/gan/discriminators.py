@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ GAN discriminator modules for the adversarial architecture. """
@@ -11,13 +11,16 @@ import torch.nn.functional as F
 
 from overrides import overrides
 
-from vscvs.models.mixins import OutFeaturesMixin, SigmoidMixin, SoftmaxMixin
+from vscvs.models.mixins import OutFeaturesMixin
+from vscvs.models.mixins import SigmoidMixin
+from vscvs.models.mixins import SoftmaxMixin
 
 
 class InterModalDiscriminatorBase(nn.Module):
     """
     Fully connected network that classifies vectors in the common vector space as belonging any mode (image or sketch).
     """
+
     def __init__(self, input_dimension=None):
         """
         :param input_dimension: the size of the input vector (common vector space dimensionality).

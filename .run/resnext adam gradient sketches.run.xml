@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="resnext adam resume" type="PythonConfigurationType" factoryName="Python" folderName="train">
+  <configuration default="false" name="resnext adam gradient sketches" type="PythonConfigurationType" factoryName="Python" folderName="train">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -23,7 +23,7 @@
       </ENTRIES>
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
-    <option name="PARAMETERS" value="train --train-validation-split 0.9 --batch-size 16 --epochs 5 --workers 12 --n-gpu 1 --resume-date &quot;20-04-15T11-43&quot; --resume-checkpoint &quot;net_latest_complete_71&quot; adam --learning-rate 0.0001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000008 --weight-decay 0 --amsgrad False resnext --pretrained True --dataset-name sketchy-test-photos --early-stopping-patience 1" />
+    <option name="PARAMETERS" value="gradient --name train-resnext-adam-sketches train --train-validation-split 0.9 --batch-size 50 --epochs 200 --workers 16 --n-gpu 1 --tag sketches-pretrained adam --learning-rate 0.001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000008 --weight-decay 0 --amsgrad True resnext --pretrained True --dataset-name sketchy-sketches --early-stopping-patience 10" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

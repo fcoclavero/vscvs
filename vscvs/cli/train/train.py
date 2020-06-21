@@ -1,6 +1,6 @@
-__author__ = ['Francisco Clavero']
-__email__ = ['fcoclavero32@gmail.com']
-__status__ = 'Prototype'
+__author__ = ["Francisco Clavero"]
+__email__ = ["fcoclavero32@gmail.com"]
+__status__ = "Prototype"
 
 
 """ Model training entry point. """
@@ -8,9 +8,14 @@ __status__ = 'Prototype'
 
 import click
 
-from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
-from vscvs.cli.train.optimizers import adabound, adam, adam_w, rms_prop, sgd
+from vscvs.cli.decorators import pass_context_to_kwargs
+from vscvs.cli.decorators import pass_kwargs_to_context
 from vscvs.cli.train.gan import gan
+from vscvs.cli.train.optimizers import adabound
+from vscvs.cli.train.optimizers import adam
+from vscvs.cli.train.optimizers import adam_w
+from vscvs.cli.train.optimizers import rms_prop
+from vscvs.cli.train.optimizers import sgd
 from vscvs.cli.train.siamese import siamese
 from vscvs.cli.train.triplet import triplet
 
@@ -21,75 +26,103 @@ from vscvs.cli.train.triplet import triplet
 @click.command()
 @pass_context_to_kwargs
 @click.option(
-    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
-@click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
+    "--dataset-name",
+    prompt="Dataset name",
+    help="The name of the dataset to be used for training.",
+    type=click.Choice(["sketchy-photos", "sketchy-sketches", "sketchy-test-photos", "sketchy-test-sketches"]),
+)
+@click.option("--early-stopping-patience", help="Early stopping patience, in epochs", default=5)
 def cnn(*args, **kwargs):
     """ Train a CNN model. """
     from vscvs.trainers.cnn import train_cnn
-    click.echo('cnn - {} dataset'.format(kwargs['dataset_name']))
+
+    click.echo("cnn - {} dataset".format(kwargs["dataset_name"]))
     train_cnn(*args, **kwargs)
 
 
 @click.command()
 @pass_context_to_kwargs
 @click.option(
-    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
-@click.option('--pretrained', prompt='Pretrained', help='Whether to use pretrained model weights.', default=False)
-@click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
+    "--dataset-name",
+    prompt="Dataset name",
+    help="The name of the dataset to be used for training.",
+    type=click.Choice(["sketchy-photos", "sketchy-sketches", "sketchy-test-photos", "sketchy-test-sketches"]),
+)
+@click.option("--pretrained", prompt="Pretrained", help="Whether to use pretrained model weights.", default=False)
+@click.option("--early-stopping-patience", help="Early stopping patience, in epochs", default=5)
 def resnet(*args, **kwargs):
     """ Train a ResNet model. """
     from vscvs.trainers.resnet import train_resnet
-    click.echo('resnet - {} dataset'.format(kwargs['dataset_name']))
+
+    click.echo("resnet - {} dataset".format(kwargs["dataset_name"]))
     train_resnet(*args, **kwargs)
 
 
 @click.command()
 @pass_context_to_kwargs
 @click.option(
-    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
-@click.option('--pretrained', prompt='Pretrained', help='Whether to use pretrained model weights.', default=False)
-@click.option('--early-stopping-patience', help='Early stopping patience, in epochs', default=5)
+    "--dataset-name",
+    prompt="Dataset name",
+    help="The name of the dataset to be used for training.",
+    type=click.Choice(["sketchy-photos", "sketchy-sketches", "sketchy-test-photos", "sketchy-test-sketches"]),
+)
+@click.option("--pretrained", prompt="Pretrained", help="Whether to use pretrained model weights.", default=False)
+@click.option("--early-stopping-patience", help="Early stopping patience, in epochs", default=5)
 def resnext(*args, **kwargs):
     """ Train a ResNext model. """
     from vscvs.trainers.resnext import train_resnext
-    click.echo('resnext - {} dataset'.format(kwargs['dataset_name']))
+
+    click.echo("resnext - {} dataset".format(kwargs["dataset_name"]))
     train_resnext(*args, **kwargs)
 
 
 @click.command()
 @pass_context_to_kwargs
 @click.option(
-    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
-@click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
-              help='The number of parallel workers to be used for creating batch graphs.')
+    "--dataset-name",
+    prompt="Dataset name",
+    help="The name of the dataset to be used for training.",
+    type=click.Choice(["sketchy-photos", "sketchy-sketches", "sketchy-test-photos", "sketchy-test-sketches"]),
+)
+@click.option(
+    "--processes",
+    prompt="Number of parallel workers for batch graph creation",
+    default=1,
+    help="The number of parallel workers to be used for creating batch graphs.",
+)
 def classification_gcn(*args, **kwargs):
     """ Train a Classification GCN model. """
     from vscvs.trainers.classification_gcn import train_classification_gcn
-    dataset_name = kwargs.pop('dataset_name')
-    click.echo('classification GCN - {} dataset'.format(dataset_name))
-    dataset_name = dataset_name + '-binary'
+
+    dataset_name = kwargs.pop("dataset_name")
+    click.echo("classification GCN - {} dataset".format(dataset_name))
+    dataset_name = dataset_name + "-binary"
     train_classification_gcn(*args, dataset_name=dataset_name, **kwargs)
 
 
 @click.command()
 @pass_context_to_kwargs
 @click.option(
-    '--dataset-name', prompt='Dataset name', help='The name of the dataset to be used for training.',
-    type=click.Choice(['sketchy-photos', 'sketchy-sketches', 'sketchy-test-photos', 'sketchy-test-sketches']))
-@click.option('--in-channels', prompt='In channels', help='Number of image color channels.', default=3)
-@click.option('--cell-size', prompt='Cell size', help='Gradient pooling size.', default=8)
-@click.option('--bins', prompt='Number of histogram bins', help='Number of histogram bins.', default=9)
-@click.option('--signed-gradients', prompt='Signed gradients', help='Use signed gradients?', default=False)
-@click.option('--processes', prompt='Number of parallel workers for batch graph creation', default=1,
-              help='The number of parallel workers to be used for creating batch graphs.')
+    "--dataset-name",
+    prompt="Dataset name",
+    help="The name of the dataset to be used for training.",
+    type=click.Choice(["sketchy-photos", "sketchy-sketches", "sketchy-test-photos", "sketchy-test-sketches"]),
+)
+@click.option("--in-channels", prompt="In channels", help="Number of image color channels.", default=3)
+@click.option("--cell-size", prompt="Cell size", help="Gradient pooling size.", default=8)
+@click.option("--bins", prompt="Number of histogram bins", help="Number of histogram bins.", default=9)
+@click.option("--signed-gradients", prompt="Signed gradients", help="Use signed gradients?", default=False)
+@click.option(
+    "--processes",
+    prompt="Number of parallel workers for batch graph creation",
+    default=1,
+    help="The number of parallel workers to be used for creating batch graphs.",
+)
 def hog_gcn(*args, **kwargs):
     """ Train a HOG GCN model. """
     from vscvs.trainers.hog_gcn import train_hog_gcn
-    click.echo('HOG GCN - {} dataset'.format(kwargs['dataset_name']))
+
+    click.echo("HOG GCN - {} dataset".format(kwargs["dataset_name"]))
     train_hog_gcn(*args, **kwargs)
 
 
@@ -97,19 +130,23 @@ def hog_gcn(*args, **kwargs):
 
 
 @click.group()
-@click.option('--resume-date', help='Date of the training checkpoint to be resumed.', default=None)
-@click.option('--resume-checkpoint', help='Model checkpoint to be resumed.', default=None)
-@click.option('--train-validation-split', prompt='Train/validation split',
-              help='proportion of the training set that will be used for training.', default=.8)
-@click.option('--batch-size', prompt='Batch size', help='The batch size during training.', default=16)
-@click.option('--epochs', prompt='Number of epochs', help='The number of training epochs.', type=int)
-@click.option('--workers', prompt='Data loader workers', help='The number of workers for the data loader.', default=4)
-@click.option('--n-gpu', prompt='Number of gpus', help='The number of GPUs available. Use 0 for CPU mode.', default=0)
-@click.option('-t', '--tag', help='Optional tag for model checkpoint and tensorboard logs.', multiple=True)
+@click.option("--resume-date", help="Date of the training checkpoint to be resumed.", default=None)
+@click.option("--resume-checkpoint", help="Model checkpoint to be resumed.", default=None)
+@click.option(
+    "--train-validation-split",
+    prompt="Train/validation split",
+    help="proportion of the training set that will be used for training.",
+    default=0.8,
+)
+@click.option("--batch-size", prompt="Batch size", help="The batch size during training.", default=16)
+@click.option("--epochs", prompt="Number of epochs", help="The number of training epochs.", type=int)
+@click.option("--workers", prompt="Data loader workers", help="The number of workers for the data loader.", default=4)
+@click.option("--n-gpu", prompt="Number of gpus", help="The number of GPUs available. Use 0 for CPU mode.", default=0)
+@click.option("-t", "--tag", help="Optional tag for model checkpoint and tensorboard logs.", multiple=True)
 @pass_kwargs_to_context
 def train(context, *_, **__):
     """ Model training. """
-    context.obj['tags'] = context.obj.pop('tag')
+    context.obj["tags"] = context.obj.pop("tag")
 
 
 """ Add trainer commands to each optimizer trainer group, then add the optimizer groups to the global `train` group. """

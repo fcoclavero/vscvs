@@ -23,7 +23,7 @@
       </ENTRIES>
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
-    <option name="PARAMETERS" value="measure recall --k 8 --distance cosine --n-gpu 0 same-class --dataset-name sketchy-photos --embeddings-name siamese-resnext-photos-margin-08 --test-split 0.2" />
+    <option name="PARAMETERS" value="measure recall --k 8 --distance cosine --n-gpu 0 same-class --dataset-name sketchy-photos --embeddings-name siamese-resnext-photos --test-split 0.2" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

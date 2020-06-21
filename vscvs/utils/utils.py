@@ -145,7 +145,7 @@ def load_classification_model_from_checkpoint(model, state_dict_file, checkpoint
         )
     except FileNotFoundError:
         state_dict = torch.load(
-            os.path.join(checkpoint_directory, "{}.pts".format(state_dict_file)), map_location=get_map_location()
+            os.path.join(checkpoint_directory, "{}.pth".format(state_dict_file)), map_location=get_map_location()
         )
     out_features = get_out_features_from_state_dict(state_dict)
     model = model(out_features=out_features)

@@ -121,6 +121,32 @@ def initialize_weights(
         nn.init.constant_(model.bias.data, batch_norm_bias)
 
 
+def load_state_dict_from_checkpoint(state_dict_file, checkpoint_name, date_string, *tags):
+    """
+    Load a state dictionary from its checkpoint file.
+    :param state_dict_file: the name of the state_dict file.
+    :type: str
+    :param checkpoint_name: the name of the checkpoint directory.
+    :type: str
+    :param date_string: the checkpoint date in string format.
+    :type: str
+    :param tags: the checkpoint tags (subdirectories).
+    :type: List[str]
+    :return: the state dictionary.
+    :type: OrderedDict
+    """
+    date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
+    checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
+    try:
+        return torch.load(
+            os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)), map_location=get_map_location()
+        )
+    except FileNotFoundError:
+        return torch.load(
+            os.path.join(checkpoint_directory, "{}.pth".format(state_dict_file)), map_location=get_map_location()
+        )
+
+
 def load_classification_model_from_checkpoint(model, state_dict_file, checkpoint_name, date_string, *tags):
     """
     Load a classification model from its state dictionary file.
@@ -134,19 +160,10 @@ def load_classification_model_from_checkpoint(model, state_dict_file, checkpoint
     :type: str
     :param tags: the checkpoint tags (subdirectories).
     :type: List[str]
-    :return: the mode, loaded with the state dictionary at the specified checkpoint.
+    :return: the model, loaded with the state dictionary at the specified checkpoint.
     :type: torch.nn.Module
     """
-    date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
-    checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
-    try:
-        state_dict = torch.load(
-            os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)), map_location=get_map_location()
-        )
-    except FileNotFoundError:
-        state_dict = torch.load(
-            os.path.join(checkpoint_directory, "{}.pth".format(state_dict_file)), map_location=get_map_location()
-        )
+    state_dict = load_state_dict_from_checkpoint(state_dict_file, checkpoint_name, date_string, *tags)
     out_features = get_out_features_from_state_dict(state_dict)
     model = model(out_features=out_features)
     model.load_state_dict(state_dict)
@@ -173,11 +190,7 @@ def load_siamese_model_from_checkpoint(model_0, model_1, state_dict_file, checkp
     """
     from vscvs.models import SiameseNetwork
 
-    date = datetime.strptime(date_string, CHECKPOINT_NAME_FORMAT)
-    checkpoint_directory = get_checkpoint_path(checkpoint_name, *tags, date=date)
-    state_dict = torch.load(
-        os.path.join(checkpoint_directory, "{}.pt".format(state_dict_file)), map_location=get_map_location()
-    )
+    state_dict = load_state_dict_from_checkpoint(state_dict_file, checkpoint_name, date_string, *tags)
     state_dict_0 = OrderedDict({key: value for key, value in state_dict.items() if "embedding_network_0" in key})
     state_dict_1 = OrderedDict({key: value for key, value in state_dict.items() if "embedding_network_1" in key})
     out_features_0 = get_out_features_from_state_dict(state_dict_0)

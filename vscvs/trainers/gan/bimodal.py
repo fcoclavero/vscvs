@@ -21,11 +21,11 @@ from vscvs.models import InterModalDiscriminator
 from vscvs.models import MultimodalEncoder
 from vscvs.models import ResNextNormalized
 
-from ..engines.gan import create_multimodal_gan_evaluator
-from ..engines.gan import create_multimodal_gan_siamese_evaluator
-from ..engines.gan import create_multimodal_gan_siamese_trainer
-from ..engines.gan import create_multimodal_gan_trainer
-from ..engines.gan import prepare_bimodal_batch_variables
+from .engines.multimodal import create_multimodal_gan_evaluator
+from .engines.multimodal import create_multimodal_gan_siamese_evaluator
+from .engines.multimodal import create_multimodal_gan_siamese_trainer
+from .engines.multimodal import create_multimodal_gan_trainer
+from .engines.multimodal import prepare_bimodal_batch_variables
 from .gan import AbstractGANTrainer
 
 

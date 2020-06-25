@@ -20,9 +20,9 @@ from vscvs.datasets import get_dataset
 from vscvs.decorators import kwargs_parameter_dict
 from vscvs.models import HOGGCN
 
+from .engines.hog import create_hog_gcn_evaluator
+from .engines.hog import create_hog_gcn_trainer
 from vscvs.trainers.abstract_trainer import AbstractTrainer
-from vscvs.trainers.engines.hog_gcn import create_hog_gcn_evaluator
-from vscvs.trainers.engines.hog_gcn import create_hog_gcn_trainer
 
 
 class AbstractHOGGCNTrainer(AbstractTrainer, ABC):

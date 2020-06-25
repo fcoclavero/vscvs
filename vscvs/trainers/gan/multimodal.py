@@ -12,14 +12,14 @@ from typing import Callable
 from overrides import overrides
 from torch.nn import MSELoss
 
+from .engines.multimodal import create_multimodal_gan_evaluator
+from .engines.multimodal import create_multimodal_gan_trainer
+from .gan import AbstractGANTrainer
 from vscvs.decorators import kwargs_parameter_dict
 from vscvs.metrics import LossMultimodalGAN
 from vscvs.models import InterModalDiscriminatorSoftmax
 from vscvs.models import MultimodalEncoder
 from vscvs.models import ResNextNormalized
-from vscvs.trainers.engines.gan import create_multimodal_gan_evaluator
-from vscvs.trainers.engines.gan import create_multimodal_gan_trainer
-from vscvs.trainers.gan import AbstractGANTrainer
 
 
 class AbstractMultiModalGANTrainer(AbstractGANTrainer, ABC):

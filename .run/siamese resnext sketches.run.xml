@@ -45,7 +45,7 @@
       </ENTRIES>
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
-    <option name="PARAMETERS" value="embed --dataset-name sketchy-sketches --embeddings-name siamese-resnext-sketches-pretrained --batch-size 128 --workers 16 --n-gpu 1 siamese --branch 1 resnext --checkpoint SiameseResNextNormalized --date 20-06-05T02-31 --state-dict net_best_checkpoint_63360" />
+    <option name="PARAMETERS" value="embed --dataset-name sketchy-sketches --embeddings-name siamese-resnext-sketches-pretrained --batch-size 128 --workers 16 --n-gpu 1 siamese --branch 1 resnext --checkpoint SiameseResNextNormalized --date 20-06-22T14-13 --state-dict net_best_checkpoint_63360" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

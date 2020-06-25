@@ -23,7 +23,7 @@
       </ENTRIES>
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
-    <option name="PARAMETERS" value="gradient --name embed-siamese-resnext-photos-pretrained embed --dataset-name sketchy-photos --embeddings-name siamese-resnext-photos-pretrained --batch-size 128 --workers 16 --n-gpu 1 siamese --branch 0 resnext --checkpoint SiameseResNextNormalized --date 20-06-22T14-13 --state-dict net_best_checkpoint_5625" />
+    <option name="PARAMETERS" value="gradient --name embed-siamese-resnext-photos-pretrained embed --dataset-name sketchy-photos --embeddings-name siamese-resnext-photos-pretrained --batch-size 128 --workers 16 --n-gpu 1 siamese --branch 0 resnext --checkpoint SiameseResNext --date 20-06-22T14-13 --state-dict net_best_checkpoint_5625" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

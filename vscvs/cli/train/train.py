@@ -92,7 +92,7 @@ def resnext(*args, **kwargs):
 )
 def classification_gcn(*args, **kwargs):
     """ Train a Classification GCN model. """
-    from vscvs.trainers.classification_gcn import train_classification_gcn
+    from vscvs.trainers.gcn.classification import train_classification_gcn
 
     dataset_name = kwargs.pop("dataset_name")
     click.echo("classification GCN - {} dataset".format(dataset_name))
@@ -120,7 +120,7 @@ def classification_gcn(*args, **kwargs):
 )
 def hog_gcn(*args, **kwargs):
     """ Train a HOG GCN model. """
-    from vscvs.trainers.hog_gcn import train_hog_gcn
+    from vscvs.trainers.gcn.hog import train_hog_gcn
 
     click.echo("HOG GCN - {} dataset".format(kwargs["dataset_name"]))
     train_hog_gcn(*args, **kwargs)

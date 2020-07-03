@@ -1,6 +1,6 @@
 adabound>=0.0.5
 black>=19.3
-click==7.1
+click>=7.1
 flake8>=3.8
 gradient>=0.9
 ignite>=0.4

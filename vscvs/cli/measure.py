@@ -25,8 +25,70 @@ def measure():
     pass
 
 
+@measure.command()
+@pass_context_to_kwargs
+@click.option(
+    "--dataset-name",
+    prompt="Dataset name",
+    help="The name of the Sketchy dataset variant.",
+    type=click.Choice(["sketchy", "sketchy-test"]),
+)
+@click.option("--photo-embeddings-name", prompt="Photo embeddings name", help="Photo embeddings directory name.")
+@click.option("--sketch-embeddings-name", prompt="Sketch embeddings name", help="Sketch embeddings directory name.")
+@click.option(
+    "--test-split", prompt="Test split", default=0.2, help="Proportion of the dataset to be used for queries."
+)
+@click.option(
+    "-k", "--top-k", prompt="Top k", help="The amount of top results to be retrieved", default=1, multiple=True
+)
+@click.option(
+    "--distance", prompt="Distance", help="The distance measure to be used.", type=click.Choice(["cosine", "pairwise"])
+)
+@click.option(
+    "--n-gpu",
+    prompt="Number of gpus",
+    default=0,
+    help="The number of GPUs available. Use 0 for CPU mode. Windows does not support CUDA multiprocessing.",
+)
+def sketchy_suite(dataset_name, photo_embeddings_name, sketch_embeddings_name, test_split, top_k, distance, n_gpu):
+    """ Same mode recall for photos and sketches, as well as cross-modal recall using both modes as queries. """
+    photo_dataset = get_dataset(f"{dataset_name}-photos")
+    sketch_dataset = get_dataset(f"{dataset_name}-sketches")
+    photo_embeddings = load_embeddings(photo_embeddings_name)
+    sketch_embeddings = load_embeddings(sketch_embeddings_name)
+
+    for k in top_k:
+        click.echo(f"Calculating class recall@{k}\n\nphoto to photo:")
+        query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(
+            photo_embeddings, test_split
+        )
+        query_dataset, queried_dataset = Subset(photo_dataset, query_indices), Subset(photo_dataset, queried_indices)
+        average_class_recall(  # photo to photo average class recall
+            photo_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu
+        )
+
+        click.echo(f"sketch to sketch:")
+        query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(
+            sketch_embeddings, test_split
+        )
+        query_dataset, queried_dataset = Subset(sketch_dataset, query_indices), Subset(sketch_dataset, queried_indices)
+        average_class_recall(  # sketch to sketch average class recall
+            sketch_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu
+        )
+
+        click.echo(f"photo to sketch:")
+        average_class_recall(  # photo to sketch average class recall
+            photo_dataset, sketch_dataset, photo_embeddings, sketch_embeddings, k, distance, n_gpu
+        )
+
+        click.echo(f"sketch to photo:")
+        average_class_recall(  # sketch to photo average class recall
+            sketch_dataset, photo_dataset, sketch_embeddings, photo_embeddings, k, distance, n_gpu
+        )
+
+
 @measure.group()
-@click.option("--k", prompt="Top k", help="The amount of top results to be retrieved", default=10)
+@click.option("--k", prompt="Top k", help="The amount of top results to be retrieved", default=1)
 @click.option(
     "--distance", prompt="Distance", help="The distance measure to be used.", type=click.Choice(["cosine", "pairwise"])
 )
@@ -80,7 +142,7 @@ def cross_modal():
 )
 @click.option("--query-embeddings-name", prompt="Query embeddings name", help="Query embeddings directory name.")
 @click.option("--queried-embeddings-name", prompt="Queried embeddings name", help="Queried embeddings directory name.")
-@click.option("--k", prompt="Top k", help="The amount of top results to be retrieved", default=10)
+@click.option("--k", prompt="Top k", help="The amount of top results to be retrieved", default=1)
 @click.option(
     "--distance", prompt="Distance", help="The distance measure to be used.", type=click.Choice(["cosine", "pairwise"])
 )

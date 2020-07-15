@@ -34,7 +34,7 @@ warnings.filterwarnings(action="ignore", category=FutureWarning, module="tensorb
 @click.group()
 def cli():
     """ Sketch/image common vector space with semantic information. """
-    pass
+    click.echo("")
 
 
 # We must use add_command instead of CommandCollection to get a nested structure.

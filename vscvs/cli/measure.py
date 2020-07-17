@@ -58,30 +58,30 @@ def sketchy_suite(dataset_name, photo_embeddings_name, sketch_embeddings_name, t
     sketch_embeddings = load_embeddings(sketch_embeddings_name)
 
     for k in top_k:
-        click.echo(f"Calculating class recall@{k}\n\nphoto to photo:")
+        click.echo(f"\nCalculating class recall@{k}\n\nphoto to photo:")
         query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(
             photo_embeddings, test_split
         )
         query_dataset, queried_dataset = Subset(photo_dataset, query_indices), Subset(photo_dataset, queried_indices)
         average_class_recall(  # photo to photo average class recall
-            photo_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu
+            query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu
         )
 
-        click.echo(f"sketch to sketch:")
+        click.echo(f"\nsketch to sketch:")
         query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(
             sketch_embeddings, test_split
         )
         query_dataset, queried_dataset = Subset(sketch_dataset, query_indices), Subset(sketch_dataset, queried_indices)
         average_class_recall(  # sketch to sketch average class recall
-            sketch_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu
+            query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu
         )
 
-        click.echo(f"photo to sketch:")
+        click.echo(f"\nphoto to sketch:")
         average_class_recall(  # photo to sketch average class recall
             photo_dataset, sketch_dataset, photo_embeddings, sketch_embeddings, k, distance, n_gpu
         )
 
-        click.echo(f"sketch to photo:")
+        click.echo(f"\nsketch to photo:")
         average_class_recall(  # sketch to photo average class recall
             sketch_dataset, photo_dataset, sketch_embeddings, photo_embeddings, k, distance, n_gpu
         )

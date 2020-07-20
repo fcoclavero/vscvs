@@ -57,38 +57,39 @@ def sketchy_suite(dataset_name, photo_embeddings_name, sketch_embeddings_name, t
     photo_embeddings = load_embeddings(photo_embeddings_name)
     sketch_embeddings = load_embeddings(sketch_embeddings_name)
 
-    for k in top_k:
-        click.echo(f"\nCalculating class recall@{k}\n\nphoto to photo:")
-        query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(
-            photo_embeddings, test_split
-        )
-        query_dataset, queried_dataset = Subset(photo_dataset, query_indices), Subset(photo_dataset, queried_indices)
-        average_class_recall(  # photo to photo average class recall
-            query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu
-        )
+    click.echo(f"\nphoto to photo:")
+    query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(
+        photo_embeddings, test_split
+    )
+    query_dataset, queried_dataset = Subset(photo_dataset, query_indices), Subset(photo_dataset, queried_indices)
+    average_class_recall(  # photo to photo average class recall
+        query_dataset, queried_dataset, query_embeddings, queried_embeddings, top_k, distance, n_gpu
+    )
 
-        click.echo(f"\nsketch to sketch:")
-        query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(
-            sketch_embeddings, test_split
-        )
-        query_dataset, queried_dataset = Subset(sketch_dataset, query_indices), Subset(sketch_dataset, queried_indices)
-        average_class_recall(  # sketch to sketch average class recall
-            query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu
-        )
+    click.echo(f"\nsketch to sketch:")
+    query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(
+        sketch_embeddings, test_split
+    )
+    query_dataset, queried_dataset = Subset(sketch_dataset, query_indices), Subset(sketch_dataset, queried_indices)
+    average_class_recall(  # sketch to sketch average class recall
+        query_dataset, queried_dataset, query_embeddings, queried_embeddings, top_k, distance, n_gpu
+    )
 
-        click.echo(f"\nphoto to sketch:")
-        average_class_recall(  # photo to sketch average class recall
-            photo_dataset, sketch_dataset, photo_embeddings, sketch_embeddings, k, distance, n_gpu
-        )
+    click.echo(f"\nphoto to sketch:")
+    average_class_recall(  # photo to sketch average class recall
+        photo_dataset, sketch_dataset, photo_embeddings, sketch_embeddings, top_k, distance, n_gpu
+    )
 
-        click.echo(f"\nsketch to photo:")
-        average_class_recall(  # sketch to photo average class recall
-            sketch_dataset, photo_dataset, sketch_embeddings, photo_embeddings, k, distance, n_gpu
-        )
+    click.echo(f"\nsketch to photo:")
+    average_class_recall(  # sketch to photo average class recall
+        sketch_dataset, photo_dataset, sketch_embeddings, photo_embeddings, top_k, distance, n_gpu
+    )
 
 
 @measure.group()
-@click.option("--k", prompt="Top k", help="The amount of top results to be retrieved", default=1)
+@click.option(
+    "-k", "--top-k", prompt="Top k", help="The amount of top results to be retrieved", default=1, multiple=True
+)
 @click.option(
     "--distance", prompt="Distance", help="The distance measure to be used.", type=click.Choice(["cosine", "pairwise"])
 )
@@ -111,14 +112,14 @@ def recall(_, **__):
 @click.option(
     "--test-split", prompt="Test split", default=0.2, help="Proportion of the dataset to be used for queries."
 )
-def same_class(dataset_name, embeddings_name, test_split, k, distance, n_gpu):
+def same_class(dataset_name, embeddings_name, test_split, top_k, distance, n_gpu):
     """ Image recall of same class elements. """
-    click.echo("Calculating class recall@{} for {} embeddings".format(k, embeddings_name))
+    click.echo("Calculating class recall@{} for {} embeddings".format(top_k, embeddings_name))
     dataset = get_dataset(dataset_name)
     embeddings = load_embeddings(embeddings_name)
     query_embeddings, queried_embeddings, query_indices, queried_indices = random_simple_split(embeddings, test_split)
     query_dataset, queried_dataset = Subset(dataset, query_indices), Subset(dataset, queried_indices)
-    average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance, n_gpu)
+    average_class_recall(query_dataset, queried_dataset, query_embeddings, queried_embeddings, top_k, distance, n_gpu)
 
 
 @measure.group()

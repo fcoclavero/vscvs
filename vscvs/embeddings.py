@@ -185,7 +185,7 @@ def retrieve_top_k(
 
 @log_time
 def average_class_recall(
-    query_dataset, queried_dataset, query_embeddings, queried_embeddings, k, distance="cosine", n_gpu=0
+    query_dataset, queried_dataset, query_embeddings, queried_embeddings, top_k, distance="cosine", n_gpu=0
 ):
     """
     Computes the average class recall for the given embeddings. Embeddings are split into "test" and "queried" subsets.
@@ -201,8 +201,9 @@ def average_class_recall(
     :type: torch.Tensor of shape [query_dataset_length, embedding_length]
     :param queried_embeddings: the embedding tensors that will be retrieved to compute the average class recall.
     :type: torch.Tensor of shape [queried_dataset_length, embedding_length]
-    :param k: the number of most similar images to be retrieved in order to compute the recall.
-    :type: int
+    :param top_k: list with the number of most similar images to be retrieved in order to compute the recall. The
+    metric will be displayed for each of the selected `k` values.
+    :type: List[int]
     :param distance: which distance function to be used for nearest neighbor computation. Either 'cosine' or 'pairwise'
     :type: str, either 'cosine' or 'pairwise'
     :param n_gpu: number of available GPUs. If zero, the CPU will be used.
@@ -210,13 +211,19 @@ def average_class_recall(
     """
     device = get_device(n_gpu)
     query_embeddings, queried_embeddings = query_embeddings.to(device), queried_embeddings.to(device)
-    recalls = []
+    recalls = [[] for _ in top_k]
     for i, query_embedding in tqdm(
         enumerate(query_embeddings), total=query_embeddings.shape[0], desc="Computing recall"
     ):
-        top_indices = get_top_k_indices(query_embedding.unsqueeze(0), queried_embeddings, k, distance)
-        recalls.append(sum([queried_dataset[j][1] == query_dataset[i][1] for j in top_indices]) / k)
-    print("Average class recall: {0:.2f}%".format(mean(recalls) * 100))
+        # Get the indices of the k elements in the queried dataset that are most similar to the query embedding, for the
+        # biggest k in the `top_k` array. This should cover all other k's.
+        top_indices = get_top_k_indices(query_embedding.unsqueeze(0), queried_embeddings, max(top_k), distance)
+        # Create array that has a `1` at position `i` if the top k element has the same class as the query element.
+        top_k_same_class_as_query_embedding = [queried_dataset[j][1] == query_dataset[i][1] for j in top_indices]
+        for j, k in enumerate(top_k):
+            recalls[j].append(sum(top_k_same_class_as_query_embedding[:k]) / k)
+    for j, k in enumerate(top_k):
+        print("Average class recall@{0}: {1:.2f}%".format(k, mean(recalls[j]) * 100))
 
 
 def class_recall(queried_dataset, top_indices, query_image_class):

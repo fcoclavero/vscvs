@@ -92,6 +92,7 @@ venv.bak/
 
 # PyCharm
 .idea
+.run/
 
 # Visual Studio Code
 .vscode
@@ -100,10 +101,15 @@ venv.bak/
 *.vec*
 
 # Big files
-data/pickles/*
-data/embeddings/*
-data/logs/*
 data/checkpoints/*
+data/embeddings/*
+data/pickles/*
+data/tensorboard/*
 
 # Temporary plotly plots
 temp-plot.html
+
+# Other
+dropbox_sync.sh
+gradient.yaml
+README.md

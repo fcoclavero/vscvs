@@ -17,7 +17,7 @@ import yaml
 import torch
 
 from settings import CHECKPOINT_NAME_FORMAT
-from torch import nn as nn
+from torch import nn
 from torch.utils.data import DataLoader
 
 from .path import get_checkpoint_path

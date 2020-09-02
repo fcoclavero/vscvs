@@ -74,7 +74,7 @@ class AdaBoundOptimizerMixin(OptimizerMixin):
         """
         :param args: arguments for additional mixins
         :param betas: coefficients used for computing running averages of gradient and its square
-        :type: Tuple<float, float>
+        :type: Tuple[float, float]
         :type: Tuple
         :param final_learning_rate: final (SGD) learning rate.
         :type: float
@@ -122,7 +122,7 @@ class AdamOptimizerMixin(OptimizerMixin):
         :param args: arguments for additional mixins
         :type: Tuple
         :param betas: coefficients used for computing running averages of gradient and its square
-        :type: Tuple<float, float>
+        :type: Tuple[float, float]
         :param epsilon: term added to the denominator to improve numerical stability
         :type: float
         :param weight_decay: weight decay for L2 penalty

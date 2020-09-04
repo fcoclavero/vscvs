@@ -44,8 +44,8 @@ RUN conda install -y pytorch torchvision ignite cudatoolkit=10.1 -c pytorch
 
 # Module requirements
 
-COPY modules/textpreprocess/requirements.txt /textpreprocess.txt
-COPY modules/wordvectors/requirements.txt /wordvectors.txt
+COPY ../modules/textpreprocess/requirements.txt /textpreprocess.txt
+COPY ../modules/wordvectors/requirements.txt /wordvectors.txt
 RUN pip install -r /textpreprocess.txt && \
     pip install -r /wordvectors.txt
 RUN python -c "import nltk; nltk.download('averaged_perceptron_tagger'); nltk.download('punkt')" && \
@@ -53,5 +53,5 @@ RUN python -c "import nltk; nltk.download('averaged_perceptron_tagger'); nltk.do
 
 # Project requirements
 
-COPY requirements.txt /vscvs.txt
+COPY ../requirements.txt /vscvs.txt
 RUN pip install -r /vscvs.txt

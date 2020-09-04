@@ -11,7 +11,7 @@ import random
 
 import pandas as pd
 
-from settings import DATA_SOURCES
+from vscvs.settings import DATA_SOURCES
 
 
 def create_sample_vectors(n, dimension):

@@ -10,7 +10,7 @@
 
 FROM fcoclavero/vscvs:latest
 
-COPY . /vscvs
+COPY .. /vscvs
 
 ENV DATA_DIR=gs://vscvs/vscvs/data
 ENV EMBEDDINGS_DIR=gs://vscvs/embeddings

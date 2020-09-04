@@ -11,8 +11,8 @@ import shutil
 
 from datetime import datetime
 
-from settings import CHECKPOINT_NAME_FORMAT
-from settings import ROOT_DIR
+from vscvs.settings import CHECKPOINT_NAME_FORMAT
+from vscvs.settings import ROOT_DIR
 
 
 def get_path(*paths):

@@ -12,7 +12,7 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
     <option name="PARAMETERS" value="create sketchy-test-dataset --photos-per-class 10 --photos-root &quot;C:\Users\Chopan\Documents\Data\sketchy\photo\tx_000000000000&quot; --sketches-root &quot;C:\Users\Chopan\Documents\Data\sketchy\sketch\tx_000000000000&quot; --test-photos-root &quot;C:\Users\Chopan\Documents\Data\sketchy_test_multimodal\photo&quot; --test-sketches-root &quot;C:\Users\Chopan\Documents\Data\sketchy_test_multimodal\sketch&quot;" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

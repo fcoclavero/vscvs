@@ -20,7 +20,7 @@ from ignite.engine import Events
 from ignite.handlers import ModelCheckpoint
 from ignite.handlers import TerminateOnNan
 from ignite.handlers import Timer
-from settings import CHECKPOINT_NAME_FORMAT
+from vscvs.settings import CHECKPOINT_NAME_FORMAT
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from vscvs.datasets import get_dataset

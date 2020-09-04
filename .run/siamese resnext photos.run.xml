@@ -22,7 +22,7 @@
         <ENTRY IS_ENABLED="true" PARSER="runconfig" />
       </ENTRIES>
     </EXTENSION>
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
     <option name="PARAMETERS" value="embed --dataset-name sketchy-photos --embeddings-name siamese-resnext-photos-margin-08 --batch-size 128 --workers 12 --n-gpu 1 siamese --branch 0 resnext --checkpoint SiameseResNextNormalized --date 20-06-05T02-31 --state-dict net_best_checkpoint_63360" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

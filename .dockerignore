@@ -110,6 +110,6 @@ data/tensorboard/*
 temp-plot.html
 
 # Other
-dropbox_sync.sh
+dropbox.sh
 gradient.yaml
 README.md

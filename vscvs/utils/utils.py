@@ -16,7 +16,7 @@ import yaml
 
 import torch
 
-from settings import CHECKPOINT_NAME_FORMAT
+from vscvs.settings import CHECKPOINT_NAME_FORMAT
 from torch import nn
 from torch.utils.data import DataLoader
 

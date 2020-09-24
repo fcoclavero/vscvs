@@ -10,6 +10,7 @@ container: fcoclavero/vscvs
 #jobEnv:
 #  DATA_DIR: /storage/data
 #  EMBEDDINGS_DIR: /storage/data/embeddings
+#  ROOT_DIR: /storage/vscvs
 #machineType: G6
 machineType: P4000
 #module: false
@@ -29,4 +30,4 @@ projectId: prya1pizz
 #workingDirectory: null
 workspaceUrl: https://github.com/fcoclavero/vscvs.git
 #workspaceArchive: null
-workspaceRef: dev
+#workspaceRef: dev

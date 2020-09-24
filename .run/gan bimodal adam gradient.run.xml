@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="gan bimodal adam gradient" type="PythonConfigurationType" factoryName="Python" folderName="train">
+  <configuration default="false" name="gan bimodal adam gradient" type="PythonConfigurationType" factoryName="Python" folderName="train gradient">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />

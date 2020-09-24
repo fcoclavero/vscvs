@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="siamese resnext adam gradient" type="PythonConfigurationType" factoryName="Python" folderName="train" singleton="false">
+  <configuration default="false" name="siamese resnext adam gradient" type="PythonConfigurationType" factoryName="Python" folderName="train gradient" singleton="false">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />

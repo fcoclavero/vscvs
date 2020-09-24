@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="class recall suite hog gradient" type="PythonConfigurationType" factoryName="Python" folderName="measure">
+  <configuration default="false" name="class recall suite hog gradient" type="PythonConfigurationType" factoryName="Python" folderName="measure gradient">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />

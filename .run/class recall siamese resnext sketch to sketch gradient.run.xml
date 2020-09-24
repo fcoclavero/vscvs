@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="class recall siamese resnext sketch to sketch gradient" type="PythonConfigurationType" factoryName="Python" folderName="measure" singleton="false">
+  <configuration default="false" name="class recall siamese resnext sketch to sketch gradient" type="PythonConfigurationType" factoryName="Python" folderName="measure gradient" singleton="false">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />

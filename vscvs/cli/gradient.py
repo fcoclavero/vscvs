@@ -28,7 +28,7 @@ def gradient(name):
     experiment_parameters = {
         "name": name,
         "experiment_env": dotenv_values(".env.gradient"),
-        "command": "python __main__.py {}".format(" ".join(command_arguments)),
+        "command": "python -m vscvs {}".format(" ".join(command_arguments)),
         **camel_to_snake_case_dict_keys(load_yaml("gradient.yaml")),
     }  # shared experiment parameters, such as machine type
     experiment_id = experiment_client.run_single_node(**experiment_parameters)  # define and run experiment

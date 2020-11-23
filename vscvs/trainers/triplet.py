@@ -2,6 +2,7 @@ __author__ = ["Francisco Clavero"]
 __email__ = ["fcoclavero32@gmail.com"]
 __status__ = "Prototype"
 
+from torch.nn import TripletMarginLoss
 
 """ Ignite trainer for a Triplet Network architecture. """
 
@@ -65,7 +66,8 @@ class AbstractTripletTrainer(AbstractTrainer, ABC):
     @property
     @overrides
     def loss(self):
-        return TripletLoss(margin=self.margin, reduction=self.loss_reduction)
+        # return TripletLoss(margin=self.margin, reduction=self.loss_reduction)
+        return TripletMarginLoss(margin=self.margin, p=2.0)
 
     @property
     @overrides

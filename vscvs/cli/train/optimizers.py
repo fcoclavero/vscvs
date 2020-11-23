@@ -124,6 +124,9 @@ def rms_prop(context, *_, **__):
 @click.group()
 @click.option("--learning-rate", prompt="Learning rate", help="Learning rate for the optimizer", default=1e-3)
 @click.option("--momentum", prompt="Momentum", help="Momentum parameter for SGD optimizer.", default=0.2)
+@click.option("--weight-decay", prompt="Weight decay", default=0.0, help="Weight decay (L2 penalty).")
+@click.option("--dampening", prompt="Dampening", default=0.0, help="Momentum dampening.")
+@click.option("--nesterov", prompt="Nesterov", default=False, help="Enable Nesterov momentum.")
 @pass_kwargs_to_context
 def sgd(context, *_, **__):
     """ Train models using an SGD optimizer. """

@@ -215,17 +215,33 @@ class SGDOptimizerMixin(OptimizerMixin):
     [Stochastic Gradient Descent (SGD)](https://pytorch.org/docs/stable/optim.html#torch.optim.SGD) optimizer.
     """
 
-    def __init__(self, *args, momentum=0.8, **kwargs):
+    def __init__(self, *args, momentum=0.8, weight_decay=0.0, dampening=0.0, nesterov=False, **kwargs):
         """
-        :param args: arguments for additional mixins
+        :param args: arguments for additional mixins.
         :type: Tuple
-        :param momentum: momentum parameter for SGD optimizer
+        :param momentum: momentum factor.
         :type: float
-        :param kwargs: keyword arguments for additional mixins
+        :param weight_decay: decay for L2 penalty.
+        :type: float
+        :param dampening: momentum dampening.
+        :type: float
+        :param nesterov: enable Nesterov momentum.
+        :type: float
+        :param kwargs: keyword arguments for additional mixins.
         :type: Dict
         """
         self.momentum = momentum
+        self.weight_decay = weight_decay
+        self.dampening = dampening
+        self.nesterov = nesterov
         super().__init__(*args, **kwargs)
 
     def _optimizer(self, parameters):
-        return SGD(parameters, lr=self.learning_rate, momentum=self.momentum)
+        return SGD(
+            parameters,
+            lr=self.learning_rate,
+            momentum=self.momentum,
+            weight_decay=self.weight_decay,
+            dampening=self.dampening,
+            nesterov=self.nesterov,
+        )

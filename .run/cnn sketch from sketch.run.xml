@@ -12,7 +12,7 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
     <option name="PARAMETERS" value="retrieve --query-image-filename C:\Users\Chopan\Documents\Data\sketchy\sketch\tx_000000000000\candle\n02948072_782-5.png --query-dataset-name sketchy-sketches --queried-dataset-name sketchy-sketches --queried-embeddings-name cnn-sketches --k 16 --n-gpu 1 cnn --checkpoint 19-05-21T22-24 --epoch 50" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

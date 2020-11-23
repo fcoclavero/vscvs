@@ -6,12 +6,22 @@
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
     </envs>
-    <option name="SDK_HOME" value="C:\Anaconda\envs\tensorflow\python.exe" />
+    <option name="SDK_HOME" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Scratch" />
-    <option name="IS_MODULE_SDK" value="false" />
+    <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+    <EXTENSION ID="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" />
+      </ENTRIES>
+    </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../Scratch/modify_tf_logfile.py" />
     <option name="PARAMETERS" value="rename-events-dir -i &quot;C:\Users\Chopan\Dropbox\Workspace\Python\Tesis\paperspace\vscvs\data\logs\ResNext\photos\20-02-21T20-24&quot; -o &quot;C:\Users\Chopan\Dropbox\Workspace\Python\Tesis\paperspace\vscvs\data\logs\ResNext\photos\20-02-21T20-24n&quot; -t &quot;training_accuracy&quot; -t &quot;training_average_negative_distance&quot; -t &quot;training_average_positive_distance&quot; -t &quot;training_loss&quot; -t &quot;training_precision&quot; -t &quot;training_recall&quot; -t &quot;training_top_k_categorical_accuracy&quot; -t &quot;validation_accuracy&quot; -t &quot;validation_average_negative_distance&quot; -t &quot;validation_average_positive_distance&quot; -t &quot;validation_loss&quot; -t &quot;validation_precision&quot; -t &quot;validation_recall&quot; -t &quot;validation_top_k_categorical_accuracy&quot; -r &quot;Accuracy/training&quot; -r &quot;Average Distance/training/negative&quot; -r &quot;Average Distance/training/positive&quot; -r &quot;Loss/training&quot; -r &quot;Precision/training&quot; -r &quot;Recall/training&quot; -r &quot;Top k Categorical Accuracy/training&quot; -r &quot;Accuracy/validation&quot; -r &quot;Average Distance/validation/negative&quot; -r &quot;Average Distance/validation/positive&quot; -r &quot;Loss/validation&quot; -r &quot;Precision/validation&quot; -r &quot;Recall/validation&quot; -r &quot;Top k Categorical Accuracy/validation&quot;" />
     <option name="SHOW_COMMAND_LINE" value="false" />

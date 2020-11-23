@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="triplet resnext sgd gradient" type="PythonConfigurationType" factoryName="Python" folderName="train">
+  <configuration default="false" name="triplet resnext sgd gradient" type="PythonConfigurationType" factoryName="Python" folderName="train gradient">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -22,7 +22,7 @@
         <ENTRY IS_ENABLED="true" PARSER="runconfig" />
       </ENTRIES>
     </EXTENSION>
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
     <option name="PARAMETERS" value="gradient --name train-triplet-resnext train --train-validation-split 0.85 --batch-size 12 --epochs 100 --workers 16 --n-gpu 1 sgd --learning-rate 0.05 --momentum 0.01 triplet --dataset-name sketchy --loss-reduction sum --margin 0.2 resnext" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

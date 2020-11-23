@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="class recall hog photo to sketch gradient" type="PythonConfigurationType" factoryName="Python" folderName="measure">
+  <configuration default="false" name="class recall hog photo to sketch gradient" type="PythonConfigurationType" factoryName="Python" folderName="measure gradient">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -12,7 +12,17 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
+    <EXTENSION ID="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" />
+      </ENTRIES>
+    </EXTENSION>
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
     <option name="PARAMETERS" value="gradient --name measure-class-recall-hog-photo-to-sketch measure cross-modal recall --query-dataset-name sketchy-photos --queried-dataset-name sketchy-sketches --query-embeddings-name hog-photos --queried-embeddings-name hog-sketches --k 8 --distance cosine --n-gpu 0 --processes 6 same-class" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

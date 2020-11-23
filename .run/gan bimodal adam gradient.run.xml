@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="gan bimodal adam gradient" type="PythonConfigurationType" factoryName="Python" folderName="train">
+  <configuration default="false" name="gan bimodal adam gradient" type="PythonConfigurationType" factoryName="Python" folderName="train gradient">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -22,7 +22,7 @@
         <ENTRY IS_ENABLED="true" PARSER="runconfig" />
       </ENTRIES>
     </EXTENSION>
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
     <option name="PARAMETERS" value="gradient --name train-bimodal-gan train --train-validation-split 0.85 --batch-size 20 --epochs 100 --workers 16 --n-gpu 1 adam --learning-rate 0.01 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000001 --weight-decay 0.001 --amsgrad True gan --dataset-name sketchy multimodal --loss-reduction sum bimodal" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

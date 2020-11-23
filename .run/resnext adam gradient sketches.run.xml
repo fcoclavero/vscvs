@@ -22,7 +22,7 @@
         <ENTRY IS_ENABLED="true" PARSER="runconfig" />
       </ENTRIES>
     </EXTENSION>
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
     <option name="PARAMETERS" value="gradient --name train-resnext-adam-sketches train --train-validation-split 0.9 --batch-size 50 --epochs 200 --workers 16 --n-gpu 1 --tag sketches-pretrained adam --learning-rate 0.001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000008 --weight-decay 0 --amsgrad True resnext --pretrained True --dataset-name sketchy-sketches --early-stopping-patience 10" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

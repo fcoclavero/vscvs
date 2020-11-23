@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="class recall suite hog gradient" type="PythonConfigurationType" factoryName="Python" folderName="measure">
+  <configuration default="false" name="class recall suite hog gradient" type="PythonConfigurationType" factoryName="Python" folderName="measure gradient">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -22,7 +22,7 @@
         <ENTRY IS_ENABLED="true" PARSER="runconfig" />
       </ENTRIES>
     </EXTENSION>
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__main__.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
     <option name="PARAMETERS" value="gradient --name measure-recall-hog measure sketchy-suite --dataset-name sketchy --photo-embeddings-name hog-photos --sketch-embeddings-name hog-sketches --test-split 0.2 -k 1 -k 5 -k 10 --distance cosine --n-gpu 0" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

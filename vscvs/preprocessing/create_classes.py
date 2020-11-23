@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 from modules.textpreprocess.compound_cleaners.en import full_clean
 from modules.wordvectors.en import document_vector
-from settings import DATA_SOURCES
+from vscvs.settings import DATA_SOURCES
 
 
 def classes_set(directory):

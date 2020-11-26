@@ -15,6 +15,7 @@ from vscvs.utils import load_classification_model_from_checkpoint
 from vscvs.utils import remove_last_layer
 
 from .siamese import siamese
+from .triplet import triplet
 
 
 @click.group()
@@ -35,6 +36,7 @@ def embed(*_, **__):
 
 
 embed.add_command(siamese)
+embed.add_command(triplet)
 
 
 @embed.command()

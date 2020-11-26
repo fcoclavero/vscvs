@@ -60,7 +60,7 @@ class AccuracyTriplets(Metric):
         """
         anchor_embeddings, positive_embeddings, negative_embeddings = output
         batch_size = anchor_embeddings.shape[0]
-        # Compute distances between the anchors and the positives and negatives, which should be at a greater distance.
+        # Compute distances between the anchors and the positives and negatives, which should be at a smaller distance.
         positive_distances = torch.nn.functional.pairwise_distance(anchor_embeddings, positive_embeddings).pow(2)
         negative_distances = torch.nn.functional.pairwise_distance(anchor_embeddings, negative_embeddings).pow(2)
         # Find the triplets where the desirable condition is met, that `positive_distances[i] < negative_distances[i]`

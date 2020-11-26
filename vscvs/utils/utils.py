@@ -203,6 +203,52 @@ def load_siamese_model_from_checkpoint(model_0, model_1, state_dict_file, checkp
     return model
 
 
+def load_triplet_model_from_checkpoint(
+    anchor_model, positive_model, negative_model, state_dict_file, checkpoint_name, date_string, *tags
+):
+    """
+    Load a triplet model from its state dictionary file.
+    :param anchor_model: the model of the anchor triplet branch.
+    :type: torch.nn.Module
+    :param positive_model: the model of the positive triplet branch.
+    :type: torch.nn.Module
+    :param negative_model: the model of the negative triplet branch.
+    :type: torch.nn.Module
+    :param state_dict_file: the name of the state_dict file.
+    :type: str
+    :param checkpoint_name: the name of the checkpoint directory.
+    :type: str
+    :param date_string: the checkpoint date in string format.
+    :type: str
+    :param tags: the checkpoint tags (subdirectories).
+    :type: List[str]
+    :return: the mode, loaded with the state dictionary at the specified checkpoint.
+    :type: torch.nn.Module
+    """
+    from vscvs.models import TripletNetwork
+
+    state_dict = load_state_dict_from_checkpoint(state_dict_file, checkpoint_name, date_string, *tags)
+    anchor_state_dict = OrderedDict(
+        {key: value for key, value in state_dict.items() if "anchor_embedding_network" in key}
+    )
+    positive_state_dict = OrderedDict(
+        {key: value for key, value in state_dict.items() if "positive_embedding_network" in key}
+    )
+    negative_state_dict = OrderedDict(
+        {key: value for key, value in state_dict.items() if "negative_embedding_network" in key}
+    )
+    anchor_out_features = get_out_features_from_state_dict(anchor_state_dict)
+    positive_out_features = get_out_features_from_state_dict(positive_state_dict)
+    negative_out_features = get_out_features_from_state_dict(negative_state_dict)
+    model = TripletNetwork(
+        anchor_embedding_network=anchor_model(out_features=anchor_out_features),
+        positive_embedding_network=positive_model(out_features=positive_out_features),
+        negative_embedding_network=negative_model(out_features=negative_out_features),
+    )
+    model.load_state_dict(state_dict)
+    return model
+
+
 def load_yaml(file_path):
     """
     Load a yaml file as a Python dictionary.

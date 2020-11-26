@@ -23,7 +23,7 @@
       </ENTRIES>
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
-    <option name="PARAMETERS" value="train --train-validation-split 0.9 --batch-size 12 --epochs 1 --workers 12 --n-gpu 1 --tag test adam --learning-rate 0.0001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000008 --weight-decay 0 --amsgrad False resnext --pretrained True --dataset-name sketchy-test-photos --early-stopping-patience 5" />
+    <option name="PARAMETERS" value="train --train-validation-split 0.9 --batch-size 12 --epochs 1 --workers 12 --n-gpu 0 --tag test adam --learning-rate 0.0001 --beta-1 0.9 --beta-2 0.999 --epsilon 0.000000008 --weight-decay 0 --amsgrad False resnext --pretrained True --dataset-name sketchy-test-photos --early-stopping-patience 5" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

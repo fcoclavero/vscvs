@@ -43,7 +43,7 @@ DATASETS = {
         "sketchy-test-sketches", *args, **kwargs
     ),
     "sketchy-siamese": lambda *args, **kwargs: SiameseDataset(
-        Sketchy("sketchy-photos", *args, **kwargs), SketchyClassIndices("sketchy-sketches", *args, **kwargs)
+        Sketchy("sketchy-sketches", *args, **kwargs), SketchyClassIndices("sketchy-photos", *args, **kwargs)
     ),
     "sketchy-test-siamese": lambda *args, **kwargs: SiameseDataset(
         Sketchy("sketchy-test-photos", *args, **kwargs), SketchyClassIndices("sketchy-test-sketches", *args, **kwargs)
@@ -52,7 +52,7 @@ DATASETS = {
         Sketchy("sketchy-test-photos", *args, **kwargs), SketchyClassIndices("sketchy-test-sketches", *args, **kwargs)
     ),
     "sketchy-triplet": lambda *args, **kwargs: TripletDataset(
-        Sketchy("sketchy-photos", *args, **kwargs), SketchyClassIndices("sketchy-sketches", *args, **kwargs)
+        Sketchy("sketchy-sketches", *args, **kwargs), SketchyClassIndices("sketchy-photos", *args, **kwargs)
     ),
     "sketchy-multimodal": lambda *args, **kwargs: MultimodalEntityDatasetFolder(
         Sketchy("sketchy-photos", *args, **kwargs), Sketchy("sketchy-sketches", *args, **kwargs)

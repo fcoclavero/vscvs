@@ -19,13 +19,13 @@ from vscvs.utils import load_triplet_model_from_checkpoint
     "--branch",
     prompt="Triplet branch.",
     help="The branch of the triplet to be used to embed.",
-    default=0,
+    default="anchor",
     type=click.Choice(["anchor", "positive", "negative"]),
 )
 @pass_kwargs_to_context
 def triplet(context, *_, **__):
     """ Image embedding creation. """
-    context.obj["branch"] = int(context.obj["branch"])  # `click.Choice` only admits `str`, so we must cast manually
+    context.obj["branch"] = context.obj["branch"]
 
 
 @triplet.command()

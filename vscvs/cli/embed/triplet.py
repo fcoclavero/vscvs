@@ -8,8 +8,7 @@ __status__ = "Prototype"
 
 import click
 
-from vscvs.cli.decorators import pass_context_to_kwargs
-from vscvs.cli.decorators import pass_kwargs_to_context
+from vscvs.cli.decorators import pass_context_to_kwargs, pass_kwargs_to_context
 from vscvs.embeddings import create_embeddings
 from vscvs.utils import load_triplet_model_from_checkpoint
 
@@ -25,7 +24,7 @@ from vscvs.utils import load_triplet_model_from_checkpoint
 @pass_kwargs_to_context
 def triplet(context, *_, **__):
     """ Image embedding creation. """
-    context.obj["branch"] = context.obj["branch"]
+    pass
 
 
 @triplet.command()

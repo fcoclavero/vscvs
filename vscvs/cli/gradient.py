@@ -36,6 +36,22 @@ def gradient(name):
     sys.exit()  # terminate program after log stream
 
 
+@click.command()
+def dropbox_upload():
+    """ Upload Paperspace storage to Dropbox. """
+    print("Uploading to DBX.")
+    experiment_client = ExperimentsClient(api_key=os.environ["GRADIENT_API_KEY"])
+    experiment_parameters = {
+        "name": "dropbox-upload",
+        "experiment_env": dotenv_values(".env.gradient"),
+        "command": "ls -la /storage/other && cd /storage/other && find /storage/vscvs/data | while read file; do echo $file; target=Workspace/Python/Tesis/paperspace/$file; ./dbxcli put $file $target; done",
+        **camel_to_snake_case_dict_keys(load_yaml("gradient.yaml")),
+    }  # shared experiment parameters, such as machine type
+    experiment_id = experiment_client.run_single_node(**experiment_parameters)  # define and run experiment
+    stream_logs(experiment_id)
+    sys.exit()  # terminate program after log stream
+
+
 def stream_logs(experiment_id):
     """
     Stream the logs of a Gradient experiment to the local I/O.

@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 from vscvs.cli import create
 from vscvs.cli import embed
-from vscvs.cli import gradient
+from vscvs.cli import dropbox_upload, gradient
 from vscvs.cli import measure
 from vscvs.cli import retrieve
 from vscvs.cli import show
@@ -39,6 +39,7 @@ def cli():
 
 # We must use add_command instead of CommandCollection to get a nested structure.
 # https://stackoverflow.com/a/39416589
+cli.add_command(dropbox_upload)
 cli.add_command(gradient)
 
 for group in [cli, gradient]:

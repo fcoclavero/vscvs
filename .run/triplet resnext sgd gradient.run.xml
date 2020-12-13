@@ -23,7 +23,7 @@
       </ENTRIES>
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
-    <option name="PARAMETERS" value="gradient --name train-triplet-resnext train --train-validation-split 0.85 --batch-size 12 --epochs 200 --workers 16 --n-gpu 1 sgd --learning-rate 0.001 --momentum 0.9 --weight-decay 0.0005 --dampening 0.0 --nesterov False triplet --dataset-name sketchy --loss-reduction sum --margin 1.0 resnext" />
+    <option name="PARAMETERS" value="gradient --name train-triplet-resnext train --train-validation-split 0.85 --batch-size 12 --epochs 200 --workers 16 --n-gpu 1 sgd --learning-rate 0.001 --momentum 0.9 --weight-decay 0.0005 --dampening 0.0 --nesterov False triplet --dataset-name sketchy --loss-reduction sum --margin 0.2 resnext" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

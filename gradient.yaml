@@ -3,6 +3,7 @@
 #clusterId: null
 #command: null
 container: fcoclavero/vscvs
+#container: alpine
 #experimentId: null
 #ignoreFiles: null
 #isPreemptible: true
@@ -12,6 +13,7 @@ container: fcoclavero/vscvs
 #  EMBEDDINGS_DIR: /storage/data/embeddings
 #  ROOT_DIR: /storage/vscvs
 #machineType: G6
+#machineType: C3
 machineType: P4000
 #module: false
 #name: null

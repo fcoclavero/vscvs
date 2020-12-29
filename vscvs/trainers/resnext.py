@@ -50,7 +50,10 @@ class AbstractResNextTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     @property
     @overrides
     def initial_model(self):
-        return ResNextLogSoftmax(out_features=self.out_features, pretrained=self.pretrained)
+        return ResNextLogSoftmax(
+            out_features=self.out_features,
+            pretrained=self.pretrained
+        ).to(self.device)
 
     @property
     @overrides

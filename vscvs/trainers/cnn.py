@@ -44,7 +44,7 @@ class AbstractCNNTrainer(EarlyStoppingMixin, AbstractTrainer, ABC):
     @property
     @overrides
     def initial_model(self):
-        return CNNLogSoftmax(out_features=self.out_features)
+        return CNNLogSoftmax(out_features=self.out_features).to(self.device)
 
     @property
     @overrides

@@ -1,4 +1,4 @@
-# Build from project root: `docker build -t vscvs .`
+# Build from project root: `docker build -f docker/Dockerfile -t vscvs .`
 # To upload to Dockerhub:
 # 1) Tag the latest image: `docker tag f0a5d49e616f fcoclavero/vscvs:latest`
 # 2) Push to the container registry: `docker push fcoclavero/vscvs`
@@ -25,7 +25,7 @@ ENV PATH=/miniconda/bin:${PATH}
 
 # Install project requirements
 
-RUN conda install -y pytorch torchvision ignite cudatoolkit=10.1 -c pytorch
+RUN conda install -y pytorch torchvision ignite cudatoolkit=11.0 -c pytorch
 
 # In order to install pytorch-geometric, the build environment must have GPU access and thus must
 # be run with [nvidia-docker](https://github.com/NVIDIA/nvidia-docker). To be able to access the nvidia
@@ -44,8 +44,8 @@ RUN conda install -y pytorch torchvision ignite cudatoolkit=10.1 -c pytorch
 
 # Module requirements
 
-COPY ../modules/textpreprocess/requirements.txt /textpreprocess.txt
-COPY ../modules/wordvectors/requirements.txt /wordvectors.txt
+COPY modules/textpreprocess/requirements.txt /textpreprocess.txt
+COPY modules/wordvectors/requirements.txt /wordvectors.txt
 RUN pip install -r /textpreprocess.txt && \
     pip install -r /wordvectors.txt
 RUN python -c "import nltk; nltk.download('averaged_perceptron_tagger'); nltk.download('punkt')" && \
@@ -53,5 +53,13 @@ RUN python -c "import nltk; nltk.download('averaged_perceptron_tagger'); nltk.do
 
 # Project requirements
 
-COPY ../requirements.txt /vscvs.txt
+RUN CUDA="cu110" && \
+    TORCH="torch-1.7.0" && \
+    pip install torch-scatter -f https://pytorch-geometric.com/whl/${TORCH}+${CUDA}.html && \
+    pip install torch-sparse -f https://pytorch-geometric.com/whl/${TORCH}+${CUDA}.html && \
+    pip install torch-cluster -f https://pytorch-geometric.com/whl/${TORCH}+${CUDA}.html && \
+    pip install torch-spline-conv -f https://pytorch-geometric.com/whl/${TORCH}+${CUDA}.html && \
+    pip install torch-geometric
+
+COPY requirements.txt /vscvs.txt
 RUN pip install -r /vscvs.txt

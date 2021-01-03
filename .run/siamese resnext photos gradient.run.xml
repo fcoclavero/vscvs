@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="siamese resnext photos gradient" type="PythonConfigurationType" factoryName="Python" folderName="embed">
+  <configuration default="false" name="siamese resnext photos gradient" type="PythonConfigurationType" factoryName="Python" folderName="embed gradient">
     <module name="vscvs" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />

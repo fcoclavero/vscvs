@@ -23,7 +23,7 @@
       </ENTRIES>
     </EXTENSION>
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/vscvs/__main__.py" />
-    <option name="PARAMETERS" value="embed --dataset-name sketchy-sketches --embeddings-name resnext-sketches --batch-size 128 --workers 6 --n-gpu 1 resnext --checkpoint ResNext --date 20-03-04T21-31 --state-dict net_best_train_25821 --tag sketches_pretrained" />
+    <option name="PARAMETERS" value="embed --dataset-name sketchy-sketches --embeddings-name resnext-sketches-pretrained-epochs-10 --batch-size 128 --workers 16 --n-gpu 1 resnext --checkpoint ResNext --date 20-12-29T18-03 --state-dict net_best_checkpoint_5020 --tag sketches-pretrained" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

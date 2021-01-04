@@ -3,7 +3,7 @@
 # 1) Tag the latest image: `docker tag f0a5d49e616f fcoclavero/vscvs:latest`
 # 2) Push to the container registry: `docker push fcoclavero/vscvs`
 
-FROM nvidia/cuda:latest
+FROM nvidia/cuda:11.0-runtime-ubuntu20.04
 
 # Set locale to C.UTF-8 to avoid problems with pytorch-geometric
 
@@ -14,7 +14,7 @@ ENV LC_ALL C.UTF-8
 # Install rsync to move checkpoints and log files to persitent storage
 
 RUN apt-get update && \
-    apt-get install -y rsync wget
+    apt-get install -y build-essential rsync wget
 
 # Install miniconda
 

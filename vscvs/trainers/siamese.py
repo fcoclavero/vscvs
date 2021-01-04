@@ -126,7 +126,7 @@ def train_siamese_cnn(
 def train_siamese_resnet(
     *args,
     embedding_network_0=ResNetNormalized(out_features=250, pretrained=True),
-    embedding_network_1=ResNetNormalized(out_features=250),
+    embedding_network_1=ResNetNormalized(out_features=250, pretrained=True),
     optimizer_mixin=None,
     **kwargs
 ):
@@ -156,7 +156,7 @@ def train_siamese_resnet(
 def train_siamese_resnext(
     *args,
     embedding_network_0=ResNextNormalized(out_features=250, pretrained=True),
-    embedding_network_1=ResNextNormalized(out_features=250),
+    embedding_network_1=ResNextNormalized(out_features=250, pretrained=True),
     optimizer_mixin=None,
     **kwargs
 ):
